@@ -18,6 +18,8 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.Objects;
+
 public class Identifiers {
 
     @Schema
@@ -57,5 +59,17 @@ public class Identifiers {
 
     public void setPid(String pid) {
         this.pid = pid;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Identifiers that = (Identifiers) o;
+        return Objects.equals(originalId, that.originalId) && Objects.equals(pid, that.pid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(originalId, pid);
     }
 }
