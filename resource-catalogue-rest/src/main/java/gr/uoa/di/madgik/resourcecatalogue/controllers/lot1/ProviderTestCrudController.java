@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -55,7 +56,7 @@ public class ProviderTestCrudController {
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
     @Value("${auditing.interval:6}")
-    private String auditingInterval;
+    private int auditingInterval;
     @Value("${catalogue.id}")
     private String catalogueId;
 
@@ -85,17 +86,13 @@ public class ProviderTestCrudController {
     public ResponseEntity<LinkedHashMap<String,Object>> get(@Parameter(description = "The left part of the ID before the '/'")
                                       @PathVariable("prefix") String prefix,
                                       @Parameter(description = "The right part of the ID after the '/'")
-                                      @PathVariable("suffix") String suffix,
-                                      @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId, //TODO: not needed
-                                      @Parameter(hidden = true) Authentication auth) { //TODO: not needed
+                                      @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("resource_internal_id", id);
-        ff.addFilter("catalogue_id", catalogueId); //TODO: not needed, BUT we cannot change API call
-        ff.addFilter("published", false);
-        return new ResponseEntity<>(providerTestService.get(ff, auth).getProvider(), HttpStatus.OK); //TODO: this way we avoid public layer
-//        NewProviderBundle provider = genericResourceService.get(resourceTypeName, id);
+        NewProviderBundle bundle = providerTestService.get(
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "false")
+        );
+        return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -104,15 +101,13 @@ public class ProviderTestCrudController {
                                                        @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'")
                                                        @PathVariable("suffix") String suffix,
-                                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("resource_internal_id", id);
-        ff.addFilter("catalogue_id", catalogueId); //TODO: not needed, BUT we cannot change API call
-        ff.addFilter("published", false);
-        return new ResponseEntity<>(providerTestService.get(ff, auth), HttpStatus.OK); //TODO: this way we avoid public layer
+        NewProviderBundle bundle = providerTestService.get(
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "false")
+        );
+        return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
     @Operation(summary = "Get a list of Providers based on a list of filters")
@@ -414,18 +409,6 @@ public class ProviderTestCrudController {
         providerTestService.requestProviderDeletion(ff, authentication);
     }
 
-    //TODO: delete this?
-    @GetMapping(path = {"history/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ResourceHistory>> history(@Parameter(description = "The left part of the ID before the '/'")
-                                                           @PathVariable("prefix") String prefix,
-                                                           @Parameter(description = "The right part of the ID after the '/'")
-                                                           @PathVariable("suffix") String suffix,
-                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
-        String id = prefix + "/" + suffix;
-        Paging<ResourceHistory> history = this.providerTestService.getHistory(id, catalogueId);
-        return ResponseEntity.ok(history);
-    }
-
     @PatchMapping(path = "auditProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     public ResponseEntity<NewProviderBundle> auditProvider(@Parameter(description = "The left part of the ID before the '/'")
@@ -446,30 +429,26 @@ public class ProviderTestCrudController {
     })
     @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<NewProviderBundle>> getRandomProviders(@Parameter(hidden = true)
+    public ResponseEntity<Paging<NewProviderBundle>> getRandomProviders(@RequestParam int quantity,
                                                                         @RequestParam MultiValueMap<String, Object> params,
                                                                         @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType(resourceTypeName);
         ff.addFilter("status", "approved provider");
         ff.addFilter("published", false);
-        Paging<NewProviderBundle> providerBundlePaging = providerTestService.getRandomResources(ff, auditingInterval);
+        Paging<NewProviderBundle> providerBundlePaging = providerTestService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(providerBundlePaging, HttpStatus.OK);
     }
 
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'")
+    public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'")
                                                                   @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'")
                                                                   @PathVariable("suffix") String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("resource_internal_id", id);
-        ff.addFilter("catalogue_id", catalogueId);
-        NewProviderBundle bundle = providerTestService.get(ff, auth);
-        Paging<LoggingInfo> loggingInfoHistory = providerTestService.getLoggingInfoHistory(bundle);
+        NewProviderBundle bundle = providerTestService.get(new SearchService.KeyValue("resource_internal_id", id), new SearchService.KeyValue("catalogue_id", catalogueId));
+        List<LoggingInfo> loggingInfoHistory = providerTestService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -592,12 +571,12 @@ public class ProviderTestCrudController {
                                                                          @PathVariable("suffix") String suffix,
                                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("resource_internal_id", id);
-        ff.addFilter("published", false);
-        ff.addFilter("draft", true);
-        return new ResponseEntity<>(providerTestService.get(ff, auth).getProvider(), HttpStatus.OK);
+        NewProviderBundle draft = providerTestService.get(
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "false"),
+                new SearchService.KeyValue("draft", "true")
+        );
+        return new ResponseEntity<>(draft.getProvider(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})

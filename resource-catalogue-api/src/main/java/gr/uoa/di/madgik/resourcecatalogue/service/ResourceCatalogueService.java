@@ -24,6 +24,15 @@ public interface ResourceCatalogueService<T> extends ResourceService<T> {
      * Get resource of a specific catalogue and level
      *
      * @param id          resource ID
+     * @param published   true/false
+     * @return {@link T}
+     */
+    T get(String id, boolean published);
+
+    /**
+     * Get resource of a specific catalogue and level
+     *
+     * @param id          resource ID
      * @param catalogueId catalogue ID
      * @param published   true/false
      * @return {@link T}

@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import java.util.Collections;
 import org.springframework.security.core.Authentication;
 
 import java.util.Comparator;
@@ -106,7 +107,7 @@ public interface BundleOperations<T extends Bundle<?>> {
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
             return loggingInfoList;
         }
-        return null;
+        return Collections.emptyList();
     }
 
     /**

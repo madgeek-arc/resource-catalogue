@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import org.springframework.security.core.Authentication;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -95,47 +96,22 @@ public interface NewBundleOperations<T extends NewBundle> {
      * @param bundle
      * @return
      */
-    default Paging<LoggingInfo> getLoggingInfoHistory(T bundle) {
+    default List<LoggingInfo> getLoggingInfoHistory(T bundle) {
         if (bundle != null && bundle.getLoggingInfo() != null) {
             List<LoggingInfo> loggingInfoList = bundle.getLoggingInfo();
             loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return new Browsing<>(loggingInfoList.size(), 0, loggingInfoList.size(), loggingInfoList, null);
+            return loggingInfoList;
         }
-        return null;
+        return Collections.emptyList();
     }
 
     /**
-     * Get User's resource bundles
+     * Get a paging of random Resources for auditing.
      *
-     * @param filter parameters for the indexer
-     * @param authentication Authentication
-     * @return {@link Browsing<T>}
-     */
-    Browsing<T> getMy(FacetFilter filter, Authentication authentication);
-
-    /**
-     * Get the History of the resource with the specified id.
-     *
-     * @param id          ID
-     * @param catalogueId Catalogue ID
-     * @return {@link Paging}&lt;{@link ResourceHistory}&gt;
-     */
-    Paging<ResourceHistory> getHistory(String id, String catalogueId);
-
-    /**
-     * Get a paging of random resources
-     *
-     * @param ff               FacetFilter
+     * @param quantity how many resources to return
      * @param auditingInterval Auditing Interval (in months)
+     * @param auth Authentication
      * @return {@link Paging}&lt;{@link T}&gt;
      */
-    Paging<T> getRandomResources(FacetFilter ff, String auditingInterval);
-
-    /**
-     * Validate a resource
-     *
-     * @param t resource
-     * @return {@link T}
-     */
-    T validate(T t);
+    Paging<T> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth);
 }
