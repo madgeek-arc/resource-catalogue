@@ -55,8 +55,8 @@ import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
-@RequestMapping("provider")
-@Tag(name = "provider")
+@RequestMapping("providerOld")
+@Tag(name = "providerOld")
 public class ProviderController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);

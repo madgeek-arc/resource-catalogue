@@ -1,19 +1,17 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderTestService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
@@ -24,7 +22,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -46,8 +44,8 @@ import java.util.stream.Collectors;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "providertests", produces = {MediaType.APPLICATION_JSON_VALUE})
-@Tag(name = "providertests")
+@RequestMapping(path = "provider", produces = {MediaType.APPLICATION_JSON_VALUE})
+@Tag(name = "provider")
 public class ProviderTestCrudController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderTestCrudController.class);
@@ -83,15 +81,18 @@ public class ProviderTestCrudController {
 
     @Operation(summary = "Returns the Provider with the given id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<LinkedHashMap<String,Object>> get(@Parameter(description = "The left part of the ID before the '/'")
-                                      @PathVariable("prefix") String prefix,
-                                      @Parameter(description = "The right part of the ID after the '/'")
-                                      @PathVariable("suffix") String suffix) {
+    @PostAuthorize("hasRole('ADMIN') || hasRole('EPOT') || " +
+            "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix) || " +
+            "returnObject.body.status == 'approved provider'")
+    public ResponseEntity<LinkedHashMap<String, Object>> get(@Parameter(description = "The left part of the ID before the '/'")
+                                                             @PathVariable("prefix") String prefix,
+                                                             @Parameter(description = "The right part of the ID after the '/'")
+                                                             @PathVariable("suffix") String suffix,
+                                                             @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerTestService.get(
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "false")
-        );
+        NewProviderBundle bundle = providerTestService.get(id);
+        //TODO: should we have pre-auth on all our calls for Role USER?
+        //FIXME: condition for status does not work on PostAuth, because we return a different object -> DTO?
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
 
@@ -123,7 +124,7 @@ public class ProviderTestCrudController {
         ff.addFilter("active", true);
         ff.addFilter("status", "approved provider");
         Paging<NewProviderBundle> paging = genericResourceService.getResults(ff);
-        return  ResponseEntity.ok(paging.map(NewProviderBundle::getProvider));
+        return ResponseEntity.ok(paging.map(NewProviderBundle::getProvider));
     }
 
     @BrowseParameters
@@ -157,7 +158,7 @@ public class ProviderTestCrudController {
         // metadata
         // registrationMailService.sendEmailsToNewlyAddedProviderAdmins(provider, null);
         // synchronizerService.syncAdd(provider.getProvider());
-        NewProviderBundle ret = genericResourceService.add(resourceTypeName, providerBundle);
+        NewProviderBundle ret = providerTestService.add(providerBundle, auth);
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
 
@@ -184,8 +185,9 @@ public class ProviderTestCrudController {
 //        Resource resource = genericResourceService.getResults(resourceTypeName, new SearchService.KeyValue("id", id),
 //                new SearchService.KeyValue("published", "false"));
 //        NewProviderBundle providerBundle = deserialize(existingResource);
-    ////        NewProviderBundle providerBundle = genericResourceService.get(resourceTypeName, id);
-    ////        providerBundle.setProvider(provider);
+
+    /// /        NewProviderBundle providerBundle = genericResourceService.get(resourceTypeName, id);
+    /// /        providerBundle.setProvider(provider);
 //        //TODO:
 //        // check if there are actual changes in the Provider
 //        // check catalogueId
@@ -201,7 +203,6 @@ public class ProviderTestCrudController {
 //        logger.info("Updated the Provider with id '{}'", provider.get("id"));
 //        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
 //    }
-
     @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> updateBundle(@RequestBody NewProviderBundle provider,
@@ -256,13 +257,13 @@ public class ProviderTestCrudController {
     @Operation(summary = "Returns a list of Providers a User is admin.")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
     @GetMapping(path = "getUserProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<LinkedHashMap<String,Object>>> getUserProviders(@RequestParam("email") String email) {
+    public ResponseEntity<List<LinkedHashMap<String, Object>>> getUserProviders(@RequestParam("email") String email) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
         ff.addFilter("users", email);
-        List<LinkedHashMap<String,Object>> providers = genericResourceService.getResults(ff).getResults()
+        List<LinkedHashMap<String, Object>> providers = genericResourceService.getResults(ff).getResults()
                 .stream()
                 .map(obj -> (NewProviderBundle) obj)
                 .toList()
@@ -275,40 +276,40 @@ public class ProviderTestCrudController {
     @Operation(summary = "Returns all Provider's of a User.")
     @GetMapping(path = "getMyProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<NewProviderBundle>> getMyProviders(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
-        ff.addFilter("draft", false);
-        return new ResponseEntity<>(providerTestService.getMy(ff, auth).getResults(), HttpStatus.OK);
+        if (auth == null) {
+            throw new InsufficientAuthenticationException("Please log in.");
+        }
+        return new ResponseEntity<>(providerTestService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @Operation(summary = "Returns a list of inactive Providers.")
     @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<LinkedHashMap<String,Object>>> getInactive() {
-        FacetFilter ff = new  FacetFilter();
+    public ResponseEntity<List<LinkedHashMap<String, Object>>> getInactive() {
+        FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
         ff.addFilter("published", false);
         ff.addFilter("active", false);
         ff.addFilter("draft", false);
-        List<LinkedHashMap<String,Object>> ret = genericResourceService.getResults(ff).getResults()
+        List<LinkedHashMap<String, Object>> ret = genericResourceService.getResults(ff).getResults()
                 .stream()
                 .map(obj -> (NewProviderBundle) obj)
                 .toList()
                 .stream()
                 .map(NewProviderBundle::getProvider)
-                .collect(Collectors.toList());;;
+                .collect(Collectors.toList());
+        ;
+        ;
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     //TODO: refactored to provide the resourceType (there were 2, one for Services and one for Trainings) -> inform front-end
     @Operation(summary = "Returns a list of inactive Services of a Provider.")
     @GetMapping(path = "services/inactive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<LinkedHashMap<String,Object>>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'")
-                                                            @PathVariable("prefix") String prefix,
-                                                            @Parameter(description = "The right part of the ID after the '/'")
-                                                            @PathVariable("suffix") String suffix,
-                                                            @RequestParam String resourceTypeName) {
+    public ResponseEntity<List<LinkedHashMap<String, Object>>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'")
+                                                                                   @PathVariable("prefix") String prefix,
+                                                                                   @Parameter(description = "The right part of the ID after the '/'")
+                                                                                   @PathVariable("suffix") String suffix,
+                                                                                   @RequestParam String resourceTypeName) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
@@ -402,11 +403,7 @@ public class ProviderTestCrudController {
 
     @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void requestProviderDeletion(@RequestParam String id, @Parameter(hidden = true) Authentication authentication) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("resource_internal_id", id);
-        ff.addFilter("published", false);
-        providerTestService.requestProviderDeletion(ff, authentication);
+        providerTestService.requestProviderDeletion(id, authentication);
     }
 
     @PatchMapping(path = "auditProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -442,10 +439,10 @@ public class ProviderTestCrudController {
 
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'")
-                                                                  @PathVariable("prefix") String prefix,
-                                                                  @Parameter(description = "The right part of the ID after the '/'")
-                                                                  @PathVariable("suffix") String suffix,
-                                                                  @Parameter(hidden = true) Authentication auth) {
+                                                                @PathVariable("prefix") String prefix,
+                                                                @Parameter(description = "The right part of the ID after the '/'")
+                                                                @PathVariable("suffix") String suffix,
+                                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle bundle = providerTestService.get(new SearchService.KeyValue("resource_internal_id", id), new SearchService.KeyValue("catalogue_id", catalogueId));
         List<LoggingInfo> loggingInfoHistory = providerTestService.getLoggingInfoHistory(bundle);
@@ -555,8 +552,8 @@ public class ProviderTestCrudController {
 
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-        public void addBulk(@RequestBody List<NewProviderBundle> providerList,
-                            @Parameter(hidden = true) Authentication auth) {
+    public void addBulk(@RequestBody List<NewProviderBundle> providerList,
+                        @Parameter(hidden = true) Authentication auth) {
         for (NewProviderBundle bundle : providerList) {
             genericResourceService.add(resourceTypeName, bundle); //TODO: add creates ID, we want it?
         }
@@ -565,11 +562,11 @@ public class ProviderTestCrudController {
 
     // Drafts
     @GetMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<LinkedHashMap<String,Object>> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'")
-                                                                         @PathVariable("prefix") String prefix,
-                                                                         @Parameter(description = "The right part of the ID after the '/'")
-                                                                         @PathVariable("suffix") String suffix,
-                                                                         @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<LinkedHashMap<String, Object>> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'")
+                                                                          @PathVariable("prefix") String prefix,
+                                                                          @Parameter(description = "The right part of the ID after the '/'")
+                                                                          @PathVariable("suffix") String suffix,
+                                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle draft = providerTestService.get(
                 new SearchService.KeyValue("resource_internal_id", id),
@@ -600,7 +597,8 @@ public class ProviderTestCrudController {
         NewProviderBundle ret = genericResourceService.add(resourceTypeName, providerBundle);
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
-//
+
+    //
 //    @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
 //    public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
@@ -612,7 +610,7 @@ public class ProviderTestCrudController {
 //        return new ResponseEntity<>(providerBundle.getProvider(), HttpStatus.OK);
 //    }
 //
-     //TODO: change to Void -> inform front-end
+    //TODO: change to Void -> inform front-end
     @DeleteMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Void> deleteDraftProvider(@Parameter(description = "The left part of the ID before the '/'")

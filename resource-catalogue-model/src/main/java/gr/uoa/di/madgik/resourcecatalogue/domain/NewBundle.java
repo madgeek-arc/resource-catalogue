@@ -16,6 +16,9 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import org.springframework.security.core.Authentication;
+
 import java.beans.Transient;
 import java.util.*;
 
@@ -33,7 +36,7 @@ public class NewBundle {
 
     private Identifiers identifiers;
 
-    private List<LoggingInfo> loggingInfo;
+    private List<LoggingInfo> loggingInfo = new ArrayList<>();
 
     private LoggingInfo latestAuditInfo;
 
@@ -44,6 +47,8 @@ public class NewBundle {
     private String status;
     private String templateStatus;
     private String auditState;
+
+    private String catalogueId;
 
     public NewBundle() {
     }
@@ -59,6 +64,35 @@ public class NewBundle {
 //            this.payload.put("id", id);
 //        }
 //    }
+
+    public void markOnboard(String status, boolean active, Authentication auth, String comment) {
+        UserInfo user = UserInfo.of(auth);
+        this.setStatus(status);
+        this.setActive(active); // TODO: use this or markActive() to create logging info?
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+        LoggingInfo onboardingInfo = null;
+        if (status.toLowerCase().contains("pending")) {
+            this.setActive(false);
+            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REGISTERED.getKey(), comment
+            );
+        } else if (status.toLowerCase().contains("approved")) {
+            this.setActive(true);
+            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.APPROVED.getKey(), comment
+            );
+        } else if (status.toLowerCase().contains("rejected")) {
+            this.setActive(false);
+            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.ONBOARD.getKey(),
+                    LoggingInfo.ActionType.REJECTED.getKey(), comment
+            );
+        }
+        this.setLatestOnboardingInfo(onboardingInfo);
+        this.getLoggingInfo().add(onboardingInfo);
+    }
 
     @Transient
     public LinkedHashMap<String, Object> getPayload() {
@@ -164,5 +198,13 @@ public class NewBundle {
 
     public void setAuditState(String auditState) {
         this.auditState = auditState;
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
     }
 }

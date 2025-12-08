@@ -76,6 +76,9 @@
     "auditState" : {
       "type" : "string"
     },
+    "catalogueId" : {
+      "type" : "string"
+    },
     "draft" : {
       "type" : "boolean"
     },

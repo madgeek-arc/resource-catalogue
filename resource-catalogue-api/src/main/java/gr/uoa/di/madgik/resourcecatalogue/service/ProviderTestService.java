@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
@@ -31,10 +30,10 @@ public interface ProviderTestService extends NewBundleOperations<NewProviderBund
     /**
      * Send email to Portal Admins requesting a Provider's deletion
      *
-     * @param ff   FacetFilter
-     * @param auth Authentication
+     * @param providerId Provider ID
+     * @param auth       Authentication
      */
-    void requestProviderDeletion(FacetFilter ff, Authentication auth);
+    void requestProviderDeletion(String providerId, Authentication auth);
 
     /**
      * Create Public Provider
