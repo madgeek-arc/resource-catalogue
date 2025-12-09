@@ -145,16 +145,24 @@ public interface SecurityService {
     boolean guidelineIsActive(String id, String catalogueId, boolean published);
 
     /**
-     * @param auth       Authentication
-     * @param id         Catalogue or Adapter id
+     * @param auth Authentication
+     * @param id   Catalogue or Adapter id
      * @return True if the authenticated user is an Adapter Admin
      */
     boolean hasAdapterAccess(Authentication auth, @NotNull String id);
 
     /**
-     * @param user       User
-     * @param id         Catalogue or Adapter id
+     * @param user User
+     * @param id   Catalogue or Adapter id
      * @return True if the authenticated user is an Adapter Admin
      */
     boolean userHasAdapterAccess(User user, @NotNull String id);
+
+    /**
+     *
+     * @param prefix ID prefix
+     * @param suffix ID suffix
+     * @return True if Provider is approved
+     */
+    boolean isApprovedProvider(String prefix, String suffix);
 }

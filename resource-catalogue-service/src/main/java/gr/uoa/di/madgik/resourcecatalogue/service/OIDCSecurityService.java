@@ -41,6 +41,7 @@ public class OIDCSecurityService implements SecurityService {
 
     private final CatalogueService catalogueService;
     private final ProviderService providerService;
+    private final ProviderTestService providerTestService;
     private final ServiceBundleService<ServiceBundle> serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -56,6 +57,7 @@ public class OIDCSecurityService implements SecurityService {
 
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
                                @Lazy ProviderService providerService,
+                               @Lazy ProviderTestService providerTestService,
                                @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
                                @Lazy TrainingResourceService trainingResourceService,
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
@@ -64,6 +66,7 @@ public class OIDCSecurityService implements SecurityService {
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
+        this.providerTestService = providerTestService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
@@ -120,7 +123,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private Optional<User> getAuthenticatedUser(Authentication auth) {
-        if (hasRole(auth, "ROLE_ANONYMOUS")) {
+        if (auth == null || hasRole(auth, "ROLE_ANONYMOUS")) {
             return Optional.empty();
         }
         return Optional.of(Objects.requireNonNull(User.of(auth)));
@@ -164,6 +167,13 @@ public class OIDCSecurityService implements SecurityService {
 
     private boolean userMatches(User u1, User u2) {
         return u1.getEmail().equalsIgnoreCase(u2.getEmail());
+    }
+
+    @Override
+    public boolean isApprovedProvider(String prefix, String suffix) {
+        String id = prefix + "/" + suffix;
+        NewProviderBundle bundle = providerTestService.get(id);
+        return "approved provider".equals(bundle.getStatus());
     }
     //endregion
 
