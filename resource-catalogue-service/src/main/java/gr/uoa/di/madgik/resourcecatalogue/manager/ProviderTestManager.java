@@ -28,17 +28,20 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateMerilScientificDomains;
+import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 //TODO: REMOVE PUBLISHED FALSE IF IDS ARE UNIQUE
 @org.springframework.stereotype.Service("providerTestManager")
@@ -52,18 +55,24 @@ public class ProviderTestManager implements ProviderTestService {
     private final SearchService searchService;
     private final PublicProviderService publicProviderService;
     private final VocabularyService vocabularyService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceBundleService<ServiceBundle> serviceBundleService; //FIXME: do we need <?>
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final IdCreator idCreator;
+    private final ProviderResourcesCommonMethods commonMethods;
+    private final SynchronizerService<LinkedHashMap<String, Object>> synchronizerService;
 
     public ProviderTestManager(GenericResourceService genericResourceService,
                                SearchService searchService,
                                RegistrationMailService registrationMailService,
                                PublicProviderService publicProviderService,
                                VocabularyService vocabularyService,
-                               ServiceBundleService serviceBundleService,
+                               ServiceBundleService<ServiceBundle> serviceBundleService,
                                TrainingResourceService trainingResourceService,
-                               InteroperabilityRecordService interoperabilityRecordService) {
+                               InteroperabilityRecordService interoperabilityRecordService,
+                               IdCreator idCreator,
+                               ProviderResourcesCommonMethods commonMethods,
+                               SynchronizerService<LinkedHashMap<String, Object>> synchronizerService) {
         this.genericResourceService = genericResourceService;
         this.searchService = searchService;
         this.registrationMailService = registrationMailService;
@@ -72,102 +81,9 @@ public class ProviderTestManager implements ProviderTestService {
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
-    }
-
-    @Override
-    public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = genericResourceService.get(resourceTypeName,
-                new SearchService.KeyValue("resource_internal_id", providerId),
-                new SearchService.KeyValue("published", "false"));
-        for (User user : provider.getProvider().getUsers()) {
-            if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
-            }
-        }
-    }
-
-    @Override
-    public NewProviderBundle createPublicProvider(NewProviderBundle bundle, Authentication auth) {
-        //TODO: fill method
-        return null;
-    }
-
-    @Override
-    public String determineHostingLegalEntity(String providerName) {
-        List<Vocabulary> hostingLegalEntityList = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
-        for (Vocabulary hle : hostingLegalEntityList) {
-            if (hle.getName().equalsIgnoreCase(providerName)) {
-                return hle.getId();
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("hosting_legal_entity", hle);
-        ff.addFilter("published", false);
-        List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
-        List<NewProviderBundle> providers = getAll(ff, auth).getResults();
-        List<ServiceBundle> services = new ArrayList<>();
-        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
-        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
-        createMapValuesForHLE(providers, "provider", mapValuesList);
-        for (NewProviderBundle providerBundle : providers) {
-            services.addAll(serviceBundleService.getResourceBundles(providerBundle.getCatalogueId(),
-                    providerBundle.getProvider().get("id").toString(), auth).getResults());
-            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
-                    providerBundle.getProvider().get("id").toString(), auth).getResults());
-            interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(
-                    providerBundle.getCatalogueId(), providerBundle.getProvider().get("id").toString(), auth).getResults());
-        }
-        createMapValuesForHLE(services, "service", mapValuesList);
-        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
-        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
-        return mapValuesList;
-    }
-
-    private void createMapValuesForHLE(List<?> resources, String resourceType,
-                                       List<MapValues<CatalogueValue>> mapValuesList) {
-        MapValues<CatalogueValue> mapValues = new MapValues<>();
-        mapValues.setKey(resourceType);
-        List<CatalogueValue> valueList = new ArrayList<>();
-        for (Object obj : resources) {
-            CatalogueValue value = new CatalogueValue();
-            switch (resourceType) {
-                case "provider":
-                    ProviderBundle providerBundle = (ProviderBundle) obj;
-                    value.setId(providerBundle.getId());
-                    value.setName(providerBundle.getProvider().getName());
-                    value.setCatalogue(providerBundle.getProvider().getCatalogueId());
-                    break;
-                case "service":
-                    ServiceBundle serviceBundle = (ServiceBundle) obj;
-                    value.setId(serviceBundle.getId());
-                    value.setName(serviceBundle.getService().getName());
-                    value.setCatalogue(serviceBundle.getService().getCatalogueId());
-                    break;
-                case "training_resource":
-                    TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
-                    value.setId(trainingResourceBundle.getId());
-                    value.setName(trainingResourceBundle.getTrainingResource().getTitle());
-                    value.setCatalogue(trainingResourceBundle.getTrainingResource().getCatalogueId());
-                    break;
-                case "interoperability_record":
-                    InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
-                    value.setId(interoperabilityRecordBundle.getId());
-                    value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
-                    value.setCatalogue(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-                    break;
-                default:
-                    break;
-            }
-            valueList.add(value);
-        }
-        mapValues.setValues(valueList);
-        mapValuesList.add(mapValues);
+        this.idCreator = idCreator;
+        this.commonMethods = commonMethods;
+        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -226,27 +142,114 @@ public class ProviderTestManager implements ProviderTestService {
     }
 
     @Override
-    public NewProviderBundle add(NewProviderBundle resource, Authentication authentication) {
-        //TODO:
-        // onboarding
-        // commonMethods.addAuthenticatedUser(provider.getProvider(), auth); (should be part of the onboarding)
-        // validation
-        // metadata
-        // registrationMailService.sendEmailsToNewlyAddedProviderAdmins(provider, null);
-        // synchronizerService.syncAdd(provider.getProvider());
-        resource.markOnboard("pending provider", false, authentication, null);
-        resource.setCatalogueId(null);
-        resource.setTemplateStatus("no template status");
-        resource.getProvider().put("id", "21.T15999/asdf12");
-//        commonMethods.createIdentifiers(provider, getResourceTypeName(), false);
-        NewProviderBundle ret = genericResourceService.add(resourceTypeName, resource);
-        return ret;
+    public NewProviderBundle add(NewProviderBundle bundle, Authentication auth) {
+        return add(bundle, null, auth);
     }
 
     @Override
-    public NewProviderBundle update(NewProviderBundle resource, Authentication authentication) {
-        //TODO: fill method
-        return null;
+    public NewProviderBundle add(NewProviderBundle bundle, String catalogueId, Authentication auth) {
+        onboard(bundle, catalogueId, auth);
+        NewProviderBundle ret = genericResourceService.add(resourceTypeName, bundle);
+//        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
+//        synchronizerService.syncAdd(bundle.getProvider()); //TODO: remove this?
+        return ret;
+    }
+
+    private void onboard(NewProviderBundle bundle, String catalogueId, Authentication auth) {
+        if (catalogueId == null || catalogueId.isEmpty()) {
+            bundle.markOnboard(vocabularyService.get("pending provider").getId(), false, auth, null);
+            bundle.setCatalogueId(null); //TODO: how we proceed with instance's catalogue ID
+            bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
+            //TODO: make sure we need to create our own IDs instead of users giving them
+            bundle.getProvider().put("id", idCreator.generate(resourceTypeName));
+//            commonMethods.createIdentifiers(bundle, resourceTypeName, false); //TODO: fix and enable
+        } else {
+            bundle.markOnboard(vocabularyService.get("approved provider").getId(), true, auth, null);
+            commonMethods.checkCatalogueIdConsistency(bundle, catalogueId);
+            bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
+            idCreator.validateId(bundle.getProvider().get("id").toString());
+//            commonMethods.createIdentifiers(bundle, resourceTypeName, true); //TODO: fix and enable
+        }
+
+        commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
+        bundle.setAuditState(Auditable.NOT_AUDITED);
+    }
+
+    @Override
+    public NewProviderBundle update(NewProviderBundle bundle, String catalogueId, String comment, Authentication auth) {
+        NewProviderBundle existing = get(bundle.getProvider().get("id").toString());
+        // check if there are actual changes in the Provider
+        if (bundle.equals(existing)) {
+            return bundle;
+        }
+        bundle.markUpdate(auth, comment);
+        return update(bundle, auth);
+    }
+
+    @Override
+    public NewProviderBundle update(NewProviderBundle bundle, Authentication auth) {
+        NewProviderBundle existing = get(bundle.getProvider().get("id").toString()); //TODO: I don't like calling it twice
+        validate(bundle);
+
+        try {
+            NewProviderBundle ret = genericResourceService.update(resourceTypeName,
+                    bundle.getProvider().get("id").toString(), bundle);
+
+            checkAndAddProviderToHLEVocabulary(bundle);
+            sendEmailsAfterProviderUpdate(bundle, existing);
+//            synchronizerService.syncUpdate(bundle.getProvider()); // TODO: remove this?
+            return ret;
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private void sendEmailsAfterProviderUpdate(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
+        // Send emails to newly added or deleted Admins
+        adminDifferences(updatedProvider, existingProvider);
+
+        // send notification emails to Portal Admins
+        if (updatedProvider.getLatestAuditInfo() != null &&
+                updatedProvider.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+            long latestAudit = Long.parseLong(updatedProvider.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(updatedProvider.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate) {
+//                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(bundle); //TODO: fix & enable
+            }
+        }
+    }
+
+    public void adminDifferences(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
+        List<String> existingAdmins = extractEmails(existingProvider);
+        List<String> newAdmins = extractEmails(updatedProvider);
+
+        List<String> adminsAdded = new ArrayList<>(newAdmins);
+        adminsAdded.removeAll(existingAdmins);
+        if (!adminsAdded.isEmpty()) {
+//            registrationMailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded); //TODO: fix & enable
+        }
+
+        List<String> adminsDeleted = new ArrayList<>(existingAdmins);
+        adminsDeleted.removeAll(newAdmins);
+
+        if (!adminsDeleted.isEmpty()) {
+//            registrationMailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted); //TODO: fix & enable
+        }
+    }
+
+    private List<String> extractEmails(NewProviderBundle providerBundle) {
+        List<String> emails = new ArrayList<>();
+
+        Object usersObj = providerBundle.getProvider().get("users");
+        if (usersObj instanceof Collection<?>) {
+            for (Object obj : (Collection<?>) usersObj) {
+                if (obj instanceof User user) {
+                    emails.add(user.getEmail().toLowerCase());
+                }
+            }
+        }
+        return emails;
     }
 
     @Override
@@ -302,8 +305,7 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public Browsing<NewProviderBundle> getAll(FacetFilter filter) {
-        //TODO: fill method
-        return null;
+        return genericResourceService.getResults(filter);
     }
 
     @Override
@@ -348,9 +350,9 @@ public class ProviderTestManager implements ProviderTestService {
     }
 
     @Override
-    public NewProviderBundle validate(NewProviderBundle newProviderBundle) {
-        //TODO: fill method
-        return null;
+    public NewProviderBundle validate(NewProviderBundle bundle) {
+        logger.debug("Validating Provider with id: '{}'", bundle.getProvider().get("id"));
+        return genericResourceService.validate(bundle.getProvider());
     }
 
     @Override
@@ -375,6 +377,103 @@ public class ProviderTestManager implements ProviderTestService {
     public boolean exists(String id) {
         //TODO: fill method
         return false;
+    }
+
+    //TODO: move to PublicController
+    @Override
+    public NewProviderBundle createPublicProvider(NewProviderBundle bundle, Authentication auth) {
+        //TODO: fill method
+        return null;
+    }
+
+    @Override
+    public void requestProviderDeletion(String providerId, Authentication auth) {
+        ProviderBundle provider = genericResourceService.get(resourceTypeName,
+                new SearchService.KeyValue("resource_internal_id", providerId),
+                new SearchService.KeyValue("published", "false"));
+        for (User user : provider.getProvider().getUsers()) {
+            if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
+                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
+            }
+        }
+    }
+
+    @Override
+    public String determineHostingLegalEntity(String providerName) {
+        List<Vocabulary> hostingLegalEntityList = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
+        for (Vocabulary hle : hostingLegalEntityList) {
+            if (hle.getName().equalsIgnoreCase(providerName)) {
+                return hle.getId();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("hosting_legal_entity", hle);
+        ff.addFilter("published", false);
+        List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
+        List<NewProviderBundle> providers = getAll(ff, auth).getResults();
+        List<ServiceBundle> services = new ArrayList<>();
+        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
+        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
+        createMapValuesForHLE(providers, "provider", mapValuesList);
+        for (NewProviderBundle providerBundle : providers) {
+            services.addAll(serviceBundleService.getResourceBundles(providerBundle.getCatalogueId(),
+                    providerBundle.getProvider().get("id").toString(), auth).getResults());
+            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
+                    providerBundle.getProvider().get("id").toString(), auth).getResults());
+            interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(
+                    providerBundle.getCatalogueId(), providerBundle.getProvider().get("id").toString(), auth).getResults());
+        }
+        createMapValuesForHLE(services, "service", mapValuesList);
+        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
+        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
+        return mapValuesList;
+    }
+
+    private void createMapValuesForHLE(List<?> resources, String resourceType,
+                                       List<MapValues<CatalogueValue>> mapValuesList) {
+        MapValues<CatalogueValue> mapValues = new MapValues<>();
+        mapValues.setKey(resourceType);
+        List<CatalogueValue> valueList = new ArrayList<>();
+        for (Object obj : resources) {
+            CatalogueValue value = new CatalogueValue();
+            switch (resourceType) {
+                case "provider":
+                    NewProviderBundle providerBundle = (NewProviderBundle) obj;
+                    value.setId(providerBundle.getProvider().get("id").toString());
+                    value.setName(providerBundle.getProvider().get("name").toString());
+                    value.setCatalogue(providerBundle.getProvider().get("catalogue").toString());
+                    break;
+                case "service":
+                    ServiceBundle serviceBundle = (ServiceBundle) obj;
+                    value.setId(serviceBundle.getId());
+                    value.setName(serviceBundle.getService().getName());
+                    value.setCatalogue(serviceBundle.getService().getCatalogueId());
+                    break;
+                case "training_resource":
+                    TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
+                    value.setId(trainingResourceBundle.getId());
+                    value.setName(trainingResourceBundle.getTrainingResource().getTitle());
+                    value.setCatalogue(trainingResourceBundle.getTrainingResource().getCatalogueId());
+                    break;
+                case "interoperability_record":
+                    InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
+                    value.setId(interoperabilityRecordBundle.getId());
+                    value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
+                    value.setCatalogue(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
+                    break;
+                default:
+                    break;
+            }
+            valueList.add(value);
+        }
+        mapValues.setValues(valueList);
+        mapValuesList.add(mapValues);
     }
 
     //TODO: call on update and verify

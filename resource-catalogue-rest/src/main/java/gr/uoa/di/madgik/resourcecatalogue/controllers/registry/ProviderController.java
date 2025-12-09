@@ -129,7 +129,6 @@ public class ProviderController {
     }
 
     // Creates a new Provider.
-//    @Override
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Provider> add(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {

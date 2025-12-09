@@ -28,6 +28,27 @@ import java.util.List;
 public interface ProviderTestService extends NewBundleOperations<NewProviderBundle>, ResourceService<NewProviderBundle> {
 
     /**
+     * Add a new Provider on a specific Catalogue.
+     *
+     * @param bundle         Provider
+     * @param catalogueId    Catalogue ID
+     * @param authentication Authentication
+     * @return {@link NewProviderBundle}
+     */
+    NewProviderBundle add(NewProviderBundle bundle, String catalogueId, Authentication authentication);
+
+    /**
+     * Update a Provider of an external Catalogue, providing its Catalogue ID
+     *
+     * @param bundle      Provider
+     * @param catalogueId Catalogue ID
+     * @param comment     Comment
+     * @param auth        Authentication
+     * @return {@link NewProviderBundle}
+     */
+    NewProviderBundle update(NewProviderBundle bundle, String catalogueId, String comment, Authentication auth);
+
+    /**
      * Send email to Portal Admins requesting a Provider's deletion
      *
      * @param providerId Provider ID

@@ -799,7 +799,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             // set catalogueId = eosc
-            provider.markOnboard(vocabularyService.get("pending provider").getId(), /*TODO: check this*/false, auth, null);
+            provider.markOnboard(vocabularyService.get("pending provider").getId(), false, auth, null);
             provider.getProvider().setCatalogueId(this.catalogueId);
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());
             provider.setId(idCreator.generate(getResourceTypeName()));
