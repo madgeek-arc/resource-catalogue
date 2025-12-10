@@ -444,7 +444,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+            if (securityService.hasPortalAdminRole(auth) ||
                     securityService.userHasAdminAccess(user, providerId)) {
                 return this.getAll(ff, auth).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
             }

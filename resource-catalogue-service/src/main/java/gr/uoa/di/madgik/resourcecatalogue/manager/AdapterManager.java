@@ -161,7 +161,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         String status;
         boolean active;
 
-        if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+        if (securityService.hasPortalAdminRole(auth) ||
                 getProviderUserEmails().contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
 //            adapter.setActive(true);
 //            adapter.setStatus(vocabularyService.get("approved adapter").getId());

@@ -76,7 +76,7 @@ public class AdapterController {
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<AdapterBundle> getAdapterBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -111,7 +111,7 @@ public class AdapterController {
                     content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<AdapterBundle>> getAllAdapterBundles(@Parameter(hidden = true)
                                                                       @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -138,7 +138,7 @@ public class AdapterController {
 
     @Operation(summary = "Updates the Adapter.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdapterAccess(#auth,#adapter.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth,#adapter.id)")
     public ResponseEntity<Adapter> update(@RequestBody Adapter adapter,
                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                           @RequestParam(required = false) String comment,
@@ -155,7 +155,7 @@ public class AdapterController {
     }
 
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Adapter> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
@@ -171,7 +171,7 @@ public class AdapterController {
     }
 
     @PatchMapping(path = "verify/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<AdapterBundle> verify(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                 @RequestParam(required = false) Boolean active,
@@ -184,7 +184,7 @@ public class AdapterController {
     }
 
     @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<AdapterBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                    @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                    @RequestParam Boolean active,
@@ -201,7 +201,7 @@ public class AdapterController {
     }
 
     @PatchMapping(path = "audit/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<AdapterBundle> audit(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                @RequestParam("catalogueId") String catalogueId,
@@ -215,7 +215,7 @@ public class AdapterController {
 
     @Operation(summary = "Suspends an Adapter.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public AdapterBundle suspend(@RequestParam String adapterId, @RequestParam String catalogueId,
                                  @RequestParam boolean suspend, @Parameter(hidden = true) Authentication auth) {
         return adapterService.suspend(adapterId, catalogueId, suspend, auth);

@@ -238,7 +238,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+            if (securityService.hasPortalAdminRole(auth) ||
                     securityService.userHasAdminAccess(user, providerId)) {
                 return providerBundle;
             }
@@ -256,7 +256,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
             // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+            if (securityService.hasPortalAdminRole(auth) ||
                     securityService.userHasAdminAccess(user, id)) {
                 return providerBundle;
             }

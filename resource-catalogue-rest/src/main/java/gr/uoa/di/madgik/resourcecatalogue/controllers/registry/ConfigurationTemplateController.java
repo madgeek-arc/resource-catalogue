@@ -63,7 +63,7 @@ public class ConfigurationTemplateController {
 
     @Operation(summary = "Create a new Configuration Template.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.isResourceAdmin(#auth, #configurationTemplate.interoperabilityRecordId)")
     public ResponseEntity<ConfigurationTemplate> add(@RequestBody ConfigurationTemplate configurationTemplate,
                                                      @Parameter(hidden = true) Authentication auth) {
@@ -72,7 +72,7 @@ public class ConfigurationTemplateController {
     }
 
     @Operation(summary = "Updates the Configuration Template with the given id.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.isResourceAdmin(#auth,#configurationTemplate.interoperabilityRecordId)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<ConfigurationTemplate> update(@RequestBody ConfigurationTemplate configurationTemplate,
@@ -82,7 +82,7 @@ public class ConfigurationTemplateController {
     }
 
     @DeleteMapping(path = "deleteByInteroperabilityRecordId/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ConfigurationTemplate> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                         @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,

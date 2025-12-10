@@ -115,7 +115,7 @@ public class DatasourceController {
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllDatasourcesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType("datasource");
@@ -126,7 +126,7 @@ public class DatasourceController {
 
     @Operation(description = "Creates a new Datasource.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> addDatasource(@Valid @RequestBody Datasource datasource,
                                                     @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle datasourceBundle = datasourceService.add(new DatasourceBundle(datasource), auth);
@@ -135,7 +135,7 @@ public class DatasourceController {
 
     @Operation(description = "Updates the Datasource with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> updateHDatasource(@Valid @RequestBody Datasource datasource,
                                                         @RequestParam(required = false) String comment,
                                                         @Parameter(hidden = true) Authentication auth) {
@@ -146,7 +146,7 @@ public class DatasourceController {
     }
 
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Datasource> deleteDatasourceById(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                            @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                            @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -163,7 +163,7 @@ public class DatasourceController {
     // Deletes the Datasource of the specific Service of the specific Catalogue.
     @Operation(description = "Deletes the Datasource of the specific Service of the specific Catalogue.")
     @DeleteMapping(path = "/{catalogueId}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Datasource> deleteDatasource(@PathVariable("catalogueId") String catalogueId,
                                                        @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -180,7 +180,7 @@ public class DatasourceController {
 
     // Accept/Reject a Datasource.
     @PatchMapping(path = "verifyDatasource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<DatasourceBundle> verify(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                              @RequestParam(required = false) Boolean active,

@@ -62,7 +62,7 @@ public class PublicAdapterController {
     @Operation(description = "Returns the Public Adapter with the given id.")
     @GetMapping(path = "public/adapter/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
                                  @PathVariable("prefix") String prefix,
@@ -81,7 +81,7 @@ public class PublicAdapterController {
 
     @GetMapping(path = "public/adapter/bundle/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
                                        @PathVariable("prefix") String prefix,
@@ -123,7 +123,7 @@ public class PublicAdapterController {
             content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/adapter/bundle/all",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<AdapterBundle>> getAllBundles(@Parameter(hidden = true)
                                                                @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);

@@ -265,7 +265,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+            if (securityService.hasPortalAdminRole(auth) ||
                     securityService.userIsResourceAdmin(user, deployableServiceId)) {
                 return deployableServiceBundle;
             }

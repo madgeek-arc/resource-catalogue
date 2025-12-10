@@ -41,6 +41,13 @@ public interface SecurityService {
     boolean hasRole(Authentication auth, String role);
 
     /**
+     *
+     * @param auth authentication
+     * @return True if authentication is not null and has role ADMIN or EPOT, False otherwise
+     */
+    boolean hasPortalAdminRole(Authentication auth);
+
+    /**
      * @param auth Authentication
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin

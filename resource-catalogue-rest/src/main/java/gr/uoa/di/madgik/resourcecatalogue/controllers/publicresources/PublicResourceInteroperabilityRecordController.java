@@ -77,7 +77,7 @@ public class PublicResourceInteroperabilityRecordController {
 
     @GetMapping(path = "public/resourceInteroperabilityRecord/bundle/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
                                        @PathVariable("prefix") String prefix,
@@ -113,7 +113,7 @@ public class PublicResourceInteroperabilityRecordController {
     @BrowseCatalogue
     @GetMapping(path = "public/resourceInteroperabilityRecord/bundle/all",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ResourceInteroperabilityRecordBundle>> getAllBundles(@Parameter(hidden = true)
                                                                                       @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);

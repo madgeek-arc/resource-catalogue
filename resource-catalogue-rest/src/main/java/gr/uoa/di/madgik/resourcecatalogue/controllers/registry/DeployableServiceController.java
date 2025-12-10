@@ -79,7 +79,7 @@ public class DeployableServiceController {
     }
 
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<DeployableServiceBundle> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
@@ -102,7 +102,7 @@ public class DeployableServiceController {
 
     @Operation(summary = "Get the most current version of a specific Deployable Service, providing the Resource id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("@securityService.deployableServiceIsActive(#prefix+'/'+#suffix, #catalogueId, false) or hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("@securityService.deployableServiceIsActive(#prefix+'/'+#suffix, #catalogueId, false) or hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<DeployableService> getDeployableService(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                   @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -113,7 +113,7 @@ public class DeployableServiceController {
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<DeployableServiceBundle> getDeployableServiceBundle(@Parameter(description = "The left part of the ID before the '/'")
                                                                               @PathVariable("prefix") String prefix,
                                                                               @Parameter(description = "The right part of the ID after the '/'")
@@ -126,7 +126,7 @@ public class DeployableServiceController {
 
     @Operation(summary = "Creates a new DeployableService")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #deployableService)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #deployableService)")
     public ResponseEntity<DeployableService> addDeployableService(@RequestBody DeployableService deployableService,
                                                                   @Parameter(hidden = true) Authentication auth) {
         DeployableServiceBundle ret = this.service.add(new DeployableServiceBundle(deployableService), auth);
@@ -136,7 +136,7 @@ public class DeployableServiceController {
     }
 
     @Operation(summary = "Updates the DeployableService assigned the given id with the given DeployableService, keeping a version of revisions.")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableService.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableService.id)")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<DeployableService> updateDeployableService(@RequestBody DeployableService deployableService,
                                                                      @RequestParam(required = false) String comment,
@@ -148,7 +148,7 @@ public class DeployableServiceController {
 
     // Accept/Reject a Resource.
     @PatchMapping(path = "verify/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<DeployableServiceBundle> verify(@Parameter(description = "The left part of the ID before the '/'")
                                                           @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'")
@@ -198,7 +198,7 @@ public class DeployableServiceController {
 
     @BrowseParameters
     @GetMapping(path = "byProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<DeployableServiceBundle>> getDeployableServiceByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                           @Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -216,7 +216,7 @@ public class DeployableServiceController {
 
     @BrowseParameters
     @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
     public ResponseEntity<Paging<DeployableServiceBundle>> getDeployableServicesByCatalogue(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams,
                                                                                             @PathVariable String id,
                                                                                             @Parameter(hidden = true) Authentication auth) {
@@ -243,7 +243,7 @@ public class DeployableServiceController {
 
     // Providing the Deployable Service id, set the Deployable Service to active or inactive.
     @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<DeployableServiceBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                              @RequestParam Boolean active,
@@ -255,7 +255,7 @@ public class DeployableServiceController {
 
     // Get all pending Service Templates.
     @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Browsing<DeployableService>> pendingTemplates(@Parameter(hidden = true) Authentication auth) {
         List<ProviderBundle> pendingProviders = providerService.getInactive();
         List<DeployableService> serviceTemplates = new ArrayList<>();
@@ -273,7 +273,7 @@ public class DeployableServiceController {
     @BrowseCatalogue
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DeployableServiceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                          @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -284,7 +284,7 @@ public class DeployableServiceController {
     }
 
     @PatchMapping(path = "audit/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<DeployableServiceBundle> audit(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                          @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                          @RequestParam("catalogueId") String catalogueId,
@@ -298,7 +298,7 @@ public class DeployableServiceController {
 
 
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DeployableServiceBundle>> getRandomResources(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
                                                                               @RequestParam(defaultValue = "10") int quantity,
                                                                               @Parameter(hidden = true) Authentication auth) {
@@ -317,7 +317,7 @@ public class DeployableServiceController {
     }
 
     @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public void changeProvider(@RequestParam String resourceId,
                                @RequestParam String newProvider,
                                @RequestParam(required = false) String comment,
@@ -358,7 +358,7 @@ public class DeployableServiceController {
 
     @Operation(summary = "Suspends a specific Deployable Service.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public DeployableServiceBundle suspendDeployableService(@RequestParam String id,
                                                             @RequestParam String catalogueId,
                                                             @RequestParam boolean suspend,

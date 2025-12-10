@@ -128,7 +128,7 @@ public class ConfigurationTemplateInstanceController {
 
     @Operation(summary = "Create a new Configuration Template Instance.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.isResourceAdmin(#auth,#configurationTemplateInstance.resourceId)")
     public ResponseEntity<ConfigurationTemplateInstance> add(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
                                                              @Parameter(hidden = true) Authentication auth) {
@@ -151,7 +151,7 @@ public class ConfigurationTemplateInstanceController {
 
     @Operation(summary = "Updates the Configuration Template Instance with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.isResourceAdmin(#auth,#configurationTemplateInstance.resourceId)")
     public ResponseEntity<ConfigurationTemplateInstance> update(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
                                                                 @Parameter(hidden = true) Authentication auth) {

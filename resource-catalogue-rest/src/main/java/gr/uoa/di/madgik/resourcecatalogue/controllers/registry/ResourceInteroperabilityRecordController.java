@@ -78,7 +78,7 @@ public class ResourceInteroperabilityRecordController {
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ResourceInteroperabilityRecordBundle> getBundle(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                           @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
@@ -101,7 +101,7 @@ public class ResourceInteroperabilityRecordController {
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ResourceInteroperabilityRecordBundle>> getAllBundles(
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -127,7 +127,7 @@ public class ResourceInteroperabilityRecordController {
 
     @Operation(summary = "Creates a new ResourceInteroperabilityRecord.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #rir.resourceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #rir.resourceId)")
     public ResponseEntity<ResourceInteroperabilityRecord> add(@RequestBody ResourceInteroperabilityRecord rir,
                                                               @RequestParam String resourceType, @Parameter(hidden = true) Authentication auth) {
         ResourceInteroperabilityRecordBundle bundle = service.add(new ResourceInteroperabilityRecordBundle(rir), resourceType, auth);
@@ -137,7 +137,7 @@ public class ResourceInteroperabilityRecordController {
 
     @Operation(summary = "Updates the ResourceInteroperabilityRecord with the given id.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #rir.resourceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #rir.resourceId)")
     public ResponseEntity<ResourceInteroperabilityRecord> update(@RequestBody ResourceInteroperabilityRecord rir,
                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                  @Parameter(hidden = true) Authentication auth) {
@@ -151,7 +151,7 @@ public class ResourceInteroperabilityRecordController {
 
     @DeleteMapping(path = "{resourceIdPrefix}/{resourceIdSuffix}/{resourceInteroperabilityRecordIdPrefix}/{resourceInteroperabilityRecordIdSuffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #resourcePrefix+'/'+resourceSuffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #resourcePrefix+'/'+resourceSuffix)")
     public ResponseEntity<ResourceInteroperabilityRecord> deleteById(@SuppressWarnings("unused") @Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceIdPrefix") String resourcePrefix,
                                                                      @SuppressWarnings("unused") @Parameter(description = "The right part of the ID after the '/'") @PathVariable("resourceIdSuffix") String resourceSuffix,
                                                                      @Parameter(description = "The left part of the ID before the '/'") @PathVariable("resourceInteroperabilityRecordIdPrefix") String rirPrefix,

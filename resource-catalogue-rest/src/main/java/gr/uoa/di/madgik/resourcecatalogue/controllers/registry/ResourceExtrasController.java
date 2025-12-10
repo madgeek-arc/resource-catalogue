@@ -40,7 +40,7 @@ import java.util.List;
 @RestController
 @RequestMapping("resource-extras")
 @Tag(name = "resource extras", description = "Update a Service's EOSC Interoperability Framework Guidelines")
-@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
 public class ResourceExtrasController {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceExtrasController.class);

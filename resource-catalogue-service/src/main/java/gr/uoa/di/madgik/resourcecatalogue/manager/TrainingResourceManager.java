@@ -294,7 +294,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         }
         if (auth != null && auth.isAuthenticated()) {
             User user = User.of(auth);
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
+            if (securityService.hasPortalAdminRole(auth) ||
                     securityService.userIsResourceAdmin(user, trainingResourceId)) {
                 return trainingResourceBundle;
             }

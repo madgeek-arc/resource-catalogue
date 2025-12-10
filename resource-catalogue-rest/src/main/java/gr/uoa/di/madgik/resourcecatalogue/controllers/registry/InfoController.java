@@ -57,7 +57,7 @@ public class InfoController {
     @Hidden
     @Operation(summary = "Get the total number of active Providers and Services registered in the Catalogue.")
     @GetMapping(path = "numberOfProvidersAndServices", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Map<Object, Integer>> numberOfProvidersAndServices() {
         Map<Object, Integer> numberOfResources = new HashMap<>();
         FacetFilter ff = new FacetFilter();

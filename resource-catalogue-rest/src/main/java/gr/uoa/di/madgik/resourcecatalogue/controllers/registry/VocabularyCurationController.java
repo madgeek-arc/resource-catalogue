@@ -82,7 +82,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     //    @Operation(summary = "Filter a list of Vocabulary Curation Requests based on a set of filters or get a list of all Vocabulary Curation Requests in the Catalogue.")
     @BrowseParameters
     @GetMapping(path = "vocabularyCurationRequests/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<VocabularyCuration>> getAllVocabularyCurationRequests(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @RequestParam(required = false) Set<String> status,
                                                                                        @RequestParam(required = false) Set<String> vocabulary, @Parameter(hidden = true) Authentication authentication) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
@@ -90,7 +90,7 @@ public class VocabularyCurationController extends ResourceController<VocabularyC
     }
 
     @PutMapping(path = "approveOrRejectVocabularyCuration", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public void approveOrRejectVocabularyCuration(@RequestBody VocabularyCuration vocabularyCuration, @RequestParam boolean approved,
                                                   @RequestParam(required = false) String rejectionReason, @Parameter(hidden = true) Authentication authentication) {
         vocabularyCurationService.approveOrRejectVocabularyCuration(vocabularyCuration, approved, rejectionReason, authentication);

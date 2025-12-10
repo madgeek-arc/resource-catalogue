@@ -84,7 +84,7 @@ public class PublicServiceExtensionsController {
 
     @GetMapping(path = "public/helpdesk/helpdeskBundle/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<?> getHelpdeskBundle(@Parameter(description = "The left part of the ID before the '/'")
                                                @PathVariable("prefix") String prefix,
                                                @Parameter(description = "The right part of the ID after the '/'")
@@ -118,7 +118,7 @@ public class PublicServiceExtensionsController {
     @BrowseCatalogue
     @GetMapping(path = "public/helpdesk/adminPage/all",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<HelpdeskBundle>> getAllHeldpeskBundles(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -150,7 +150,7 @@ public class PublicServiceExtensionsController {
 
     @GetMapping(path = "public/monitoring/monitoringBundle/{prefix}/{suffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<?> getMonitoringBundle(@Parameter(description = "The left part of the ID before the '/'")
                                                  @PathVariable("prefix") String prefix,
                                                  @Parameter(description = "The right part of the ID after the '/'")
@@ -183,7 +183,7 @@ public class PublicServiceExtensionsController {
     @BrowseParameters
     @GetMapping(path = "public/monitoring/adminPage/all",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<MonitoringBundle>> getAllMonitoringBundles(@Parameter(hidden = true)
                                                                             @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);

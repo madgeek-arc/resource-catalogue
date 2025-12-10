@@ -100,6 +100,9 @@ public class OIDCSecurityService implements SecurityService {
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
     }
 
+    public boolean hasPortalAdminRole(Authentication auth) {
+        return auth != null && (hasRole(auth, "ROLE_ADMIN") || hasRole(auth, "ROLE_EPOT"));
+    }
 
     // region Catalogues & Providers
     @Override

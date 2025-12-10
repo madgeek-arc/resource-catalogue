@@ -114,7 +114,7 @@ public class CatalogueController {
 
     @Operation(summary = "Updates a specific Catalogue.")
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#catalogue.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#catalogue.id)")
     public ResponseEntity<Catalogue> updateCatalogue(@RequestBody Catalogue catalogue,
                                                      @RequestParam(required = false) String comment,
                                                      @Parameter(hidden = true) Authentication auth) {
@@ -161,7 +161,7 @@ public class CatalogueController {
     @Hidden
     @Operation(summary = "Returns the Catalogue Bundle with the given id.")
     @GetMapping(path = "bundle/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #id)")
     public ResponseEntity<CatalogueBundle> getCatalogueBundle(@PathVariable("id") String id,
                                                               @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(catalogueManager.get(id, auth), HttpStatus.OK);
@@ -177,7 +177,7 @@ public class CatalogueController {
 
     @Operation(summary = "Verifies the specific Catalogue.")
     @PatchMapping(path = "verifyCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<CatalogueBundle> verifyCatalogue(@PathVariable("id") String id,
                                                            @RequestParam(required = false) Boolean active,
                                                            @RequestParam(required = false) String status,
@@ -191,7 +191,7 @@ public class CatalogueController {
     @Hidden
     @Operation(summary = "Activates/Deactivates the specific Catalogue.")
     @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<CatalogueBundle> publish(@PathVariable("id") String id,
                                                    @RequestParam(required = false) Boolean active,
                                                    @Parameter(hidden = true) Authentication auth) {
@@ -206,7 +206,7 @@ public class CatalogueController {
     @Operation(summary = "Get a list of all Catalogues Bundles in the Portal.")
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@Parameter(hidden = true)
                                                                           @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -233,7 +233,7 @@ public class CatalogueController {
     @Parameter(hidden = true)
     @Operation(summary = "Deletes the Catalogue with the given id.")
 //    @DeleteMapping(path = "delete/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Catalogue> deleteCatalogue(@PathVariable("id") String id,
                                                      @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = catalogueManager.get(id, auth);
@@ -248,7 +248,7 @@ public class CatalogueController {
 
     @Operation(summary = "Suspends a Catalogue and all its resources.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public CatalogueBundle suspendCatalogue(@RequestParam String catalogueId, @RequestParam boolean suspend,
                                             @Parameter(hidden = true) Authentication auth) {
         if (catalogueId.equalsIgnoreCase(this.catalogueId)) {
@@ -260,7 +260,7 @@ public class CatalogueController {
 
     @Operation(summary = "Audits a Catalogue.")
     @PatchMapping(path = "auditCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<CatalogueBundle> auditCatalogue(@PathVariable("id") String id,
                                                           @RequestParam(required = false) String comment,
                                                           @RequestParam LoggingInfo.ActionType actionType,
@@ -288,7 +288,7 @@ public class CatalogueController {
 
     @Operation(description = "Returns the ProviderBundle of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/provider/bundle/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
     public ResponseEntity<ProviderBundle> getCatalogueProviderBundle(@PathVariable("catalogueId") String catalogueId,
                                                                      @PathVariable("providerId") String providerId,
                                                                      @Parameter(hidden = true) Authentication auth) {
@@ -297,7 +297,7 @@ public class CatalogueController {
 
     @Hidden
     @GetMapping(path = {"{catalogueId}/provider/loggingInfoHistory/{providerId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
     public ResponseEntity<List<LoggingInfo>> providerLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
                                                                           @PathVariable("providerId") String providerId,
                                                                           @Parameter(hidden = true) Authentication auth) {
@@ -348,7 +348,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Provider of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
     public ResponseEntity<Provider> updateCatalogueProvider(@RequestBody Provider provider,
                                                             @PathVariable String catalogueId,
                                                             @RequestParam(required = false) String comment,
@@ -380,7 +380,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Provider of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/provider/{providerId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<Provider> deleteCatalogueProvider(@PathVariable("catalogueId") String catalogueId,
                                                             @PathVariable("providerId") String providerId,
                                                             @Parameter(hidden = true) Authentication auth) {
@@ -395,7 +395,7 @@ public class CatalogueController {
 
     @Hidden
     @PatchMapping(path = "{catalogueId}/provider/auditProvider/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> auditProvider(@PathVariable("id") String id,
                                                         @PathVariable("catalogueId") String catalogueId,
                                                         @RequestParam(required = false) String comment,
@@ -416,7 +416,7 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Service for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/service", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
     public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId,
                                                        @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.addResource(new ServiceBundle(service), catalogueId, auth);
@@ -427,7 +427,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Service of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/service", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#service.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#service.id)")
     public ResponseEntity<Service> updateCatalogueService(@RequestBody Service service, @PathVariable String catalogueId,
                                                           @RequestParam(required = false) String comment,
                                                           @Parameter(hidden = true) Authentication auth) {
@@ -439,7 +439,7 @@ public class CatalogueController {
 
     @Operation(description = "Returns the ServiceBundle of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/service/bundle/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceId)")
     public ResponseEntity<ServiceBundle> getCatalogueServiceBundle(@PathVariable("catalogueId") String catalogueId,
                                                                    @PathVariable("serviceId") String serviceId,
                                                                    @Parameter(hidden = true) Authentication auth) {
@@ -448,7 +448,7 @@ public class CatalogueController {
 
     @Hidden
     @GetMapping(path = {"{catalogueId}/service/loggingInfoHistory/{serviceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceId)")
     public ResponseEntity<List<LoggingInfo>> serviceLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
                                                                          @PathVariable("serviceId") String serviceId,
                                                                          @Parameter(hidden = true) Authentication auth) {
@@ -474,7 +474,7 @@ public class CatalogueController {
     @Hidden
     @Operation(description = "Get all the Service Bundles of a specific Provider of a specific Catalogue.")
     @GetMapping(path = "{catalogueId}/{providerId}/service/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
     public ResponseEntity<Paging<ServiceBundle>> getProviderServiceBundles(@PathVariable("catalogueId") String catalogueId,
                                                                            @PathVariable("providerId") String providerId,
                                                                            @Parameter(hidden = true)
@@ -491,7 +491,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Service of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/service/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<Service> deleteCatalogueService(@PathVariable("catalogueId") String catalogueId,
                                                           @PathVariable("serviceId") String serviceId,
                                                           @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -507,7 +507,7 @@ public class CatalogueController {
 
     @Hidden
     @PatchMapping(path = "{catalogueId}/service/auditService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ServiceBundle> auditService(@PathVariable("id") String id,
                                                       @PathVariable("catalogueId") String catalogueId,
                                                       @RequestParam(required = false) String comment,
@@ -530,7 +530,7 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Datasource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> addCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                              @RequestBody Datasource datasource,
                                                              @Parameter(hidden = true) Authentication auth) {
@@ -542,7 +542,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Datasource of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource.serviceId)")
     public ResponseEntity<Datasource> updateCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                                 @RequestBody Datasource datasource,
                                                                 @RequestParam(required = false) String comment,
@@ -555,7 +555,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Datasource of the specific Service of the specific Catalogue given the service id.")
     @DeleteMapping(path = "{catalogueId}/datasource/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<Datasource> deleteCatalogueDatasource(@PathVariable("catalogueId") String catalogueId,
                                                                 @PathVariable("serviceId") String serviceId,
                                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -580,7 +580,7 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Training Resource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/trainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #trainingResource)")
     public ResponseEntity<TrainingResource> addCatalogueTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                          @PathVariable String catalogueId,
                                                                          @Parameter(hidden = true) Authentication auth) {
@@ -592,7 +592,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Training Resource of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/trainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#trainingResource.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#trainingResource.id)")
     public ResponseEntity<TrainingResource> updateCatalogueTrainingResource(@RequestBody TrainingResource trainingResource,
                                                                             @PathVariable String catalogueId,
                                                                             @RequestParam(required = false) String comment,
@@ -621,7 +621,7 @@ public class CatalogueController {
     @Hidden
     @Operation(description = "Get all the Training Resource Bundles of a specific Provider of a specific Catalogue.")
     @GetMapping(path = "{catalogueId}/{providerId}/trainingResource/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
     public ResponseEntity<Paging<TrainingResourceBundle>> getProviderTrainingResourceBundles(@PathVariable("catalogueId") String catalogueId,
                                                                                              @PathVariable("providerId") String providerId,
                                                                                              @Parameter(hidden = true)
@@ -639,7 +639,7 @@ public class CatalogueController {
     @Operation(description = "Returns the TrainingResourceBundle of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/trainingResource/bundle/{trainingResourceId}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId)")
     public ResponseEntity<TrainingResourceBundle> getCatalogueTrainingResourceBundle(@PathVariable("catalogueId") String catalogueId,
                                                                    @PathVariable("trainingResourceId") String trainingResourceId,
                                                                    @Parameter(hidden = true) Authentication auth) {
@@ -648,7 +648,7 @@ public class CatalogueController {
 
     @Hidden
     @GetMapping(path = {"{catalogueId}/trainingResource/loggingInfoHistory/{trainingResourceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId)")
     public ResponseEntity<List<LoggingInfo>> trainingResourceLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
                                                                                   @PathVariable("trainingResourceId") String trainingResourceId,
                                                                                   @Parameter(hidden = true) Authentication auth) {
@@ -659,7 +659,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Training Resource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/trainingResource/{trainingResourceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<TrainingResource> deleteCatalogueTrainingResource(@PathVariable("catalogueId") String catalogueId,
                                                                             @PathVariable("trainingResourceId") String trainingResourceId,
                                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -675,7 +675,7 @@ public class CatalogueController {
 
     @Hidden
     @PatchMapping(path = "{catalogueId}/trainingResource/auditTrainingResource/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<TrainingResourceBundle> auditTrainingResource(@PathVariable("id") String id,
                                                                         @PathVariable("catalogueId") String catalogueId,
                                                                         @RequestParam(required = false) String comment,
@@ -697,7 +697,7 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Deployable Service for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/deployableService", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #deployableService)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #deployableService)")
     public ResponseEntity<DeployableService> addCatalogueDeployableService(@RequestBody DeployableService deployableService,
                                                                            @PathVariable String catalogueId,
                                                                            @Parameter(hidden = true) Authentication auth) {
@@ -709,7 +709,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Deployable Service of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/deployableService", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableService.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableService.id)")
     public ResponseEntity<DeployableService> updateCatalogueDeployableService(@RequestBody DeployableService deployableService,
                                                                               @PathVariable String catalogueId,
                                                                               @RequestParam(required = false) String comment,
@@ -723,7 +723,7 @@ public class CatalogueController {
 
     @Operation(description = "Returns the DeployableServiceBundle of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/deployableService/bundle/{deployableServiceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableServiceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableServiceId)")
     public ResponseEntity<DeployableServiceBundle> getCatalogueDeployableServiceBundle(@PathVariable("catalogueId") String catalogueId,
                                                                                        @PathVariable("deployableServiceId") String deployableServiceId,
                                                                                        @Parameter(hidden = true) Authentication auth) {
@@ -732,7 +732,7 @@ public class CatalogueController {
 
     @Hidden
     @GetMapping(path = {"{catalogueId}/deployableService/loggingInfoHistory/{deployableServiceId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableServiceId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableServiceId)")
     public ResponseEntity<List<LoggingInfo>> deployableServiceLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
                                                                                    @PathVariable("deployableServiceId") String deployableServiceId,
                                                                                    @Parameter(hidden = true) Authentication auth) {
@@ -759,7 +759,7 @@ public class CatalogueController {
     @Hidden
     @Operation(description = "Get all the Deployable Service Bundles of a specific Provider of a specific Catalogue.")
     @GetMapping(path = "{catalogueId}/{providerId}/deployableService/bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
     public ResponseEntity<Paging<DeployableServiceBundle>> getProviderDeployableServiceBundles(@PathVariable("catalogueId") String catalogueId,
                                                                                                @PathVariable("providerId") String providerId,
                                                                                                @Parameter(hidden = true)
@@ -776,7 +776,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Deployable Service of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/deployableService/{deployableServiceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<DeployableService> deleteCatalogueDeployableService(@PathVariable("catalogueId") String catalogueId,
                                                                               @PathVariable("deployableServiceId") String deployableServiceId,
                                                                               @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -792,7 +792,7 @@ public class CatalogueController {
 
     @Hidden
     @PatchMapping(path = "{catalogueId}/deployableService/auditService/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<DeployableServiceBundle> auditDeployableService(@PathVariable("id") String id,
                                                       @PathVariable("catalogueId") String catalogueId,
                                                       @RequestParam(required = false) String comment,
@@ -814,7 +814,7 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Interoperability Record for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
     public ResponseEntity<InteroperabilityRecord> addCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                                                      @PathVariable String catalogueId,
                                                                                      @Parameter(hidden = true) Authentication auth) {
@@ -826,7 +826,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Interoperability Record of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#interoperabilityRecord.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#interoperabilityRecord.id)")
     public ResponseEntity<InteroperabilityRecord> updateCatalogueInteroperabilityRecord(@RequestBody InteroperabilityRecord interoperabilityRecord,
                                                                                         @PathVariable String catalogueId,
                                                                                         @Parameter(hidden = true) Authentication auth) {
@@ -853,7 +853,7 @@ public class CatalogueController {
     @Operation(description = "Returns the InteroperabilityRecordBundle of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/interoperabilityRecord/bundle/{interoperabilityRecordId}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecordId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecordId)")
     public ResponseEntity<InteroperabilityRecordBundle> getCatalogueInteroperabilityRecordBundle(@PathVariable("catalogueId") String catalogueId,
                                                                                      @PathVariable("interoperabilityRecordId") String interoperabilityRecordId,
                                                                                      @Parameter(hidden = true) Authentication auth) {
@@ -862,7 +862,7 @@ public class CatalogueController {
 
     @Hidden
     @GetMapping(path = {"{catalogueId}/interoperabilityRecord/loggingInfoHistory/{interoperabilityRecordId}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecordId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecordId)")
     public ResponseEntity<List<LoggingInfo>> interoperabilityRecordLoggingInfoHistory(@PathVariable("catalogueId") String catalogueId,
                                                                                         @PathVariable("interoperabilityRecordId") String interoperabilityRecordId,
                                                                                         @Parameter(hidden = true) Authentication auth) {
@@ -889,7 +889,7 @@ public class CatalogueController {
 
     @Hidden
     @PatchMapping(path = "{catalogueId}/interoperabilityRecord/auditInteroperabilityRecord/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecordBundle> auditInteroperabilityRecord(@PathVariable("id") String id,
                                                                                     @PathVariable("catalogueId") String catalogueId,
                                                                                     @RequestParam(required = false) String comment,

@@ -106,8 +106,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         CatalogueBundle catalogueBundle = get(id);
         if (auth != null && auth.isAuthenticated()) {
             // if user is ADMIN/EPOT or Catalogue Admin on the specific Catalogue, return everything
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.hasAdminAccess(auth, id)) {
+            if (securityService.hasPortalAdminRole(auth) || securityService.hasAdminAccess(auth, id)) {
                 return catalogueBundle;
             }
         }
