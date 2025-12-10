@@ -60,7 +60,8 @@ public class ProviderTestManager implements ProviderTestService {
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final SynchronizerService<LinkedHashMap<String, Object>> synchronizerService;
+    private final SecurityService securityService;
+//    private final SynchronizerService<LinkedHashMap<String, Object>> synchronizerService;
 
     public ProviderTestManager(GenericResourceService genericResourceService,
                                SearchService searchService,
@@ -72,7 +73,9 @@ public class ProviderTestManager implements ProviderTestService {
                                InteroperabilityRecordService interoperabilityRecordService,
                                IdCreator idCreator,
                                ProviderResourcesCommonMethods commonMethods,
-                               SynchronizerService<LinkedHashMap<String, Object>> synchronizerService) {
+                               SecurityService securityService)
+//                               SynchronizerService<LinkedHashMap<String, Object>> synchronizerService)
+                               {
         this.genericResourceService = genericResourceService;
         this.searchService = searchService;
         this.registrationMailService = registrationMailService;
@@ -83,7 +86,8 @@ public class ProviderTestManager implements ProviderTestService {
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
-        this.synchronizerService = synchronizerService;
+        this.securityService = securityService;
+//        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -119,9 +123,25 @@ public class ProviderTestManager implements ProviderTestService {
     }
 
     @Override
-    public Browsing<NewProviderBundle> getAll(FacetFilter filter, Authentication authentication) {
-        //TODO: fill method
-        return null;
+    public Browsing<NewProviderBundle> getAll(FacetFilter ff, Authentication auth) {
+        boolean authenticated = auth != null && auth.isAuthenticated();
+        if (authenticated) {
+            if (securityService.hasPortalAdminRole(auth)) {
+                return getAll(ff);
+            }
+            if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
+                ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
+                return getAll(ff);
+            }
+        }
+        ff.addFilter("status", "approved provider");
+        ff.addFilter("active", true);
+        return getAll(ff);
+    }
+
+    @Override
+    public Browsing<NewProviderBundle> getAll(FacetFilter filter) {
+        return genericResourceService.getResults(filter);
     }
 
     @Override
@@ -301,11 +321,6 @@ public class ProviderTestManager implements ProviderTestService {
     public Paging<NewProviderBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         //TODO: fill method
         return null;
-    }
-
-    @Override
-    public Browsing<NewProviderBundle> getAll(FacetFilter filter) {
-        return genericResourceService.getResults(filter);
     }
 
     @Override
