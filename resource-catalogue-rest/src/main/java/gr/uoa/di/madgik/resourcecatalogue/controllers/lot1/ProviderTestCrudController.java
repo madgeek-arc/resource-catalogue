@@ -9,14 +9,10 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.service.ResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderTestService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -65,19 +61,25 @@ public class ProviderTestCrudController {
     private final ProviderTestService providerTestService;
     private final SecurityService securityService;
     private final MigrationService migrationService;
+    private final ServiceBundleService serviceBundleService;
+    private final TrainingResourceService trainingResourceService;
 
     ProviderTestCrudController(GenericResourceService genericResourceService,
                                VocabularyService vocabularyService,
                                ResourceService resourceService,
                                ProviderTestService providerTestService,
                                SecurityService securityService,
-                               MigrationService migrationService) {
+                               MigrationService migrationService,
+                               ServiceBundleService serviceBundleService,
+                               TrainingResourceService trainingResourceService) {
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
         this.resourceService = resourceService;
         this.providerTestService = providerTestService;
         this.securityService = securityService;
         this.migrationService = migrationService;
+        this.serviceBundleService = serviceBundleService;
+        this.trainingResourceService = trainingResourceService;
     }
 
     @Operation(summary = "Returns the Provider with the given id.")
@@ -277,7 +279,6 @@ public class ProviderTestCrudController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    //TODO: refactored to provide the resourceType (there were 2, one for Services and one for Trainings) -> inform front-end
     @Operation(summary = "Returns a list of inactive Services of a Provider.")
     @GetMapping(path = "services/inactive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<LinkedHashMap<String, Object>>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'")
@@ -285,22 +286,21 @@ public class ProviderTestCrudController {
                                                                                    @Parameter(description = "The right part of the ID after the '/'")
                                                                                    @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("resource_organisation", id);
-        ff.addFilter("published", false);
-        ff.addFilter("active", false);
-        ff.addFilter("draft", false);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-//        List<LinkedHashMap<String,Object>> ret = genericResourceService.getResults(ff).getResults()
-//                .stream()
-//                .map(obj -> (ServiceBundle) obj)
-//                .toList()
-//                .stream()
-//                .map(ServiceBundle::getService)
-//                .collect(Collectors.toList());;
-//        return new ResponseEntity<>(ret, HttpStatus.OK);
+        List<Service> ret = serviceBundleService.getInactiveResources(id).stream().map(ServiceBundle::getService).collect(Collectors.toList());
+//        return new ResponseEntity<>(ret, HttpStatus.OK); //FIXME
+        return null;
+    }
+
+    //FIXME: /inactive/ instead of /pending/ -> inform front-end
+    @Operation(summary = "Returns a list of inactive Training Resources of a Provider.")
+    @GetMapping(path = "trainingResources/inactive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<LinkedHashMap<String, Object>>> getInactiveTrainingResources(@Parameter(description = "The left part of the ID before the '/'")
+                                                                                            @PathVariable("prefix") String prefix,
+                                                                                            @Parameter(description = "The right part of the ID after the '/'")
+                                                                                            @PathVariable("suffix") String suffix) {
+        String id = prefix + "/" + suffix;
+        List<TrainingResource> ret = trainingResourceService.getInactiveResources(id).stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
+//        return new ResponseEntity<>(ret, HttpStatus.OK); //FIXME
         return null;
     }
 
