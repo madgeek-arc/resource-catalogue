@@ -36,7 +36,7 @@ public class ServiceUnitTest {
     @Mock
     private Authentication auth;
     @Mock
-    private ServiceBundleService<ServiceBundle> serviceBundleService;
+    private ServiceBundleService serviceBundleService;
 
     /**
      * Test to verify the successful addition of a valid service using the {@code add} method.

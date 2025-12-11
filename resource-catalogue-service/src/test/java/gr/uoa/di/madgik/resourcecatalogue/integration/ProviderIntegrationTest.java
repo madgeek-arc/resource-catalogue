@@ -54,7 +54,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     @MockitoSpyBean
     private ProviderResourcesCommonMethods commonMethods;
     @Mock
-    private ServiceBundleService<ServiceBundle> serviceBundleService;
+    private ServiceBundleService serviceBundleService;
     private static String providerId;
 
     /**

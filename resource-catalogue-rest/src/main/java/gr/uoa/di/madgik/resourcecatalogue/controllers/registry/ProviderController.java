@@ -278,16 +278,6 @@ public class ProviderController {
         return ResponseEntity.ok(providerService.getRejectedResources(ff, resourceType, auth));
     }
 
-    // Get all inactive Providers.
-    @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Provider>> getInactive(@Parameter(hidden = true) Authentication auth) {
-        List<Provider> ret = providerService.getInactive()
-                .stream()
-                .map(ProviderBundle::getProvider)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(ret, HttpStatus.OK);
-    }
-
     // Accept/Reject a Provider.
     @PatchMapping(path = "verifyProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")

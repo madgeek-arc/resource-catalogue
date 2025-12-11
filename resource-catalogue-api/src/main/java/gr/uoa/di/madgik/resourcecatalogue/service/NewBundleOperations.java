@@ -54,19 +54,19 @@ public interface NewBundleOperations<T extends NewBundle> {
     /**
      * Has an Authenticated User accepted the Terms & Conditions
      *
-     * @param ff FacetFilter
+     * @param id Provider ID
      * @param auth Authentication
      * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
      */
-    boolean hasAdminAcceptedTerms(FacetFilter ff, Authentication auth);
+    boolean hasAdminAcceptedTerms(String id, Authentication auth);
 
     /**
      * Update a resource's list of Users that has accepted the Terms & Conditions
      *
-     * @param ff FacetFilter
+     * @param id Provider ID
      * @param auth Authentication
      */
-    void adminAcceptedTerms(FacetFilter ff, Authentication auth);
+    void adminAcceptedTerms(String id, Authentication auth);
 
     /**
      * Suspend the resource

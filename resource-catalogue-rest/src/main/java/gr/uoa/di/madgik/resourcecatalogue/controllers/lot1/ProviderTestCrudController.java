@@ -5,12 +5,12 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.service.ResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.service.MigrationService;
@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -43,6 +41,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//TODO: Decide what to do with catalogueId, what we put on default Catalogue id
 
 @Profile("crud")
 @RestController
@@ -83,13 +82,14 @@ public class ProviderTestCrudController {
 
     @Operation(summary = "Returns the Provider with the given id.")
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ADMIN') || hasRole('EPOT') || " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') || " +
             "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix) || " +
             "@securityService.isApprovedProvider(#prefix, #suffix)")
     public ResponseEntity<LinkedHashMap<String, Object>> get(@Parameter(description = "The left part of the ID before the '/'")
                                                              @PathVariable("prefix") String prefix,
                                                              @Parameter(description = "The right part of the ID after the '/'")
                                                              @PathVariable("suffix") String suffix,
+                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                              @SuppressWarnings("unused")
                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
@@ -103,6 +103,7 @@ public class ProviderTestCrudController {
                                                        @PathVariable("prefix") String prefix,
                                                        @Parameter(description = "The right part of the ID after the '/'")
                                                        @PathVariable("suffix") String suffix,
+                                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                        @SuppressWarnings("unused")
                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
@@ -159,7 +160,7 @@ public class ProviderTestCrudController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> addBundle(@RequestBody NewProviderBundle bundle,
                                                        @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle providerBundle = providerTestService.add(bundle, auth);
+        NewProviderBundle providerBundle = providerTestService.add(bundle, auth); //TODO: do we want Admin adds to pass through regular update?
         logger.info("Added ProviderBundle with id '{}'", providerBundle.getProvider().get("id"));
         return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
     }
@@ -169,12 +170,13 @@ public class ProviderTestCrudController {
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
     public ResponseEntity<LinkedHashMap<String, Object>> update(@RequestBody LinkedHashMap<String, Object> provider,
+                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                 @RequestParam(required = false) String comment,
                                                                 @Parameter(hidden = true) Authentication auth) {
         String id = provider.get("id").toString();
         NewProviderBundle bundle = providerTestService.get(id);
         bundle.setProvider(provider);
-        bundle = providerTestService.update(bundle, null, comment, auth);
+        bundle = providerTestService.update(bundle, catalogueId, comment, auth);
         logger.info("Updated the Provider with id '{}'", provider.get("id"));
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
@@ -182,11 +184,8 @@ public class ProviderTestCrudController {
     @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> updateBundle(@RequestBody NewProviderBundle provider,
-                                                          @SuppressWarnings("unused")
-                                                          @Parameter(hidden = true) Authentication auth)
-            throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
-        NewProviderBundle providerBundle =
-                genericResourceService.update(resourceTypeName, provider.getProvider().get("id").toString(), provider);
+                                                          @Parameter(hidden = true) Authentication auth) {
+        NewProviderBundle providerBundle = providerTestService.update(provider, provider.getCatalogueId(), null, auth); //TODO: do we want Admin updates to pass through regular update?
         logger.info("Updated the Provider id '{}'", provider.getProvider().get("id"));
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
@@ -194,23 +193,26 @@ public class ProviderTestCrudController {
     @Operation(summary = "Deletes the Provider with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Void> delete(@Parameter(description = "The left part of the ID before the '/'")
-                                       @PathVariable("prefix") String prefix,
-                                       @Parameter(description = "The right part of the ID after the '/'")
-                                       @PathVariable("suffix") String suffix) {
+    public ResponseEntity<LinkedHashMap<String, Object>> delete(@Parameter(description = "The left part of the ID before the '/'")
+                                                                @PathVariable("prefix") String prefix,
+                                                                @Parameter(description = "The right part of the ID after the '/'")
+                                                                @PathVariable("suffix") String suffix,
+                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        Resource resource = genericResourceService.searchResource(resourceTypeName,
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "false"));
-        if (resource == null) return new ResponseEntity<>(HttpStatus.GONE);
-        //TODO:
-        // delete resources under the Provider
-        // registrationMailService.notifyProviderAdminsForProviderDeletion(provider);
-        // synchronizerService.syncDelete(provider.getProvider());
-        // async Public Provider and resources deletion
-        resourceService.deleteResource(resource.getId());
-        logger.info("Deleted Provider with id '{}'", id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        NewProviderBundle provider = providerTestService.get(id);
+        // Block users of deleting Providers of another Catalogue
+        if (!provider.getCatalogueId().equals(this.catalogueId)) {
+            throw new ResourceException(String.format("You cannot delete a Provider of a non [%s] Catalogue.", catalogueId),
+                    HttpStatus.FORBIDDEN);
+        }
+
+        // delete Provider
+        providerTestService.delete(provider);
+        logger.info("Deleted the Provider with name '{}' and id '{}'",
+                provider.getProvider().get("name"),
+                provider.getProvider().get("id"));
+        return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
     @Operation(summary = "Returns a list of Providers providing a Catalogue ID.")
@@ -226,7 +228,7 @@ public class ProviderTestCrudController {
         ff.setResourceType(resourceTypeName);
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
-        Paging<NewProviderBundle> paging = genericResourceService.getResults(ff);
+        Paging<NewProviderBundle> paging = providerTestService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -252,10 +254,8 @@ public class ProviderTestCrudController {
 
     @Operation(summary = "Returns all Provider's of a User.")
     @GetMapping(path = "getMyProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<NewProviderBundle>> getMyProviders(@Parameter(hidden = true) Authentication auth) {
-        if (auth == null) {
-            throw new InsufficientAuthenticationException("Please log in.");
-        }
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<NewProviderBundle>> getMy(@Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(providerTestService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
@@ -274,8 +274,6 @@ public class ProviderTestCrudController {
                 .stream()
                 .map(NewProviderBundle::getProvider)
                 .collect(Collectors.toList());
-        ;
-        ;
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
@@ -285,8 +283,7 @@ public class ProviderTestCrudController {
     public ResponseEntity<List<LinkedHashMap<String, Object>>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'")
                                                                                    @PathVariable("prefix") String prefix,
                                                                                    @Parameter(description = "The right part of the ID after the '/'")
-                                                                                   @PathVariable("suffix") String suffix,
-                                                                                   @RequestParam String resourceTypeName) {
+                                                                                   @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
@@ -362,20 +359,12 @@ public class ProviderTestCrudController {
 
     @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE})
     public boolean hasAdminAcceptedTerms(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("resource_internal_id", id);
-        ff.addFilter("published", false);
-        return providerTestService.hasAdminAcceptedTerms(ff, auth);
+        return providerTestService.hasAdminAcceptedTerms(id, auth);
     }
 
     @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE})
     public void adminAcceptedTerms(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("resource_internal_id", id);
-        ff.addFilter("published", false);
-        providerTestService.adminAcceptedTerms(ff, auth);
+        providerTestService.adminAcceptedTerms(id, auth);
     }
 
     @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -403,13 +392,8 @@ public class ProviderTestCrudController {
     })
     @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<NewProviderBundle>> getRandomProviders(@RequestParam int quantity,
-                                                                        @RequestParam MultiValueMap<String, Object> params,
+    public ResponseEntity<Paging<NewProviderBundle>> getRandomProviders(@RequestParam(defaultValue = "10") int quantity,
                                                                         @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType(resourceTypeName);
-        ff.addFilter("status", "approved provider");
-        ff.addFilter("published", false);
         Paging<NewProviderBundle> providerBundlePaging = providerTestService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(providerBundlePaging, HttpStatus.OK);
     }

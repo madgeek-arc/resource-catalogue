@@ -16,34 +16,33 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 
-import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateMerilScientificDomains;
-import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
-
-//TODO: REMOVE PUBLISHED FALSE IF IDS ARE UNIQUE
+//TODO: REMOVE ANY LOGIC THAT RELATES WITH MODEL'S FIELDS (eg. id, users)
 @org.springframework.stereotype.Service("providerTestManager")
 public class ProviderTestManager implements ProviderTestService {
 
@@ -55,7 +54,7 @@ public class ProviderTestManager implements ProviderTestService {
     private final SearchService searchService;
     private final PublicProviderService publicProviderService;
     private final VocabularyService vocabularyService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService; //FIXME: do we need <?>
+    private final ServiceBundleService serviceBundleService; //FIXME: do we need <?>
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final IdCreator idCreator;
@@ -68,14 +67,14 @@ public class ProviderTestManager implements ProviderTestService {
                                RegistrationMailService registrationMailService,
                                PublicProviderService publicProviderService,
                                VocabularyService vocabularyService,
-                               ServiceBundleService<ServiceBundle> serviceBundleService,
+                               ServiceBundleService serviceBundleService,
                                TrainingResourceService trainingResourceService,
                                InteroperabilityRecordService interoperabilityRecordService,
                                IdCreator idCreator,
                                ProviderResourcesCommonMethods commonMethods,
                                SecurityService securityService)
 //                               SynchronizerService<LinkedHashMap<String, Object>> synchronizerService)
-                               {
+    {
         this.genericResourceService = genericResourceService;
         this.searchService = searchService;
         this.registrationMailService = registrationMailService;
@@ -122,6 +121,7 @@ public class ProviderTestManager implements ProviderTestService {
 //        throw new InsufficientAuthenticationException("You cannot view the specific Provider");
     }
 
+    //TODO: hard test this
     @Override
     public Browsing<NewProviderBundle> getAll(FacetFilter ff, Authentication auth) {
         boolean authenticated = auth != null && auth.isAuthenticated();
@@ -273,43 +273,194 @@ public class ProviderTestManager implements ProviderTestService {
     }
 
     @Override
-    public void delete(NewProviderBundle resourceId) {
-        //TODO: fill method
+    public void delete(NewProviderBundle bundle) {
+        String catalogueId = bundle.getCatalogueId();
+        // block Public Provider deletion
+        if (bundle.getMetadata().isPublished()) {
+            throw new ValidationException("You cannot directly delete a Public Provider");
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        logger.trace("User is attempting to delete the Provider with id '{}'", bundle.getProvider().get("id"));
+//        List<ServiceBundle> services =
+//                serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
+//        if (services != null && !services.isEmpty()) {
+//            services.forEach(s -> {
+//                if (!s.getMetadata().isPublished()) {
+//                    try {
+//                        serviceBundleService.delete(s);
+//                    } catch (ResourceNotFoundException e) {
+//                        logger.error("Error deleting Service with ID '{}'", s.getId());
+//                    }
+//                }
+//            });
+//        }
+//        List<TrainingResourceBundle> trainingResources =
+//                trainingResourceService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
+//        if (trainingResources != null && !trainingResources.isEmpty()) {
+//            trainingResources.forEach(s -> {
+//                if (!s.getMetadata().isPublished()) {
+//                    try {
+//                        trainingResourceService.delete(s);
+//                    } catch (ResourceNotFoundException e) {
+//                        logger.error("Error deleting Training Resource with ID '{}'", s.getId());
+//                    }
+//                }
+//            });
+//        }
+//        List<InteroperabilityRecordBundle> interoperabilityRecords =
+//                interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, provider.getId(), authentication).getResults();
+//        if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
+//            interoperabilityRecords.forEach(s -> {
+//                if (!s.getMetadata().isPublished()) {
+//                    try {
+//                        interoperabilityRecordService.delete(s);
+//                    } catch (ResourceNotFoundException e) {
+//                        logger.error("Error deleting Interoperability Record with ID '{}'", s.getId());
+//                    }
+//                }
+//            });
+//        }
+        logger.debug("Deleting Provider: {} and all his Resources", bundle.getProvider().get("id"));
+
+        genericResourceService.delete(resourceTypeName, bundle.getProvider().get("id").toString());
+
+        // TODO: move to aspect
+//        registrationMailService.notifyProviderAdminsForProviderDeletion(bundle);
+
+//        synchronizerService.syncDelete(bundle.getProvider());
     }
 
     @Override
     public NewProviderBundle verify(String id, String status, Boolean active, Authentication auth) {
-        //TODO: fill method
-        return null;
+        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
+        if (!statusVocabulary.getType().equals("Provider state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
+        }
+        NewProviderBundle existing = get(id);
+        existing.markOnboard(status, active, auth, null);
+
+        if (status.equals("approved provider")) {
+            checkAndAddProviderToHLEVocabulary(existing);
+        }
+
+        logger.info("Verifying Provider: {}", existing);
+        try {
+            return genericResourceService.update(resourceTypeName, id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public NewProviderBundle publish(String id, Boolean active, Authentication auth) {
-        //TODO: fill method
-        return null;
+        NewProviderBundle existing = get(id);
+
+        if ((existing.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
+                existing.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !existing.isActive()) {
+            throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]",
+                    existing.getStatus()));
+        }
+
+        existing.markActive(active, auth);
+//        activateProviderResources(existingProvider.getId(), active, auth); //FIXME
+        try {
+            return genericResourceService.update(resourceTypeName, id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public boolean hasAdminAcceptedTerms(FacetFilter ff, Authentication auth) {
-        //TODO: fill method
-        return false;
+    public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
+        NewProviderBundle bundle = get(id);
+        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
+
+        List<String> providerAdmins = extractEmails(bundle);
+        List<String> acceptedTerms = bundle.getMetadata().getTerms();
+
+        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
+            return !providerAdmins.contains(userEmail); // false -> show modal, true -> no modal
+        }
+
+        return !providerAdmins.contains(userEmail) || acceptedTerms.contains(userEmail); // Show or not modal
     }
 
     @Override
-    public void adminAcceptedTerms(FacetFilter ff, Authentication auth) {
-        //TODO: fill method
+    public void adminAcceptedTerms(String id, Authentication auth) {
+        NewProviderBundle bundle = get(id);
+        String userEmail = AuthenticationInfo.getEmail(auth);
+
+        List<String> existingTerms = bundle.getMetadata().getTerms();
+        if (existingTerms == null) {
+            existingTerms = new ArrayList<>();
+        }
+
+        if (!existingTerms.contains(userEmail)) {
+            existingTerms.add(userEmail);
+            bundle.getMetadata().setTerms(existingTerms);
+
+            try {
+                genericResourceService.update(resourceTypeName, id, bundle);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.info("Could not update terms for Provider with id: '{}'", id);
+            } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override
     public NewProviderBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        //TODO: fill method
-        return null;
+        NewProviderBundle existing = get(id);
+//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend, auth); //FIXME
+
+        existing.markSuspend(suspend, auth);
+
+        // Suspend Provider's resources
+        List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, id, auth).getResults();
+        List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(catalogueId, id, auth).getResults();
+        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, id, auth).getResults();
+
+//        if (services != null && !services.isEmpty()) {
+//            for (ServiceBundle serviceBundle : services) {
+//                serviceBundleService.suspend(serviceBundle.getId(), catalogueId, suspend, auth);
+//            }
+//        }
+//        if (trainingResources != null && !trainingResources.isEmpty()) {
+//            for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
+//                trainingResourceService.suspend(trainingResourceBundle.getId(), catalogueId, suspend, auth);
+//            }
+//        }
+//        if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
+//            for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
+//                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), catalogueId, suspend, auth);
+//            }
+//        }
+
+        try {
+            return genericResourceService.update(resourceTypeName, id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public NewProviderBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        //TODO: fill method
-        return null;
+        NewProviderBundle existing = get(id);
+        existing.markAudit(comment, actionType, auth);
+
+        // send notification emails to Provider Admins
+//        registrationMailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
+
+        logger.info("Audited Provider '{}'-'{}' with [actionType: {}]",
+                existing.getProvider().get("id"), existing.getProvider().get("name"), actionType);
+
+        try {
+            genericResourceService.update(resourceTypeName, id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        return existing;
     }
 
     @Override
@@ -319,14 +470,57 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public Paging<NewProviderBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
-        //TODO: fill method
-        return null;
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(resourceTypeName);
+        ff.setQuantity(10000);
+        ff.addFilter("status", "approved provider");
+        ff.addFilter("published", false);
+
+        Browsing<NewProviderBundle> providersBrowsing = getAll(ff, auth);
+        List<NewProviderBundle> providersToBeAudited = new ArrayList<>();
+
+        long todayEpochMillis = System.currentTimeMillis();
+        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
+                .atZone(ZoneId.systemDefault())
+                .minusMonths(auditingInterval)
+                .toEpochSecond();
+
+        for (NewProviderBundle bundle : providersBrowsing.getResults()) {
+            LoggingInfo auditInfo = bundle.getLatestAuditInfo();
+            if (auditInfo == null) {
+                // Include providers that have never been audited
+                providersToBeAudited.add(bundle);
+            } else {
+                try {
+                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
+                    if (auditEpochSeconds < intervalEpochSeconds) {
+                        // Include providers that were last audited before the threshold
+                        providersToBeAudited.add(bundle);
+                    }
+                } catch (NumberFormatException e) {
+                }
+            }
+        }
+
+        // Shuffle the list randomly
+        Collections.shuffle(providersToBeAudited);
+
+        // Limit the list to the requested quantity
+        if (providersToBeAudited.size() > quantity) {
+            providersToBeAudited = providersToBeAudited.subList(0, quantity);
+        }
+
+        return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited,
+                providersBrowsing.getFacets());
     }
 
     @Override
     public NewProviderBundle get(String id, String catalogueId) {
-        //TODO: fill method
-        return null;
+        return genericResourceService.get(resourceTypeName,
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("catalogue_id", catalogueId),
+                new SearchService.KeyValue("published", "false")
+        );
     }
 
     @Override

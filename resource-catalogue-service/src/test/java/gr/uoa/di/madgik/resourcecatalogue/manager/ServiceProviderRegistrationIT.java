@@ -50,7 +50,7 @@ public class ServiceProviderRegistrationIT {
     ProviderService providerService;
 
     @Autowired
-    ServiceBundleService<ServiceBundle> serviceBundleService;
+    ServiceBundleService serviceBundleService;
 
     @Autowired
     SecurityService securityService;
