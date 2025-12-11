@@ -56,7 +56,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final FieldValidator fieldValidator;
     private final RegistrationMailService registrationMailService;
     private final ProviderService providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -66,7 +66,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     public CatalogueManager(IdCreator idCreator,
                             @Lazy ProviderService providerService,
-                            @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                            @Lazy ServiceBundleService serviceBundleService,
                             @Lazy TrainingResourceService trainingResourceService,
                             @Lazy InteroperabilityRecordService interoperabilityRecordService,
                             @Lazy FieldValidator fieldValidator,

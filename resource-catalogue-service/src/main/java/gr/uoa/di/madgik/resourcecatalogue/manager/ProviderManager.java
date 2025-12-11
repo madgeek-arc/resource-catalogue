@@ -54,7 +54,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     private static final
     Logger logger = LoggerFactory.getLogger(ProviderManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableServiceService deployableServiceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -76,7 +76,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManager(@Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+    public ProviderManager(@Lazy ServiceBundleService serviceBundleService,
                            @Lazy SecurityService securityService,
                            @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,

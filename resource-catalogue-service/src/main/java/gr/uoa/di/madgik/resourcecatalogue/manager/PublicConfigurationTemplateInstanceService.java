@@ -32,13 +32,13 @@ public class PublicConfigurationTemplateInstanceService
         extends AbstractPublicResourceManager<ConfigurationTemplateInstanceBundle>
         implements PublicResourceService<ConfigurationTemplateInstanceBundle> {
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicConfigurationTemplateInstanceService(JmsService jmsService,
                                                       PidIssuer pidIssuer,
                                                       FacetLabelService facetLabelService,
-                                                      ServiceBundleService<ServiceBundle> serviceBundleService,
+                                                      ServiceBundleService serviceBundleService,
                                                       TrainingResourceService trainingResourceService) {
         super(ConfigurationTemplateInstanceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.serviceBundleService = serviceBundleService;

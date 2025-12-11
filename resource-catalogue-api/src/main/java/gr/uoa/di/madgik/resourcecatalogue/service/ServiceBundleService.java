@@ -17,7 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -31,16 +30,16 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatalogueService<T>, BundleOperations<T> {
+public interface ServiceBundleService extends ResourceCatalogueService<ServiceBundle>, BundleOperations<ServiceBundle> {
 
     /**
      * Method to add a new resource.
      *
      * @param resource Resource to be added
      * @param auth     Authentication
-     * @return {@link T}
+     * @return {@link ServiceBundle}
      */
-    T addResource(T resource, Authentication auth);
+    ServiceBundle addResource(ServiceBundle resource, Authentication auth);
 
     /**
      * Method to add a new resource from external catalogue.
@@ -48,9 +47,9 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      * @param resource    Resource to be added
      * @param catalogueId Catalogue ID
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link ServiceBundle}
      */
-    T addResource(T resource, String catalogueId, Authentication auth);
+    ServiceBundle addResource(ServiceBundle resource, String catalogueId, Authentication auth);
 
     /**
      * Method to update a resource.
@@ -58,10 +57,10 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      * @param resource Resource to be added
      * @param comment  Related comment
      * @param auth     Authentication
-     * @return {@link T}
+     * @return {@link ServiceBundle}
      * @throws ResourceNotFoundException
      */
-    T updateResource(T resource, String comment, Authentication auth);
+    ServiceBundle updateResource(ServiceBundle resource, String comment, Authentication auth);
 
     /**
      * Method to update a resource.
@@ -70,10 +69,10 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      * @param catalogueId Catalogue ID
      * @param comment     Related comment
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link ServiceBundle}
      * @throws ResourceNotFoundException
      */
-    T updateResource(T resource, String catalogueId, String comment, Authentication auth);
+    ServiceBundle updateResource(ServiceBundle resource, String catalogueId, String comment, Authentication auth);
 
     /**
      * Get ResourceBundles by a specific field.
@@ -83,7 +82,7 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      * @return {@link Map}
      * @throws NoSuchFieldException
      */
-    Map<String, List<T>> getBy(String field, Authentication auth) throws NoSuchFieldException;
+    Map<String, List<ServiceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
      * @param authentication Authentication
@@ -114,9 +113,9 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      *
      * @param providerId Provider ID
      * @param auth       Authentication
-     * @return {@link List}&lt;{@link T}&gt;
+     * @return {@link List}&lt;{@link ServiceBundle}&gt;
      */
-    List<T> getResourceBundles(String providerId, Authentication auth);
+    List<ServiceBundle> getResourceBundles(String providerId, Authentication auth);
 
     /**
      * Get a paging of Service Bundles of a specific Provider of an external Catalogue
@@ -124,9 +123,9 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      * @param catalogueId Catalogue ID
      * @param providerId  Provider ID
      * @param auth        Authentication
-     * @return {@link Paging}&lt;{@link T}&gt;
+     * @return {@link Paging}&lt;{@link ServiceBundle}&gt;
      */
-    Paging<T> getResourceBundles(String catalogueId, String providerId, Authentication auth);
+    Paging<ServiceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
     /**
      * Get a list of Services of a specific Provider of the EOSC Catalogue
@@ -141,9 +140,9 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      * Get all inactive Services of a specific Provider, providing its ID
      *
      * @param providerId Provider ID
-     * @return {@link List}&lt;{@link T}&gt;
+     * @return {@link List}&lt;{@link ServiceBundle}&gt;
      */
-    List<T> getInactiveResources(String providerId);
+    List<ServiceBundle> getInactiveResources(String providerId);
 
     /**
      * Get an EOSC Provider's Service Template, if exists, else return null
@@ -169,9 +168,9 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      * @param newProvider New Provider ID
      * @param comment     Comment
      * @param auth        Authentication
-     * @return {@link T}
+     * @return {@link ServiceBundle}
      */
-    T changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+    ServiceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
 
     /**
@@ -199,9 +198,9 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
      *
      * @param resource Service
      * @param auth     Authentication
-     * @return {@link T}
+     * @return {@link ServiceBundle}
      */
-    T createPublicResource(T resource, Authentication auth);
+    ServiceBundle createPublicResource(ServiceBundle resource, Authentication auth);
 
     /**
      * Publish Service's related resources

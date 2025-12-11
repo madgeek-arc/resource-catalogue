@@ -48,7 +48,7 @@ import java.util.*;
 public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle> implements MonitoringService {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final PublicMonitoringService publicMonitoringManager;
     private final SecurityService securityService;
@@ -67,7 +67,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     private final IdCreator idCreator;
 
 
-    public MonitoringManager(ServiceBundleService<ServiceBundle> serviceBundleService,
+    public MonitoringManager(ServiceBundleService serviceBundleService,
                              TrainingResourceService trainingResourceService,
                              PublicMonitoringService publicMonitoringManager,
                              @Lazy SecurityService securityService,

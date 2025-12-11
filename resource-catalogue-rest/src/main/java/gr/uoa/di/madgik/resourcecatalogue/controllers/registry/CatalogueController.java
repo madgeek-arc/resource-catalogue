@@ -53,7 +53,7 @@ public class CatalogueController {
     private static final Logger logger = LoggerFactory.getLogger(CatalogueController.class);
     private final CatalogueService catalogueManager;
     private final ProviderService providerManager;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final DeployableServiceService deployableServiceService;
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
@@ -65,7 +65,7 @@ public class CatalogueController {
 
     CatalogueController(CatalogueService catalogueManager,
                         ProviderService providerManager,
-                        ServiceBundleService<ServiceBundle> serviceBundleService,
+                        ServiceBundleService serviceBundleService,
                         DeployableServiceService deployableServiceService,
                         DatasourceService datasourceService,
                         TrainingResourceService trainingResourceService,

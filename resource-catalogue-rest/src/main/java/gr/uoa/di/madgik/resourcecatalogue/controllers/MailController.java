@@ -53,7 +53,7 @@ public class MailController {
     @Autowired
     DraftResourceService<ProviderBundle> draftProviderService;
     @Autowired
-    ServiceBundleService<ServiceBundle> serviceBundleService;
+    ServiceBundleService serviceBundleService;
     @Autowired
     DraftResourceService<ServiceBundle> draftServiceService;
     @Autowired

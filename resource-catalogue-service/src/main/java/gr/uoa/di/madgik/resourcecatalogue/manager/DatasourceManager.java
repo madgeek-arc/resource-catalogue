@@ -41,7 +41,7 @@ import java.util.List;
 public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle> implements DatasourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final SecurityService securityService;
     private final RegistrationMailService registrationMailService;
     private final VocabularyService vocabularyService;
@@ -52,7 +52,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public DatasourceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
+    public DatasourceManager(ServiceBundleService serviceBundleService,
                              @Lazy SecurityService securityService,
                              @Lazy RegistrationMailService registrationMailService,
                              @Lazy VocabularyService vocabularyService,

@@ -61,7 +61,7 @@ public class ServiceExtensionsController {
     private static final Logger logger = LoggerFactory.getLogger(ServiceExtensionsController.class);
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     @Value("${argo.grnet.monitoring.availability:}")
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status:}")
@@ -80,7 +80,7 @@ public class ServiceExtensionsController {
 
     ServiceExtensionsController(HelpdeskService helpdeskService,
                                 MonitoringService monitoringService,
-                                ServiceBundleService<ServiceBundle> serviceBundleService,
+                                ServiceBundleService serviceBundleService,
                                 GenericResourceService genericResourceService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;

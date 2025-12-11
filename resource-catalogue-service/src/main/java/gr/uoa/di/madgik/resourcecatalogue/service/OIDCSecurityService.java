@@ -42,7 +42,7 @@ public class OIDCSecurityService implements SecurityService {
     private final CatalogueService catalogueService;
     private final ProviderService providerService;
     private final ProviderTestService providerTestService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final DeployableServiceService deployableServiceService;
@@ -58,7 +58,7 @@ public class OIDCSecurityService implements SecurityService {
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
                                @Lazy ProviderService providerService,
                                @Lazy ProviderTestService providerTestService,
-                               @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                               @Lazy ServiceBundleService serviceBundleService,
                                @Lazy TrainingResourceService trainingResourceService,
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
                                @Lazy DeployableServiceService deployableServiceService,

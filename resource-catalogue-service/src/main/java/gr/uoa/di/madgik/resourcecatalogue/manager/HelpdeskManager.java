@@ -41,7 +41,7 @@ import java.util.List;
 public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> implements HelpdeskService {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final PublicHelpdeskService publicHelpdeskManager;
     private final SecurityService securityService;
@@ -52,7 +52,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public HelpdeskManager(ServiceBundleService<ServiceBundle> serviceBundleService,
+    public HelpdeskManager(ServiceBundleService serviceBundleService,
                            TrainingResourceService trainingResourceService,
                            PublicHelpdeskService publicHelpdeskManager,
                            @Lazy SecurityService securityService,

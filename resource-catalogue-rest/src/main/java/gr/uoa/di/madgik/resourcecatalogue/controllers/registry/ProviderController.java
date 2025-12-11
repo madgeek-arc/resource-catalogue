@@ -62,7 +62,7 @@ public class ProviderController {
     private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
     private final ProviderService providerService;
     private final DraftResourceService<ProviderBundle> draftProviderService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final SecurityService securityService;
     private final MigrationService migrationService;
@@ -79,7 +79,7 @@ public class ProviderController {
 
     ProviderController(ProviderService providerService,
                        DraftResourceService<ProviderBundle> draftProviderService,
-                       ServiceBundleService<ServiceBundle> serviceBundleService,
+                       ServiceBundleService serviceBundleService,
                        TrainingResourceService trainingResourceService,
                        SecurityService securityService, MigrationService migrationService,
                        GenericResourceService genericResourceService) {

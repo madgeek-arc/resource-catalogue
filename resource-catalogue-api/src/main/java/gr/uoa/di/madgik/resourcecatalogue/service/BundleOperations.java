@@ -16,14 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import java.util.Collections;
 import org.springframework.security.core.Authentication;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -113,9 +111,9 @@ public interface BundleOperations<T extends Bundle<?>> {
     /**
      * Get a paging of random Resources for auditing.
      *
-     * @param quantity how many resources to return
+     * @param quantity         how many resources to return
      * @param auditingInterval Auditing Interval (in months)
-     * @param auth Authentication
+     * @param auth             Authentication
      * @return {@link Paging}&lt;{@link T}&gt;
      */
     Paging<T> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth);

@@ -40,11 +40,11 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
 
     private static final Logger logger = LoggerFactory.getLogger(PublicHelpdeskService.class);
     private final JmsService jmsService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicHelpdeskService(JmsService jmsService,
-                                 @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                                 @Lazy ServiceBundleService serviceBundleService,
                                  @Lazy TrainingResourceService trainingResourceService) {
         super(HelpdeskBundle.class);
         this.jmsService = jmsService;

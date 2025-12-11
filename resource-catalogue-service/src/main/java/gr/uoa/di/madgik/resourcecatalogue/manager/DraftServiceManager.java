@@ -39,7 +39,7 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
 
     private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final IdCreator idCreator;
     private final VocabularyService vocabularyService;
     private final ProviderService providerService;
@@ -48,7 +48,7 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public DraftServiceManager(ServiceBundleService<ServiceBundle> serviceBundleService,
+    public DraftServiceManager(ServiceBundleService serviceBundleService,
                                IdCreator idCreator, @Lazy VocabularyService vocabularyService,
                                @Lazy ProviderService providerService,
                                ProviderResourcesCommonMethods commonMethods) {

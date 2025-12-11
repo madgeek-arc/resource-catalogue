@@ -43,7 +43,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private static final Logger logger = LoggerFactory.getLogger(VocabularyCurationManager.class);
     private final RegistrationMailService registrationMailService;
     private final ProviderService providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
     @Autowired
@@ -58,7 +58,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService,
                                      ProviderService providerService,
-                                     ServiceBundleService<ServiceBundle> serviceBundleService,
+                                     ServiceBundleService serviceBundleService,
                                      TrainingResourceService trainingResourceService,
                                      IdCreator idCreator) {
         super(VocabularyCuration.class);

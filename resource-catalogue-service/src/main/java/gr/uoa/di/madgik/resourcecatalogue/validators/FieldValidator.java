@@ -56,7 +56,7 @@ public class FieldValidator {
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableServiceService deployableServiceService;
     private final CatalogueService catalogueService;
@@ -70,7 +70,7 @@ public class FieldValidator {
 
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                          @Lazy ServiceBundleService serviceBundleService,
                           @Lazy TrainingResourceService trainingResourceService,
                           @Lazy CatalogueService catalogueService,
                           @Lazy InteroperabilityRecordService interoperabilityRecordService,

@@ -37,9 +37,7 @@ public class PublicDeployableServiceService
     public PublicDeployableServiceService(JmsService jmsService,
                                           PidIssuer pidIssuer,
                                           FacetLabelService facetLabelService,
-                                          ProviderService providerService,
-                                          ServiceBundleService<ServiceBundle> serviceBundleService,
-                                          TrainingResourceService trainingResourceService) {
+                                          ProviderService providerService) {
         super(DeployableServiceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.providerService = providerService;
     }

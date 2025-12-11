@@ -27,10 +27,10 @@ import org.springframework.http.HttpStatus;
 
 public class ResourceValidationUtils {
 
-    public static <T extends ServiceBundle> void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
-                                                                                                      ServiceBundleService<T> serviceBundleService,
+    public static void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
+                                                                                                      ServiceBundleService serviceBundleService,
                                                                                                       String resourceType) {
-        T resourceBundle;
+        ServiceBundle resourceBundle;
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists
         resourceBundle = serviceBundleService.get(resourceId, catalogueId, false);

@@ -37,12 +37,12 @@ public class PublicResourceInteroperabilityRecordService
         extends AbstractPublicResourceManager<ResourceInteroperabilityRecordBundle>
         implements PublicResourceService<ResourceInteroperabilityRecordBundle> {
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     public PublicResourceInteroperabilityRecordService(JmsService jmsService,
-                                                       ServiceBundleService<ServiceBundle> serviceBundleService,
+                                                       ServiceBundleService serviceBundleService,
                                                        TrainingResourceService trainingResourceService,
                                                        InteroperabilityRecordService interoperabilityRecordService,
                                                        PidIssuer pidIssuer,

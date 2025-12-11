@@ -36,14 +36,14 @@ import java.util.Objects;
 public class RelationshipValidator {
 
     private final ProviderService providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     @Autowired
     public RelationshipValidator(
             ProviderService providerService,
-            ServiceBundleService<ServiceBundle> serviceBundleService,
+            ServiceBundleService serviceBundleService,
             TrainingResourceService trainingResourceService,
             InteroperabilityRecordService interoperabilityRecordService
     ) {

@@ -38,11 +38,11 @@ public class PublicDatasourceService
         extends AbstractPublicResourceManager<DatasourceBundle>
         implements PublicResourceService<DatasourceBundle> {
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
 
     public PublicDatasourceService(JmsService jmsService,
                                    PidIssuer pidIssuer,
-                                   ServiceBundleService<ServiceBundle> serviceBundleService,
+                                   ServiceBundleService serviceBundleService,
                                    FacetLabelService facetLabelService) {
         super(DatasourceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.serviceBundleService = serviceBundleService;

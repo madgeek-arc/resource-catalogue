@@ -58,7 +58,7 @@ import java.util.Objects;
 public class CSVController {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVController.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final ProviderService providerService;
     private final VocabularyService vocabularyService;
     private final CSVService csvService;
@@ -66,7 +66,7 @@ public class CSVController {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    CSVController(ServiceBundleService<ServiceBundle> service, ProviderService provider,
+    CSVController(ServiceBundleService service, ProviderService provider,
                   VocabularyService vocabulary, CSVService csvService) {
         this.serviceBundleService = service;
         this.providerService = provider;

@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
-public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle> implements ServiceBundleService<ServiceBundle> {
+public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle> implements ServiceBundleService {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
 

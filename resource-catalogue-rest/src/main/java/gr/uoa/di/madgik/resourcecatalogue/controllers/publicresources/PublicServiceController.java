@@ -47,13 +47,13 @@ import java.util.Map;
 @Tag(name = "public service")
 public class PublicServiceController {
 
-    private final ServiceBundleService<ServiceBundle> service;
+    private final ServiceBundleService service;
     private final GenericResourceService genericService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PublicServiceController(ServiceBundleService<ServiceBundle> service,
+    public PublicServiceController(ServiceBundleService service,
                                    GenericResourceService genericService) {
         this.service = service;
         this.genericService = genericService;

@@ -47,7 +47,7 @@ public class PublicTrainingResourceService
         implements PublicResourceService<TrainingResourceBundle> {
 
     private final ProviderService providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
     @Value("${pid.service.enabled}")
@@ -57,7 +57,7 @@ public class PublicTrainingResourceService
                                          PidIssuer pidIssuer,
                                          FacetLabelService facetLabelService,
                                          ProviderService providerService,
-                                         @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                                         @Lazy ServiceBundleService serviceBundleService,
                                          @Lazy TrainingResourceService trainingResourceService) {
         super(TrainingResourceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.providerService = providerService;

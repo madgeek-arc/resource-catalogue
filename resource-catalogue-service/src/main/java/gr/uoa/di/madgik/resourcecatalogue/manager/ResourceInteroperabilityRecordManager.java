@@ -37,7 +37,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
@@ -48,7 +48,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
     private final ConfigurationTemplateService ctService;
     private final ConfigurationTemplateInstanceService ctiService;
 
-    public ResourceInteroperabilityRecordManager(ServiceBundleService<ServiceBundle> serviceBundleService,
+    public ResourceInteroperabilityRecordManager(ServiceBundleService serviceBundleService,
                                                  TrainingResourceService trainingResourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,

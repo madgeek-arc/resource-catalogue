@@ -38,10 +38,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "resource template", description = "Operations for Provider Templates")
 public class ResourceTemplateBundleController {
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
-    public ResourceTemplateBundleController(ServiceBundleService<ServiceBundle> serviceBundleService,
+    public ResourceTemplateBundleController(ServiceBundleService serviceBundleService,
                                             TrainingResourceService trainingResourceService) {
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;

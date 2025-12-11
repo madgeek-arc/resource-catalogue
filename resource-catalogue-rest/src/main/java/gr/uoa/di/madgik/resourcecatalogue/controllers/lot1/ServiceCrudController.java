@@ -40,9 +40,9 @@ import java.util.List;
 public class ServiceCrudController extends ResourceCrudController<ServiceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceCrudController.class.getName());
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
 
-    ServiceCrudController(ServiceBundleService<ServiceBundle> serviceBundleService) {
+    ServiceCrudController(ServiceBundleService serviceBundleService) {
         super(serviceBundleService);
         this.serviceBundleService = serviceBundleService;
     }

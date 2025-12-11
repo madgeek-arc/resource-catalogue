@@ -44,11 +44,11 @@ import java.util.Map;
 @Tag(name = "info", description = "Information about various resources in the Catalogue")
 public class InfoController {
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final ProviderService providerService;
     private final SecurityService securityService;
 
-    InfoController(ServiceBundleService<ServiceBundle> service, ProviderService provider, SecurityService securityService) {
+    InfoController(ServiceBundleService service, ProviderService provider, SecurityService securityService) {
         this.serviceBundleService = service;
         this.providerService = provider;
         this.securityService = securityService;

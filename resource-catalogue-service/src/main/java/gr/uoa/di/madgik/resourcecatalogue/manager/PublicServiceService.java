@@ -37,14 +37,14 @@ public class PublicServiceService
         implements PublicResourceService<ServiceBundle> {
 
     private final ProviderService providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicServiceService(JmsService jmsService,
                                 PidIssuer pidIssuer,
                                 FacetLabelService facetLabelService,
                                 ProviderService providerService,
-                                ServiceBundleService<ServiceBundle> serviceBundleService,
+                                ServiceBundleService serviceBundleService,
                                 TrainingResourceService trainingResourceService) {
         super(ServiceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.providerService = providerService;

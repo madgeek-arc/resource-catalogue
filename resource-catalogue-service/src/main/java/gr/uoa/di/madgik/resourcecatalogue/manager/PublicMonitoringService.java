@@ -41,11 +41,11 @@ public class PublicMonitoringService
 
     private static final Logger logger = LoggerFactory.getLogger(PublicMonitoringService.class);
     private final JmsService jmsService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicMonitoringService(JmsService jmsService,
-                                   @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
+                                   @Lazy ServiceBundleService serviceBundleService,
                                    @Lazy TrainingResourceService trainingResourceService
     ) {
         super(MonitoringBundle.class);

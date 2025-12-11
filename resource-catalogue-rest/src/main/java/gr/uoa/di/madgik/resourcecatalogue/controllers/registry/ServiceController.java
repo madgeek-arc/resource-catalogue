@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 public class ServiceController {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final ServiceBundleService serviceBundleService;
     private final DraftResourceService<ServiceBundle> draftServiceService;
     private final ProviderService providerService;
     private final GenericResourceService genericResourceService;
@@ -70,7 +70,7 @@ public class ServiceController {
     @Value("${catalogue.name:Resource Catalogue}")
     private String catalogueName;
 
-    ServiceController(ServiceBundleService<ServiceBundle> service,
+    ServiceController(ServiceBundleService service,
                       DraftResourceService<ServiceBundle> draftServiceService,
                       ProviderService provider,
                       GenericResourceService genericResourceService) {
