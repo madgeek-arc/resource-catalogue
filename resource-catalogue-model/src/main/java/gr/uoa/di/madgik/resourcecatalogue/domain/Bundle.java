@@ -29,7 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class Bundle<T extends Identifiable> implements Identifiable {
+public class Bundle<T extends Identifiable> implements Identifiable {
 
     @Schema(hidden = true)
     @FieldValidation
@@ -65,32 +65,38 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     }
 
     public void markOnboard(String status, boolean active, Authentication auth, String comment) {
-        UserInfo user = UserInfo.of(auth);
-        this.setStatus(status);
-        this.setActive(active); // TODO: use this or markActive() to create logging info?
-        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
-        LoggingInfo onboardingInfo = null;
-        if (status.toLowerCase().contains("pending")) {
-            this.setActive(false);
-            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
-                    user, LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.REGISTERED.getKey(), comment
-            );
-        } else if (status.toLowerCase().contains("approved")) {
-            this.setActive(true);
-            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
-                    user, LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.APPROVED.getKey(), comment
-            );
-        } else if (status.toLowerCase().contains("rejected")) {
-            this.setActive(false);
-            onboardingInfo = LoggingInfo.createLoggingInfoEntry(
-                    user, LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.REJECTED.getKey(), comment
-            );
+        if (!Objects.equals(status, this.status)) { // status changed
+            UserInfo user = UserInfo.of(auth);
+            this.setStatus(status);
+
+            this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+            LoggingInfo onboardingInfo = null;
+            if (loggingInfo.isEmpty()) {
+                onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REGISTERED.getKey(), comment
+                );
+                this.setLatestOnboardingInfo(onboardingInfo);
+                this.getLoggingInfo().add(onboardingInfo);
+            }
+
+            if (status.toLowerCase().contains("approved") && !this.status.contains("approved")) {
+                onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.APPROVED.getKey(), comment
+                );
+                this.setLatestOnboardingInfo(onboardingInfo);
+                this.getLoggingInfo().add(onboardingInfo);
+            } else if (status.toLowerCase().contains("rejected") && !this.status.contains("rejected")) {
+                onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REJECTED.getKey(), comment
+                );
+                this.setLatestOnboardingInfo(onboardingInfo);
+                this.getLoggingInfo().add(onboardingInfo);
+            }
         }
-        this.setLatestOnboardingInfo(onboardingInfo);
-        this.getLoggingInfo().add(onboardingInfo);
+        markActive(active, auth);
     }
 
     public void markUpdate(Authentication auth, String comment) {
@@ -109,27 +115,29 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
     }
 
     public void markActive(boolean active, Authentication auth) {
-        UserInfo user = UserInfo.of(auth);
-        this.setActive(active);
-        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+        if (active != this.active) {
+            UserInfo user = UserInfo.of(auth);
+            this.setActive(active);
+            this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
 
-        LoggingInfo loggingInfo;
-        LoggingInfo.ActionType type = LoggingInfo.ActionType.DEACTIVATED;
-        if (active) {
-            type = LoggingInfo.ActionType.ACTIVATED;
+            LoggingInfo info;
+            LoggingInfo.ActionType type = LoggingInfo.ActionType.DEACTIVATED;
+            if (active) {
+                type = LoggingInfo.ActionType.ACTIVATED;
+            }
+            try {
+                info = LoggingInfo.createLoggingInfoEntry(
+                        UserInfo.of(auth),
+                        LoggingInfo.Types.UPDATE.getKey(),
+                        type.getKey(),
+                        null
+                );
+            } catch (InsufficientAuthenticationException e) {
+                info = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+            }
+            this.loggingInfo.add(info);
+            this.latestUpdateInfo = info;
         }
-        try {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(
-                    UserInfo.of(auth),
-                    LoggingInfo.Types.UPDATE.getKey(),
-                    type.getKey(),
-                    null
-            );
-        } catch (InsufficientAuthenticationException e) {
-            loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-        }
-        this.loggingInfo.add(loggingInfo);
-        this.latestUpdateInfo = loggingInfo;
     }
 
     public void markAudit(String comment, LoggingInfo.ActionType actionType, Authentication auth) {
@@ -157,44 +165,31 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.setLatestAuditInfo(loggingInfo);
     }
 
-    public List<LoggingInfo> createRegistrationLoggingInfo(Authentication auth) {
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (this.getLoggingInfo() != null && !this.getLoggingInfo().isEmpty()) {
-            loggingInfoList = this.getLoggingInfo();
-        } else {
-            loggingInfoList.add(LoggingInfo.createLoggingInfoEntry(
-                    UserInfo.of(auth),
-                    LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.REGISTERED.getKey(),
-                    null)
-            );
-        }
-        return loggingInfoList;
-    }
-
     public void markSuspend(boolean suspend, Authentication auth) {
-        UserInfo user = UserInfo.of(auth);
-        this.setSuspended(suspend);
-        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+        if (suspend != this.suspended) {
+            UserInfo user = UserInfo.of(auth);
+            this.setSuspended(suspend);
+            this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
 
-        LoggingInfo loggingInfo;
-        if (suspend) {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(
-                    user,
-                    LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.SUSPENDED.getKey(),
-                    null
-            );
-        } else {
-            loggingInfo = LoggingInfo.createLoggingInfoEntry(
-                    user,
-                    LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.UNSUSPENDED.getKey(),
-                    null
-            );
+            LoggingInfo loggingInfo;
+            if (suspend) {
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user,
+                        LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.SUSPENDED.getKey(),
+                        null
+                );
+            } else {
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user,
+                        LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.UNSUSPENDED.getKey(),
+                        null
+                );
+            }
+            this.loggingInfo.add(loggingInfo);
+            this.setLatestUpdateInfo(loggingInfo);
         }
-        this.loggingInfo.add(loggingInfo);
-        this.setLatestUpdateInfo(loggingInfo);
     }
 
     private void determineAuditState() {
