@@ -236,6 +236,14 @@ public class NewBundle {
         this.auditState = auditState;
     }
 
+    public String getId() {
+        return this.getPayload().get("id").toString();
+    }
+
+    public void setId(String id) {
+        this.getPayload().put("id", id);
+    }
+
     @Transient
     public LinkedHashMap<String, Object> getPayload() {
         return payload;
