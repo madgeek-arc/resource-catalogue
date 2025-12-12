@@ -28,12 +28,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,23 +81,23 @@ public class ProviderTestCrudController {
     }
 
     @Operation(summary = "Returns the Provider with the given id.")
-    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') || " +
             "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix) || " +
             "@securityService.isApprovedProvider(#prefix, #suffix)")
-    public ResponseEntity<LinkedHashMap<String, Object>> get(@Parameter(description = "The left part of the ID before the '/'")
-                                                             @PathVariable("prefix") String prefix,
-                                                             @Parameter(description = "The right part of the ID after the '/'")
-                                                             @PathVariable("suffix") String suffix,
-                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                             @SuppressWarnings("unused")
-                                                             @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
+                                 @PathVariable("prefix") String prefix,
+                                 @Parameter(description = "The right part of the ID after the '/'")
+                                 @PathVariable("suffix") String suffix,
+                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                 @SuppressWarnings("unused")
+                                 @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle bundle = providerTestService.get(id);
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "bundle/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<NewProviderBundle> getBundle(@Parameter(description = "The left part of the ID before the '/'")
                                                        @PathVariable("prefix") String prefix,
@@ -117,10 +115,10 @@ public class ProviderTestCrudController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
-                                                                        @RequestParam MultiValueMap<String, Object> params,
-                                                                        @Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "all")
+    public ResponseEntity<Paging<?>> getAll(@Parameter(hidden = true)
+                                            @RequestParam MultiValueMap<String, Object> params,
+                                            @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType(resourceTypeName);
         ff.addFilter("published", false);
@@ -134,7 +132,7 @@ public class ProviderTestCrudController {
             @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false"))),
             @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
-    @GetMapping(path = "bundle/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<NewProviderBundle>> getAllBundles(@Parameter(hidden = true)
                                                                    @RequestParam MultiValueMap<String, Object> params) {
@@ -146,10 +144,10 @@ public class ProviderTestCrudController {
     }
 
     @Operation(summary = "Adds a new Provider")
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping()
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<LinkedHashMap<String, Object>> add(@RequestBody LinkedHashMap<String, Object> provider,
-                                                             @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> provider,
+                                 @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
         NewProviderBundle ret = providerTestService.add(providerBundle, auth);
@@ -158,7 +156,7 @@ public class ProviderTestCrudController {
     }
 
     //    @Hidden
-    @PostMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/bundle")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> addBundle(@RequestBody NewProviderBundle bundle,
                                                        @Parameter(hidden = true) Authentication auth) {
@@ -169,12 +167,12 @@ public class ProviderTestCrudController {
 
     //FIXME: how to proceed with IDs
     @Operation(summary = "Updates the Provider with the given id.")
-    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
-    public ResponseEntity<LinkedHashMap<String, Object>> update(@RequestBody LinkedHashMap<String, Object> provider,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                @RequestParam(required = false) String comment,
-                                                                @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> provider,
+                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                    @RequestParam(required = false) String comment,
+                                    @Parameter(hidden = true) Authentication auth) {
         String id = provider.get("id").toString();
         NewProviderBundle bundle = providerTestService.get(id);
         bundle.setProvider(provider);
@@ -193,14 +191,14 @@ public class ProviderTestCrudController {
     }
 
     @Operation(summary = "Deletes the Provider with the given id.")
-    @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<LinkedHashMap<String, Object>> delete(@Parameter(description = "The left part of the ID before the '/'")
-                                                                @PathVariable("prefix") String prefix,
-                                                                @Parameter(description = "The right part of the ID after the '/'")
-                                                                @PathVariable("suffix") String suffix,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> delete(@Parameter(description = "The left part of the ID before the '/'")
+                                    @PathVariable("prefix") String prefix,
+                                    @Parameter(description = "The right part of the ID after the '/'")
+                                    @PathVariable("suffix") String suffix,
+                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle provider = providerTestService.get(id);
         // Block users of deleting Providers of another Catalogue
@@ -219,7 +217,7 @@ public class ProviderTestCrudController {
 
     @Operation(summary = "Returns a list of Providers providing a Catalogue ID.")
     @BrowseParameters
-    @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "byCatalogue/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
     public ResponseEntity<Paging<NewProviderBundle>> getByCatalogue(@Parameter(hidden = true)
                                                                     @RequestParam MultiValueMap<String, Object> params,
@@ -238,13 +236,13 @@ public class ProviderTestCrudController {
     @Operation(summary = "Returns a list of Providers a User is admin.")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     @GetMapping(path = "getUserProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<LinkedHashMap<String, Object>>> getUserProviders(@RequestParam("email") String email) {
+    public ResponseEntity<List<?>> getUserProviders(@RequestParam("email") String email) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
         ff.addFilter("users", email);
-        List<LinkedHashMap<String, Object>> providers = genericResourceService.getResults(ff).getResults()
+        List<?> providers = genericResourceService.getResults(ff).getResults()
                 .stream()
                 .map(obj -> (NewProviderBundle) obj)
                 .toList()
@@ -255,21 +253,21 @@ public class ProviderTestCrudController {
     }
 
     @Operation(summary = "Returns all Provider's of a User.")
-    @GetMapping(path = "getMyProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "getMyProviders")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<NewProviderBundle>> getMy(@Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(providerTestService.getMy(null, auth).getResults(), HttpStatus.OK);
     }
 
     @Operation(summary = "Returns a list of inactive Providers.")
-    @GetMapping(path = "inactive/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<LinkedHashMap<String, Object>>> getInactive() {
+    @GetMapping(path = "inactive/all")
+    public ResponseEntity<List<?>> getInactive() {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
         ff.addFilter("published", false);
         ff.addFilter("active", false);
         ff.addFilter("draft", false);
-        List<LinkedHashMap<String, Object>> ret = genericResourceService.getResults(ff).getResults()
+        List<?> ret = genericResourceService.getResults(ff).getResults()
                 .stream()
                 .map(obj -> (NewProviderBundle) obj)
                 .toList()
@@ -280,11 +278,11 @@ public class ProviderTestCrudController {
     }
 
     @Operation(summary = "Returns a list of inactive Services of a Provider.")
-    @GetMapping(path = "services/inactive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<LinkedHashMap<String, Object>>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'")
-                                                                                   @PathVariable("prefix") String prefix,
-                                                                                   @Parameter(description = "The right part of the ID after the '/'")
-                                                                                   @PathVariable("suffix") String suffix) {
+    @GetMapping(path = "services/inactive/{prefix}/{suffix}")
+    public ResponseEntity<List<?>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'")
+                                                       @PathVariable("prefix") String prefix,
+                                                       @Parameter(description = "The right part of the ID after the '/'")
+                                                       @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
         List<Service> ret = serviceBundleService.getInactiveResources(id).stream().map(ServiceBundle::getService).collect(Collectors.toList());
 //        return new ResponseEntity<>(ret, HttpStatus.OK); //FIXME
@@ -293,11 +291,11 @@ public class ProviderTestCrudController {
 
     //FIXME: /inactive/ instead of /pending/ -> inform front-end
     @Operation(summary = "Returns a list of inactive Training Resources of a Provider.")
-    @GetMapping(path = "trainingResources/inactive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<LinkedHashMap<String, Object>>> getInactiveTrainingResources(@Parameter(description = "The left part of the ID before the '/'")
-                                                                                            @PathVariable("prefix") String prefix,
-                                                                                            @Parameter(description = "The right part of the ID after the '/'")
-                                                                                            @PathVariable("suffix") String suffix) {
+    @GetMapping(path = "trainingResources/inactive/{prefix}/{suffix}")
+    public ResponseEntity<List<?>> getInactiveTrainingResources(@Parameter(description = "The left part of the ID before the '/'")
+                                                                @PathVariable("prefix") String prefix,
+                                                                @Parameter(description = "The right part of the ID after the '/'")
+                                                                @PathVariable("suffix") String suffix) {
         String id = prefix + "/" + suffix;
         List<TrainingResource> ret = trainingResourceService.getInactiveResources(id).stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
 //        return new ResponseEntity<>(ret, HttpStatus.OK); //FIXME
@@ -306,7 +304,7 @@ public class ProviderTestCrudController {
 
     @Operation(summary = "Returns all Provider's rejected resources, providing the corresponding resource type.")
     @BrowseParameters
-    @GetMapping(path = "resources/rejected/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "resources/rejected/{prefix}/{suffix}")
     public ResponseEntity<Paging<?>> getRejectedResources(@Parameter(description = "The left part of the ID before the '/'")
                                                           @PathVariable("prefix") String prefix,
                                                           @Parameter(description = "The right part of the ID after the '/'")
@@ -325,7 +323,7 @@ public class ProviderTestCrudController {
 
     //TODO: rename path to verify/ -> notify front-end
     @Operation(summary = "Verifies the Provider.")
-    @PatchMapping(path = "verifyProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "verifyProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<NewProviderBundle> verifyProvider(@Parameter(description = "The left part of the ID before the '/'")
                                                             @PathVariable("prefix") String prefix,
@@ -342,7 +340,7 @@ public class ProviderTestCrudController {
     }
 
     @Operation(summary = "Activates the Provider.")
-    @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "publish/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<NewProviderBundle> setActive(@Parameter(description = "The left part of the ID before the '/'")
@@ -357,22 +355,22 @@ public class ProviderTestCrudController {
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-    @GetMapping(path = "hasAdminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "hasAdminAcceptedTerms")
     public boolean hasAdminAcceptedTerms(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
         return providerTestService.hasAdminAcceptedTerms(id, auth);
     }
 
-    @PutMapping(path = "adminAcceptedTerms", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "adminAcceptedTerms")
     public void adminAcceptedTerms(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
         providerTestService.adminAcceptedTerms(id, auth);
     }
 
-    @GetMapping(path = "requestProviderDeletion", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "requestProviderDeletion")
     public void requestProviderDeletion(@RequestParam String id, @Parameter(hidden = true) Authentication authentication) {
         providerTestService.requestProviderDeletion(id, authentication);
     }
 
-    @PatchMapping(path = "auditProvider/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "auditProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<NewProviderBundle> auditProvider(@Parameter(description = "The left part of the ID before the '/'")
                                                            @PathVariable("prefix") String prefix,
@@ -390,7 +388,7 @@ public class ProviderTestCrudController {
     @Parameters({
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
-    @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "randomProviders")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<NewProviderBundle>> getRandomProviders(@RequestParam(defaultValue = "10") int quantity,
                                                                         @Parameter(hidden = true) Authentication auth) {
@@ -398,7 +396,7 @@ public class ProviderTestCrudController {
         return new ResponseEntity<>(providerBundlePaging, HttpStatus.OK);
     }
 
-    @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'")
                                                                 @PathVariable("prefix") String prefix,
                                                                 @Parameter(description = "The right part of the ID after the '/'")
@@ -411,7 +409,7 @@ public class ProviderTestCrudController {
     }
 
     @Operation(summary = "Validates the Provider without actually changing the repository.")
-    @PostMapping(path = "validate", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "validate")
     public ResponseEntity<Void> validate(@RequestBody LinkedHashMap<String, Object> provider) {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
@@ -421,7 +419,7 @@ public class ProviderTestCrudController {
 
     // front-end use (Provider form)
     @Hidden
-    @GetMapping(path = {"providerIdToNameMap"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = {"providerIdToNameMap"})
     public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> providerIdToNameMap(@RequestParam String catalogueId) {
         Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allProviders = new ArrayList<>();
@@ -465,7 +463,7 @@ public class ProviderTestCrudController {
     }
 
 
-    @PutMapping(path = "changeCatalogue", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "changeCatalogue")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<NewProviderBundle> changeCatalogue(@RequestParam String catalogueId,
                                                              @RequestParam String providerId,
@@ -477,7 +475,7 @@ public class ProviderTestCrudController {
     }
 
     @Hidden
-    @PostMapping(path = "createPublicProvider", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "createPublicProvider")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> createPublicProvider(@RequestBody NewProviderBundle providerBundle,
                                                                   @Parameter(hidden = true) Authentication auth) {
@@ -488,7 +486,7 @@ public class ProviderTestCrudController {
     }
 
     @Operation(description = "Suspends a Provider and all its resources")
-    @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public NewProviderBundle suspendProvider(@RequestParam String providerId,
                                              @RequestParam String catalogueId,
@@ -499,7 +497,7 @@ public class ProviderTestCrudController {
 
     @BrowseParameters
     @Operation(description = "Given a HLE, get all Providers associated with it")
-    @GetMapping(path = "getAllResourcesUnderASpecificHLE", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "getAllResourcesUnderASpecificHLE")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public List<MapValues<CatalogueValue>> getAllProvidersUnderASpecificHLE(@RequestParam String providerName,
                                                                             @Parameter(hidden = true) Authentication auth) {
@@ -511,7 +509,7 @@ public class ProviderTestCrudController {
         }
     }
 
-    @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/addBulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<NewProviderBundle> providerList,
                         @Parameter(hidden = true) Authentication auth) {
@@ -522,12 +520,12 @@ public class ProviderTestCrudController {
 
 
     // Drafts
-    @GetMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<LinkedHashMap<String, Object>> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'")
-                                                                          @PathVariable("prefix") String prefix,
-                                                                          @Parameter(description = "The right part of the ID after the '/'")
-                                                                          @PathVariable("suffix") String suffix,
-                                                                          @Parameter(hidden = true) Authentication auth) {
+    @GetMapping(path = "/draft/{prefix}/{suffix}")
+    public ResponseEntity<?> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'")
+                                              @PathVariable("prefix") String prefix,
+                                              @Parameter(description = "The right part of the ID after the '/'")
+                                              @PathVariable("suffix") String suffix,
+                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle draft = providerTestService.get(
                 new SearchService.KeyValue("resource_internal_id", id),
@@ -537,7 +535,7 @@ public class ProviderTestCrudController {
         return new ResponseEntity<>(draft.getProvider(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/draft/getMyDraftProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "/draft/getMyDraftProviders")
     public ResponseEntity<List<NewProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
@@ -547,10 +545,10 @@ public class ProviderTestCrudController {
         return new ResponseEntity<>(providerTestService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "/draft")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<LinkedHashMap<String, Object>> addDraftProvider(@RequestBody LinkedHashMap<String, Object> provider,
-                                                                          @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> addDraftProvider(@RequestBody LinkedHashMap<String, Object> provider,
+                                              @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
         //TODO:
@@ -560,7 +558,7 @@ public class ProviderTestCrudController {
     }
 
     //
-//    @PutMapping(path = "/draft", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PutMapping(path = "/draft")
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
 //    public ResponseEntity<Provider> updateDraftProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
 //        ProviderBundle providerBundle = draftProviderService.get(provider.getId(), catalogueId, false);
@@ -572,7 +570,7 @@ public class ProviderTestCrudController {
 //    }
 //
     //TODO: change to Void -> inform front-end
-    @DeleteMapping(path = "/draft/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "/draft/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Void> deleteDraftProvider(@Parameter(description = "The left part of the ID before the '/'")
                                                     @PathVariable("prefix") String prefix,
@@ -589,7 +587,7 @@ public class ProviderTestCrudController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 //
-//    @PutMapping(path = "draft/transform", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PutMapping(path = "draft/transform")
 //    @PreAuthorize("hasRole('ROLE_USER')")
 //    public ResponseEntity<Provider> transformToProvider(@RequestBody Provider provider, @Parameter(hidden = true) Authentication auth) {
 //        ProviderBundle providerBundle = draftProviderService.get(provider.getId(), catalogueId, false);
