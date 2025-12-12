@@ -43,21 +43,19 @@ public class CatalogueExceptionController extends GenericExceptionController {
      * @return {@link ServerError}
      */
     @ExceptionHandler(value = HttpMessageNotReadableException.class, produces = MediaType.APPLICATION_JSON_VALUE)
-    protected ResponseEntity<ServerError> handleException(HttpServletRequest req, Exception ex) {
-        HttpStatusCode status;
-        String message;
+    protected ResponseEntity<ServerError> handleException(HttpServletRequest req, HttpMessageNotReadableException ex) {
+        HttpStatusCode status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String message = ex.getMessage();
 
         switch (ex.getCause()) {
+            case null -> {}
             case InvalidFormatException exception -> {
                 status = HttpStatus.BAD_REQUEST;
                 String field = exception.getPathReference();
                 field = field.substring(field.indexOf("[")).replaceAll("\"", "");
                 message = "Field %s: %s".formatted(field, exception.getOriginalMessage());
             }
-            default -> {
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = ex.getMessage();
-            }
+            default -> {}
         }
 
         ServerError serverError = new ServerError(status, req, ex);
