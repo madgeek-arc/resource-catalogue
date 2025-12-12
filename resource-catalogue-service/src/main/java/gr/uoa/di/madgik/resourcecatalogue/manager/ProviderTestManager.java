@@ -51,8 +51,6 @@ public class ProviderTestManager implements ProviderTestService {
 
     private final GenericResourceService genericResourceService;
     private final RegistrationMailService registrationMailService;
-    private final SearchService searchService;
-    private final PublicProviderService publicProviderService;
     private final VocabularyService vocabularyService;
     private final ServiceBundleService serviceBundleService; //FIXME: do we need <?>
     private final TrainingResourceService trainingResourceService;
@@ -60,25 +58,18 @@ public class ProviderTestManager implements ProviderTestService {
     private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
     private final SecurityService securityService;
-//    private final SynchronizerService<LinkedHashMap<String, Object>> synchronizerService;
 
     public ProviderTestManager(GenericResourceService genericResourceService,
-                               SearchService searchService,
                                RegistrationMailService registrationMailService,
-                               PublicProviderService publicProviderService,
                                VocabularyService vocabularyService,
                                ServiceBundleService serviceBundleService,
                                TrainingResourceService trainingResourceService,
                                InteroperabilityRecordService interoperabilityRecordService,
                                IdCreator idCreator,
                                ProviderResourcesCommonMethods commonMethods,
-                               SecurityService securityService)
-//                               SynchronizerService<LinkedHashMap<String, Object>> synchronizerService)
-    {
+                               SecurityService securityService) {
         this.genericResourceService = genericResourceService;
-        this.searchService = searchService;
         this.registrationMailService = registrationMailService;
-        this.publicProviderService = publicProviderService;
         this.vocabularyService = vocabularyService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -86,7 +77,6 @@ public class ProviderTestManager implements ProviderTestService {
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.securityService = securityService;
-//        this.synchronizerService = synchronizerService;
     }
 
     @Override
@@ -687,7 +677,11 @@ public class ProviderTestManager implements ProviderTestService {
 
     //TODO: call on update and verify
     private void checkAndAddProviderToHLEVocabulary(NewProviderBundle bundle) {
-        boolean legalEntity = (Boolean) bundle.getProvider().get("legalEntity");
+        boolean legalEntity = switch (bundle.getProvider().get("legalEntity")) { // TODO: field type (in model) should be 'boolean', not radio with "true"/"false" values.
+            case Boolean value -> value;
+            case String str -> Boolean.parseBoolean(str);
+            default -> throw new ValidationException("Error in field 'legalEntity', should be boolean.");
+        };
         if (bundle.getStatus().toLowerCase().contains("approved") && legalEntity) {
             addUpdateProviderHLEVocabulary(bundle);
         }
