@@ -34,6 +34,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -48,6 +49,9 @@ public class ProviderTestManager implements ProviderTestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderTestManager.class);
     private final String resourceTypeName = "providertest";
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
 
     private final GenericResourceService genericResourceService;
     private final RegistrationMailService registrationMailService;
@@ -166,9 +170,9 @@ public class ProviderTestManager implements ProviderTestService {
     }
 
     private void onboard(NewProviderBundle bundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null || catalogueId.isEmpty()) {
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             bundle.markOnboard(vocabularyService.get("pending provider").getId(), false, auth, null);
-            bundle.setCatalogueId(null); //TODO: how we proceed with instance's catalogue ID
+            bundle.setCatalogueId(this.catalogueId); //TODO: how we proceed with instance's catalogue ID
             bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
             //TODO: make sure we need to create our own IDs instead of users giving them
             bundle.getProvider().put("id", idCreator.generate(resourceTypeName));

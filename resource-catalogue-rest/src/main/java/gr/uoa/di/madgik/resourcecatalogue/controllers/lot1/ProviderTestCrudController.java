@@ -130,7 +130,7 @@ public class ProviderTestCrudController {
     @BrowseCatalogue
     @Parameters({
             @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false"))),
-            @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
+            @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean")))
     })
     @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
