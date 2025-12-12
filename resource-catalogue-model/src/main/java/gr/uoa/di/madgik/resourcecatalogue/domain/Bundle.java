@@ -80,14 +80,14 @@ public class Bundle<T extends Identifiable> implements Identifiable {
                 this.getLoggingInfo().add(onboardingInfo);
             }
 
-            if (status.toLowerCase().contains("approved") && !this.status.contains("approved")) {
+            if (status.toLowerCase().contains("approved")) {
                 onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                         user, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.APPROVED.getKey(), comment
                 );
                 this.setLatestOnboardingInfo(onboardingInfo);
                 this.getLoggingInfo().add(onboardingInfo);
-            } else if (status.toLowerCase().contains("rejected") && !this.status.contains("rejected")) {
+            } else if (status.toLowerCase().contains("rejected")) {
                 onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                         user, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.REJECTED.getKey(), comment
