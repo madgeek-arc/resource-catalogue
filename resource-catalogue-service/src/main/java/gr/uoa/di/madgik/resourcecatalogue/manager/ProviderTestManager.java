@@ -28,6 +28,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -62,6 +63,7 @@ public class ProviderTestManager implements ProviderTestService {
     private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
     private final SecurityService securityService;
+    private final CatalogueService catalogueService;
 
     public ProviderTestManager(GenericResourceService genericResourceService,
                                RegistrationMailService registrationMailService,
@@ -71,7 +73,8 @@ public class ProviderTestManager implements ProviderTestService {
                                InteroperabilityRecordService interoperabilityRecordService,
                                IdCreator idCreator,
                                ProviderResourcesCommonMethods commonMethods,
-                               SecurityService securityService) {
+                               SecurityService securityService,
+                               CatalogueService catalogueService) {
         this.genericResourceService = genericResourceService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
@@ -81,6 +84,7 @@ public class ProviderTestManager implements ProviderTestService {
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.securityService = securityService;
+        this.catalogueService = catalogueService;
     }
 
     @Override
@@ -155,6 +159,7 @@ public class ProviderTestManager implements ProviderTestService {
         return genericResourceService.getResults(ff);
     }
 
+    //TODO: we do not actually need this one
     @Override
     public NewProviderBundle add(NewProviderBundle bundle, Authentication auth) {
         return add(bundle, null, auth);
@@ -178,8 +183,9 @@ public class ProviderTestManager implements ProviderTestService {
             bundle.getProvider().put("id", idCreator.generate(resourceTypeName));
 //            commonMethods.createIdentifiers(bundle, resourceTypeName, false); //TODO: fix and enable
         } else {
+            bundle.setCatalogueId(catalogueId);
             bundle.markOnboard(vocabularyService.get("approved provider").getId(), true, auth, null);
-            commonMethods.checkCatalogueIdConsistency(bundle, catalogueId);
+            commonMethods.checkCatalogueIdConsistency(bundle, catalogueId); //TODO: test me
             bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
             idCreator.validateId(bundle.getProvider().get("id").toString());
 //            commonMethods.createIdentifiers(bundle, resourceTypeName, true); //TODO: fix and enable
@@ -440,7 +446,7 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public NewProviderBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        NewProviderBundle existing = get(id);
+        NewProviderBundle existing = get(id, catalogueId);
         existing.markAudit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
@@ -510,6 +516,12 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public NewProviderBundle get(String id, String catalogueId) {
+        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
+        //FIXME: never reaches here
+        if (catalogueBundle == null) {
+            throw new CatalogueResourceNotFoundException(
+                    String.format("Could not find catalogue with id: %s", catalogueId));
+        }
         return genericResourceService.get(resourceTypeName,
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("catalogue_id", catalogueId),

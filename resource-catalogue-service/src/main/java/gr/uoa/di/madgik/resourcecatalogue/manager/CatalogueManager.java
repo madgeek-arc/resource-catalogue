@@ -95,6 +95,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Override
     public CatalogueBundle get(String id) {
         CatalogueBundle catalogue = super.get(id);
+        //FIXME: never reaches here
         if (catalogue == null) {
             throw new ResourceNotFoundException(id, "Catalogue");
         }

@@ -85,10 +85,8 @@ public class ProviderTestCrudController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') || " +
             "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix) || " +
             "@securityService.isApprovedProvider(#prefix, #suffix)")
-    public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
-                                 @PathVariable("prefix") String prefix,
-                                 @Parameter(description = "The right part of the ID after the '/'")
-                                 @PathVariable("suffix") String suffix,
+    public ResponseEntity<?> get(@PathVariable String prefix,
+                                 @PathVariable String suffix,
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused")
                                  @Parameter(hidden = true) Authentication auth) {
@@ -99,10 +97,8 @@ public class ProviderTestCrudController {
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<NewProviderBundle> getBundle(@Parameter(description = "The left part of the ID before the '/'")
-                                                       @PathVariable("prefix") String prefix,
-                                                       @Parameter(description = "The right part of the ID after the '/'")
-                                                       @PathVariable("suffix") String suffix,
+    public ResponseEntity<NewProviderBundle> getBundle(@PathVariable String prefix,
+                                                       @PathVariable String suffix,
                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                        @SuppressWarnings("unused")
                                                        @Parameter(hidden = true) Authentication auth) {
@@ -114,7 +110,7 @@ public class ProviderTestCrudController {
     @Operation(summary = "Get a list of Providers based on a list of filters")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", nullable = true)))
     @GetMapping(path = "all")
     public ResponseEntity<Paging<?>> getAll(@Parameter(hidden = true)
                                             @RequestParam MultiValueMap<String, Object> params,
@@ -129,7 +125,7 @@ public class ProviderTestCrudController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameters({
-            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false"))),
+            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean",  nullable = true))),
             @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean")))
     })
     @GetMapping(path = "bundle/all")
@@ -184,8 +180,9 @@ public class ProviderTestCrudController {
     @PutMapping(path = "/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> updateBundle(@RequestBody NewProviderBundle provider,
+                                                          @RequestParam(required = false) String comment,
                                                           @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle providerBundle = providerTestService.update(provider, provider.getCatalogueId(), null, auth); //TODO: do we want Admin updates to pass through regular update?
+        NewProviderBundle providerBundle = providerTestService.update(provider, provider.getCatalogueId(), comment, auth); //TODO: do we want Admin updates to pass through regular update?
         logger.info("Updated the Provider id '{}'", provider.getProvider().get("id"));
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
@@ -193,12 +190,9 @@ public class ProviderTestCrudController {
     @Operation(summary = "Deletes the Provider with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<?> delete(@Parameter(description = "The left part of the ID before the '/'")
-                                    @PathVariable("prefix") String prefix,
-                                    @Parameter(description = "The right part of the ID after the '/'")
-                                    @PathVariable("suffix") String suffix,
-                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                    @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> delete(@PathVariable String prefix,
+                                    @PathVariable String suffix,
+                                    @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
         NewProviderBundle provider = providerTestService.get(id);
         // Block users of deleting Providers of another Catalogue
@@ -279,10 +273,8 @@ public class ProviderTestCrudController {
 
     @Operation(summary = "Returns a list of inactive Services of a Provider.")
     @GetMapping(path = "services/inactive/{prefix}/{suffix}")
-    public ResponseEntity<List<?>> getInactiveServices(@Parameter(description = "The left part of the ID before the '/'")
-                                                       @PathVariable("prefix") String prefix,
-                                                       @Parameter(description = "The right part of the ID after the '/'")
-                                                       @PathVariable("suffix") String suffix) {
+    public ResponseEntity<List<?>> getInactiveServices(@PathVariable String prefix,
+                                                       @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
         List<Service> ret = serviceBundleService.getInactiveResources(id).stream().map(ServiceBundle::getService).collect(Collectors.toList());
 //        return new ResponseEntity<>(ret, HttpStatus.OK); //FIXME
@@ -292,10 +284,8 @@ public class ProviderTestCrudController {
     //FIXME: /inactive/ instead of /pending/ -> inform front-end
     @Operation(summary = "Returns a list of inactive Training Resources of a Provider.")
     @GetMapping(path = "trainingResources/inactive/{prefix}/{suffix}")
-    public ResponseEntity<List<?>> getInactiveTrainingResources(@Parameter(description = "The left part of the ID before the '/'")
-                                                                @PathVariable("prefix") String prefix,
-                                                                @Parameter(description = "The right part of the ID after the '/'")
-                                                                @PathVariable("suffix") String suffix) {
+    public ResponseEntity<List<?>> getInactiveTrainingResources(@PathVariable String prefix,
+                                                                @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
         List<TrainingResource> ret = trainingResourceService.getInactiveResources(id).stream().map(TrainingResourceBundle::getTrainingResource).collect(Collectors.toList());
 //        return new ResponseEntity<>(ret, HttpStatus.OK); //FIXME
@@ -305,10 +295,8 @@ public class ProviderTestCrudController {
     @Operation(summary = "Returns all Provider's rejected resources, providing the corresponding resource type.")
     @BrowseParameters
     @GetMapping(path = "resources/rejected/{prefix}/{suffix}")
-    public ResponseEntity<Paging<?>> getRejectedResources(@Parameter(description = "The left part of the ID before the '/'")
-                                                          @PathVariable("prefix") String prefix,
-                                                          @Parameter(description = "The right part of the ID after the '/'")
-                                                          @PathVariable("suffix") String suffix,
+    public ResponseEntity<Paging<?>> getRejectedResources(@PathVariable String prefix,
+                                                          @PathVariable String suffix,
                                                           @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                           @RequestParam String resourceType,
                                                           @Parameter(hidden = true) Authentication auth) {
@@ -325,10 +313,8 @@ public class ProviderTestCrudController {
     @Operation(summary = "Verifies the Provider.")
     @PatchMapping(path = "verifyProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewProviderBundle> verifyProvider(@Parameter(description = "The left part of the ID before the '/'")
-                                                            @PathVariable("prefix") String prefix,
-                                                            @Parameter(description = "The right part of the ID after the '/'")
-                                                            @PathVariable("suffix") String suffix,
+    public ResponseEntity<NewProviderBundle> verifyProvider(@PathVariable String prefix,
+                                                            @PathVariable String suffix,
                                                             @RequestParam(required = false) Boolean active,
                                                             @RequestParam(required = false) String status,
                                                             @Parameter(hidden = true) Authentication auth) {
@@ -343,10 +329,8 @@ public class ProviderTestCrudController {
     @PatchMapping(path = "publish/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<NewProviderBundle> setActive(@Parameter(description = "The left part of the ID before the '/'")
-                                                       @PathVariable("prefix") String prefix,
-                                                       @Parameter(description = "The right part of the ID after the '/'")
-                                                       @PathVariable("suffix") String suffix,
+    public ResponseEntity<NewProviderBundle> setActive(@PathVariable String prefix,
+                                                       @PathVariable String suffix,
                                                        @RequestParam(required = false) Boolean active,
                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
@@ -372,10 +356,8 @@ public class ProviderTestCrudController {
 
     @PatchMapping(path = "auditProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewProviderBundle> auditProvider(@Parameter(description = "The left part of the ID before the '/'")
-                                                           @PathVariable("prefix") String prefix,
-                                                           @Parameter(description = "The right part of the ID after the '/'")
-                                                           @PathVariable("suffix") String suffix,
+    public ResponseEntity<NewProviderBundle> auditProvider(@PathVariable String prefix,
+                                                           @PathVariable String suffix,
                                                            @RequestParam("catalogueId") String catalogueId,
                                                            @RequestParam(required = false) String comment,
                                                            @RequestParam LoggingInfo.ActionType actionType,
@@ -397,13 +379,11 @@ public class ProviderTestCrudController {
     }
 
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
-    public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'")
-                                                                @PathVariable("prefix") String prefix,
-                                                                @Parameter(description = "The right part of the ID after the '/'")
-                                                                @PathVariable("suffix") String suffix,
+    public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
+                                                                @PathVariable String suffix,
                                                                 @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerTestService.get(new SearchService.KeyValue("resource_internal_id", id), new SearchService.KeyValue("catalogue_id", catalogueId));
+        NewProviderBundle bundle = providerTestService.get(id);
         List<LoggingInfo> loggingInfoHistory = providerTestService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -521,10 +501,8 @@ public class ProviderTestCrudController {
 
     // Drafts
     @GetMapping(path = "/draft/{prefix}/{suffix}")
-    public ResponseEntity<?> getDraftProvider(@Parameter(description = "The left part of the ID before the '/'")
-                                              @PathVariable("prefix") String prefix,
-                                              @Parameter(description = "The right part of the ID after the '/'")
-                                              @PathVariable("suffix") String suffix,
+    public ResponseEntity<?> getDraftProvider(@PathVariable String prefix,
+                                              @PathVariable String suffix,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle draft = providerTestService.get(
@@ -572,10 +550,8 @@ public class ProviderTestCrudController {
     //TODO: change to Void -> inform front-end
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<Void> deleteDraftProvider(@Parameter(description = "The left part of the ID before the '/'")
-                                                    @PathVariable("prefix") String prefix,
-                                                    @Parameter(description = "The right part of the ID after the '/'")
-                                                    @PathVariable("suffix") String suffix,
+    public ResponseEntity<Void> deleteDraftProvider(@PathVariable String prefix,
+                                                    @PathVariable String suffix,
                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         Resource resource = genericResourceService.searchResource(resourceTypeName,
