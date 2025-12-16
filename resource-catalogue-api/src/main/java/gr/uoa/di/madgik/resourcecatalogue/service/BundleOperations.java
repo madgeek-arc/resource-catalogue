@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
@@ -107,4 +108,14 @@ public interface BundleOperations<T extends Bundle<?>> {
         }
         return null;
     }
+
+    /**
+     * Get a paging of random Resources for auditing.
+     *
+     * @param quantity how many resources to return
+     * @param auditingInterval Auditing Interval (in months)
+     * @param auth Authentication
+     * @return {@link Paging}&lt;{@link T}&gt;
+     */
+    Paging<T> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth);
 }

@@ -51,7 +51,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
      * </ul>
      */
     @Test
-    public void testNullLoggingInfo_CreatesNewLoggingInfo() {
+    void testNullLoggingInfo_CreatesNewLoggingInfo() {
         // Arrange
         ProviderBundle provider = mock(ProviderBundle.class);
         Authentication auth = securityService.getAdminAccess();
@@ -81,7 +81,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
      * </ul>
      */
     @Test
-    public void testEmptyLoggingInfo_CreatesNewLoggingInfo() {
+    void testEmptyLoggingInfo_CreatesNewLoggingInfo() {
         // Arrange
         ProviderBundle provider = mock(ProviderBundle.class);
         Authentication auth = securityService.getAdminAccess();
@@ -110,7 +110,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
      * </ul>
      */
     @Test
-    public void testNonEmptyLoggingInfo_ReturnsExistingList() {
+    void testNonEmptyLoggingInfo_ReturnsExistingList() {
         // Arrange
         List<LoggingInfo> existingLoggingInfo = List.of(createLoggingInfo(LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey()));
@@ -138,7 +138,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
      * </ul>
      */
     @Test
-    public void testNullAuthentication_ThrowsInsufficientAuthenticationException() {
+    void testNullAuthentication_ThrowsInsufficientAuthenticationException() {
         // Arrange
         ProviderBundle provider = mock(ProviderBundle.class);
         when(provider.getLoggingInfo()).thenReturn(null);
@@ -165,7 +165,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
      * </ul>
      */
     @Test
-    public void testCreateLoggingInfo_ValidInput_ReturnsCorrectLoggingInfo() {
+    void testCreateLoggingInfo_ValidInput_ReturnsCorrectLoggingInfo() {
         // Arrange
         Authentication auth = securityService.getAdminAccess();
 
@@ -191,7 +191,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
      * </ul>
      */
     @Test
-    public void testCreateLoggingInfo_NullAuthentication_ThrowsException() {
+    void testCreateLoggingInfo_NullAuthentication_ThrowsException() {
         // Act & Assert
         InsufficientAuthenticationException exception = assertThrows(
                 InsufficientAuthenticationException.class,
@@ -221,7 +221,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
      * </ul>
      */
     @Test
-    public void testCreateLoggingInfo_NullOrEmptyOrNonexistentTypeOrActionType() {
+    void testCreateLoggingInfo_NullOrEmptyOrNonexistentTypeOrActionType() {
         // Arrange
         Authentication auth = securityService.getAdminAccess();
 

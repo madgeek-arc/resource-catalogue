@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -461,6 +462,11 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                 AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
                 catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
         return super.update(catalogue, auth);
+    }
+
+    @Override
+    public Paging<CatalogueBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
+        throw new UnsupportedOperationException("Not implemented.");
     }
 
     private FacetFilter createFacetFilter(String catalogueId) {

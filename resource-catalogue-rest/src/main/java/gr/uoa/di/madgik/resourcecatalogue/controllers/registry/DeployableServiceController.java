@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -24,7 +25,8 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.DeployableServiceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -60,7 +62,7 @@ public class DeployableServiceController {
     private final GenericResourceService genericResourceService;
 
     @Value("${auditing.interval:6}")
-    private String auditingInterval;
+    private int auditingInterval;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -126,7 +128,7 @@ public class DeployableServiceController {
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #deployableService)")
     public ResponseEntity<DeployableService> addDeployableService(@RequestBody DeployableService deployableService,
-                                                                                  @Parameter(hidden = true) Authentication auth) {
+                                                                  @Parameter(hidden = true) Authentication auth) {
         DeployableServiceBundle ret = this.service.add(new DeployableServiceBundle(deployableService), auth);
         logger.info("User '{}' created a new Deployable Service with name '{}' and id '{}'",
                 User.of(auth).getEmail().toLowerCase(), deployableService.getName(), deployableService.getId());
@@ -295,18 +297,12 @@ public class DeployableServiceController {
     }
 
 
-    @Parameters({
-            @Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
-    })
     @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<DeployableServiceBundle>> getRandomResources(@Parameter(hidden = true)
-                                                                              @RequestParam MultiValueMap<String, Object> allRequestParams,
+    public ResponseEntity<Paging<DeployableServiceBundle>> getRandomResources(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
+                                                                              @RequestParam(defaultValue = "10") int quantity,
                                                                               @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
-        ff.addFilter("status", "approved resource");
-        ff.addFilter("published", false);
-        Paging<DeployableServiceBundle> paging = service.getRandomResources(ff, auditingInterval, auth);
+        Paging<DeployableServiceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 

@@ -41,7 +41,7 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
     private List<String> resourceTypes;
 
     @BeforeAll
-    public void setUp() {
+    void setUp() {
         resourceTypes = Arrays.stream(ResourceTypes.values())
                 .map(resourceType -> resourceType.name().toLowerCase())
                 .collect(Collectors.toList());
@@ -57,7 +57,7 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
      * does not produce duplicates under normal conditions.
      */
     @Test
-    public void generateUniqueIds() {
+    void generateUniqueIds() {
         IntStream.range(0, 10).forEach(i -> idCreator.generate("provider"));
     }
 
@@ -73,7 +73,7 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
      * to all resource types and maintains the correct format.
      */
     @Test
-    public void generatedIdHasValidFormat() {
+    void generatedIdHasValidFormat() {
         for (String resourceType : resourceTypes) {
             String id = idCreator.generate(resourceType);
 
@@ -93,7 +93,7 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
      * such as empty or invalid input.
      */
     @Test()
-    public void generateWithEmptyResourceType() {
+    void generateWithEmptyResourceType() {
 //        assertThrows(ServiceException.class, () -> idCreator.generate(""));
         String id = idCreator.generate("");
 
