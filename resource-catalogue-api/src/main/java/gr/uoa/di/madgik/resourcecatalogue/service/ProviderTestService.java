@@ -25,7 +25,8 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 //TODO: extend ResourceCRUDService<NewProviderBundle, Authentication>
-public interface ProviderTestService extends NewBundleOperations<NewProviderBundle>, ResourceService<NewProviderBundle> {
+public interface ProviderTestService extends NewBundleOperations<NewProviderBundle>, ResourceService<NewProviderBundle>,
+        DraftTestResourceService<NewProviderBundle> {
 
     /**
      * Add a new Provider on a specific Catalogue.

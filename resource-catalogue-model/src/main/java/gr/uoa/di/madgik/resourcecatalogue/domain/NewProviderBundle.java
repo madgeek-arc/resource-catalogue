@@ -1,6 +1,5 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import java.beans.Transient;
 import java.util.LinkedHashMap;
 
 public class NewProviderBundle extends NewBundle {

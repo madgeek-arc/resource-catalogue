@@ -731,4 +731,83 @@ public class ProviderTestManager implements ProviderTestService {
                 bundle.getProvider().get("id").toString()
         );
     }
+
+    @Override
+    public NewProviderBundle addDraft(NewProviderBundle bundle, Authentication auth) {
+
+        bundle.setId(idCreator.generate(resourceTypeName));
+//        commonMethods.createIdentifiers(bundle, resourceTypeName, false); //FIXME
+        commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
+
+        logger.trace("Attempting to add a new Draft Provider: {}", bundle);
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(),
+                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
+                LoggingInfo.ActionType.CREATED.getKey());
+        loggingInfoList.add(loggingInfo);
+        bundle.setLoggingInfo(loggingInfoList);
+
+        bundle.setCatalogueId(catalogueId);
+        bundle.setActive(false);
+        bundle.setDraft(true);
+
+        NewProviderBundle ret = genericResourceService.add(resourceTypeName, bundle);
+
+        return ret;
+    }
+
+    @Override
+    public NewProviderBundle updateDraft(NewProviderBundle bundle, Authentication auth) {
+        validate(bundle);
+        try {
+            NewProviderBundle ret = genericResourceService.update(resourceTypeName,
+                    bundle.getProvider().get("id").toString(), bundle);
+            return ret;
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteDraft(NewProviderBundle bundle) {
+        genericResourceService.delete(resourceTypeName, bundle.getProvider().get("id").toString());
+    }
+
+    @Override
+    public NewProviderBundle transformToNonDraft(String id, Authentication auth) {
+        NewProviderBundle bundle = genericResourceService.get(resourceTypeName, id);
+        return transformToNonDraft(bundle, auth);
+    }
+
+    @Override
+    public NewProviderBundle transformToNonDraft(NewProviderBundle bundle, Authentication auth) {
+        logger.trace("Attempting to transform the Draft Provider with id '{}' to Provider", bundle.getId());
+        validate(bundle);
+
+        // update loggingInfo
+        List<LoggingInfo> loggingInfoList = new ArrayList<>();
+        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+                LoggingInfo.ActionType.REGISTERED.getKey());
+        loggingInfoList.add(loggingInfo);
+        bundle.setLoggingInfo(loggingInfoList);
+        bundle.setLatestOnboardingInfo(loggingInfo);
+
+        // update providerStatus
+        bundle.setStatus(vocabularyService.get("pending").getId());
+        bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
+
+        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+        bundle.setDraft(false);
+
+        try {
+            bundle = update(bundle, auth);
+        } catch (ResourceNotFoundException e) {
+            logger.info("Provider with id '{}' does not exist", bundle.getId());
+        }
+
+//        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
+        return bundle;
+    }
 }
