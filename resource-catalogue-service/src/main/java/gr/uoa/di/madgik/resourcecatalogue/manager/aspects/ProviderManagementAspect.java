@@ -175,7 +175,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.verify(..))",
             returning = "providerBundle")
     public void addProviderAsPublic(final ProviderBundle providerBundle) {
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
+        if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
             try {
                 publicProviderService.get(providerBundle.getIdentifiers().getPid(),
                         providerBundle.getProvider().getCatalogueId(), true);
@@ -258,7 +258,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.changeProvider(..))",
             returning = "serviceBundle")
     public void addResourceAsPublic(final ServiceBundle serviceBundle) {
-        if (serviceBundle.getStatus().equals("approved resource") && serviceBundle.isActive()) {
+        if (serviceBundle.getStatus().equals("approved") && serviceBundle.isActive()) {
             try {
                 publicServiceManager.get(serviceBundle.getIdentifiers().getPid(),
                         serviceBundle.getService().getCatalogueId(), true);
@@ -275,7 +275,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.changeProvider(..))",
             returning = "trainingResourceBundle")
     public void addResourceAsPublic(final TrainingResourceBundle trainingResourceBundle) {
-        if (trainingResourceBundle.getStatus().equals("approved resource") && trainingResourceBundle.isActive()) {
+        if (trainingResourceBundle.getStatus().equals("approved") && trainingResourceBundle.isActive()) {
             try {
                 publicTrainingResourceManager.get(trainingResourceBundle.getIdentifiers().getPid(),
                         trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
@@ -291,7 +291,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.changeProvider(..))",
             returning = "deployableServiceBundle")
     public void addResourceAsPublic(final DeployableServiceBundle deployableServiceBundle) {
-        if (deployableServiceBundle.getStatus().equals("approved resource") && deployableServiceBundle.isActive()) {
+        if (deployableServiceBundle.getStatus().equals("approved") && deployableServiceBundle.isActive()) {
             try {
                 publicDeployableServiceManager.get(deployableServiceBundle.getIdentifiers().getPid(),
                         deployableServiceBundle.getDeployableService().getCatalogueId(), true);
@@ -306,7 +306,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.verify(..))",
             returning = "interoperabilityRecordBundle")
     public void addResourceAsPublic(final InteroperabilityRecordBundle interoperabilityRecordBundle) {
-        if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record") && interoperabilityRecordBundle.isActive()) {
+        if (interoperabilityRecordBundle.getStatus().equals("approved") && interoperabilityRecordBundle.isActive()) {
             try {
                 publicInteroperabilityRecordManager.get(interoperabilityRecordBundle.getIdentifiers().getPid(),
                         interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), true);
@@ -481,7 +481,7 @@ public class ProviderManagementAspect {
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                             serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                    serviceBundleService.verify(serviceBundle.getService().getId(), "pending resource", false, securityService.getAdminAccess());
+                    serviceBundleService.verify(serviceBundle.getService().getId(), "pending", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(), e);
@@ -498,7 +498,7 @@ public class ProviderManagementAspect {
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                             trainingResourceBundle.getTrainingResource().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                    trainingResourceService.verify(trainingResourceBundle.getTrainingResource().getId(), "pending resource", false, securityService.getAdminAccess());
+                    trainingResourceService.verify(trainingResourceBundle.getTrainingResource().getId(), "pending", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(), e);
@@ -515,7 +515,7 @@ public class ProviderManagementAspect {
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                             bundle.getDeployableService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                    deployableServiceService.verify(bundle.getDeployableService().getId(), "pending resource", false, securityService.getAdminAccess());
+                    deployableServiceService.verify(bundle.getDeployableService().getId(), "pending", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(), e);
@@ -528,7 +528,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
             returning = "datasourceBundle")
     public void addDatasourceAsPublic(final DatasourceBundle datasourceBundle) {
-        if (datasourceBundle.getStatus().equals("approved datasource") && datasourceBundle.isActive()) {
+        if (datasourceBundle.getStatus().equals("approved") && datasourceBundle.isActive()) {
             try {
                 publicDatasourceManager.get(datasourceBundle.getIdentifiers().getPid(),
                         datasourceBundle.getDatasource().getCatalogueId(), true);
@@ -739,7 +739,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))",
             returning = "serviceBundle")
     public void assignEoscMonitoringGuidelineToService(final ServiceBundle serviceBundle) {
-        if (serviceBundle.getStatus().equals("approved resource")) {
+        if (serviceBundle.getStatus().equals("approved")) {
             ResourceInteroperabilityRecord rir = new ResourceInteroperabilityRecord();
             rir.setCatalogueId(serviceBundle.getService().getCatalogueId());
             rir.setNode(serviceBundle.getService().getNode());

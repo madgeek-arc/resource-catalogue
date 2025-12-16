@@ -123,15 +123,15 @@ public class InternalToPublicConsistency {
     @Scheduled(cron = "0 0 0 * * *") // At midnight every day
 //    @Scheduled(initialDelay = 0, fixedRate = 6000) // every 2 min
     protected void logInternalToPublicResourceConsistency() {
-        List<ProviderBundle> allInternalApprovedProviders = providerService.getAll(createFacetFilter("approved provider"), securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> allInternalApprovedServices = serviceBundleService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
-        List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
-        List<DeployableServiceBundle> allInternalApprovedDS = deployableServiceService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
-        List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter("approved interoperability record"), securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> allInternalApprovedProviders = providerService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> allInternalApprovedServices = serviceBundleService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
+        List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
+        List<DeployableServiceBundle> allInternalApprovedDS = deployableServiceService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
+        List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allInternalApprovedRIR = resourceInteroperabilityRecordService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allInternalApprovedDatasources = datasourceService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
         List<ConfigurationTemplateInstanceBundle> allInternalCTI = configurationTemplateInstanceService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
-        List<AdapterBundle> allInternalApprovedAdapters = adapterService.getAll(createFacetFilter("approved adapter"), securityService.getAdminAccess()).getResults();
+        List<AdapterBundle> allInternalApprovedAdapters = adapterService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
         List<String> logs = new ArrayList<>();
 
         // check consistency for Providers

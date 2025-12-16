@@ -96,14 +96,14 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().
                 getCatalogueId(), interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
         // check if Provider is approved
-        if (!providerBundle.getStatus().equals("approved provider")) {
+        if (!providerBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",
                     interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId()), HttpStatus.CONFLICT);
         }
         validate(interoperabilityRecordBundle);
 
         // status
-        interoperabilityRecordBundle.setStatus("pending interoperability record");
+        interoperabilityRecordBundle.setStatus("pending");
         // metadata
         if (interoperabilityRecordBundle.getMetadata() == null) {
             interoperabilityRecordBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
@@ -114,7 +114,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         interoperabilityRecordBundle.setAuditState(Auditable.NOT_AUDITED);
 
         if (!providerBundle.getProvider().getCatalogueId().equals(this.catalogueId)) {
-            interoperabilityRecordBundle.setStatus(vocabularyService.get("approved interoperability record").getId());
+            interoperabilityRecordBundle.setStatus(vocabularyService.get("approved").getId());
             interoperabilityRecordBundle.setActive(true);
             LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey());
@@ -225,8 +225,8 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
     public InteroperabilityRecordBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-        if (!statusVocabulary.getType().equals("Interoperability Record state")) {
-            throw new ValidationException(String.format("Vocabulary %s does not consist an Interoperability Record state!", status));
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist an Resource state!", status));
         }
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         InteroperabilityRecordBundle interoperabilityRecordBundle = get(id, catalogueId, false);
@@ -246,7 +246,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
         ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
+        if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
             activeProvider = interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId();
         }
         if (active && activeProvider.isEmpty()) {

@@ -131,7 +131,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
                     serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
         }
         // check if Provider is approved
-        if (!providerBundle.getStatus().equals("approved provider")) {
+        if (!providerBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
                     serviceBundle.getService().getResourceOrganisation()), HttpStatus.CONFLICT);
         }
@@ -164,7 +164,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
-            serviceBundle.setStatus(vocabularyService.get("approved resource").getId());
+            serviceBundle.setStatus(vocabularyService.get("approved").getId());
             LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
@@ -172,7 +172,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
             // latestOnboardingInfo
             serviceBundle.setLatestOnboardingInfo(loggingInfoApproved);
         } else {
-            serviceBundle.setStatus(vocabularyService.get("pending resource").getId());
+            serviceBundle.setStatus(vocabularyService.get("pending").getId());
         }
 
         // LoggingInfo
@@ -261,10 +261,10 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         ret.setStatus(existingService.getStatus());
         ret.setSuspended(existingService.isSuspended());
 
-        // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
-        if (existingService.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
+        // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
+        if (existingService.getStatus().equals(vocabularyService.get("rejected").getId())) {
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                ret.setStatus(vocabularyService.get("pending resource").getId());
+                ret.setStatus(vocabularyService.get("pending").getId());
                 ret.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
                 providerService.update(providerBundle, null, auth);
@@ -335,13 +335,13 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
         ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
         switch (status) {
-            case "pending resource":
+            case "pending":
                 resourceProvider.setTemplateStatus("pending template");
                 break;
-            case "approved resource":
+            case "approved":
                 resourceProvider.setTemplateStatus("approved template");
                 break;
-            case "rejected resource":
+            case "rejected":
                 resourceProvider.setTemplateStatus("rejected template");
                 break;
             default:
@@ -359,13 +359,13 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         String activeProvider = "";
         service = this.get(serviceId, catalogueId, false);
 
-        if ((service.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
-                service.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !service.isActive()) {
+        if ((service.getStatus().equals(vocabularyService.get("pending").getId()) ||
+                service.getStatus().equals(vocabularyService.get("rejected").getId())) && !service.isActive()) {
             throw new ValidationException(String.format("You cannot activate this Service, because it's Inactive with status = [%s]", service.getStatus()));
         }
 
         ProviderBundle providerBundle = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
+        if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
             activeProvider = service.getService().getResourceOrganisation();
         }
         if (active && activeProvider.isEmpty()) {
@@ -381,7 +381,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     public void publishServiceSubprofiles(String serviceId, String catalogueId, Boolean active, Authentication auth) {
         DatasourceBundle bundle = datasourceService.get(serviceId, catalogueId);
         logger.info("{} all related resources of the Service with id: '{}'", active ? "Activating" : "Deactivating", serviceId);
-        if (bundle != null && bundle.getStatus().equals("approved datasource")) {
+        if (bundle != null && bundle.getStatus().equals("approved")) {
             bundle.markActive(active, auth);
 
             try {
@@ -450,7 +450,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
             }
         }
         // else return Provider's Services ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
             return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
         }
         throw new InsufficientAuthenticationException("You cannot view the Services of the specific Provider");
@@ -477,7 +477,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
         ServiceBundle serviceBundle = get(resourceId, catalogueId, false);
         // check Service's status
-        if (!serviceBundle.getStatus().equals("approved resource")) {
+        if (!serviceBundle.getStatus().equals("approved")) {
             throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
                     "is not yet Approved", serviceBundle.getId()));
         }
@@ -661,7 +661,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         ff.addFilter("published", false);
         List<ServiceBundle> allProviderResources = getAll(ff, auth).getResults();
         for (ServiceBundle resourceBundle : allProviderResources) {
-            if (resourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
+            if (resourceBundle.getStatus().equals(vocabularyService.get("pending").getId())) {
                 return resourceBundle;
             }
         }
@@ -725,7 +725,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     public Paging<ServiceBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
-        facetFilter.addFilter("status", "approved resource");
+        facetFilter.addFilter("status", "approved");
         facetFilter.addFilter("published", false);
 
         Browsing<ServiceBundle> serviceBrowsing = getAll(facetFilter, auth);

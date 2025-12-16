@@ -75,7 +75,7 @@ public class ProviderResourcesCommonMethods {
                         throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
                     }
                 }
-                if (!catalogueService.get(catalogueId).getStatus().equals("approved catalogue")) {
+                if (!catalogueService.get(catalogueId).getStatus().equals("approved")) {
                     throw new ResourceException(String.format("The Catalogue '%s' is not yet approved", catalogueId),
                             HttpStatus.CONFLICT);
                 }
@@ -178,7 +178,7 @@ public class ProviderResourcesCommonMethods {
     }
 
     public void blockResourceDeletion(String status, boolean isPublished) {
-        if (status.equals(vocabularyService.get("pending resource").getId())) {
+        if (status.equals(vocabularyService.get("pending").getId())) {
             throw new ResourceException("You cannot delete a Template that is under review", HttpStatus.FORBIDDEN);
         }
         if (isPublished) {

@@ -132,7 +132,7 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
         bundle.setLatestOnboardingInfo(loggingInfo);
 
         // update providerStatus
-        bundle.setStatus(vocabularyService.get("pending provider").getId());
+        bundle.setStatus(vocabularyService.get("pending").getId());
         bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));

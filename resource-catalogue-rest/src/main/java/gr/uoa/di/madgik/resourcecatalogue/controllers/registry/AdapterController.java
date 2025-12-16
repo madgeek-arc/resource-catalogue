@@ -97,7 +97,7 @@ public class AdapterController {
         ff.addFilter("published", false);
         //TODO: do we need these?
 //        ff.addFilter("active", true);
-//        ff.addFilter("status", "approved adapter");
+//        ff.addFilter("status", "approved");
         Paging<Adapter> paging = genericResourceService.getResults(ff).map(r -> ((AdapterBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
@@ -241,7 +241,7 @@ public class AdapterController {
         // fetch catalogueId related non-public Resources
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> catalogueRelatedServices = genericResourceService
-                .getResults(createFacetFilter(catalogueId, false, "approved resource",
+                .getResults(createFacetFilter(catalogueId, false, "approved",
                         "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
@@ -249,7 +249,7 @@ public class AdapterController {
                 .toList();
         // fetch non-catalogueId related public Resources
         List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> publicServices = genericResourceService
-                .getResults(createFacetFilter(catalogueId, true, "approved resource",
+                .getResults(createFacetFilter(catalogueId, true, "approved",
                         "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
                 .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
@@ -277,7 +277,7 @@ public class AdapterController {
         // fetch catalogueId related non-public Resources
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> catalogueRelatedGuidelines = genericResourceService
-                .getResults(createFacetFilter(catalogueId, false, "approved interoperability record",
+                .getResults(createFacetFilter(catalogueId, false, "approved",
                         "interoperability_record")).getResults()
                 .stream().map(guidelineBundle -> (InteroperabilityRecordBundle) guidelineBundle)
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
@@ -285,7 +285,7 @@ public class AdapterController {
                 .toList();
         // fetch non-catalogueId related public Resources
         List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> publicGuidelines = genericResourceService
-                .getResults(createFacetFilter(catalogueId, true, "approved interoperability record",
+                .getResults(createFacetFilter(catalogueId, true, "approved",
                         "interoperability_record")).getResults()
                 .stream().map(guidelineBundle -> (InteroperabilityRecordBundle) guidelineBundle)
                 .filter(c -> !c.getInteroperabilityRecord().getCatalogueId().equals(catalogueId))

@@ -183,7 +183,7 @@ public class ProviderController {
         ff.setResourceType("provider");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         Paging<Provider> paging = genericResourceService.getResults(ff).map(r -> ((ProviderBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
@@ -272,7 +272,7 @@ public class ProviderController {
                                                           @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         allRequestParams.add("resource_organisation", id);
-        allRequestParams.add("status", "rejected resource");
+        allRequestParams.add("status", "rejected");
         allRequestParams.add("published", false);
         FacetFilter ff = FacetFilter.from(allRequestParams);
         return ResponseEntity.ok(providerService.getRejectedResources(ff, resourceType, auth));
@@ -430,7 +430,7 @@ public class ProviderController {
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         ff.addFilter("active", true);
         if (isPublic) {
             ff.addFilter("published", true);

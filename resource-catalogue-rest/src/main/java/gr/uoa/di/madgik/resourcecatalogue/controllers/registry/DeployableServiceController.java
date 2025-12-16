@@ -180,7 +180,7 @@ public class DeployableServiceController {
         ff.setResourceType("deployable_service");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved resource");
+        ff.addFilter("status", "approved");
         Paging<DeployableService> paging = genericResourceService.getResults(ff).map(r -> ((DeployableServiceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }

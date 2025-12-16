@@ -130,7 +130,7 @@ public class CSVManager implements CSVService {
                     }
                 } catch (Exception e) {
                     if (!providerOfServicesWithMalformedLoggingInfo.contains(resourceOrganisation)
-                            && service.getStatus().equals("approved resource")) {
+                            && service.getStatus().equals("approved")) {
                         providerOfServicesWithMalformedLoggingInfo.add(resourceOrganisation);
                     }
                 }

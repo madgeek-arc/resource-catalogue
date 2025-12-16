@@ -47,7 +47,7 @@ public class ResourceTemplateBundleController {
         this.trainingResourceService = trainingResourceService;
     }
 
-    // Get the Provider's Template (status = "pending provider" or "rejected provider")
+    // Get the Provider's Template (status = "pending" or "rejected")
     @GetMapping(path = {"templates"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public Bundle<?> getProviderTemplate(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
         Bundle<?> template = serviceBundleService.getResourceTemplate(id, auth);

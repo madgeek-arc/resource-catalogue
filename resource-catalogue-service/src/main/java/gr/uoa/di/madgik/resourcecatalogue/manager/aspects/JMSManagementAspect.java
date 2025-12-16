@@ -43,7 +43,7 @@ public class JMSManagementAspect {
             "|| (execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..)))",
             returning = "catalogueBundle")
     public void sendJMSForCatalogueCreation(CatalogueBundle catalogueBundle) {
-        if (catalogueBundle.getStatus().equals("approved catalogue") && catalogueBundle.isActive()) {
+        if (catalogueBundle.getStatus().equals("approved") && catalogueBundle.isActive()) {
             jmsService.convertAndSendTopic("catalogue.create", catalogueBundle);
         }
     }
@@ -55,7 +55,7 @@ public class JMSManagementAspect {
             "|| (execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..)))",
             returning = "catalogueBundle")
     public void sendJMSForCatalogueUpdate(CatalogueBundle catalogueBundle) {
-        if (catalogueBundle.getStatus().equals("approved catalogue")) {
+        if (catalogueBundle.getStatus().equals("approved")) {
             jmsService.convertAndSendTopic("catalogue.update", catalogueBundle);
         }
     }

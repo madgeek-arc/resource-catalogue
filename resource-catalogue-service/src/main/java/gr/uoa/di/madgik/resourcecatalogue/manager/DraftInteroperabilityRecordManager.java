@@ -125,7 +125,7 @@ public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager
         bundle.setLoggingInfo(loggingInfoList);
         bundle.setLatestOnboardingInfo(loggingInfoList.getLast());
 
-        bundle.setStatus("pending interoperability record");
+        bundle.setStatus("pending");
         bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
         bundle.setDraft(false);
 

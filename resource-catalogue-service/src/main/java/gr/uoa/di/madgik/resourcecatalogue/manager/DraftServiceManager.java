@@ -129,13 +129,13 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
 
         // set resource status according to Provider's templateStatus
         if (providerService.get(bundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
-            bundle.setStatus(vocabularyService.get("approved resource").getId());
+            bundle.setStatus(vocabularyService.get("approved").getId());
             LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
             bundle.setActive(true);
         } else {
-            bundle.setStatus(vocabularyService.get("pending resource").getId());
+            bundle.setStatus(vocabularyService.get("pending").getId());
         }
         bundle.setLoggingInfo(loggingInfoList);
         bundle.setLatestOnboardingInfo(loggingInfoList.getLast());

@@ -113,7 +113,7 @@ public class ProviderTestManager implements ProviderTestService {
 //            }
 //        }
 //        // else return the Provider ONLY if he is active
-//        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
+//        if (providerBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
 //            return providerBundle;
 //        }
 //        throw new InsufficientAuthenticationException("You cannot view the specific Provider");
@@ -132,7 +132,7 @@ public class ProviderTestManager implements ProviderTestService {
                 return getAll(ff);
             }
         }
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         ff.addFilter("active", true);
         return getAll(ff);
     }
@@ -176,7 +176,7 @@ public class ProviderTestManager implements ProviderTestService {
 
     private void onboard(NewProviderBundle bundle, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            bundle.markOnboard(vocabularyService.get("pending provider").getId(), false, auth, null);
+            bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
             bundle.setCatalogueId(this.catalogueId); //TODO: how we proceed with instance's catalogue ID
             bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
             //TODO: make sure we need to create our own IDs instead of users giving them
@@ -184,7 +184,7 @@ public class ProviderTestManager implements ProviderTestService {
 //            commonMethods.createIdentifiers(bundle, resourceTypeName, false); //TODO: fix and enable
         } else {
             bundle.setCatalogueId(catalogueId);
-            bundle.markOnboard(vocabularyService.get("approved provider").getId(), true, auth, null);
+            bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
             commonMethods.checkCatalogueIdConsistency(bundle, catalogueId); //TODO: test me
             bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
             idCreator.validateId(bundle.getProvider().get("id").toString());
@@ -333,13 +333,13 @@ public class ProviderTestManager implements ProviderTestService {
     @Override
     public NewProviderBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-        if (!statusVocabulary.getType().equals("Provider state")) {
-            throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         NewProviderBundle existing = get(id);
         existing.markOnboard(status, active, auth, null);
 
-        if (status.equals("approved provider")) {
+        if (status.equals("approved")) {
             checkAndAddProviderToHLEVocabulary(existing);
         }
 
@@ -355,8 +355,8 @@ public class ProviderTestManager implements ProviderTestService {
     public NewProviderBundle publish(String id, Boolean active, Authentication auth) {
         NewProviderBundle existing = get(id);
 
-        if ((existing.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
-                existing.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !existing.isActive()) {
+        if ((existing.getStatus().equals(vocabularyService.get("pending").getId()) ||
+                existing.getStatus().equals(vocabularyService.get("rejected").getId())) && !existing.isActive()) {
             throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]",
                     existing.getStatus()));
         }
@@ -473,7 +473,7 @@ public class ProviderTestManager implements ProviderTestService {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
         ff.setQuantity(10000);
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         ff.addFilter("published", false);
 
         Browsing<NewProviderBundle> providersBrowsing = getAll(ff, auth);

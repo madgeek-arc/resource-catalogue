@@ -164,14 +164,14 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         if (securityService.hasPortalAdminRole(auth) ||
                 getProviderUserEmails().contains(AuthenticationInfo.getEmail(auth).toLowerCase())) {
 //            adapter.setActive(true);
-//            adapter.setStatus(vocabularyService.get("approved adapter").getId());
+//            adapter.setStatus(vocabularyService.get("approved").getId());
             active = true;
-            status = vocabularyService.get("approved adapter").getId();
+            status = vocabularyService.get("approved").getId();
         } else if (securityService.hasRole(auth, "ROLE_USER")) {
 //            adapter.setActive(false);
-//            adapter.setStatus(vocabularyService.get("pending adapter").getId());
+//            adapter.setStatus(vocabularyService.get("pending").getId());
             active = false;
-            status = vocabularyService.get("pending adapter").getId();
+            status = vocabularyService.get("pending").getId();
         } else {
             throw new AccessDeniedException("You do not have permission to perform this action");
         }
@@ -204,8 +204,8 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
     @Override
     public AdapterBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-        if (!statusVocabulary.getType().equals("Adapter state")) {
-            throw new ValidationException(String.format("Vocabulary %s does not consist a Adapter State!", status));
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         logger.trace("verify adapter with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         AdapterBundle existingAdapter = get(id, catalogueId, false);

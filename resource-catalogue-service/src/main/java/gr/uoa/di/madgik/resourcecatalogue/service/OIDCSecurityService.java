@@ -176,7 +176,7 @@ public class OIDCSecurityService implements SecurityService {
     public boolean isApprovedProvider(String prefix, String suffix) {
         String id = prefix + "/" + suffix;
         NewProviderBundle bundle = providerTestService.get(id);
-        return "approved provider".equals(bundle.getStatus());
+        return "approved".equals(bundle.getStatus());
     }
     //endregion
 
@@ -287,7 +287,7 @@ public class OIDCSecurityService implements SecurityService {
         if (provider.getStatus() == null) {
             throw new ServiceException("Provider status field is null");
         }
-        if (provider.isActive() && "approved provider".equals(provider.getStatus())) {
+        if (provider.isActive() && "approved".equals(provider.getStatus())) {
             return true;
         }
         return "no template status".equals(provider.getTemplateStatus()) &&

@@ -113,7 +113,7 @@ public class PublicProviderController {
         ff.setResourceType("provider");
         ff.addFilter("published", true);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         Paging<Provider> paging = genericService.getResults(ff).map(r -> ((ProviderBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }

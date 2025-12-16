@@ -1,6 +1,6 @@
 <p>Dear ${user.fullName},</p>
 <p>
-    <#if bundle.status == "pending catalogue">
+    <#if bundle.status == "pending">
         You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) as a
         new ${project} Catalogue in the ${project}.
         <br>
@@ -9,7 +9,7 @@
         <br>
         Thank you for your interest in becoming a member of the ${project}.
     </#if>
-    <#if bundle.status == "approved catalogue">
+    <#if bundle.status == "approved">
         <#if bundle.active == true>
             You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}])
             as a new ${project} Catalogue in the ${project}.
@@ -22,7 +22,7 @@
             For any further clarifications please contact ${registrationEmail}.
         </#if>
     </#if>
-    <#if bundle.status == "rejected catalogue">
+    <#if bundle.status == "rejected">
         You have applied for registering [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) as a
         new ${project} Catalogue in the ${project}.
         <br>

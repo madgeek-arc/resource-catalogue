@@ -253,7 +253,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         ff.addFilter("published", false);
         List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<String> providerNames = new ArrayList<>();

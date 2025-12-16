@@ -372,7 +372,7 @@ public class RegistrationMailService {
         List<String> providersWaitingForTemplateApproval = new ArrayList<>();
 
         for (ProviderBundle providerBundle : allNonDraftProviders) {
-            if (providerBundle.getStatus().equals("pending provider")) {
+            if (providerBundle.getStatus().equals("pending")) {
                 providersWaitingForInitialApproval.add(providerBundle.getProvider().getName());
             }
             if (providerBundle.getTemplateStatus().equals("pending template")) {

@@ -39,7 +39,7 @@ public class ResourceValidationUtils {
             throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));
         }
         // check if Service is Active + Approved
-        if (!resourceBundle.isActive() || !resourceBundle.getStatus().equals("approved resource")) {
+        if (!resourceBundle.isActive() || !resourceBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("%s with ID '%s' is not Approved and/or Active",
                     resourceType, resourceId), HttpStatus.CONFLICT);
         }
@@ -57,7 +57,7 @@ public class ResourceValidationUtils {
             throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));
         }
         // check if TR is Active + Approved
-        if (!trainingResourceBundle.isActive() || !trainingResourceBundle.getStatus().equals("approved resource")) {
+        if (!trainingResourceBundle.isActive() || !trainingResourceBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("%s with ID '%s' is not Approved and/or Active",
                     resourceType, resourceId), HttpStatus.CONFLICT);
         }

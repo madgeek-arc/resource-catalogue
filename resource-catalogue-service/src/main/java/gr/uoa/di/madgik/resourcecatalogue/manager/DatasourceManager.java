@@ -107,14 +107,14 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
     private void differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
         if (catalogueId == null || catalogueId.isEmpty() || datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
             datasourceBundle.setActive(false);
-            datasourceBundle.setStatus(vocabularyService.get("pending datasource").getId());
+            datasourceBundle.setStatus(vocabularyService.get("pending").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
             datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
             registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
             commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), false);
         } else {
             datasourceBundle.setActive(true);
-            datasourceBundle.setStatus(vocabularyService.get("approved datasource").getId());
+            datasourceBundle.setStatus(vocabularyService.get("approved").getId());
             LoggingInfo loggingInfo = commonMethods.createLoggingInfo(securityService.getAdminAccess(),
                     LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
             datasourceBundle.getLoggingInfo().add(loggingInfo);
@@ -151,9 +151,9 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
         ret.setActive(existingDatasource.isActive());
 
-        // if status = "rejected datasource", update to "pending datasource"
-        if (existingDatasource.getStatus().equals(vocabularyService.get("rejected datasource").getId())) {
-            ret.setStatus(vocabularyService.get("pending datasource").getId());
+        // if status = "rejected", update to "pending"
+        if (existingDatasource.getStatus().equals(vocabularyService.get("rejected").getId())) {
+            ret.setStatus(vocabularyService.get("pending").getId());
         }
 
         // block user from updating serviceId
@@ -213,15 +213,15 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
 
     public DatasourceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-        if (!statusVocabulary.getType().equals("Datasource state")) {
-            throw new ValidationException(String.format("Vocabulary %s does not consist an Datasource state!", status));
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist an Resource state!", status));
         }
         logger.trace("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         DatasourceBundle datasourceBundle = get(id, catalogueId, false);
 
         // Verify that Service is Approved before proceeding
         if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId(), false)
-                .getStatus().equals("approved resource") && status.equals("approved datasource")) {
+                .getStatus().equals("approved") && status.equals("approved")) {
             throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
         }
 

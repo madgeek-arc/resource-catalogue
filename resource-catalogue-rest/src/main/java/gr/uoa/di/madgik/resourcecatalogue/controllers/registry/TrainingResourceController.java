@@ -184,7 +184,7 @@ public class TrainingResourceController {
         ff.setResourceType("training_resource");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved resource");
+        ff.addFilter("status", "approved");
         Paging<TrainingResource> paging = genericResourceService.getResults(ff).map(r -> ((TrainingResourceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }

@@ -111,7 +111,7 @@ public class PublicAdapterController {
         ff.setResourceType("adapter");
         ff.addFilter("published", true);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved adapter");
+        ff.addFilter("status", "approved");
         Paging<Adapter> paging = genericService.getResults(ff).map(
                 r -> ((AdapterBundle) r).getPayload());
         return ResponseEntity.ok(paging);

@@ -273,7 +273,7 @@ public class WizardController {
         List<LoggingInfo> loggingInfoList = createLoggingInfoList();
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(true);
-        catalogue.setStatus(vocabularyService.get("approved catalogue").getId());
+        catalogue.setStatus(vocabularyService.get("approved").getId());
         catalogue.setAuditState(Auditable.NOT_AUDITED);
 
         // latestOnboardingInfo

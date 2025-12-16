@@ -168,7 +168,7 @@ public class ServiceController {
         ff.setResourceType("service");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved resource");
+        ff.addFilter("status", "approved");
         Paging<Service> paging = genericResourceService.getResults(ff).map(r -> ((ServiceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
@@ -398,7 +398,7 @@ public class ServiceController {
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("status", "approved resource");
+        ff.addFilter("status", "approved");
         ff.addFilter("active", true);
         if (isPublic) {
             ff.addFilter("published", true);

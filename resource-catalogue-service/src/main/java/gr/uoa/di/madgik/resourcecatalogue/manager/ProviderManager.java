@@ -244,7 +244,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             }
         }
         // else return the Provider ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
             return providerBundle;
         }
         throw new InsufficientAuthenticationException("You cannot view the specific Provider");
@@ -262,7 +262,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             }
         }
         // else return the Provider ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId())) {
+        if (providerBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
             return providerBundle;
         }
         throw new InsufficientAuthenticationException("You cannot view the specific Provider");
@@ -328,7 +328,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             User user = User.of(auth);
             Browsing<ProviderBundle> providers = super.getAll(ff, auth);
             for (ProviderBundle providerBundle : providers.getResults()) {
-                if (providerBundle.getStatus().equals(vocabularyService.get("approved provider").getId()) ||
+                if (providerBundle.getStatus().equals(vocabularyService.get("approved").getId()) ||
                         securityService.userHasAdminAccess(user, providerBundle.getId())) {
                     retList.add(providerBundle);
                 }
@@ -340,7 +340,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         }
 
         // else return ONLY approved Providers
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         Browsing<ProviderBundle> providers = super.getAll(ff, auth);
         retList.addAll(providers.getResults());
         providers.setResults(retList);
@@ -425,14 +425,14 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     @Override
     public ProviderBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-        if (!statusVocabulary.getType().equals("Provider state")) {
-            throw new ValidationException(String.format("Vocabulary %s does not consist a Provider State!", status));
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         logger.trace("verifyProvider with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         ProviderBundle existingProvider = get(id, catalogueId, false);
         existingProvider.markOnboard(status, active, auth, null);
 
-        if (status.equals("approved provider")) {
+        if (status.equals("approved")) {
             checkAndAddProviderToHLEVocabulary(existingProvider);
         }
 
@@ -444,8 +444,8 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     public ProviderBundle publish(String id, Boolean active, Authentication auth) {
         ProviderBundle existingProvider = getWithCatalogue(id, catalogueId);
 
-        if ((existingProvider.getStatus().equals(vocabularyService.get("pending provider").getId()) ||
-                existingProvider.getStatus().equals(vocabularyService.get("rejected provider").getId())) && !existingProvider.isActive()) {
+        if ((existingProvider.getStatus().equals(vocabularyService.get("pending").getId()) ||
+                existingProvider.getStatus().equals(vocabularyService.get("rejected").getId())) && !existingProvider.isActive()) {
             throw new ValidationException(String.format("You cannot activate this Provider, because it's Inactive with status = [%s]", existingProvider.getStatus()));
         }
 
@@ -532,7 +532,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     private void activateProviderServices(List<ServiceBundle> services, Boolean active, Authentication auth) {
         for (ServiceBundle service : services) {
-            if (service.getStatus().equals("approved resource")) {
+            if (service.getStatus().equals("approved")) {
                 service.markActive(active, auth);
 
                 try {
@@ -555,7 +555,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     private void activateProviderTrainingResources(List<TrainingResourceBundle> trainingResources, Boolean active, Authentication auth) {
         for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
-            if (trainingResourceBundle.getStatus().equals("approved resource")) {
+            if (trainingResourceBundle.getStatus().equals("approved")) {
                 trainingResourceBundle.markActive(active, auth);
 
                 try {
@@ -575,7 +575,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     private void activateProviderDeployableServices(List<DeployableServiceBundle> deployableServices, Boolean active, Authentication auth) {
         for (DeployableServiceBundle bundle : deployableServices) {
-            if (bundle.getStatus().equals("approved resource")) {
+            if (bundle.getStatus().equals("approved")) {
                 bundle.markActive(active, auth);
 
                 try {
@@ -595,7 +595,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     private void activateProviderInteroperabilityRecords(List<InteroperabilityRecordBundle> interoperabilityRecords, Boolean active, Authentication auth) {
         for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
-            if (interoperabilityRecordBundle.getStatus().equals("approved interoperability record")) {
+            if (interoperabilityRecordBundle.getStatus().equals("approved")) {
                 interoperabilityRecordBundle.markActive(active, auth);
 
                 try {
@@ -755,7 +755,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     public Paging<ProviderBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
-        facetFilter.addFilter("status", "approved provider");
+        facetFilter.addFilter("status", "approved");
         facetFilter.addFilter("published", false);
 
         Browsing<ProviderBundle> providersBrowsing = getAll(facetFilter, auth);
@@ -799,7 +799,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private ProviderBundle onboard(ProviderBundle provider, String catalogueId, Authentication auth) {
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             // set catalogueId = eosc
-            provider.markOnboard(vocabularyService.get("pending provider").getId(), false, auth, null);
+            provider.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
             provider.getProvider().setCatalogueId(this.catalogueId);
             provider.setTemplateStatus(vocabularyService.get("no template status").getId());
             provider.setId(idCreator.generate(getResourceTypeName()));
@@ -807,7 +807,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         } else {
 //            List<LoggingInfo> loggingInfoList = provider.createRegistrationLoggingInfo(auth);
 //            provider.setLoggingInfo(loggingInfoList);
-            provider.markOnboard(vocabularyService.get("approved provider").getId(), true, auth, null);
+            provider.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
             commonMethods.checkCatalogueIdConsistency(provider, catalogueId);
             provider.setTemplateStatus(vocabularyService.get("approved template").getId());
             // check that external source has provided its own ID
@@ -822,7 +822,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private void checkAndAddProviderToHLEVocabulary(ProviderBundle providerBundle) {
         // FIXME: This method is faulty. Adds new HLE voc every time the name of a Provider changes.
         //  replace with "checkAndAddProviderToHLEVocabulary_fixed" but hle vocabulary migration is needed (id changes)
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.getProvider().isLegalEntity()) {
+        if (providerBundle.getStatus().equals("approved") && providerBundle.getProvider().isLegalEntity()) {
             List<String> allHLENames = vocabularyService.getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY)
                     .stream().map(Vocabulary::getName).toList();
             if (!allHLENames.contains(providerBundle.getProvider().getName())) {

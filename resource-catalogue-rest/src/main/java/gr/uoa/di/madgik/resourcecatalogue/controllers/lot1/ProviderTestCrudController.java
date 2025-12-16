@@ -305,7 +305,7 @@ public class ProviderTestCrudController {
         ff.setResourceType(resourceType);
         ff.addFilter("resource_organisation", id);
         ff.addFilter("published", false);
-        ff.addFilter("status", "rejected resource");
+        ff.addFilter("status", "rejected");
         return ResponseEntity.ok(genericResourceService.getResults(ff));
     }
 
@@ -431,7 +431,7 @@ public class ProviderTestCrudController {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(resourceTypeName);
         ff.setQuantity(10000);
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         ff.addFilter("active", true);
         if (isPublic) {
             ff.addFilter("published", true);

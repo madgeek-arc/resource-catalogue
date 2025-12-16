@@ -147,7 +147,7 @@ public class InteroperabilityRecordController {
         ff.setResourceType("interoperability_record");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved interoperability record");
+        ff.addFilter("status", "approved");
         Paging<InteroperabilityRecord> paging = genericResourceService.getResults(ff).map(r -> ((InteroperabilityRecordBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }
@@ -299,7 +299,7 @@ public class InteroperabilityRecordController {
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        ff.addFilter("status", "approved interoperability record");
+        ff.addFilter("status", "approved");
         ff.addFilter("active", true);
         if (isPublic) {
             ff.addFilter("published", true);

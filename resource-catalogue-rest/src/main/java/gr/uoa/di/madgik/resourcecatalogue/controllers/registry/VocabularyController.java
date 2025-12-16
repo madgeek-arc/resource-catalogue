@@ -118,6 +118,13 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return super.delete(vocabulary, auth);
     }
 
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Vocabulary> deleteById(@PathVariable String id, @Parameter(hidden = true) Authentication auth) {
+        Vocabulary vocabulary = vocabularyService.get(id);
+        return super.delete(vocabulary, auth);
+    }
+
     @PostMapping(path = "/addBulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<Vocabulary> newVocabularies, @Parameter(hidden = true) Authentication auth) {

@@ -112,7 +112,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             }
         }
         // else return the Catalogue ONLY if it is active
-        if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId())) {
+        if (catalogueBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
             return catalogueBundle;
         }
         throw new InsufficientAuthenticationException("You cannot view the specific Catalogue");
@@ -132,7 +132,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
             Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
             for (CatalogueBundle catalogueBundle : catalogues.getResults()) {
-                if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId()) ||
+                if (catalogueBundle.getStatus().equals(vocabularyService.get("approved").getId()) ||
                         securityService.hasAdminAccess(auth, catalogueBundle.getId())) {
                     retList.add(catalogueBundle);
                 }
@@ -152,7 +152,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
 
         // else return ONLY approved Catalogues
-        ff.addFilter("status", "approved catalogue");
+        ff.addFilter("status", "approved");
         Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
         retList.addAll(catalogues.getResults());
         catalogues.setResults(retList);
@@ -171,7 +171,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(false);
-        catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
+        catalogue.setStatus(vocabularyService.get("pending").getId());
         catalogue.setAuditState(Auditable.NOT_AUDITED);
 
         // latestOnboardingInfo
@@ -361,8 +361,8 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Override
     public CatalogueBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-        if (!statusVocabulary.getType().equals("Catalogue state")) {
-            throw new ValidationException(String.format("Vocabulary %s does not consist a Catalogue State!", status));
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         logger.trace("verifyCatalogue with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         CatalogueBundle existingCatalogue = get(id);
@@ -375,8 +375,8 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Override
     public CatalogueBundle publish(String id, Boolean active, Authentication auth) {
         CatalogueBundle existingCatalogue = get(id);
-        if ((existingCatalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
-                existingCatalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !existingCatalogue.isActive()) {
+        if ((existingCatalogue.getStatus().equals(vocabularyService.get("pending").getId()) ||
+                existingCatalogue.getStatus().equals(vocabularyService.get("rejected").getId())) && !existingCatalogue.isActive()) {
             throw new ResourceException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]",
                     existingCatalogue.getStatus()), HttpStatus.CONFLICT);
         }

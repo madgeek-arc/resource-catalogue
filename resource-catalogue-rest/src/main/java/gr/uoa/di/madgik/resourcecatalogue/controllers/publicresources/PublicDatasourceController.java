@@ -104,7 +104,7 @@ public class PublicDatasourceController {
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("datasource");
         ff.addFilter("published", true);
-        ff.addFilter("status", "approved datasource");
+        ff.addFilter("status", "approved");
         Paging<Datasource> paging = genericService.getResults(ff).map(r -> ((DatasourceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }

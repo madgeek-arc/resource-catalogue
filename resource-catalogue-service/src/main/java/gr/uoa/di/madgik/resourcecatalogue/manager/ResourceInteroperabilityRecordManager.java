@@ -201,7 +201,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
 
     private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
         for (String interoperabilityRecord : resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()) {
-            if (!interoperabilityRecordService.get(interoperabilityRecord).getStatus().equals("approved interoperability record")) {
+            if (!interoperabilityRecordService.get(interoperabilityRecord).getStatus().equals("approved")) {
                 throw new ValidationException("One ore more of the Interoperability Records you have provided is not yet approved.");
             }
         }

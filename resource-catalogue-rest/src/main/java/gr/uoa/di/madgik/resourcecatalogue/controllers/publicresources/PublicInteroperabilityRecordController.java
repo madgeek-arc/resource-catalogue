@@ -120,7 +120,7 @@ public class PublicInteroperabilityRecordController {
         ff.setResourceType("interoperability_record");
         ff.addFilter("published", true);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved interoperability record");
+        ff.addFilter("status", "approved");
         Paging<InteroperabilityRecord> paging = genericService.getResults(ff).map(
                 r -> ((InteroperabilityRecordBundle) r).getPayload());
         return ResponseEntity.ok(paging);

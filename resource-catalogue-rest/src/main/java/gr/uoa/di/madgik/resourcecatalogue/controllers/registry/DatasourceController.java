@@ -106,7 +106,7 @@ public class DatasourceController {
         ff.setResourceType("datasource");
         ff.addFilter("published", false);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved datasource");
+        ff.addFilter("status", "approved");
         Paging<Datasource> paging = genericResourceService.getResults(ff).map(r -> ((DatasourceBundle) r).getPayload());
         return ResponseEntity.ok(paging);
     }

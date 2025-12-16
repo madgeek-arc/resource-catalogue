@@ -1,12 +1,12 @@
 <p>Dear ${user.fullName},</p>
 <p>
-    <#if bundle.status == "pending interoperability record">
+    <#if bundle.status == "pending">
         You have applied for registering[${bundle.interoperabilityRecord.title}] -
         [${bundle.interoperabilityRecord.id}] as a new ${project} Interoperability Record in
         the ${project}.
         <br>
         Your application will be reviewed and you will be notified on its approval or rejection.
-    <#elseif bundle.status == "approved interoperability record">
+    <#elseif bundle.status == "approved">
         Your application for registering [${bundle.interoperabilityRecord.title}] -
         [${bundle.interoperabilityRecord.id}] as a new ${project} Interoperability Record in
         the ${project} has been approved.

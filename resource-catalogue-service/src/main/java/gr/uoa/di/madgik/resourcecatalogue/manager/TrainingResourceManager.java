@@ -128,7 +128,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                     trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
         }
         // check if Provider is approved
-        if (!providerBundle.getStatus().equals("approved provider")) {
+        if (!providerBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
                     trainingResourceBundle.getTrainingResource().getResourceOrganisation()), HttpStatus.CONFLICT);
         }
@@ -156,7 +156,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
 
         // resource status & extra loggingInfo for Approval
         if (providerBundle.getTemplateStatus().equals("approved template")) {
-            trainingResourceBundle.setStatus(vocabularyService.get("approved resource").getId());
+            trainingResourceBundle.setStatus(vocabularyService.get("approved").getId());
             LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
                     LoggingInfo.ActionType.APPROVED.getKey());
             loggingInfoList.add(loggingInfoApproved);
@@ -164,7 +164,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
             // latestOnboardingInfo
             trainingResourceBundle.setLatestOnboardingInfo(loggingInfoApproved);
         } else {
-            trainingResourceBundle.setStatus(vocabularyService.get("pending resource").getId());
+            trainingResourceBundle.setStatus(vocabularyService.get("pending").getId());
         }
 
         // LoggingInfo
@@ -236,10 +236,10 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         ret.setStatus(existingTrainingResource.getStatus());
         ret.setSuspended(existingTrainingResource.isSuspended());
 
-        // if Resource's status = "rejected resource", update to "pending resource" & Provider templateStatus to "pending template"
-        if (existingTrainingResource.getStatus().equals(vocabularyService.get("rejected resource").getId())) {
+        // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
+        if (existingTrainingResource.getStatus().equals(vocabularyService.get("rejected").getId())) {
             if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                ret.setStatus(vocabularyService.get("pending resource").getId());
+                ret.setStatus(vocabularyService.get("pending").getId());
                 ret.setActive(false);
                 providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
                 providerService.update(providerBundle, null, auth);
@@ -300,7 +300,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
             }
         }
         // else return the Training Resource ONLY if it is active
-        if (trainingResourceBundle.getStatus().equals(vocabularyService.get("approved resource").getId())) {
+        if (trainingResourceBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
             return trainingResourceBundle;
         }
         throw new InsufficientAuthenticationException("You cannot view the specific Training Resource");
@@ -328,9 +328,9 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
 
         switch (status) {
-            case "pending resource" -> resourceProvider.setTemplateStatus("pending template");
-            case "approved resource" -> resourceProvider.setTemplateStatus("approved template");
-            case "rejected resource" -> resourceProvider.setTemplateStatus("rejected template");
+            case "pending" -> resourceProvider.setTemplateStatus("pending template");
+            case "approved" -> resourceProvider.setTemplateStatus("approved template");
+            case "rejected" -> resourceProvider.setTemplateStatus("rejected template");
         }
 
         logger.info("Verifying Training Resource: {}", trainingResourceBundle);
@@ -362,15 +362,15 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         String activeProvider = "";
         trainingResourceBundle = get(trainingResourceId, catalogueId, false);
 
-        if ((trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId()) ||
-                trainingResourceBundle.getStatus().equals(vocabularyService.get("rejected resource").getId())) && !trainingResourceBundle.isActive()) {
+        if ((trainingResourceBundle.getStatus().equals(vocabularyService.get("pending").getId()) ||
+                trainingResourceBundle.getStatus().equals(vocabularyService.get("rejected").getId())) && !trainingResourceBundle.isActive()) {
             throw new ResourceException(String.format("You cannot activate this Training Resource, because it's Inactive with status = [%s]",
                     trainingResourceBundle.getStatus()), HttpStatus.CONFLICT);
         }
 
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
                 trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
-        if (providerBundle.getStatus().equals("approved provider") && providerBundle.isActive()) {
+        if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
             activeProvider = trainingResourceBundle.getTrainingResource().getResourceOrganisation();
         }
         if (active && activeProvider.isEmpty()) {
@@ -491,7 +491,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     public Paging<TrainingResourceBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         FacetFilter facetFilter = new FacetFilter();
         facetFilter.setQuantity(maxQuantity);
-        facetFilter.addFilter("status", "approved resource");
+        facetFilter.addFilter("status", "approved");
         facetFilter.addFilter("published", false);
 
         Browsing<TrainingResourceBundle> trainingsBrowsing = getAll(facetFilter, auth);
@@ -540,7 +540,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         ff.addFilter("published", false);
         List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();
         for (TrainingResourceBundle trainingResourceBundle : allProviderTrainingResources) {
-            if (trainingResourceBundle.getStatus().equals(vocabularyService.get("pending resource").getId())) {
+            if (trainingResourceBundle.getStatus().equals(vocabularyService.get("pending").getId())) {
                 return trainingResourceBundle;
             }
         }
@@ -569,7 +569,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     public TrainingResourceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueId, false);
         // check Datasource's status
-        if (!trainingResourceBundle.getStatus().equals("approved resource")) {
+        if (!trainingResourceBundle.getStatus().equals("approved")) {
             throw new ValidationException(String.format("You cannot move Training Resource with id [%s] to another Provider as it" +
                     "is not yet Approved", trainingResourceBundle.getId()));
         }
