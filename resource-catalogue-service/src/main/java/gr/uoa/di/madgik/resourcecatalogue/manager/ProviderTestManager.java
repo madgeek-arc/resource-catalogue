@@ -91,7 +91,8 @@ public class ProviderTestManager implements ProviderTestService {
     public NewProviderBundle get(String id) {
         return genericResourceService.get(resourceTypeName,
                 new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "false")
+                new SearchService.KeyValue("published", "false"),
+                new SearchService.KeyValue("draft", "false")
         );
         //TODO: do we need this?
 //        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
@@ -133,6 +134,7 @@ public class ProviderTestManager implements ProviderTestService {
             }
         }
         ff.addFilter("status", "approved");
+        ff.addFilter("draft", false);
         ff.addFilter("active", true);
         return getAll(ff);
     }
@@ -525,7 +527,8 @@ public class ProviderTestManager implements ProviderTestService {
         return genericResourceService.get(resourceTypeName,
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("catalogue_id", catalogueId),
-                new SearchService.KeyValue("published", "false")
+                new SearchService.KeyValue("published", "false"),
+                new SearchService.KeyValue("draft", "false")
         );
     }
 

@@ -23,29 +23,32 @@ import org.springframework.security.core.Authentication;
 public interface DraftTestResourceService<T extends NewBundle> {
 
     /**
+     * Adds a new Draft resource
      *
-     * @param bundle
+     * @param bundle Bundle
      * @param auth   Authentication
      * @return {@link T}
      */
-    T addDraft(NewProviderBundle bundle, Authentication auth);
+    T addDraft(T bundle, Authentication auth);
 
     /**
+     * Updates an existing Draft resource
      *
-     * @param bundle
+     * @param bundle Bundle
      * @param auth   Authentication
      * @return {@link T}
      */
     T updateDraft(T bundle, Authentication auth);
 
     /**
+     * Deletes a Draft resource
      *
      * @param bundle Bundle
      */
     void deleteDraft(T bundle);
 
     /**
-     * Transforms the resource to active.
+     * Transforms the resource to non-draft.
      *
      * @param t    resource
      * @param auth Authentication
@@ -54,7 +57,7 @@ public interface DraftTestResourceService<T extends NewBundle> {
     T transformToNonDraft(T t, Authentication auth);
 
     /**
-     * Transforms the resource with the specified id to active.
+     * Transforms the resource with the specified id to non-draft.
      *
      * @param id   resource ID
      * @param auth Authentication
