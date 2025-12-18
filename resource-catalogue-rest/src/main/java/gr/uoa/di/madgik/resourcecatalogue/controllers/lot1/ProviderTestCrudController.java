@@ -10,7 +10,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderTestService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,7 +41,6 @@ import java.util.*;
 public class ProviderTestCrudController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderTestCrudController.class);
-    private static final String resourceTypeName = "providertest";
 
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
@@ -93,8 +91,8 @@ public class ProviderTestCrudController {
                                             @RequestParam MultiValueMap<String, Object> params,
                                             @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType(resourceTypeName);
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<NewProviderBundle> paging = providerTestService.getAll(ff, auth);
         return ResponseEntity.ok(paging.map(NewProviderBundle::getProvider));
     }
@@ -110,8 +108,8 @@ public class ProviderTestCrudController {
     public ResponseEntity<Paging<NewProviderBundle>> getAllBundles(@Parameter(hidden = true)
                                                                    @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType(resourceTypeName);
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<NewProviderBundle> paging = providerTestService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
@@ -196,9 +194,9 @@ public class ProviderTestCrudController {
                                                                     @SuppressWarnings("unused")
                                                                     @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType(resourceTypeName);
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<NewProviderBundle> paging = providerTestService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
@@ -206,8 +204,11 @@ public class ProviderTestCrudController {
     @Operation(summary = "Returns all Provider's of a User.")
     @GetMapping(path = "getMyProviders")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<NewProviderBundle>> getMy(@Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(providerTestService.getMy(null, auth).getResults(), HttpStatus.OK);
+    public ResponseEntity<List<NewProviderBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
+                                                         @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("draft", draft);
+        return new ResponseEntity<>(providerTestService.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @Operation(summary = "Returns all Provider's rejected resources, providing the corresponding resource type.")
@@ -223,6 +224,7 @@ public class ProviderTestCrudController {
         ff.setResourceType(resourceType);
         ff.addFilter("resource_organisation", id);
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         ff.addFilter("status", "rejected");
         return ResponseEntity.ok(providerTestService.getAll(ff, auth));
     }
@@ -318,48 +320,11 @@ public class ProviderTestCrudController {
     // front-end use (Provider form)
     @Hidden
     @GetMapping(path = {"providerIdToNameMap"})
-    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> providerIdToNameMap(@RequestParam String catalogueId) {
-        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allProviders = new ArrayList<>();
-        // fetch catalogueId related non-public Providers
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedProviders = providerTestService
-                .getAll(createFacetFilter(catalogueId, false)).getResults()
-                .stream().map(obj -> (NewProviderBundle) obj)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
-                        c.getProvider().get("id").toString(), c.getProvider().get("name").toString())
-                )
-                .toList();
-        // fetch non-catalogueId related public Providers
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicProviders = providerTestService
-                .getAll(createFacetFilter(catalogueId, true)).getResults()
-                .stream().map(obj -> (NewProviderBundle) obj)
-                .filter(c -> !c.getProvider().get("catalogueId").equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
-                        c.getProvider().get("id").toString(), c.getProvider().get("name").toString())
-                )
-                .toList();
-
-        allProviders.addAll(catalogueRelatedProviders);
-        allProviders.addAll(publicProviders);
-        ret.put("PROVIDERS_VOC", allProviders);
+    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> getProviderIdToNameMap(@RequestParam String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret =
+                providerTestService.getProviderIdToNameMap(catalogueId);
         return ResponseEntity.ok(ret);
     }
-
-    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.setQuantity(10000);
-        ff.addFilter("status", "approved");
-        ff.addFilter("active", true);
-        if (isPublic) {
-            ff.addFilter("published", true);
-        } else {
-            ff.addFilter("catalogue_id", catalogueId);
-            ff.addFilter("published", false);
-        }
-        return ff;
-    }
-
 
     @PutMapping(path = "changeCatalogue")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
@@ -431,15 +396,16 @@ public class ProviderTestCrudController {
         return new ResponseEntity<>(draft.getProvider(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/draft/getMyDraftProviders")
-    public ResponseEntity<List<NewProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
-        ff.addFilter("draft", true);
-        return new ResponseEntity<>(providerTestService.getMy(ff, auth).getResults(), HttpStatus.OK);
-    }
+    //TODO: Do we need this? - unified with getMy()
+//
+//    @Operation(summary = "Returns all Draft Provider's of a User.")
+//    @GetMapping(path = "/draft/getMyDraftProviders")
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<List<NewProviderBundle>> getMyDraftProviders(@Parameter(hidden = true) Authentication auth) {
+//        FacetFilter ff = new FacetFilter();
+//        ff.addFilter("draft", true);
+//        return new ResponseEntity<>(providerTestService.getMy(ff, auth).getResults(), HttpStatus.OK);
+//    }
 
     @PostMapping(path = "/draft")
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -447,8 +413,6 @@ public class ProviderTestCrudController {
                                               @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
-        //TODO:
-        // whatever needed from DraftProviderManager add()
         NewProviderBundle ret = providerTestService.addDraft(providerBundle, auth);
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
@@ -465,7 +429,6 @@ public class ProviderTestCrudController {
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
 
-    //TODO: change to Void -> inform front-end
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public void deleteDraftProvider(@PathVariable String prefix,

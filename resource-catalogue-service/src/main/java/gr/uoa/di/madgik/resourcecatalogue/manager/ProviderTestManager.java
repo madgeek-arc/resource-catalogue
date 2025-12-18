@@ -44,12 +44,11 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 
-//TODO: REMOVE ANY LOGIC THAT RELATES WITH MODEL'S FIELDS (eg. id, users)
+//TODO: REMOVE ANY LOGIC THAT RELATES WITH MODEL'S FIELDS (eg. name, users, HLE)
 @org.springframework.stereotype.Service("providerTestManager")
-public class ProviderTestManager implements ProviderTestService {
+public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.manager.TestManager<NewProviderBundle> implements ProviderTestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderTestManager.class);
-    private final String resourceTypeName = "providertest";
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -75,6 +74,7 @@ public class ProviderTestManager implements ProviderTestService {
                                ProviderResourcesCommonMethods commonMethods,
                                SecurityService securityService,
                                CatalogueService catalogueService) {
+        super(genericResourceService, securityService, catalogueService);
         this.genericResourceService = genericResourceService;
         this.registrationMailService = registrationMailService;
         this.vocabularyService = vocabularyService;
@@ -88,13 +88,18 @@ public class ProviderTestManager implements ProviderTestService {
     }
 
     @Override
-    public NewProviderBundle get(String id) {
-        return genericResourceService.get(resourceTypeName,
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "false"),
-                new SearchService.KeyValue("draft", "false")
-        );
-        //TODO: do we need this?
+    protected String getResourceTypeName() {
+        return "providertest";
+    }
+
+//    @Override
+//    public NewProviderBundle get(String id) {
+//        return genericResourceService.get(getResourceTypeName(),
+//                new SearchService.KeyValue("resource_internal_id", id),
+//                new SearchService.KeyValue("published", "false"),
+//                new SearchService.KeyValue("draft", "false")
+//        );
+//        //TODO: do we need this?
 //        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
 //        if (catalogueBundle == null) {
 //            throw new CatalogueResourceNotFoundException(
@@ -104,7 +109,7 @@ public class ProviderTestManager implements ProviderTestService {
 //            throw new ResourceException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]",
 //                    providerId, catalogueId), HttpStatus.CONFLICT);
 //        }
-        //TODO: moved on Controller's PostAuth -> check that it works
+    //TODO: moved on Controller's PostAuth -> check that it works
 //        if (auth != null && auth.isAuthenticated()) {
 //            User user = User.of(auth);
 //            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
@@ -118,44 +123,36 @@ public class ProviderTestManager implements ProviderTestService {
 //            return providerBundle;
 //        }
 //        throw new InsufficientAuthenticationException("You cannot view the specific Provider");
-    }
+//    }
 
     //TODO: hard test this
-    @Override
-    public Browsing<NewProviderBundle> getAll(FacetFilter ff, Authentication auth) {
-        boolean authenticated = auth != null && auth.isAuthenticated();
-        if (authenticated) {
-            if (securityService.hasPortalAdminRole(auth)) {
-                return getAll(ff);
-            }
-            if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
-                ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
-                return getAll(ff);
-            }
-        }
-        ff.addFilter("status", "approved");
-        ff.addFilter("draft", false);
-        ff.addFilter("active", true);
-        return getAll(ff);
-    }
+//    @Override
+//    public Browsing<NewProviderBundle> getAll(FacetFilter ff, Authentication auth) {
+//        boolean authenticated = auth != null && auth.isAuthenticated();
+//        if (authenticated) {
+//            if (securityService.hasPortalAdminRole(auth)) {
+//                return getAll(ff);
+//            }
+//            if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
+//                ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
+//                return getAll(ff);
+//            }
+//        }
+//        ff.addFilter("status", "approved");
+//        ff.addFilter("active", true);
+//        return getAll(ff);
+//    }
 
-    @Override
-    public Browsing<NewProviderBundle> getAll(FacetFilter filter) {
-        return genericResourceService.getResults(filter);
-    }
+//    @Override
+//    public Browsing<NewProviderBundle> getAll(FacetFilter filter) {
+//        return genericResourceService.getResults(filter);
+//    }
 
     @Override
     public Browsing<NewProviderBundle> getMy(FacetFilter ff, Authentication auth) {
-        if (ff == null) {
-            ff = new FacetFilter();
-            ff.setResourceType(resourceTypeName);
-            ff.setQuantity(10000);
-            ff.addFilter("published", false);
-            ff.addFilter("draft", false);
-        }
-        if (!ff.getFilter().containsKey("published")) {
-            ff.addFilter("published", false);
-        }
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
         ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
         return genericResourceService.getResults(ff);
@@ -170,7 +167,7 @@ public class ProviderTestManager implements ProviderTestService {
     @Override
     public NewProviderBundle add(NewProviderBundle bundle, String catalogueId, Authentication auth) {
         onboard(bundle, catalogueId, auth);
-        NewProviderBundle ret = genericResourceService.add(resourceTypeName, bundle);
+        NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
 //        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
 //        synchronizerService.syncAdd(bundle.getProvider()); //TODO: remove this?
         return ret;
@@ -182,15 +179,15 @@ public class ProviderTestManager implements ProviderTestService {
             bundle.setCatalogueId(this.catalogueId); //TODO: how we proceed with instance's catalogue ID
             bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
             //TODO: make sure we need to create our own IDs instead of users giving them
-            bundle.getProvider().put("id", idCreator.generate(resourceTypeName));
-//            commonMethods.createIdentifiers(bundle, resourceTypeName, false); //TODO: fix and enable
+            bundle.setId(idCreator.generate(getResourceTypeName()));
+//            commonMethods.createIdentifiers(bundle, getResourceTypeName(), false); //TODO: fix and enable
         } else {
             bundle.setCatalogueId(catalogueId);
             bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
             commonMethods.checkCatalogueIdConsistency(bundle, catalogueId); //TODO: test me
             bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
-            idCreator.validateId(bundle.getProvider().get("id").toString());
-//            commonMethods.createIdentifiers(bundle, resourceTypeName, true); //TODO: fix and enable
+            idCreator.validateId(bundle.getId());
+//            commonMethods.createIdentifiers(bundle, getResourceTypeName(), true); //TODO: fix and enable
         }
 
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
@@ -199,7 +196,7 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public NewProviderBundle update(NewProviderBundle bundle, String catalogueId, String comment, Authentication auth) {
-        NewProviderBundle existing = get(bundle.getProvider().get("id").toString());
+        NewProviderBundle existing = get(bundle.getId());
         // check if there are actual changes in the Provider
         if (bundle.equals(existing)) {
             return bundle;
@@ -210,12 +207,11 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public NewProviderBundle update(NewProviderBundle bundle, Authentication auth) {
-        NewProviderBundle existing = get(bundle.getProvider().get("id").toString()); //TODO: I don't like calling it twice
+        NewProviderBundle existing = get(bundle.getId()); //TODO: I don't like calling it twice
         validate(bundle);
 
         try {
-            NewProviderBundle ret = genericResourceService.update(resourceTypeName,
-                    bundle.getProvider().get("id").toString(), bundle);
+            NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
 
             checkAndAddProviderToHLEVocabulary(bundle);
             sendEmailsAfterProviderUpdate(bundle, existing);
@@ -263,7 +259,7 @@ public class ProviderTestManager implements ProviderTestService {
     private List<String> extractEmails(NewProviderBundle providerBundle) {
         List<String> emails = new ArrayList<>();
 
-        Object usersObj = providerBundle.getProvider().get("users");
+        Object usersObj = providerBundle.getProvider().get("users"); //TODO: how to enforce that users will be always in the model
         if (usersObj instanceof Collection<?>) {
             for (Object obj : (Collection<?>) usersObj) {
                 if (obj instanceof User user) {
@@ -282,7 +278,7 @@ public class ProviderTestManager implements ProviderTestService {
             throw new ValidationException("You cannot directly delete a Public Provider");
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        logger.trace("User is attempting to delete the Provider with id '{}'", bundle.getProvider().get("id"));
+        logger.trace("User is attempting to delete the Provider with id '{}'", bundle.getId());
 //        List<ServiceBundle> services =
 //                serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
 //        if (services != null && !services.isEmpty()) {
@@ -322,9 +318,9 @@ public class ProviderTestManager implements ProviderTestService {
 //                }
 //            });
 //        }
-        logger.debug("Deleting Provider: {} and all his Resources", bundle.getProvider().get("id"));
+        logger.debug("Deleting Provider: {} and all his Resources", bundle.getId());
 
-        genericResourceService.delete(resourceTypeName, bundle.getProvider().get("id").toString());
+        genericResourceService.delete(getResourceTypeName(), bundle.getId());
 
         // TODO: move to aspect
 //        registrationMailService.notifyProviderAdminsForProviderDeletion(bundle);
@@ -347,7 +343,7 @@ public class ProviderTestManager implements ProviderTestService {
 
         logger.info("Verifying Provider: {}", existing);
         try {
-            return genericResourceService.update(resourceTypeName, id, existing);
+            return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -366,7 +362,7 @@ public class ProviderTestManager implements ProviderTestService {
         existing.markActive(active, auth);
 //        activateProviderResources(existingProvider.getId(), active, auth); //FIXME
         try {
-            return genericResourceService.update(resourceTypeName, id, existing);
+            return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -374,7 +370,10 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
-        NewProviderBundle bundle = get(id);
+        NewProviderBundle bundle = get(
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "false")
+        );
         String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
 
         List<String> providerAdmins = extractEmails(bundle);
@@ -402,7 +401,7 @@ public class ProviderTestManager implements ProviderTestService {
             bundle.getMetadata().setTerms(existingTerms);
 
             try {
-                genericResourceService.update(resourceTypeName, id, bundle);
+                genericResourceService.update(getResourceTypeName(), id, bundle);
             } catch (ResourceException | ResourceNotFoundException e) {
                 logger.info("Could not update terms for Provider with id: '{}'", id);
             } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -440,7 +439,7 @@ public class ProviderTestManager implements ProviderTestService {
 //        }
 
         try {
-            return genericResourceService.update(resourceTypeName, id, existing);
+            return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -454,11 +453,10 @@ public class ProviderTestManager implements ProviderTestService {
         // send notification emails to Provider Admins
 //        registrationMailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
 
-        logger.info("Audited Provider '{}'-'{}' with [actionType: {}]",
-                existing.getProvider().get("id"), existing.getProvider().get("name"), actionType);
+        logger.info("Audited Provider '{}' with [actionType: {}]", existing.getId(), actionType);
 
         try {
-            genericResourceService.update(resourceTypeName, id, existing);
+            genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -473,10 +471,11 @@ public class ProviderTestManager implements ProviderTestService {
     @Override
     public Paging<NewProviderBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setResourceType(resourceTypeName);
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(10000);
         ff.addFilter("status", "approved");
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
 
         Browsing<NewProviderBundle> providersBrowsing = getAll(ff, auth);
         List<NewProviderBundle> providersToBeAudited = new ArrayList<>();
@@ -516,21 +515,21 @@ public class ProviderTestManager implements ProviderTestService {
                 providersBrowsing.getFacets());
     }
 
-    @Override
-    public NewProviderBundle get(String id, String catalogueId) {
-        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-        //FIXME: never reaches here
-        if (catalogueBundle == null) {
-            throw new CatalogueResourceNotFoundException(
-                    String.format("Could not find catalogue with id: %s", catalogueId));
-        }
-        return genericResourceService.get(resourceTypeName,
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("catalogue_id", catalogueId),
-                new SearchService.KeyValue("published", "false"),
-                new SearchService.KeyValue("draft", "false")
-        );
-    }
+//    @Override
+//    public NewProviderBundle get(String id, String catalogueId) {
+//        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
+//        //FIXME: never reaches here
+//        if (catalogueBundle == null) {
+//            throw new CatalogueResourceNotFoundException(
+//                    String.format("Could not find catalogue with id: %s", catalogueId));
+//        }
+//        return genericResourceService.get(getResourceTypeName(),
+//                new SearchService.KeyValue("resource_internal_id", id),
+//                new SearchService.KeyValue("catalogue_id", catalogueId),
+//                new SearchService.KeyValue("published", "false"),
+//                new SearchService.KeyValue("draft", "false")
+//        );
+//    }
 
     @Override
     public String createId(NewProviderBundle newProviderBundle) {
@@ -556,10 +555,10 @@ public class ProviderTestManager implements ProviderTestService {
         return List.of();
     }
 
-    @Override
-    public NewProviderBundle get(SearchService.KeyValue... keyValues) {
-        return genericResourceService.get(resourceTypeName, keyValues);
-    }
+//    @Override
+//    public NewProviderBundle get(SearchService.KeyValue... keyValues) {
+//        return genericResourceService.get(getResourceTypeName(), keyValues);
+//    }
 
     @Override
     public List<NewProviderBundle> delAll() {
@@ -569,7 +568,7 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public NewProviderBundle validate(NewProviderBundle bundle) {
-        logger.debug("Validating Provider with id: '{}'", bundle.getProvider().get("id"));
+        logger.debug("Validating Provider with id: '{}'", bundle.getId());
         return genericResourceService.validate(bundle.getProvider());
     }
 
@@ -606,12 +605,14 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        ProviderBundle provider = genericResourceService.get(resourceTypeName,
+        NewProviderBundle provider = genericResourceService.get(getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", providerId),
                 new SearchService.KeyValue("published", "false"));
-        for (User user : provider.getProvider().getUsers()) {
-            if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
+
+        List<String> userEmails = extractEmails(provider);
+        for (String email : userEmails) {
+            if (email.equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
+//                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth)); //FIXME
             }
         }
     }
@@ -633,6 +634,7 @@ public class ProviderTestManager implements ProviderTestService {
         ff.setQuantity(10000);
         ff.addFilter("hosting_legal_entity", hle);
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
         List<NewProviderBundle> providers = getAll(ff, auth).getResults();
         List<ServiceBundle> services = new ArrayList<>();
@@ -641,11 +643,11 @@ public class ProviderTestManager implements ProviderTestService {
         createMapValuesForHLE(providers, "provider", mapValuesList);
         for (NewProviderBundle providerBundle : providers) {
             services.addAll(serviceBundleService.getResourceBundles(providerBundle.getCatalogueId(),
-                    providerBundle.getProvider().get("id").toString(), auth).getResults());
+                    providerBundle.getId(), auth).getResults());
             trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
-                    providerBundle.getProvider().get("id").toString(), auth).getResults());
+                    providerBundle.getId(), auth).getResults());
             interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(
-                    providerBundle.getCatalogueId(), providerBundle.getProvider().get("id").toString(), auth).getResults());
+                    providerBundle.getCatalogueId(), providerBundle.getId(), auth).getResults());
         }
         createMapValuesForHLE(services, "service", mapValuesList);
         createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
@@ -663,9 +665,9 @@ public class ProviderTestManager implements ProviderTestService {
             switch (resourceType) {
                 case "provider":
                     NewProviderBundle providerBundle = (NewProviderBundle) obj;
-                    value.setId(providerBundle.getProvider().get("id").toString());
+                    value.setId(providerBundle.getId());
                     value.setName(providerBundle.getProvider().get("name").toString());
-                    value.setCatalogue(providerBundle.getProvider().get("catalogue").toString());
+                    value.setCatalogue(providerBundle.getCatalogueId());
                     break;
                 case "service":
                     ServiceBundle serviceBundle = (ServiceBundle) obj;
@@ -731,33 +733,61 @@ public class ProviderTestManager implements ProviderTestService {
     private String createProviderHleId(NewProviderBundle bundle) {
         return "%s-%s".formatted(
                 Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey().toLowerCase().replace(" ", "_"),
-                bundle.getProvider().get("id").toString()
+                bundle.getId()
         );
+    }
+
+    public Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> getProviderIdToNameMap(String catalogueId) {
+        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allProviders = new ArrayList<>();
+        // fetch catalogueId related non-public Providers
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedProviders = getAll(createFacetFilter(catalogueId, false))
+                .getResults()
+                .stream()
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
+                        c.getProvider().get("id").toString(), c.getProvider().get("name").toString())
+                )
+                .toList();
+        // fetch non-catalogueId related public Providers
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicProviders = getAll(createFacetFilter(catalogueId, true)).getResults()
+                .stream()
+                .filter(c -> !c.getProvider().get("catalogueId").equals(catalogueId))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
+                        c.getProvider().get("id").toString(), c.getProvider().get("name").toString())
+                )
+                .toList();
+
+        allProviders.addAll(catalogueRelatedProviders);
+        allProviders.addAll(publicProviders);
+        ret.put("PROVIDERS_VOC", allProviders);
+        return ret;
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(10000);
+        ff.addFilter("status", "approved");
+        ff.addFilter("active", true);
+        ff.addFilter("draft", false);
+        if (isPublic) {
+            ff.addFilter("published", true);
+        } else {
+            ff.addFilter("catalogue_id", catalogueId);
+            ff.addFilter("published", false);
+        }
+        return ff;
     }
 
     @Override
     public NewProviderBundle addDraft(NewProviderBundle bundle, Authentication auth) {
-
-        bundle.setId(idCreator.generate(resourceTypeName));
-//        commonMethods.createIdentifiers(bundle, resourceTypeName, false); //FIXME
+        bundle.markDraft(auth, null);
+        bundle.setId(idCreator.generate(getResourceTypeName()));
+        bundle.setCatalogueId(catalogueId);
+//        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false); //FIXME
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
-        logger.trace("Attempting to add a new Draft Provider: {}", bundle);
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(),
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.DRAFT.getKey(),
-                LoggingInfo.ActionType.CREATED.getKey());
-        loggingInfoList.add(loggingInfo);
-        bundle.setLoggingInfo(loggingInfoList);
-
-        bundle.setCatalogueId(catalogueId);
-        bundle.setActive(false);
-        bundle.setDraft(true);
-
-        NewProviderBundle ret = genericResourceService.add(resourceTypeName, bundle);
-
+        NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
         return ret;
     }
 
@@ -765,8 +795,7 @@ public class ProviderTestManager implements ProviderTestService {
     public NewProviderBundle updateDraft(NewProviderBundle bundle, Authentication auth) {
         validate(bundle);
         try {
-            NewProviderBundle ret = genericResourceService.update(resourceTypeName,
-                    bundle.getProvider().get("id").toString(), bundle);
+            NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
             return ret;
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -775,40 +804,23 @@ public class ProviderTestManager implements ProviderTestService {
 
     @Override
     public void deleteDraft(NewProviderBundle bundle) {
-        genericResourceService.delete(resourceTypeName, bundle.getProvider().get("id").toString());
+        genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
 
     @Override
     public NewProviderBundle transformToNonDraft(String id, Authentication auth) {
-        NewProviderBundle bundle = genericResourceService.get(resourceTypeName, id);
+        NewProviderBundle bundle = genericResourceService.get(getResourceTypeName(), id);
         return transformToNonDraft(bundle, auth);
     }
 
     @Override
     public NewProviderBundle transformToNonDraft(NewProviderBundle bundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Provider with id '{}' to Provider", bundle.getId());
         validate(bundle);
 
-        // update loggingInfo
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                LoggingInfo.ActionType.REGISTERED.getKey());
-        loggingInfoList.add(loggingInfo);
-        bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfo);
-
-        // update providerStatus
-        bundle.setStatus(vocabularyService.get("pending").getId());
+        bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
         bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-        bundle.setDraft(false);
-
-        try {
-            bundle = update(bundle, auth);
-        } catch (ResourceNotFoundException e) {
-            logger.info("Provider with id '{}' does not exist", bundle.getId());
-        }
+        bundle = update(bundle, auth);
 
 //        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
         return bundle;

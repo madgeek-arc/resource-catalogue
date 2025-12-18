@@ -74,13 +74,15 @@ public class NewBundle {
 
             this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
             LoggingInfo onboardingInfo = null;
-            if (loggingInfo.isEmpty()) {
+            if (loggingInfo.isEmpty() || loggingInfo.stream()
+                    .anyMatch(info -> LoggingInfo.Types.DRAFT.getKey().equals(info.getType()))) {
                 onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                         user, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.REGISTERED.getKey(), comment
                 );
                 this.setLatestOnboardingInfo(onboardingInfo);
                 this.getLoggingInfo().add(onboardingInfo);
+                this.setDraft(false);
             }
 
             if (status.toLowerCase().contains("approved")) {
@@ -234,6 +236,23 @@ public class NewBundle {
         }
 
         this.auditState = auditState;
+    }
+
+    //TODO: test if we need to set draft = false
+    public void markDraft(Authentication auth, String comment) {
+        UserInfo user = UserInfo.of(auth);
+
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+        LoggingInfo draftInfo = null;
+        if (loggingInfo.isEmpty()) {
+            draftInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.DRAFT.getKey(),
+                    LoggingInfo.ActionType.CREATED.getKey(), comment
+            );
+            this.setLatestOnboardingInfo(draftInfo);
+            this.getLoggingInfo().add(draftInfo);
+        }
+        this.draft = true;
     }
 
     public String getId() {
