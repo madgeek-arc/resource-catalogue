@@ -3,21 +3,34 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+import java.util.Map;
+
+//TODO: specific-resource method -> inside corresponding manager/service
+//TODO: true universal method (all resources will use it) -> inside here (generic)
+//TODO: some but not all resources need a method -> create a new interface with default implementation
+
 @org.springframework.stereotype.Service("testManager")
-public abstract class TestManager<R> {
+public abstract class TestManager<T extends NewBundle> implements TestService<T> {
 
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
     private final CatalogueService catalogueService;
+
+    private static final Logger logger = LoggerFactory.getLogger(TestManager.class);
 
     protected abstract String getResourceTypeName();
 
@@ -29,7 +42,9 @@ public abstract class TestManager<R> {
         this.catalogueService = catalogueService;
     }
 
-    public R get(String id) {
+    //TODO: we don't need this
+    @Override
+    public T get(String id) {
         return genericResourceService.get(
                 getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", id),
@@ -37,25 +52,28 @@ public abstract class TestManager<R> {
         );
     }
 
-    public NewProviderBundle get(String id, String catalogueId) {
-        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-        //FIXME: never reaches here
-        if (catalogueBundle == null) {
-            throw new CatalogueResourceNotFoundException(
-                    String.format("Could not find catalogue with id: %s", catalogueId));
+    @Override
+    public T get(String id, String catalogueId) {
+        if (catalogueId != null && !catalogueId.isBlank()) {
+            return genericResourceService.get(getResourceTypeName(),
+                    new SearchService.KeyValue("resource_internal_id", id),
+                    new SearchService.KeyValue("catalogue_id", catalogueId),
+                    new SearchService.KeyValue("published", "false"));
         }
         return genericResourceService.get(getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("catalogue_id", catalogueId),
-                new SearchService.KeyValue("published", "false")
-        );
+                new SearchService.KeyValue("published", "false"));
     }
 
-    public NewProviderBundle get(SearchService.KeyValue... keyValues) {
+    //TODO: probably we do not need this IF we use the same get for drafts and non-drafts
+    //TODO: draft functionality is default-catalogue specific, meaning the IDs are always unique
+    @Override
+    public T get(SearchService.KeyValue... keyValues) {
         return genericResourceService.get(getResourceTypeName(), keyValues);
     }
 
-    public Browsing<R> getAll(FacetFilter ff, Authentication auth) {
+    @Override
+    public Browsing<T> getAll(FacetFilter ff, Authentication auth) {
         ff.setResourceType(getResourceTypeName());
         boolean authenticated = auth != null && auth.isAuthenticated();
         if (authenticated) {
@@ -72,8 +90,91 @@ public abstract class TestManager<R> {
         return getAll(ff);
     }
 
-    public Browsing<R> getAll(FacetFilter ff) {
+    @Override
+    public Browsing<T> getAll(FacetFilter ff) {
         ff.setResourceType(getResourceTypeName());
         return genericResourceService.getResults(ff);
     }
+
+    @Override
+    public Browsing<T> getMy(FacetFilter ff, Authentication auth) {
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
+        ff.addOrderBy("name", "asc");
+        return genericResourceService.getResults(ff);
+    }
+
+    //TODO: we don't need this
+    @Override
+    public T add(T bundle, Authentication auth) {
+        return genericResourceService.add(getResourceTypeName(), bundle);
+    }
+
+    @Override
+    public T add(T bundle, String catalogueId, Authentication auth) {
+        T ret = genericResourceService.add(getResourceTypeName(), bundle);
+        return ret;
+    }
+
+
+    //region unused
+    @Override
+    public String createId(T bundle) {
+        return "";
+    }
+
+    @Override
+    public T save(T bundle) {
+        return null;
+    }
+
+    @Override
+    public Map<String, List<T>> getBy(String field) {
+        return Map.of();
+    }
+
+    @Override
+    public List<T> getSome(String... ids) {
+        return List.of();
+    }
+
+    @Override
+    public List<T> delAll() {
+        return List.of();
+    }
+
+    @Override
+    public T validate(T bundle) {
+        logger.debug("Validating resource '{}' with id: '{}'", getResourceTypeName(), bundle.getId());
+        return genericResourceService.validate(bundle.getPayload());
+    }
+
+    @Override
+    public Resource getResource(String id) {
+        return null;
+    }
+
+    @Override
+    public Resource getResource(String id, String catalogueId) {
+        return null;
+    }
+
+    @Override
+    public boolean exists(T bundle) {
+        return false;
+    }
+
+    @Override
+    public boolean exists(String id) {
+        return false;
+    }
+
+    //TODO: move to PublicController
+    @Override
+    public T createPublicResource(T bundle, Authentication auth) {
+        return null;
+    }
+    //endregion
 }

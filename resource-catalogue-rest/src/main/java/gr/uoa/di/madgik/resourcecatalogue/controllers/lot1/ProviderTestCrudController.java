@@ -121,7 +121,7 @@ public class ProviderTestCrudController {
                                  @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
-        NewProviderBundle ret = providerTestService.add(providerBundle, auth);
+        NewProviderBundle ret = providerTestService.add(providerBundle, null, auth);
         logger.info("Added Provider with id '{}'", providerBundle.getProvider().get("id"));
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
@@ -131,7 +131,7 @@ public class ProviderTestCrudController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> addBundle(@RequestBody NewProviderBundle bundle,
                                                        @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle providerBundle = providerTestService.add(bundle, auth); //TODO: do we want Admin adds to pass through regular update?
+        NewProviderBundle providerBundle = providerTestService.add(bundle, null, auth); //TODO: do we want Admin adds to pass through regular update?
         logger.info("Added ProviderBundle with id '{}'", providerBundle.getProvider().get("id"));
         return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
     }
@@ -345,7 +345,7 @@ public class ProviderTestCrudController {
         logger.info("Attempt to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue",
                 providerBundle.getProvider().get("id"), providerBundle.getProvider().get("name"),
                 providerBundle.getProvider().get("catalogueId"));
-        return ResponseEntity.ok(providerTestService.createPublicProvider(providerBundle, auth));
+        return ResponseEntity.ok(providerTestService.createPublicResource(providerBundle, auth));
     }
 
     @Operation(description = "Suspends a Provider and all its resources")
@@ -377,7 +377,7 @@ public class ProviderTestCrudController {
     public void addBulk(@RequestBody List<NewProviderBundle> providerList,
                         @Parameter(hidden = true) Authentication auth) {
         for (NewProviderBundle bundle : providerList) {
-            providerTestService.add(bundle, auth); //TODO: add creates ID, we want it?
+            providerTestService.add(bundle, null, auth); //TODO: add creates ID, we want it?
         }
     }
 

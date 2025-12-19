@@ -17,7 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
@@ -26,29 +25,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface ProviderTestService extends NewBundleOperations<NewProviderBundle>, ResourceService<NewProviderBundle>,
-        DraftTestResourceService<NewProviderBundle> {
-
-    /**
-     * Add a new Provider on a specific Catalogue.
-     *
-     * @param bundle         Provider
-     * @param catalogueId    Catalogue ID
-     * @param authentication Authentication
-     * @return {@link NewProviderBundle}
-     */
-    NewProviderBundle add(NewProviderBundle bundle, String catalogueId, Authentication authentication);
-
-    /**
-     * Update a Provider of an external Catalogue, providing its Catalogue ID
-     *
-     * @param bundle      Provider
-     * @param catalogueId Catalogue ID
-     * @param comment     Comment
-     * @param auth        Authentication
-     * @return {@link NewProviderBundle}
-     */
-    NewProviderBundle update(NewProviderBundle bundle, String catalogueId, String comment, Authentication auth);
+public interface ProviderTestService extends TestService<NewProviderBundle> {
 
     /**
      * Send email to Portal Admins requesting a Provider's deletion
@@ -57,15 +34,6 @@ public interface ProviderTestService extends NewBundleOperations<NewProviderBund
      * @param auth       Authentication
      */
     void requestProviderDeletion(String providerId, Authentication auth);
-
-    /**
-     * Create Public Provider
-     *
-     * @param bundle Provider Bundle
-     * @param auth   Authentication
-     * @return {@link ProviderBundle}
-     */
-    NewProviderBundle createPublicProvider(NewProviderBundle bundle, Authentication auth);
 
     /**
      * Given a Provider Name, return the corresponding HLE Vocabulary if exists, else return null

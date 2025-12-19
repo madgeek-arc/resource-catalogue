@@ -21,14 +21,12 @@ import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -46,7 +44,8 @@ import java.util.*;
 
 //TODO: REMOVE ANY LOGIC THAT RELATES WITH MODEL'S FIELDS (eg. name, users, HLE)
 @org.springframework.stereotype.Service("providerTestManager")
-public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.manager.TestManager<NewProviderBundle> implements ProviderTestService {
+public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.manager.TestManager<NewProviderBundle>
+        implements ProviderTestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderTestManager.class);
 
@@ -90,78 +89,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     @Override
     protected String getResourceTypeName() {
         return "providertest";
-    }
-
-//    @Override
-//    public NewProviderBundle get(String id) {
-//        return genericResourceService.get(getResourceTypeName(),
-//                new SearchService.KeyValue("resource_internal_id", id),
-//                new SearchService.KeyValue("published", "false"),
-//                new SearchService.KeyValue("draft", "false")
-//        );
-//        //TODO: do we need this?
-//        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-//        if (catalogueBundle == null) {
-//            throw new CatalogueResourceNotFoundException(
-//                    String.format("Could not find catalogue with id: %s", catalogueId));
-//        }
-//        if (!providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
-//            throw new ResourceException(String.format("Provider with id [%s] does not belong to the catalogue with id [%s]",
-//                    providerId, catalogueId), HttpStatus.CONFLICT);
-//        }
-    //TODO: moved on Controller's PostAuth -> check that it works
-//        if (auth != null && auth.isAuthenticated()) {
-//            User user = User.of(auth);
-//            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return everything
-//            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-//                    securityService.userHasAdminAccess(user, providerId)) {
-//                return providerBundle;
-//            }
-//        }
-//        // else return the Provider ONLY if he is active
-//        if (providerBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
-//            return providerBundle;
-//        }
-//        throw new InsufficientAuthenticationException("You cannot view the specific Provider");
-//    }
-
-    //TODO: hard test this
-//    @Override
-//    public Browsing<NewProviderBundle> getAll(FacetFilter ff, Authentication auth) {
-//        boolean authenticated = auth != null && auth.isAuthenticated();
-//        if (authenticated) {
-//            if (securityService.hasPortalAdminRole(auth)) {
-//                return getAll(ff);
-//            }
-//            if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
-//                ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
-//                return getAll(ff);
-//            }
-//        }
-//        ff.addFilter("status", "approved");
-//        ff.addFilter("active", true);
-//        return getAll(ff);
-//    }
-
-//    @Override
-//    public Browsing<NewProviderBundle> getAll(FacetFilter filter) {
-//        return genericResourceService.getResults(filter);
-//    }
-
-    @Override
-    public Browsing<NewProviderBundle> getMy(FacetFilter ff, Authentication auth) {
-        ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(10000);
-        ff.addFilter("published", false);
-        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
-        ff.addOrderBy("name", "asc");
-        return genericResourceService.getResults(ff);
-    }
-
-    //TODO: we do not actually need this one
-    @Override
-    public NewProviderBundle add(NewProviderBundle bundle, Authentication auth) {
-        return add(bundle, null, auth);
     }
 
     @Override
@@ -513,94 +440,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
 
         return new Browsing<>(providersToBeAudited.size(), 0, providersToBeAudited.size(), providersToBeAudited,
                 providersBrowsing.getFacets());
-    }
-
-//    @Override
-//    public NewProviderBundle get(String id, String catalogueId) {
-//        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId);
-//        //FIXME: never reaches here
-//        if (catalogueBundle == null) {
-//            throw new CatalogueResourceNotFoundException(
-//                    String.format("Could not find catalogue with id: %s", catalogueId));
-//        }
-//        return genericResourceService.get(getResourceTypeName(),
-//                new SearchService.KeyValue("resource_internal_id", id),
-//                new SearchService.KeyValue("catalogue_id", catalogueId),
-//                new SearchService.KeyValue("published", "false"),
-//                new SearchService.KeyValue("draft", "false")
-//        );
-//    }
-
-    @Override
-    public String createId(NewProviderBundle newProviderBundle) {
-        //TODO: fill method
-        return "";
-    }
-
-    @Override
-    public NewProviderBundle save(NewProviderBundle newProviderBundle) {
-        //TODO: fill method
-        return null;
-    }
-
-    @Override
-    public Map<String, List<NewProviderBundle>> getBy(String field) {
-        //TODO: fill method
-        return Map.of();
-    }
-
-    @Override
-    public List<NewProviderBundle> getSome(String... ids) {
-        //TODO: fill method
-        return List.of();
-    }
-
-//    @Override
-//    public NewProviderBundle get(SearchService.KeyValue... keyValues) {
-//        return genericResourceService.get(getResourceTypeName(), keyValues);
-//    }
-
-    @Override
-    public List<NewProviderBundle> delAll() {
-        //TODO: fill method
-        return List.of();
-    }
-
-    @Override
-    public NewProviderBundle validate(NewProviderBundle bundle) {
-        logger.debug("Validating Provider with id: '{}'", bundle.getId());
-        return genericResourceService.validate(bundle.getProvider());
-    }
-
-    @Override
-    public Resource getResource(String id) {
-        //TODO: fill method
-        return null;
-    }
-
-    @Override
-    public Resource getResource(String id, String catalogueId) {
-        //TODO: fill method
-        return null;
-    }
-
-    @Override
-    public boolean exists(NewProviderBundle newProviderBundle) {
-        //TODO: fill method
-        return false;
-    }
-
-    @Override
-    public boolean exists(String id) {
-        //TODO: fill method
-        return false;
-    }
-
-    //TODO: move to PublicController
-    @Override
-    public NewProviderBundle createPublicProvider(NewProviderBundle bundle, Authentication auth) {
-        //TODO: fill method
-        return null;
     }
 
     @Override
