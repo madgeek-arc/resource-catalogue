@@ -42,6 +42,7 @@
         <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
         <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <owasp-dependency-check-plugin.version>12.1.9</owasp-dependency-check-plugin.version>
         <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
     </properties>
@@ -319,6 +320,27 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${owasp-dependency-check-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <failBuildOnCVSS>7.6</failBuildOnCVSS>
+                    <formats>
+                        <format>JSON</format>
+                        <format>HTML</format>
+                    </formats>
+                    <prettyPrint>true</prettyPrint>
+                </configuration>
             </plugin>
 
         </plugins>

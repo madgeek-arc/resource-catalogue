@@ -24,7 +24,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Monitoring;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
 import io.swagger.v3.oas.annotations.Operation;

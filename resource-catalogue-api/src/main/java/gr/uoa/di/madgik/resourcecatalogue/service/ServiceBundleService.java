@@ -110,16 +110,6 @@ public interface ServiceBundleService<T extends Bundle<?>> extends ResourceCatal
     Resource getResource(String id, String catalogueId);
 
     /**
-     * Get a paging of random Services
-     *
-     * @param ff               FacetFilter
-     * @param auditingInterval Auditing Interval (in months)
-     * @param auth             Authentication
-     * @return {@link Paging}&lt;{@link T}&gt;
-     */
-    Paging<T> getRandomResources(FacetFilter ff, String auditingInterval, Authentication auth);
-
-    /**
      * Get a list of Service Bundles of a specific Provider of the EOSC Catalogue
      *
      * @param providerId Provider ID

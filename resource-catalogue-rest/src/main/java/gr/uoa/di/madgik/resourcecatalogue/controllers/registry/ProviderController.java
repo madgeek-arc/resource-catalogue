@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -71,7 +72,7 @@ public class ProviderController {
     private String catalogueId;
 
     @Value("${auditing.interval:6}")
-    private String auditingInterval;
+    private int auditingInterval;
 
     @Value("${catalogue.name:Resource Catalogue}")
     private String catalogueName;
@@ -386,16 +387,12 @@ public class ProviderController {
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
-    @Parameters({
-            @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
-    })
-    @GetMapping(path = "randomProviders", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getRandomProviders(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
-        ff.addFilter("status", "approved provider");
-        ff.addFilter("published", false);
-        Paging<ProviderBundle> providerBundlePaging = providerService.getRandomResources(ff, auditingInterval, auth);
+    public ResponseEntity<Paging<ProviderBundle>> getRandomResources(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
+                                                                              @RequestParam(defaultValue = "10") int quantity,
+                                                                              @Parameter(hidden = true) Authentication auth) {
+        Paging<ProviderBundle> providerBundlePaging = providerService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(providerBundlePaging, HttpStatus.OK);
     }
 
