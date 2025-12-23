@@ -17,6 +17,19 @@
 * sets specific maven version for java 21 ([bfdff04](https://github.com/madgeek-arc/resource-catalogue/commit/bfdff04e97202433e6634861a3ff685976f30521))
 * token in headers when submitting a ticket ([de32231](https://github.com/madgeek-arc/resource-catalogue/commit/de322315e15e62f0e595fb846c9f194c0e9a1b2e))
 
+## [5.4.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.3.0...v5.4.0) (2025-12-23)
+
+
+### Features
+
+* creates method to retrieve user info ([87f1527](https://github.com/madgeek-arc/resource-catalogue/commit/87f15273a3045e7af2afb261c1807689d628a0c8))
+
+
+### Bug Fixes
+
+* creates AuthTokenService responsible of providing valid access tokens for the authenticated user ([c12bd63](https://github.com/madgeek-arc/resource-catalogue/commit/c12bd63c216c9abf67118a8bf90a10f74471f7f3))
+* replaces deprecated annotation ([ad51d86](https://github.com/madgeek-arc/resource-catalogue/commit/ad51d86c8558f0487db943f6ed4e22c04bf92a1a))
+
 ## [5.2.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.1.0...v5.2.0) (2025-09-15)
 
 
