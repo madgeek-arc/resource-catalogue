@@ -17,11 +17,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.HelpdeskProperties;
+import gr.uoa.di.madgik.resourcecatalogue.service.AuthTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,9 +31,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -48,30 +53,18 @@ public class HelpdeskController {
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskController.class);
 
     private final WebClient webClient;
-    private final OAuth2AuthorizedClientService authorizedClientService;
+    private final AuthTokenService tokenService;
 
     public HelpdeskController(HelpdeskProperties helpdeskProperties,
-                              OAuth2AuthorizedClientService authorizedClientService,
+                              AuthTokenService tokenService,
                               WebClient.Builder webClientBuilder) {
-        this.authorizedClientService = authorizedClientService;
+        this.tokenService = tokenService;
         if (helpdeskProperties.isEnabled()) {
             this.webClient = webClientBuilder
                     .baseUrl(helpdeskProperties.getEndpoint())
                     .build();
         } else {
             this.webClient = null;
-        }
-    }
-
-    private String getAccessToken(Authentication authentication) {
-        if (authentication instanceof OAuth2AuthenticationToken token) {
-            OAuth2AuthorizedClient authorizedClient =
-                    authorizedClientService.loadAuthorizedClient(
-                            token.getAuthorizedClientRegistrationId(),
-                            token.getName());
-            return authorizedClient.getAccessToken().getTokenValue();
-        } else {
-            throw new InsufficientAuthenticationException("Insufficient authentication");
         }
     }
 
@@ -84,7 +77,7 @@ public class HelpdeskController {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
 
-        String accessToken = getAccessToken(authentication);
+        String accessToken = tokenService.getAccessToken(authentication);
 
         try {
             Object ticket = webClient.get()
@@ -113,7 +106,7 @@ public class HelpdeskController {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
 
-        String accessToken = getAccessToken(authentication);
+        String accessToken = tokenService.getAccessToken(authentication);
 
         try {
             Object tickets = webClient.get()
@@ -140,7 +133,7 @@ public class HelpdeskController {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
-        String accessToken = getAccessToken(authentication);
+        String accessToken = tokenService.getAccessToken(authentication);
 
         try {
             Object response = webClient.post()
@@ -168,7 +161,7 @@ public class HelpdeskController {
         if (webClient == null) {
             throw new UnsupportedOperationException("Helpdesk service is not enabled.");
         }
-        String accessToken = getAccessToken(authentication);
+        String accessToken = tokenService.getAccessToken(authentication);
 
         try {
             Object ticket = webClient.put()
