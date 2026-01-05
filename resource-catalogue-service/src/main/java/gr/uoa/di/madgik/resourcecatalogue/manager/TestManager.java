@@ -18,7 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
-//TODO: specific-resource method -> inside corresponding manager/service
+//TODO: resource-specific method -> inside corresponding manager/service
 //TODO: true universal method (all resources will use it) -> inside here (generic)
 //TODO: some but not all resources need a method -> create a new interface with default implementation
 
@@ -105,15 +105,8 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
         return genericResourceService.getResults(ff);
     }
 
-    //TODO: we don't need this
     @Override
     public T add(T bundle, Authentication auth) {
-        return genericResourceService.add(getResourceTypeName(), bundle);
-    }
-
-    @Override
-    public T add(T bundle, String catalogueId, Authentication auth) {
-        bundle.setCatalogueId(catalogueId);
         return genericResourceService.add(getResourceTypeName(), bundle);
     }
 
@@ -165,7 +158,7 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     @Override
     public T validate(T bundle) {
         logger.debug("Validating resource '{}' with id: '{}'", getResourceTypeName(), bundle.getId());
-        return genericResourceService.validate(bundle.getPayload());
+        return genericResourceService.validate(getResourceTypeName(), bundle);
     }
 
     @Override

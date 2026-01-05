@@ -334,7 +334,8 @@ public class CatalogueController {
                                                   @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
-        NewProviderBundle ret = providerTestService.add(providerBundle, catalogueId, auth);
+        providerBundle.setCatalogueId(catalogueId);
+        NewProviderBundle ret = providerTestService.add(providerBundle, auth);
         logger.info("Added the Provider with name '{}' and id '{}' in the Catalogue '{}'",
                 provider.get("name"), provider.get("id"), catalogueId);
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
@@ -347,7 +348,8 @@ public class CatalogueController {
     public ResponseEntity<NewProviderBundle> addCatalogueProviderBundle(@RequestBody NewProviderBundle provider,
                                                                         @PathVariable String catalogueId,
                                                                         @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle bundle = providerTestService.add(provider, catalogueId, auth); //TODO: do we want Admin adds to pass through regular update?
+        provider.setCatalogueId(catalogueId);
+        NewProviderBundle bundle = providerTestService.add(provider, auth); //TODO: do we want Admin adds to pass through regular update?
         logger.info("Added the Provider with name '{}' and id '{}' in the Catalogue '{}'",
                 provider.getProvider().get("name"), provider.getProvider().get("id"), catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);

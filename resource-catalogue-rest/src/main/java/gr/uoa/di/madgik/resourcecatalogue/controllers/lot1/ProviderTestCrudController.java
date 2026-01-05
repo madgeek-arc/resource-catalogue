@@ -123,7 +123,7 @@ public class ProviderTestCrudController {
                                  @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
-        NewProviderBundle ret = providerTestService.add(providerBundle, null, auth);
+        NewProviderBundle ret = providerTestService.add(providerBundle, auth);
         logger.info("Added Provider with id '{}'", providerBundle.getId());
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
@@ -133,7 +133,7 @@ public class ProviderTestCrudController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> addBundle(@RequestBody NewProviderBundle bundle,
                                                        @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle providerBundle = providerTestService.add(bundle, null, auth); //TODO: do we want Admin adds to pass through regular update?
+        NewProviderBundle providerBundle = providerTestService.add(bundle, auth); //TODO: do we want Admin adds to pass through regular update?
         logger.info("Added ProviderBundle with id '{}'", providerBundle.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
     }
@@ -378,7 +378,7 @@ public class ProviderTestCrudController {
     public void addBulk(@RequestBody List<NewProviderBundle> providerList,
                         @Parameter(hidden = true) Authentication auth) {
         for (NewProviderBundle bundle : providerList) {
-            providerTestService.add(bundle, null, auth); //TODO: add creates ID, we want it?
+            providerTestService.add(bundle, auth); //TODO: add creates ID, we want it?
         }
     }
 

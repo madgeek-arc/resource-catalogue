@@ -4,6 +4,8 @@ import java.util.LinkedHashMap;
 
 public class NewProviderBundle extends NewBundle {
 
+    private String templateStatus;
+
     public LinkedHashMap<String, Object> getProvider() {
         return this.getPayload();
     }
@@ -20,5 +22,13 @@ public class NewProviderBundle extends NewBundle {
     @Override
     public void setId(String id) {
         super.setId(id);
+    }
+
+    public String getTemplateStatus() {
+        return templateStatus;
+    }
+
+    public void setTemplateStatus(String templateStatus) {
+        this.templateStatus = templateStatus;
     }
 }

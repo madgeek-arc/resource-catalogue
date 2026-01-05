@@ -47,7 +47,6 @@ public class NewBundle {
     private LoggingInfo latestUpdateInfo;
 
     private String status;
-    private String templateStatus;
     private String auditState;
 
     private String catalogueId;
@@ -351,14 +350,6 @@ public class NewBundle {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getTemplateStatus() {
-        return templateStatus;
-    }
-
-    public void setTemplateStatus(String templateStatus) {
-        this.templateStatus = templateStatus;
     }
 
     public String getAuditState() {

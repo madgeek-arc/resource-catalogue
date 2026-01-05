@@ -7,16 +7,6 @@ public interface TestService<T extends NewBundle> extends NewBundleOperations<T>
         DraftTestResourceService<T> {
 
     /**
-     * Add a new resource on a specific Catalogue.
-     *
-     * @param bundle         Bundle
-     * @param catalogueId    Catalogue ID
-     * @param authentication Authentication
-     * @return {@link T}
-     */
-    T add(T bundle, String catalogueId, Authentication authentication);
-
-    /**
      * Update a resource providing a meaningful comment
      *
      * @param bundle  Bundle

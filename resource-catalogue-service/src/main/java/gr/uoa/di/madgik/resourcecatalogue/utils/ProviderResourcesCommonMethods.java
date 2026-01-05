@@ -31,6 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ProviderResourcesCommonMethods {
@@ -263,7 +264,24 @@ public class ProviderResourcesCommonMethods {
 
     public void addAuthenticatedUser(Object object, Authentication auth) {
         User authUser = User.of(auth);
-        if (object instanceof Catalogue catalogue) {
+        if (object instanceof LinkedHashMap<?, ?> raw) {
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<String, Object> payload = (LinkedHashMap<String, Object>) raw;
+
+            Object value = payload.get("users");
+            Set<User> users = new LinkedHashSet<>();
+            if (value instanceof Collection<?> collection) {
+                for (Object o : collection) {
+                    if (o instanceof User user) {
+                        users.add(user);
+                    } else if (o instanceof Map<?, ?> map) {
+                        users.add(fromMap(map));
+                    }
+                }
+            }
+            users.add(authUser);
+            payload.put("users", new ArrayList<>(users));
+        } else if (object instanceof Catalogue catalogue) {
             Set<User> users = catalogue.getUsers() == null ? new HashSet<>() : new HashSet<>(catalogue.getUsers());
             users.add(authUser);
             catalogue.setUsers(new ArrayList<>(users));
@@ -276,5 +294,14 @@ public class ProviderResourcesCommonMethods {
             users.add(authUser);
             adapter.setAdmins(new ArrayList<>(users));
         }
+    }
+
+    private static User fromMap(Map<?, ?> map) {
+        User user = new User();
+        user.setId((String) map.get("id"));
+        user.setName((String) map.get("name"));
+        user.setSurname((String) map.get("surname"));
+        user.setEmail((String) map.get("email"));
+        return user;
     }
 }

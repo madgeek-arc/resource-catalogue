@@ -92,15 +92,16 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
-    public NewProviderBundle add(NewProviderBundle bundle, String catalogueId, Authentication auth) {
-        onboard(bundle, catalogueId, auth);
+    public NewProviderBundle add(NewProviderBundle bundle, Authentication auth) {
+        onboard(bundle, auth);
         NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
 //        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
 //        synchronizerService.syncAdd(bundle.getProvider()); //TODO: remove this?
         return ret;
     }
 
-    private void onboard(NewProviderBundle bundle, String catalogueId, Authentication auth) {
+    private void onboard(NewProviderBundle bundle, Authentication auth) {
+        String catalogueId = bundle.getCatalogueId();
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
             bundle.setCatalogueId(this.catalogueId); //TODO: how we proceed with instance's catalogue ID
@@ -626,7 +627,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
 //        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false); //FIXME
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
-        NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
+        NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
         return ret;
     }
 
@@ -634,7 +635,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     public NewProviderBundle updateDraft(NewProviderBundle bundle, Authentication auth) {
         bundle.markUpdate(auth, null);
         try {
-            NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
+            NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
