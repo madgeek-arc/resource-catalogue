@@ -17,15 +17,14 @@ public interface TestService<T extends NewBundle> extends NewBundleOperations<T>
     T add(T bundle, String catalogueId, Authentication authentication);
 
     /**
-     * Update a resource of an external Catalogue, providing its Catalogue ID
+     * Update a resource providing a meaningful comment
      *
-     * @param bundle      Bundle
-     * @param catalogueId Catalogue ID
-     * @param comment     Comment
-     * @param auth        Authentication
+     * @param bundle  Bundle
+     * @param comment Comment
+     * @param auth    Authentication
      * @return {@link T}
      */
-    T update(T bundle, String catalogueId, String comment, Authentication auth);
+    T update(T bundle, String comment, Authentication auth);
 
     /**
      * Create Public resource

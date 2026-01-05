@@ -5,9 +5,7 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
@@ -16,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -114,10 +113,28 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
 
     @Override
     public T add(T bundle, String catalogueId, Authentication auth) {
-        T ret = genericResourceService.add(getResourceTypeName(), bundle);
-        return ret;
+        bundle.setCatalogueId(catalogueId);
+        return genericResourceService.add(getResourceTypeName(), bundle);
     }
 
+    @Override
+    public T update(T bundle, Authentication auth) {
+        if (!hasChanged(bundle)) {
+            return bundle;
+        }
+        bundle.markUpdate(auth, null); //TODO: make sure all resources will use this
+        validate(bundle);
+        try {
+            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean hasChanged(T bundle) {
+        T existing = get(bundle.getId(), bundle.getCatalogueId());
+        return !bundle.equals(existing);
+    }
 
     //region unused
     @Override

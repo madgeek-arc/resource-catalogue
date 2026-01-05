@@ -122,8 +122,8 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
-    public NewProviderBundle update(NewProviderBundle bundle, String catalogueId, String comment, Authentication auth) {
-        NewProviderBundle existing = get(bundle.getId());
+    public NewProviderBundle update(NewProviderBundle bundle, String comment, Authentication auth) {
+        NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Provider
         if (bundle.equals(existing)) {
             return bundle;
@@ -134,7 +134,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
 
     @Override
     public NewProviderBundle update(NewProviderBundle bundle, Authentication auth) {
-        NewProviderBundle existing = get(bundle.getId()); //TODO: I don't like calling it twice
+        NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId()); //TODO: I don't like calling it twice
         validate(bundle);
 
         try {
@@ -256,7 +256,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
-    public NewProviderBundle verify(String id, String status, Boolean active, Authentication auth) {
+    public NewProviderBundle setStatus(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
@@ -277,7 +277,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
-    public NewProviderBundle publish(String id, Boolean active, Authentication auth) {
+    public NewProviderBundle setActive(String id, Boolean active, Authentication auth) {
         NewProviderBundle existing = get(id);
 
         if ((existing.getStatus().equals(vocabularyService.get("pending").getId()) ||
@@ -338,7 +338,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
-    public NewProviderBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
+    public NewProviderBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         NewProviderBundle existing = get(id);
 //        commonMethods.suspensionValidation(existing, catalogueId, id, suspend, auth); //FIXME
 
@@ -632,7 +632,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
 
     @Override
     public NewProviderBundle updateDraft(NewProviderBundle bundle, Authentication auth) {
-        validate(bundle);
+        bundle.markUpdate(auth, null);
         try {
             NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
             return ret;
@@ -647,13 +647,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
-    public NewProviderBundle transformToNonDraft(String id, Authentication auth) {
-        NewProviderBundle bundle = genericResourceService.get(getResourceTypeName(), id);
-        return transformToNonDraft(bundle, auth);
-    }
-
-    @Override
-    public NewProviderBundle transformToNonDraft(NewProviderBundle bundle, Authentication auth) {
+    public NewProviderBundle finalizeDraft(NewProviderBundle bundle, Authentication auth) {
         validate(bundle);
 
         bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);

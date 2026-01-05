@@ -243,7 +243,7 @@ public class NewBundle {
         UserInfo user = UserInfo.of(auth);
 
         this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
-        LoggingInfo draftInfo = null;
+        LoggingInfo draftInfo;
         if (loggingInfo.isEmpty()) {
             draftInfo = LoggingInfo.createLoggingInfoEntry(
                     user, LoggingInfo.Types.DRAFT.getKey(),
