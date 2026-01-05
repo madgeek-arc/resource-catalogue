@@ -16,13 +16,13 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -345,8 +345,8 @@ public class CatalogueController {
     @PostMapping(path = "{catalogueId}/provider/bundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> addCatalogueProviderBundle(@RequestBody NewProviderBundle provider,
-                                                                     @PathVariable String catalogueId,
-                                                                     @Parameter(hidden = true) Authentication auth) {
+                                                                        @PathVariable String catalogueId,
+                                                                        @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle bundle = providerTestService.add(provider, catalogueId, auth); //TODO: do we want Admin adds to pass through regular update?
         logger.info("Added the Provider with name '{}' and id '{}' in the Catalogue '{}'",
                 provider.getProvider().get("name"), provider.getProvider().get("id"), catalogueId);
@@ -363,7 +363,7 @@ public class CatalogueController {
         String id = provider.get("id").toString();
         NewProviderBundle bundle = providerTestService.get(id, catalogueId);
         bundle.setProvider(provider);
-        bundle = providerTestService.update(bundle, catalogueId, comment, auth);
+        bundle = providerTestService.update(bundle, comment, auth);
         logger.info("Updated the Provider with id '{}'", provider.get("id"));
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
@@ -373,10 +373,9 @@ public class CatalogueController {
     @PutMapping(path = "{catalogueId}/bundle/provider", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> updateCatalogueProviderBundle(@RequestBody NewProviderBundle provider,
-                                                                           @PathVariable String catalogueId,
                                                                            @RequestParam(required = false) String comment,
                                                                            @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle providerBundle = providerTestService.update(provider, catalogueId, comment, auth); //TODO: do we want Admin updates to pass through regular update?
+        NewProviderBundle providerBundle = providerTestService.update(provider, comment, auth); //TODO: do we want Admin updates to pass through regular update?
         logger.info("Updated the Provider id '{}'", provider.getProvider().get("id"));
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
@@ -480,7 +479,8 @@ public class CatalogueController {
     public ResponseEntity<Paging<ServiceBundle>> getProviderServiceBundles(@PathVariable String catalogueId,
                                                                            @PathVariable String providerId,
                                                                            @Parameter(hidden = true)
-                                                                               @RequestParam MultiValueMap<String, Object> params,
+                                                                           @RequestParam MultiValueMap<String, Object> params,
+                                                                           @SuppressWarnings("unused")
                                                                            @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("service");
@@ -627,7 +627,8 @@ public class CatalogueController {
     public ResponseEntity<Paging<TrainingResourceBundle>> getProviderTrainingResourceBundles(@PathVariable String catalogueId,
                                                                                              @PathVariable String providerId,
                                                                                              @Parameter(hidden = true)
-                                                                                                 @RequestParam MultiValueMap<String, Object> params,
+                                                                                             @RequestParam MultiValueMap<String, Object> params,
+                                                                                             @SuppressWarnings("unused")
                                                                                              @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("training_resource");

@@ -30,7 +30,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 //TODO: Decide what to do with catalogueId, what we put on default Catalogue id
 
@@ -122,7 +124,7 @@ public class ProviderTestCrudController {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
         NewProviderBundle ret = providerTestService.add(providerBundle, null, auth);
-        logger.info("Added Provider with id '{}'", providerBundle.getProvider().get("id"));
+        logger.info("Added Provider with id '{}'", providerBundle.getId());
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
 
@@ -132,7 +134,7 @@ public class ProviderTestCrudController {
     public ResponseEntity<NewProviderBundle> addBundle(@RequestBody NewProviderBundle bundle,
                                                        @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = providerTestService.add(bundle, null, auth); //TODO: do we want Admin adds to pass through regular update?
-        logger.info("Added ProviderBundle with id '{}'", providerBundle.getProvider().get("id"));
+        logger.info("Added ProviderBundle with id '{}'", providerBundle.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.CREATED);
     }
 
@@ -145,9 +147,9 @@ public class ProviderTestCrudController {
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = provider.get("id").toString();
-        NewProviderBundle bundle = providerTestService.get(id);
+        NewProviderBundle bundle = providerTestService.get(id, catalogueId);
         bundle.setProvider(provider);
-        bundle = providerTestService.update(bundle, catalogueId, comment, auth);
+        bundle = providerTestService.update(bundle, comment, auth);
         logger.info("Updated the Provider with id '{}'", provider.get("id"));
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
@@ -157,8 +159,8 @@ public class ProviderTestCrudController {
     public ResponseEntity<NewProviderBundle> updateBundle(@RequestBody NewProviderBundle provider,
                                                           @RequestParam(required = false) String comment,
                                                           @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle providerBundle = providerTestService.update(provider, provider.getCatalogueId(), comment, auth); //TODO: do we want Admin updates to pass through regular update?
-        logger.info("Updated the Provider id '{}'", provider.getProvider().get("id"));
+        NewProviderBundle providerBundle = providerTestService.update(provider, comment, auth); //TODO: do we want Admin updates to pass through regular update?
+        logger.info("Updated the Provider id '{}'", provider.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
@@ -180,7 +182,7 @@ public class ProviderTestCrudController {
         providerTestService.delete(provider);
         logger.info("Deleted the Provider with name '{}' and id '{}'",
                 provider.getProvider().get("name"),
-                provider.getProvider().get("id"));
+                provider.getId());
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
@@ -233,15 +235,15 @@ public class ProviderTestCrudController {
     @Operation(summary = "Verifies the Provider.")
     @PatchMapping(path = "verifyProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewProviderBundle> verifyProvider(@PathVariable String prefix,
-                                                            @PathVariable String suffix,
-                                                            @RequestParam(required = false) Boolean active,
-                                                            @RequestParam(required = false) String status,
-                                                            @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<NewProviderBundle> setStatus(@PathVariable String prefix,
+                                                       @PathVariable String suffix,
+                                                       @RequestParam(required = false) Boolean active,
+                                                       @RequestParam(required = false) String status,
+                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle provider = providerTestService.verify(id, status, active, auth);
+        NewProviderBundle provider = providerTestService.setStatus(id, status, active, auth);
         logger.info("Verify Provider with id: '{}' | status: '{}' | active: '{}'",
-                provider.getProvider().get("id"), status, active);
+                provider.getId(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -254,7 +256,7 @@ public class ProviderTestCrudController {
                                                        @RequestParam(required = false) Boolean active,
                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle provider = providerTestService.publish(id, active, auth);
+        NewProviderBundle provider = providerTestService.setActive(id, active, auth);
         logger.info("Attempt to save Provider with id '{}' as '{}'", id, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
@@ -276,12 +278,12 @@ public class ProviderTestCrudController {
 
     @PatchMapping(path = "auditProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewProviderBundle> auditProvider(@PathVariable String prefix,
-                                                           @PathVariable String suffix,
-                                                           @RequestParam("catalogueId") String catalogueId,
-                                                           @RequestParam(required = false) String comment,
-                                                           @RequestParam LoggingInfo.ActionType actionType,
-                                                           @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<NewProviderBundle> audit(@PathVariable String prefix,
+                                                   @PathVariable String suffix,
+                                                   @RequestParam("catalogueId") String catalogueId,
+                                                   @RequestParam(required = false) String comment,
+                                                   @RequestParam LoggingInfo.ActionType actionType,
+                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle provider = providerTestService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -342,20 +344,19 @@ public class ProviderTestCrudController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> createPublicProvider(@RequestBody NewProviderBundle providerBundle,
                                                                   @Parameter(hidden = true) Authentication auth) {
-        logger.info("Attempt to create a Public Provider from Provider '{}'-'{}' of the '{}' Catalogue",
-                providerBundle.getProvider().get("id"), providerBundle.getProvider().get("name"),
-                providerBundle.getProvider().get("catalogueId"));
+        logger.info("Attempt to create a Public Provider '{}' of the '{}' Catalogue",
+                providerBundle.getId(), providerBundle.getCatalogueId());
         return ResponseEntity.ok(providerTestService.createPublicResource(providerBundle, auth));
     }
 
     @Operation(description = "Suspends a Provider and all its resources")
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public NewProviderBundle suspendProvider(@RequestParam String providerId,
-                                             @RequestParam String catalogueId,
-                                             @RequestParam boolean suspend,
-                                             @Parameter(hidden = true) Authentication auth) {
-        return providerTestService.suspend(providerId, catalogueId, suspend, auth);
+    public NewProviderBundle suspend(@RequestParam String providerId,
+                                     @RequestParam String catalogueId,
+                                     @RequestParam boolean suspend,
+                                     @Parameter(hidden = true) Authentication auth) {
+        return providerTestService.setSuspend(providerId, catalogueId, suspend, auth);
     }
 
     @BrowseParameters
@@ -384,9 +385,9 @@ public class ProviderTestCrudController {
 
     // Drafts
     @GetMapping(path = "/draft/{prefix}/{suffix}")
-    public ResponseEntity<?> getDraftProvider(@PathVariable String prefix,
-                                              @PathVariable String suffix,
-                                              @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> getDraft(@PathVariable String prefix,
+                                      @PathVariable String suffix,
+                                      @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle draft = providerTestService.get(
                 new SearchService.KeyValue("resource_internal_id", id),
@@ -409,8 +410,8 @@ public class ProviderTestCrudController {
 
     @PostMapping(path = "/draft")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> addDraftProvider(@RequestBody LinkedHashMap<String, Object> provider,
-                                              @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> provider,
+                                      @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = new NewProviderBundle();
         providerBundle.setProvider(provider);
         NewProviderBundle ret = providerTestService.addDraft(providerBundle, auth);
@@ -420,8 +421,8 @@ public class ProviderTestCrudController {
 
     @PutMapping(path = "/draft")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
-    public ResponseEntity<?> updateDraftProvider(@RequestBody LinkedHashMap<String, Object> provider,
-                                                 @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> provider,
+                                         @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle bundle = providerTestService.get(provider.get("id").toString(), catalogueId);
         bundle.setProvider(provider);
         bundle = providerTestService.updateDraft(bundle, auth);
@@ -431,9 +432,9 @@ public class ProviderTestCrudController {
 
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
-    public void deleteDraftProvider(@PathVariable String prefix,
-                                    @PathVariable String suffix,
-                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public void deleteDraft(@PathVariable String prefix,
+                            @PathVariable String suffix,
+                            @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle bundle = providerTestService.get(id, catalogueId);
         providerTestService.deleteDraft(bundle);
@@ -441,14 +442,14 @@ public class ProviderTestCrudController {
 
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> transformToProvider(@RequestBody LinkedHashMap<String, Object> provider,
-                                                 @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> provider,
+                                      @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle bundle = providerTestService.get(provider.get("id").toString(), catalogueId);
         bundle.setProvider(provider);
 
         providerTestService.validate(bundle);
         providerTestService.updateDraft(bundle, auth);
-        bundle = providerTestService.transformToNonDraft(bundle.getId(), auth);
+        bundle = providerTestService.finalizeDraft(bundle, auth);
 
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }

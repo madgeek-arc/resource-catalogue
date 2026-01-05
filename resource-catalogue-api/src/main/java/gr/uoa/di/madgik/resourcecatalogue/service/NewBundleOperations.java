@@ -16,11 +16,9 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
 import org.springframework.security.core.Authentication;
 
 import java.util.Collections;
@@ -38,7 +36,7 @@ public interface NewBundleOperations<T extends NewBundle> {
      * @param auth   Authentication
      * @return {@link T}
      */
-    T verify(String id, String status, Boolean active, Authentication auth);
+    T setStatus(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Activate/Deactivate a resource
@@ -48,13 +46,13 @@ public interface NewBundleOperations<T extends NewBundle> {
      * @param auth   Authentication
      * @return {@link T}
      */
-    T publish(String id, Boolean active, Authentication auth);
+    T setActive(String id, Boolean active, Authentication auth);
 
     //TODO: do we need isDraft param for terms?
     /**
      * Has an Authenticated User accepted the Terms & Conditions
      *
-     * @param id Provider ID
+     * @param id   Provider ID
      * @param auth Authentication
      * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
      */
@@ -63,7 +61,7 @@ public interface NewBundleOperations<T extends NewBundle> {
     /**
      * Update a resource's list of Users that has accepted the Terms & Conditions
      *
-     * @param id Provider ID
+     * @param id   Provider ID
      * @param auth Authentication
      */
     void adminAcceptedTerms(String id, Authentication auth);
@@ -77,7 +75,7 @@ public interface NewBundleOperations<T extends NewBundle> {
      * @param auth        Authentication
      * @return {@link T}
      */
-    T suspend(String id, String catalogueId, boolean suspend, Authentication auth);
+    T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth);
 
     /**
      * Audit the resource.
@@ -108,9 +106,9 @@ public interface NewBundleOperations<T extends NewBundle> {
     /**
      * Get a paging of random Resources for auditing.
      *
-     * @param quantity how many resources to return
+     * @param quantity         how many resources to return
      * @param auditingInterval Auditing Interval (in months)
-     * @param auth Authentication
+     * @param auth             Authentication
      * @return {@link Paging}&lt;{@link T}&gt;
      */
     Paging<T> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth);

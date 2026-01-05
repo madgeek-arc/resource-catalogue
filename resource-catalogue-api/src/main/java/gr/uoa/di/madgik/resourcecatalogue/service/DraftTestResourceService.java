@@ -17,7 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import org.springframework.security.core.Authentication;
 
 public interface DraftTestResourceService<T extends NewBundle> {
@@ -48,20 +47,11 @@ public interface DraftTestResourceService<T extends NewBundle> {
     void deleteDraft(T bundle);
 
     /**
-     * Transforms the resource to non-draft.
+     * Finalizes a draft resource by applying full validation, making it eligible for the onboarding process.
      *
      * @param t    resource
      * @param auth Authentication
      * @return {@link T}
      */
-    T transformToNonDraft(T t, Authentication auth);
-
-    /**
-     * Transforms the resource with the specified id to non-draft.
-     *
-     * @param id   resource ID
-     * @param auth Authentication
-     * @return {@link T}
-     */
-    T transformToNonDraft(String id, Authentication auth);
+    T finalizeDraft(T t, Authentication auth);
 }
