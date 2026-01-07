@@ -54,27 +54,20 @@ public class NewBundle {
     public NewBundle() {
     }
 
-//    @Override
-//    public String getId() {
-//        return (String) payload.get("id");
-//    }
-//
-//    @Override
-//    public void setId(String id) {
-//        if (this.payload != null) {
-//            this.payload.put("id", id);
-//        }
-//    }
-
     public void markOnboard(String status, boolean active, Authentication auth, String comment) {
         if (!Objects.equals(status, this.status)) { // status changed
             UserInfo user = UserInfo.of(auth);
             this.setStatus(status);
 
             this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
-            LoggingInfo onboardingInfo = null;
-            if (loggingInfo.isEmpty() || loggingInfo.stream()
-                    .anyMatch(info -> LoggingInfo.Types.DRAFT.getKey().equals(info.getType()))) {
+            LoggingInfo onboardingInfo;
+            if (loggingInfo.isEmpty() ||
+                    (loggingInfo.stream().anyMatch(
+                            info -> LoggingInfo.Types.DRAFT.getKey().equals(info.getType())) &&
+                            loggingInfo.stream().noneMatch(
+                                    info -> LoggingInfo.Types.ONBOARD.getKey().equals(info.getType()))
+                    )
+            ) {
                 onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                         user, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.REGISTERED.getKey(), comment
