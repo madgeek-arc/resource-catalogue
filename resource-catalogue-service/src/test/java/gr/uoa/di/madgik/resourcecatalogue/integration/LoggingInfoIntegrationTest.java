@@ -18,7 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.integration;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import java.util.Collections;
 import java.util.List;
 
+import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createJwtAuth;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createLoggingInfo;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -37,8 +37,6 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ProviderResourcesCommonMethods commonMethods;
-    @Autowired
-    private SecurityService securityService;
 
     /**
      * Test method to verify that when a provider's logging info is null,
@@ -54,7 +52,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
     void testNullLoggingInfo_CreatesNewLoggingInfo() {
         // Arrange
         ProviderBundle provider = mock(ProviderBundle.class);
-        Authentication auth = securityService.getAdminAccess();
+        Authentication auth = createJwtAuth();
 
         // Simulate null logging info
         when(provider.getLoggingInfo()).thenReturn(null);
@@ -84,7 +82,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
     void testEmptyLoggingInfo_CreatesNewLoggingInfo() {
         // Arrange
         ProviderBundle provider = mock(ProviderBundle.class);
-        Authentication auth = securityService.getAdminAccess();
+        Authentication auth = createJwtAuth();
 
         // Simulate empty logging info
         when(provider.getLoggingInfo()).thenReturn(Collections.emptyList());
@@ -115,7 +113,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
         List<LoggingInfo> existingLoggingInfo = List.of(createLoggingInfo(LoggingInfo.Types.UPDATE.getKey(),
                 LoggingInfo.ActionType.UPDATED.getKey()));
         ProviderBundle provider = mock(ProviderBundle.class);
-        Authentication auth = securityService.getAdminAccess();
+        Authentication auth = createJwtAuth();
 
         when(provider.getLoggingInfo()).thenReturn(existingLoggingInfo);
 
@@ -167,7 +165,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
     @Test
     void testCreateLoggingInfo_ValidInput_ReturnsCorrectLoggingInfo() {
         // Arrange
-        Authentication auth = securityService.getAdminAccess();
+        Authentication auth = createJwtAuth();
 
         // Act
         LoggingInfo result = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
@@ -177,7 +175,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
         assertNotNull(result, "LoggingInfo should not be null");
         assertEquals(LoggingInfo.Types.UPDATE.getKey(), result.getType(), "Type should match");
         assertEquals(LoggingInfo.ActionType.UPDATED.getKey(), result.getActionType(), "ActionType should match");
-        assertEquals("admin", result.getUserRole(), "User role should match");
+        assertEquals("USER", result.getUserRole(), "User role should match");
     }
 
     /**
@@ -223,7 +221,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
     @Test
     void testCreateLoggingInfo_NullOrEmptyOrNonexistentTypeOrActionType() {
         // Arrange
-        Authentication auth = securityService.getAdminAccess();
+        Authentication auth = createJwtAuth();
 
         // Act & Assert
         // test null type

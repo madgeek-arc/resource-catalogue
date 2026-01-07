@@ -17,6 +17,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -224,5 +229,19 @@ public class TestUtils {
         loggingInfo.setType(type);
         loggingInfo.setActionType(actionType);
         return loggingInfo;
+    }
+
+    public static Authentication createJwtAuth() {
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("sub", "test-id")
+                .claim("email", "test@example.com")
+                .claim("given_name", "Test")
+                .claim("family_name", "User")
+                .build();
+
+        return new JwtAuthenticationToken(jwt, authorities);
     }
 }

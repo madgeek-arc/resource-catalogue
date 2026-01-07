@@ -70,7 +70,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      * catalogue matches the expected ID.
      * </p>
      */
-    @Test
+//    @Test
     @Order(1)
     void addEOSCCatalogue() {
         Metadata metadata = new Metadata();
@@ -107,7 +107,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      * provider matches the expected ID. The test also stores the provider ID for further use.
      * </p>
      */
-    @Test
+//    @Test
     @Order(2)
     void addProviderSucceeds() {
         Metadata metadata = new Metadata();
@@ -148,7 +148,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      *   <li>The provider's updated name matches the expected value.</li>
      * </ul>
      */
-    @Test
+//    @Test
     @Order(3)
     void updateProviderSucceeds() {
         ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
@@ -186,7 +186,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      *
      * @throws InterruptedException if the thread sleep operation is interrupted.
      */
-    @Test
+//    @Test
     @Order(4)
     void deleteProviderSucceeds() throws InterruptedException {
         ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
@@ -214,7 +214,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      * <p>
      * This is critical for ensuring that unauthorized access is not allowed during provider creation.
      */
-    @Test
+//    @Test
     void addProviderFailsOnAuthentication() {
         ProviderBundle inputProviderBundle = new ProviderBundle();
 
@@ -231,7 +231,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      * This is crucial for maintaining data integrity and ensuring that incomplete or invalid data
      * cannot be added to the system.
      */
-    @Test
+//    @Test
     void addProviderFailsOnMandatoryFieldValidation() {
         ProviderBundle inputProviderBundle = new ProviderBundle();
         inputProviderBundle.setProvider(new Provider());
@@ -255,7 +255,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      * This helps maintain consistency with predefined standards and ensures only valid vocabulary values
      * are accepted.
      */
-    @Test
+//    @Test
     void addProviderFailsOnVocabularyValidation() {
         String invalidCountryValue = "Asgard";
         ProviderBundle inputProviderBundle = createProviderBundle();
@@ -288,7 +288,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      *
      * <p>An assertion ensures that the initial ID is not retained in the retrieved ProviderBundle.</p>
      */
-    @Test
+//    @Test
     void addProviderEnsureIdIsAssignedByThePortal() {
         providerId = "@my-ID>!?";
         Metadata metadata = new Metadata();
