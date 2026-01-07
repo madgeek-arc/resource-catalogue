@@ -447,7 +447,6 @@ public class ProviderTestCrudController {
         NewProviderBundle bundle = providerTestService.get(provider.get("id").toString(), catalogueId);
         bundle.setProvider(provider);
 
-        providerTestService.validate(bundle);
         providerTestService.updateDraft(bundle, auth);
         bundle = providerTestService.finalizeDraft(bundle, auth);
 

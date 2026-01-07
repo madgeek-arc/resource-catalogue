@@ -136,8 +136,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     @Override
     public NewProviderBundle update(NewProviderBundle bundle, Authentication auth) {
         NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId()); //TODO: I don't like calling it twice
-        validate(bundle);
-
         try {
             NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
 
@@ -150,6 +148,8 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         }
 
     }
+
+    //TODO: Do we need specific model validation? -> VocabularyValidationUtils -> Should it be transferred into catalogue lib?
 
     private void sendEmailsAfterProviderUpdate(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
         // Send emails to newly added or deleted Admins
@@ -649,8 +649,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
 
     @Override
     public NewProviderBundle finalizeDraft(NewProviderBundle bundle, Authentication auth) {
-        validate(bundle);
-
         bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
         bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 
