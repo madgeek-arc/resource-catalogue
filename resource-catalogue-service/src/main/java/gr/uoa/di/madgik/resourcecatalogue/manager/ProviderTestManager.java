@@ -31,6 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -138,7 +139,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId()); //TODO: I don't like calling it twice
         try {
             NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-
             checkAndAddProviderToHLEVocabulary(bundle);
             sendEmailsAfterProviderUpdate(bundle, existing);
 //            synchronizerService.syncUpdate(bundle.getProvider()); // TODO: remove this?
@@ -146,57 +146,9 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     //TODO: Do we need specific model validation? -> VocabularyValidationUtils -> Should it be transferred into catalogue lib?
-
-    private void sendEmailsAfterProviderUpdate(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
-        // Send emails to newly added or deleted Admins
-        adminDifferences(updatedProvider, existingProvider);
-
-        // send notification emails to Portal Admins
-        if (updatedProvider.getLatestAuditInfo() != null &&
-                updatedProvider.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            long latestAudit = Long.parseLong(updatedProvider.getLatestAuditInfo().getDate());
-            long latestUpdate = Long.parseLong(updatedProvider.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate) {
-//                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(bundle); //TODO: fix & enable
-            }
-        }
-    }
-
-    public void adminDifferences(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
-        List<String> existingAdmins = extractEmails(existingProvider);
-        List<String> newAdmins = extractEmails(updatedProvider);
-
-        List<String> adminsAdded = new ArrayList<>(newAdmins);
-        adminsAdded.removeAll(existingAdmins);
-        if (!adminsAdded.isEmpty()) {
-//            registrationMailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded); //TODO: fix & enable
-        }
-
-        List<String> adminsDeleted = new ArrayList<>(existingAdmins);
-        adminsDeleted.removeAll(newAdmins);
-
-        if (!adminsDeleted.isEmpty()) {
-//            registrationMailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted); //TODO: fix & enable
-        }
-    }
-
-    private List<String> extractEmails(NewProviderBundle providerBundle) {
-        List<String> emails = new ArrayList<>();
-
-        Object usersObj = providerBundle.getProvider().get("users"); //TODO: how to enforce that users will be always in the model
-        if (usersObj instanceof Collection<?>) {
-            for (Object obj : (Collection<?>) usersObj) {
-                if (obj instanceof User user) {
-                    emails.add(user.getEmail().toLowerCase());
-                }
-            }
-        }
-        return emails;
-    }
 
     @Override
     public void delete(NewProviderBundle bundle) {
@@ -534,6 +486,64 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         }
         mapValues.setValues(valueList);
         mapValuesList.add(mapValues);
+    }
+
+    private void sendEmailsAfterProviderUpdate(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
+        sendEmailsForAdminDifferences(updatedProvider, existingProvider);
+        sendEmailsForAuditInfo(updatedProvider);
+    }
+
+    private void sendEmailsForAdminDifferences(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
+        List<List<String>> differences = calculateDifferences(updatedProvider, existingProvider);
+        sendEmailsToProviderAdmins(differences);
+    }
+
+    private List<List<String>> calculateDifferences(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
+        List<String> existingAdmins = extractEmails(existingProvider);
+        List<String> newAdmins = extractEmails(updatedProvider);
+        List<String> adminsAdded = new ArrayList<>(newAdmins);
+        adminsAdded.removeAll(existingAdmins);
+        List<String> adminsDeleted = new ArrayList<>(existingAdmins);
+        adminsDeleted.removeAll(newAdmins);
+
+        List<List<String>> differences = new ArrayList<>();
+        differences.add(adminsAdded);
+        differences.add(adminsDeleted);
+        return differences;
+    }
+
+    private List<String> extractEmails(NewProviderBundle providerBundle) {
+        List<String> emails = new ArrayList<>();
+
+        Object usersObj = providerBundle.getProvider().get("users"); //TODO: how to enforce that users will be always in the model
+        if (usersObj instanceof Collection<?>) {
+            for (Object obj : (Collection<?>) usersObj) {
+                if (obj instanceof User user) {
+                    emails.add(user.getEmail().toLowerCase());
+                }
+            }
+        }
+        return emails;
+    }
+
+    private void sendEmailsToProviderAdmins(List<List<String>> differences) {
+        if (!differences.getFirst().isEmpty()) {
+//            registrationMailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded); //TODO: fix & enable
+        }
+        if (!differences.getLast().isEmpty()) {
+//            registrationMailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted); //TODO: fix & enable
+        }
+    }
+
+    private void sendEmailsForAuditInfo(NewProviderBundle updatedProvider) {
+        if (updatedProvider.getLatestAuditInfo() != null &&
+                LoggingInfo.ActionType.INVALID.getKey().equals(updatedProvider.getLatestAuditInfo().getActionType())) {
+            long latestAudit = Long.parseLong(updatedProvider.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(updatedProvider.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate) {
+//                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(bundle); //TODO: fix & enable
+            }
+        }
     }
 
     //TODO: call on update and verify
