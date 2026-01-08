@@ -3,9 +3,12 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
@@ -15,6 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -127,6 +134,71 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     private boolean hasChanged(T bundle) {
         T existing = get(bundle.getId(), bundle.getCatalogueId());
         return !bundle.equals(existing);
+    }
+
+    @Override
+    public T audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        T existing = get(id, catalogueId);
+        existing.markAudit(comment, actionType, auth);
+
+        // send notification emails to Provider Admins
+//        registrationMailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
+
+        logger.info("Audited '{}' with ID '{}' [actionType: {}]", getResourceTypeName(), existing.getId(), actionType);
+
+        try {
+            genericResourceService.update(getResourceTypeName(), id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        return existing;
+    }
+
+    @Override
+    public Paging<T> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(10000);
+        ff.addFilter("status", "approved");
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+
+        Browsing<T> resourcesBrowsing = getAll(ff, auth);
+        List<T> resourcesToBeAudited = new ArrayList<>();
+
+        long todayEpochMillis = System.currentTimeMillis();
+        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
+                .atZone(ZoneId.systemDefault())
+                .minusMonths(auditingInterval)
+                .toEpochSecond();
+
+        for (T bundle : resourcesBrowsing.getResults()) {
+            LoggingInfo auditInfo = bundle.getLatestAuditInfo();
+            if (auditInfo == null) {
+                // Include providers that have never been audited
+                resourcesToBeAudited.add(bundle);
+            } else {
+                try {
+                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
+                    if (auditEpochSeconds < intervalEpochSeconds) {
+                        // Include providers that were last audited before the threshold
+                        resourcesToBeAudited.add(bundle);
+                    }
+                } catch (NumberFormatException e) {
+                }
+            }
+        }
+
+        // Shuffle the list randomly
+        Collections.shuffle(resourcesToBeAudited);
+
+        // Limit the list to the requested quantity
+        if (resourcesToBeAudited.size() > quantity) {
+            resourcesToBeAudited = resourcesToBeAudited.subList(0, quantity);
+        }
+
+        return new Browsing<>(resourcesToBeAudited.size(), 0, resourcesToBeAudited.size(), resourcesToBeAudited,
+                resourcesBrowsing.getFacets());
     }
 
     //region unused
