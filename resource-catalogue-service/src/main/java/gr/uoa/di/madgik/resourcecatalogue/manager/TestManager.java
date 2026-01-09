@@ -8,7 +8,6 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TestService;

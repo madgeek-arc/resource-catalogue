@@ -18,20 +18,18 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
+import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,8 +37,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.*;
 
 //TODO: REMOVE ANY LOGIC THAT RELATES WITH MODEL'S FIELDS (eg. name, users, HLE)
@@ -124,6 +120,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
+    @TriggersAspects({"HostingLegalEntityVocabularyUpdate"})
     public NewProviderBundle update(NewProviderBundle bundle, String comment, Authentication auth) {
         NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Provider
@@ -139,7 +136,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId()); //TODO: I don't like calling it twice
         try {
             NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-            checkAndAddProviderToHLEVocabulary(bundle);
             sendEmailsAfterProviderUpdate(bundle, existing);
 //            synchronizerService.syncUpdate(bundle.getProvider()); // TODO: remove this?
             return ret;
@@ -209,6 +205,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
+    @TriggersAspects({"HostingLegalEntityVocabularyUpdate"})
     public NewProviderBundle setStatus(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
@@ -216,10 +213,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         }
         NewProviderBundle existing = get(id);
         existing.markOnboard(status, active, auth, null);
-
-        if (status.equals("approved")) {
-            checkAndAddProviderToHLEVocabulary(existing);
-        }
 
         logger.info("Verifying Provider: {}", existing);
         try {
@@ -473,47 +466,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
 //                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(bundle); //TODO: fix & enable
             }
         }
-    }
-
-    //TODO: call on update and verify
-    private void checkAndAddProviderToHLEVocabulary(NewProviderBundle bundle) {
-        boolean legalEntity = switch (bundle.getProvider().get("legalEntity")) { // TODO: field type (in model) should be 'boolean', not radio with "true"/"false" values.
-            case Boolean value -> value;
-            case String str -> Boolean.parseBoolean(str);
-            default -> throw new ValidationException("Error in field 'legalEntity', should be boolean.");
-        };
-        if (bundle.getStatus().toLowerCase().contains("approved") && legalEntity) {
-            addUpdateProviderHLEVocabulary(bundle);
-        }
-    }
-
-    private void addUpdateProviderHLEVocabulary(NewProviderBundle bundle) {
-        String hleId = createProviderHleId(bundle);
-        Vocabulary hle = vocabularyService.get();
-        if (hle != null) {
-            if (!hle.getName().equals(bundle.getProvider().get("name"))) {
-                hle.setName(bundle.getProvider().get("name").toString());
-                vocabularyService.update(hle, null);
-            }
-        } else { // create new entry
-            hle = new Vocabulary();
-            hle.setId(hleId);
-            hle.setName(bundle.getProvider().get("name").toString());
-            hle.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
-            hle.setExtras(new HashMap<>() {{
-                put("catalogueId", bundle.getCatalogueId());
-            }});
-            logger.info("Creating a new Hosting Legal Entity Vocabulary with id: [{}] and name: [{}]",
-                    hle.getId(), hle.getName());
-            vocabularyService.add(hle, null);
-        }
-    }
-
-    private String createProviderHleId(NewProviderBundle bundle) {
-        return "%s-%s".formatted(
-                Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey().toLowerCase().replace(" ", "_"),
-                bundle.getId()
-        );
     }
 
     public Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> getProviderIdToNameMap(String catalogueId) {

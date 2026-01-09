@@ -336,8 +336,7 @@ public class CatalogueController {
         providerBundle.setProvider(provider);
         providerBundle.setCatalogueId(catalogueId);
         NewProviderBundle ret = providerTestService.add(providerBundle, auth);
-        logger.info("Added the Provider with name '{}' and id '{}' in the Catalogue '{}'",
-                provider.get("name"), provider.get("id"), catalogueId);
+        logger.info("Added Provider with id '{}' in the Catalogue '{}'", provider.get("id"), catalogueId);
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
 
@@ -350,8 +349,7 @@ public class CatalogueController {
                                                                         @Parameter(hidden = true) Authentication auth) {
         provider.setCatalogueId(catalogueId);
         NewProviderBundle bundle = providerTestService.add(provider, auth); //TODO: do we want Admin adds to pass through regular update?
-        logger.info("Added the Provider with name '{}' and id '{}' in the Catalogue '{}'",
-                provider.getProvider().get("name"), provider.getProvider().get("id"), catalogueId);
+        logger.info("Added the Provider with id '{}' in the Catalogue '{}'", provider.getId(), catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
 
@@ -366,7 +364,7 @@ public class CatalogueController {
         NewProviderBundle bundle = providerTestService.get(id, catalogueId);
         bundle.setProvider(provider);
         bundle = providerTestService.update(bundle, comment, auth);
-        logger.info("Updated the Provider with id '{}'", provider.get("id"));
+        logger.info("Updated the Provider with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
 
@@ -378,7 +376,7 @@ public class CatalogueController {
                                                                            @RequestParam(required = false) String comment,
                                                                            @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle providerBundle = providerTestService.update(provider, comment, auth); //TODO: do we want Admin updates to pass through regular update?
-        logger.info("Updated the Provider id '{}'", provider.getProvider().get("id"));
+        logger.info("Updated the Provider id '{}'", provider.getId());
         return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
@@ -390,9 +388,7 @@ public class CatalogueController {
                                                      @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         NewProviderBundle provider = providerTestService.get(providerId, catalogueId);
         providerTestService.delete(provider);
-        logger.info("Deleted the Provider with name '{}' and id '{}'",
-                provider.getProvider().get("name"),
-                provider.getProvider().get("id"));
+        logger.info("Deleted the Provider with id '{}'", provider.getId());
         return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
     }
 
@@ -420,7 +416,7 @@ public class CatalogueController {
     @Operation(description = "Creates a new Service for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/service", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
-    public ResponseEntity<Service> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId,
+    public ResponseEntity<?> addCatalogueService(@RequestBody Service service, @PathVariable String catalogueId,
                                                        @Parameter(hidden = true) Authentication auth) {
         ServiceBundle ret = this.serviceBundleService.addResource(new ServiceBundle(service), catalogueId, auth);
         logger.info("Added the Service with name '{}' and id '{}' in the Catalogue '{}'",
