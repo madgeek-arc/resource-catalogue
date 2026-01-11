@@ -58,7 +58,7 @@ public class ProviderManagementAspect {
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final PublicConfigurationTemplateService publicConfigurationTemplateManager;
     private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final SecurityService securityService;
     private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
     private final PublicAdapterService publicAdapterManager;
@@ -83,7 +83,7 @@ public class ProviderManagementAspect {
                                     PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager,
                                     PublicAdapterService publicAdapterManager,
                                     PublicDeployableServiceService publicDeployableServiceManager,
-                                    RegistrationMailService registrationMailService,
+                                    EmailService emailService,
                                     SecurityService securityService) {
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
@@ -101,7 +101,7 @@ public class ProviderManagementAspect {
         this.publicConfigurationTemplateInstanceManager = publicConfigurationTemplateInstanceManager;
         this.publicAdapterManager = publicAdapterManager;
         this.publicDeployableServiceManager = publicDeployableServiceManager;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.securityService = securityService;
     }
 
@@ -138,7 +138,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(final ProviderBundle providerBundle) {
         logger.trace("Sending Registration emails");
         if (!providerBundle.getMetadata().isPublished() && providerBundle.getProvider().getCatalogueId().equals(catalogueId)) {
-            registrationMailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "providerManager");
+            emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "providerManager");
         }
     }
 
@@ -147,7 +147,7 @@ public class ProviderManagementAspect {
             returning = "catalogueBundle")
     public void catalogueRegistrationEmails(final CatalogueBundle catalogueBundle) {
         logger.trace("Sending Registration emails");
-        registrationMailService.sendOnboardingEmailsToCatalogueAdmins(catalogueBundle);
+        emailService.sendOnboardingEmailsToCatalogueAdmins(catalogueBundle);
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))",
@@ -156,7 +156,7 @@ public class ProviderManagementAspect {
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(),
                 serviceBundle.getService().getCatalogueId(), false);
         logger.trace("Sending Registration emails");
-        registrationMailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager");
+        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
@@ -165,7 +165,7 @@ public class ProviderManagementAspect {
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
                 trainingResourceBundle.getTrainingResource().getCatalogueId(), false);
         logger.trace("Sending Registration emails");
-        registrationMailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "trainingResourceManager");
+        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "trainingResourceManager");
     }
 
     //TODO: registration emails for DeployableServices

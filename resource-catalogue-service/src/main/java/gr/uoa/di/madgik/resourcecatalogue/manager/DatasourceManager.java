@@ -43,7 +43,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
     private final ServiceBundleService serviceBundleService;
     private final SecurityService securityService;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
@@ -54,7 +54,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
 
     public DatasourceManager(ServiceBundleService serviceBundleService,
                              @Lazy SecurityService securityService,
-                             @Lazy RegistrationMailService registrationMailService,
+                             @Lazy EmailService emailService,
                              @Lazy VocabularyService vocabularyService,
                              @Lazy ProviderResourcesCommonMethods commonMethods,
                              OpenAIREDatasourceManager openAIREDatasourceManager,
@@ -62,7 +62,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         super(DatasourceBundle.class);
         this.serviceBundleService = serviceBundleService;
         this.securityService = securityService;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
@@ -110,7 +110,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
             datasourceBundle.setStatus(vocabularyService.get("pending").getId());
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
             datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
-            registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
+            emailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
             commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), false);
         } else {
             datasourceBundle.setActive(true);
@@ -174,7 +174,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         resourceService.updateResource(existingResource);
         logger.info("Updated Datasource with id '{}'", ret.getId());
 
-        registrationMailService.sendEmailsForDatasourceExtensionToPortalAdmins(ret, "put");
+        emailService.sendEmailsForDatasourceExtensionToPortalAdmins(ret, "put");
         return ret;
     }
 

@@ -39,7 +39,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -65,7 +64,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
     private final SecurityService securityService;
     private final IdCreator idCreator;
     private final EventService eventService;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final VersionService versionService;
     private final VocabularyService vocabularyService;
     private final CatalogueService catalogueService;
@@ -78,7 +77,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
 
     public ProviderManager(@Lazy ServiceBundleService serviceBundleService,
                            @Lazy SecurityService securityService,
-                           @Lazy RegistrationMailService registrationMailService, IdCreator idCreator,
+                           @Lazy EmailService emailService, IdCreator idCreator,
                            EventService eventService, VersionService versionService,
                            VocabularyService vocabularyService,
                            @Qualifier("providerSync") SynchronizerService<Provider> synchronizerService,
@@ -97,7 +96,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         this.securityService = securityService;
         this.idCreator = idCreator;
         this.eventService = eventService;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.versionService = versionService;
         this.vocabularyService = vocabularyService;
         this.synchronizerService = synchronizerService;
@@ -138,7 +137,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         ret = super.add(provider, null);
         logger.debug("Adding Provider: {} of Catalogue: '{}'", provider, catalogueId);
 
-        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(provider, null);
+        emailService.sendEmailsToNewlyAddedProviderAdmins(provider, null);
 
 //        synchronizerService.syncAdd(provider.getProvider()); // TODO: remove this?
 
@@ -204,7 +203,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
             long latestAudit = Long.parseLong(providerBundle.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(providerBundle.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate) {
-                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(providerBundle);
+                emailService.notifyPortalAdminsForInvalidProviderUpdate(providerBundle);
             }
         }
     }
@@ -402,7 +401,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         logger.debug("Deleting Resource {}", provider);
 
         // TODO: move to aspect
-        registrationMailService.notifyProviderAdminsForProviderDeletion(provider);
+        emailService.notifyProviderAdminsForProviderDeletion(provider);
 
         synchronizerService.syncDelete(provider.getProvider());
 
@@ -717,12 +716,12 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
         if (!adminsAdded.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded);
+            emailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded);
         }
         List<String> adminsDeleted = new ArrayList<>(existingAdmins);
         adminsDeleted.removeAll(newAdmins);
         if (!adminsDeleted.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted);
+            emailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted);
         }
     }
 
@@ -731,7 +730,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         ProviderBundle provider = get(providerId, catalogueId, false);
         for (User user : provider.getProvider().getUsers()) {
             if (user.getEmail().equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
+                emailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
             }
         }
     }
@@ -742,7 +741,7 @@ public class ProviderManager extends ResourceCatalogueManager<ProviderBundle> im
         existingProvider.markAudit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForBundleAuditing(existingProvider, existingProvider.getProvider().getUsers());
+        emailService.notifyProviderAdminsForBundleAuditing(existingProvider, existingProvider.getProvider().getUsers());
 
         logger.info("Audited Provider '{}'-'{}' with [actionType: {}]",
                 existingProvider.getProvider().getId(), existingProvider.getProvider().getName(), actionType);

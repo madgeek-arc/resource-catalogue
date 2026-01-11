@@ -41,7 +41,7 @@ import java.util.*;
 public class VocabularyCurationManager extends ResourceManager<VocabularyCuration> implements VocabularyCurationService {
 
     private static final Logger logger = LoggerFactory.getLogger(VocabularyCurationManager.class);
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final ProviderService providerService;
     private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
@@ -56,13 +56,13 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private String catalogueId;
     private final IdCreator idCreator;
 
-    public VocabularyCurationManager(@Lazy RegistrationMailService registrationMailService,
+    public VocabularyCurationManager(@Lazy EmailService emailService,
                                      ProviderService providerService,
                                      ServiceBundleService serviceBundleService,
                                      TrainingResourceService trainingResourceService,
                                      IdCreator idCreator) {
         super(VocabularyCuration.class);
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -91,7 +91,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         if (vocabularyCuration.getVocabularyEntryRequests().size() == 1) {
             super.add(vocabularyCuration, auth);
             logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
-            registrationMailService.sendEmailsForVocabularyCurationCreation(vocabularyCuration,
+            emailService.sendEmailsForVocabularyCurationCreation(vocabularyCuration,
                     Objects.requireNonNull(AuthenticationInfo.getFullName(auth)));
             // if vocabularyCuration already exists in "pending"
         } else {
@@ -266,11 +266,11 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         if (approved) {
             vocabularyCuration.setStatus(VocabularyCuration.Status.APPROVED.getKey());
             createNewVocabulary(vocabularyCuration, authentication);
-            registrationMailService.sendEmailsForVocabularyCurationResolve(vocabularyCuration);
+            emailService.sendEmailsForVocabularyCurationResolve(vocabularyCuration);
         } else {
             vocabularyCuration.setStatus(VocabularyCuration.Status.REJECTED.getKey());
             vocabularyCuration.setRejectionReason(rejectionReason);
-            registrationMailService.sendEmailsForVocabularyCurationResolve(vocabularyCuration);
+            emailService.sendEmailsForVocabularyCurationResolve(vocabularyCuration);
         }
         update(vocabularyCuration, authentication);
     }

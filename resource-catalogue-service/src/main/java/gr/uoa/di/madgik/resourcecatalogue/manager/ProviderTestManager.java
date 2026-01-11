@@ -29,12 +29,14 @@ import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderCascadeLifecycleService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -50,7 +52,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     private String catalogueId;
 
     private final GenericResourceService genericResourceService;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final VocabularyService vocabularyService;
     private final ServiceBundleService serviceBundleService; //FIXME: do we need <?>
     private final TrainingResourceService trainingResourceService;
@@ -59,9 +61,10 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     private final ProviderResourcesCommonMethods commonMethods;
     private final SecurityService securityService;
     private final CatalogueService catalogueService;
+    private final ProviderCascadeLifecycleService cascadeLifecycleService;
 
     public ProviderTestManager(GenericResourceService genericResourceService,
-                               RegistrationMailService registrationMailService,
+                               EmailService emailService,
                                VocabularyService vocabularyService,
                                ServiceBundleService serviceBundleService,
                                TrainingResourceService trainingResourceService,
@@ -69,10 +72,11 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
                                IdCreator idCreator,
                                ProviderResourcesCommonMethods commonMethods,
                                SecurityService securityService,
-                               CatalogueService catalogueService) {
+                               CatalogueService catalogueService,
+                               ProviderCascadeLifecycleService cascadeLifecycleService) {
         super(genericResourceService, securityService, catalogueService);
         this.genericResourceService = genericResourceService;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.vocabularyService = vocabularyService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -81,6 +85,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         this.commonMethods = commonMethods;
         this.securityService = securityService;
         this.catalogueService = catalogueService;
+        this.cascadeLifecycleService = cascadeLifecycleService;
     }
 
     @Override
@@ -92,7 +97,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     public NewProviderBundle add(NewProviderBundle bundle, Authentication auth) {
         onboard(bundle, auth);
         NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
-//        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
+//        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
 //        synchronizerService.syncAdd(bundle.getProvider()); //TODO: remove this?
         return ret;
     }
@@ -120,7 +125,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     }
 
     @Override
-    @TriggersAspects({"HostingLegalEntityVocabularyUpdate"})
+    @TriggersAspects({"HostingLegalEntityVocabularyUpdate", "AfterProviderUpdateEmails"})
     public NewProviderBundle update(NewProviderBundle bundle, String comment, Authentication auth) {
         NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Provider
@@ -128,17 +133,9 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
             return bundle;
         }
         bundle.markUpdate(auth, comment);
-        return update(bundle, auth);
-    }
-
-    @Override
-    public NewProviderBundle update(NewProviderBundle bundle, Authentication auth) {
-        NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId()); //TODO: I don't like calling it twice
         try {
-            NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-            sendEmailsAfterProviderUpdate(bundle, existing);
+            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
 //            synchronizerService.syncUpdate(bundle.getProvider()); // TODO: remove this?
-            return ret;
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -147,61 +144,20 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
     //TODO: Do we need specific model validation? -> VocabularyValidationUtils -> Should it be transferred into catalogue lib?
 
     @Override
+    @Transactional // if deleteAllRelatedResources() fails, this should also fail
+    @TriggersAspects({"AfterProviderDeletionEmails"})
     public void delete(NewProviderBundle bundle) {
-        String catalogueId = bundle.getCatalogueId();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // block Public Provider deletion
         if (bundle.getMetadata().isPublished()) {
             throw new ValidationException("You cannot directly delete a Public Provider");
         }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        logger.trace("User is attempting to delete the Provider with id '{}'", bundle.getId());
-//        List<ServiceBundle> services =
-//                serviceBundleService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
-//        if (services != null && !services.isEmpty()) {
-//            services.forEach(s -> {
-//                if (!s.getMetadata().isPublished()) {
-//                    try {
-//                        serviceBundleService.delete(s);
-//                    } catch (ResourceNotFoundException e) {
-//                        logger.error("Error deleting Service with ID '{}'", s.getId());
-//                    }
-//                }
-//            });
-//        }
-//        List<TrainingResourceBundle> trainingResources =
-//                trainingResourceService.getResourceBundles(catalogueId, provider.getId(), authentication).getResults();
-//        if (trainingResources != null && !trainingResources.isEmpty()) {
-//            trainingResources.forEach(s -> {
-//                if (!s.getMetadata().isPublished()) {
-//                    try {
-//                        trainingResourceService.delete(s);
-//                    } catch (ResourceNotFoundException e) {
-//                        logger.error("Error deleting Training Resource with ID '{}'", s.getId());
-//                    }
-//                }
-//            });
-//        }
-//        List<InteroperabilityRecordBundle> interoperabilityRecords =
-//                interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, provider.getId(), authentication).getResults();
-//        if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
-//            interoperabilityRecords.forEach(s -> {
-//                if (!s.getMetadata().isPublished()) {
-//                    try {
-//                        interoperabilityRecordService.delete(s);
-//                    } catch (ResourceNotFoundException e) {
-//                        logger.error("Error deleting Interoperability Record with ID '{}'", s.getId());
-//                    }
-//                }
-//            });
-//        }
-        logger.debug("Deleting Provider: {} and all his Resources", bundle.getId());
 
+        logger.info("Deleting Provider: {} and all its Resources", bundle.getId());
+        cascadeLifecycleService.deleteAllRelatedResources(bundle, auth);
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
 
-        // TODO: move to aspect
-//        registrationMailService.notifyProviderAdminsForProviderDeletion(bundle);
-
-//        synchronizerService.syncDelete(bundle.getProvider());
+//        synchronizerService.syncDelete(bundle.getProvider()); //TODO: remove this?
     }
 
     @Override
@@ -284,34 +240,15 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
 
     @Override
     public NewProviderBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        NewProviderBundle existing = get(id);
+        NewProviderBundle bundle = get(id, catalogueId);
 //        commonMethods.suspensionValidation(existing, catalogueId, id, suspend, auth); //FIXME
 
-        existing.markSuspend(suspend, auth);
-
-        // Suspend Provider's resources
-        List<ServiceBundle> services = serviceBundleService.getResourceBundles(catalogueId, id, auth).getResults();
-        List<TrainingResourceBundle> trainingResources = trainingResourceService.getResourceBundles(catalogueId, id, auth).getResults();
-        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, id, auth).getResults();
-
-//        if (services != null && !services.isEmpty()) {
-//            for (ServiceBundle serviceBundle : services) {
-//                serviceBundleService.suspend(serviceBundle.getId(), catalogueId, suspend, auth);
-//            }
-//        }
-//        if (trainingResources != null && !trainingResources.isEmpty()) {
-//            for (TrainingResourceBundle trainingResourceBundle : trainingResources) {
-//                trainingResourceService.suspend(trainingResourceBundle.getId(), catalogueId, suspend, auth);
-//            }
-//        }
-//        if (interoperabilityRecords != null && !interoperabilityRecords.isEmpty()) {
-//            for (InteroperabilityRecordBundle interoperabilityRecordBundle : interoperabilityRecords) {
-//                interoperabilityRecordService.suspend(interoperabilityRecordBundle.getId(), catalogueId, suspend, auth);
-//            }
-//        }
+        logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
+        bundle.markSuspend(suspend, auth);
+        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
 
         try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
+            return genericResourceService.update(getResourceTypeName(), id, bundle);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -326,7 +263,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         List<String> userEmails = extractEmails(provider);
         for (String email : userEmails) {
             if (email.equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-//                registrationMailService.informPortalAdminsForProviderDeletion(provider, User.of(auth)); //FIXME
+//                emailService.informPortalAdminsForProviderDeletion(provider, User.of(auth)); //FIXME
             }
         }
     }
@@ -410,30 +347,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         mapValuesList.add(mapValues);
     }
 
-    private void sendEmailsAfterProviderUpdate(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
-        sendEmailsForAdminDifferences(updatedProvider, existingProvider);
-        sendEmailsForAuditInfo(updatedProvider);
-    }
-
-    private void sendEmailsForAdminDifferences(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
-        List<List<String>> differences = calculateDifferences(updatedProvider, existingProvider);
-        sendEmailsToProviderAdmins(differences);
-    }
-
-    private List<List<String>> calculateDifferences(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
-        List<String> existingAdmins = extractEmails(existingProvider);
-        List<String> newAdmins = extractEmails(updatedProvider);
-        List<String> adminsAdded = new ArrayList<>(newAdmins);
-        adminsAdded.removeAll(existingAdmins);
-        List<String> adminsDeleted = new ArrayList<>(existingAdmins);
-        adminsDeleted.removeAll(newAdmins);
-
-        List<List<String>> differences = new ArrayList<>();
-        differences.add(adminsAdded);
-        differences.add(adminsDeleted);
-        return differences;
-    }
-
     private List<String> extractEmails(NewProviderBundle providerBundle) {
         List<String> emails = new ArrayList<>();
 
@@ -446,26 +359,6 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
             }
         }
         return emails;
-    }
-
-    private void sendEmailsToProviderAdmins(List<List<String>> differences) {
-        if (!differences.getFirst().isEmpty()) {
-//            registrationMailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded); //TODO: fix & enable
-        }
-        if (!differences.getLast().isEmpty()) {
-//            registrationMailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted); //TODO: fix & enable
-        }
-    }
-
-    private void sendEmailsForAuditInfo(NewProviderBundle updatedProvider) {
-        if (updatedProvider.getLatestAuditInfo() != null &&
-                LoggingInfo.ActionType.INVALID.getKey().equals(updatedProvider.getLatestAuditInfo().getActionType())) {
-            long latestAudit = Long.parseLong(updatedProvider.getLatestAuditInfo().getDate());
-            long latestUpdate = Long.parseLong(updatedProvider.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate) {
-//                registrationMailService.notifyPortalAdminsForInvalidProviderUpdate(bundle); //TODO: fix & enable
-            }
-        }
     }
 
     public Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> getProviderIdToNameMap(String catalogueId) {
@@ -510,6 +403,7 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
         return ff;
     }
 
+    //region Drafts
     @Override
     public NewProviderBundle addDraft(NewProviderBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
@@ -545,7 +439,8 @@ public class ProviderTestManager extends gr.uoa.di.madgik.resourcecatalogue.mana
 
         bundle = update(bundle, auth);
 
-//        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
+//        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
         return bundle;
     }
+    //endregion
 }

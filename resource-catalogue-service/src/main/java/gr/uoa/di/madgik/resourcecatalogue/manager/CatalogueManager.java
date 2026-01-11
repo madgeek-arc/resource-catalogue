@@ -53,7 +53,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
     private final FieldValidator fieldValidator;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final ProviderService providerService;
     private final ServiceBundleService serviceBundleService;
     private final TrainingResourceService trainingResourceService;
@@ -71,14 +71,14 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
                             @Lazy FieldValidator fieldValidator,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,
-                            @Lazy RegistrationMailService registrationMailService,
+                            @Lazy EmailService emailService,
                             @Lazy ProviderResourcesCommonMethods commonMethods) {
         super(CatalogueBundle.class);
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
         this.fieldValidator = fieldValidator;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.providerService = providerService;
         this.serviceBundleService = serviceBundleService;
         this.trainingResourceService = trainingResourceService;
@@ -180,7 +180,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ret = super.add(catalogue, null);
         logger.debug("Adding Catalogue: {}", catalogue);
 
-        registrationMailService.sendEmailsToNewlyAddedCatalogueAdmins(catalogue, null);
+        emailService.sendEmailsToNewlyAddedCatalogueAdmins(catalogue, null);
 
         return ret;
     }
@@ -222,7 +222,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
             long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(ret);
+                emailService.notifyPortalAdminsForInvalidCatalogueUpdate(ret);
             }
         }
 
@@ -308,12 +308,12 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
         if (!adminsAdded.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyAddedCatalogueAdmins(updatedCatalogue, adminsAdded);
+            emailService.sendEmailsToNewlyAddedCatalogueAdmins(updatedCatalogue, adminsAdded);
         }
         List<String> adminsDeleted = new ArrayList<>(existingAdmins);
         adminsDeleted.removeAll(newAdmins);
         if (!adminsDeleted.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyDeletedCatalogueAdmins(updatedCatalogue, adminsDeleted);
+            emailService.sendEmailsToNewlyDeletedCatalogueAdmins(updatedCatalogue, adminsDeleted);
         }
     }
 

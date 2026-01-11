@@ -52,7 +52,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     private final TrainingResourceService trainingResourceService;
     private final PublicMonitoringService publicMonitoringManager;
     private final SecurityService securityService;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final WebClient webClient;
 
@@ -71,7 +71,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
                              TrainingResourceService trainingResourceService,
                              PublicMonitoringService publicMonitoringManager,
                              @Lazy SecurityService securityService,
-                             @Lazy RegistrationMailService registrationMailService,
+                             @Lazy EmailService emailService,
                              ProviderResourcesCommonMethods commonMethods,
                              IdCreator idCreator,
                              WebClient.Builder webClientBuilder) {
@@ -80,7 +80,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         this.trainingResourceService = trainingResourceService;
         this.publicMonitoringManager = publicMonitoringManager;
         this.securityService = securityService;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.commonMethods = commonMethods;
         this.idCreator = idCreator;
         this.webClient = webClientBuilder.build();
@@ -147,7 +147,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         ret = super.add(monitoring, null);
         logger.info("Added Monitoring with id '{}'", monitoring.getId());
 
-        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(monitoring, "post");
+        emailService.sendEmailsForMonitoringExtensionToPortalAdmins(monitoring, "post");
 
         return ret;
     }
@@ -196,7 +196,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         resourceService.updateResource(existingResource);
         logger.info("Updated Monitoring with id '{}'", ret.getId());
 
-        registrationMailService.sendEmailsForMonitoringExtensionToPortalAdmins(ret, "put");
+        emailService.sendEmailsForMonitoringExtensionToPortalAdmins(ret, "put");
 
         return ret;
     }

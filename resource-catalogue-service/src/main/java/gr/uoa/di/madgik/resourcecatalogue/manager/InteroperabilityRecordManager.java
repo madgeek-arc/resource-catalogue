@@ -49,7 +49,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
     @Value("${catalogue.id}")
@@ -58,7 +58,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
     public InteroperabilityRecordManager(ProviderService providerService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
-                                         RegistrationMailService registrationMailService,
+                                         EmailService emailService,
                                          ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
         this.providerService = providerService;
@@ -66,7 +66,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.commonMethods = commonMethods;
     }
 
@@ -130,7 +130,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         logger.info("Added a new Interoperability Record with id '{}' and title '{}'", interoperabilityRecordBundle.getId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
         super.add(interoperabilityRecordBundle, auth);
-        registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle, User.of(auth));
+        emailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle, User.of(auth));
 
         return interoperabilityRecordBundle;
     }
@@ -234,7 +234,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
         logger.info("Verified Interoperability Record with id: '{}' | status: '{}' | active: '{}'",
                 interoperabilityRecordBundle.getId(), status, active);
-        registrationMailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle,
+        emailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(interoperabilityRecordBundle,
                 User.of(auth));
         return super.update(interoperabilityRecordBundle, auth);
     }
@@ -304,7 +304,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         // send notification emails to Provider Admins
         ProviderBundle provider = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
-        registrationMailService.notifyProviderAdminsForBundleAuditing(interoperabilityRecordBundle, provider.getProvider().getUsers());
+        emailService.notifyProviderAdminsForBundleAuditing(interoperabilityRecordBundle, provider.getProvider().getUsers());
 
         logger.info("Audited Interoperability Record '{}'-'{}' with [actionType: {}]",
                 interoperabilityRecordBundle.getInteroperabilityRecord().getId(),

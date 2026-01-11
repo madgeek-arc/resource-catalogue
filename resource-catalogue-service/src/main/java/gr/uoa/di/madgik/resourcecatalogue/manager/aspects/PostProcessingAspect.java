@@ -17,21 +17,25 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Profile("beyond")
@@ -41,12 +45,19 @@ public class PostProcessingAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(PostProcessingAspect.class);
 
-    private final VocabularyService vocabularyService;
     private final Map<String, Consumer<Object>> aspectRegistry = new HashMap<>();
+    private final VocabularyService vocabularyService;
+    private final EmailService emailService;
+    private final GenericResourceService genericResourceService;
 
 
-    public PostProcessingAspect(VocabularyService vocabularyService) {
+    //TODO: one class per aspect else it will get messy
+    public PostProcessingAspect(VocabularyService vocabularyService,
+                                EmailService emailService,
+                                GenericResourceService genericResourceService) {
         this.vocabularyService = vocabularyService;
+        this.emailService = emailService;
+        this.genericResourceService = genericResourceService;
         aspectRegistry.put("HostingLegalEntityVocabularyUpdate", obj -> {
             if (!(obj instanceof NewProviderBundle bundle)) {
                 logger.debug("Skipping HostingLegalEntityVocabularyUpdate – object is {}", obj.getClass());
@@ -54,12 +65,16 @@ public class PostProcessingAspect {
             }
             checkAndAddProviderToHLEVocabulary(bundle);
         });
+        aspectRegistry.put("AfterProviderDeletionEmails", obj -> {
+            if (!(obj instanceof NewProviderBundle bundle)) {
+                logger.debug("Skipping AfterProviderDeletionEmails – object is {}", obj.getClass());
+                return;
+            }
+            notifyProviderAdminsForProviderDeletion(bundle);
+        });
     }
 
-    @AfterReturning(
-            pointcut = "@annotation(triggersAspects)",
-            returning = "result"
-    )
+    @AfterReturning(pointcut = "@annotation(triggersAspects)", returning = "result")
     public void afterReturningAdvice(JoinPoint joinPoint, TriggersAspects triggersAspects, Object result) {
         Arrays.stream(triggersAspects.value())
                 .forEach(aspectName -> {
@@ -68,6 +83,39 @@ public class PostProcessingAspect {
                         logic.accept(result);
                     }
                 });
+    }
+
+    @Around("@annotation(triggersAspects)")
+    public Object aroundUpdateEmailsAdvice(ProceedingJoinPoint pjp, TriggersAspects triggersAspects) throws Throwable {
+        boolean shouldSendEmails = Arrays.asList(triggersAspects.value())
+                .contains("AfterProviderUpdateEmails");
+
+        Object[] args = pjp.getArgs();
+        NewProviderBundle incomingBundle = null;
+        for (Object arg : args) {
+            if (arg instanceof NewProviderBundle bundle) {
+                incomingBundle = bundle;
+                break;
+            }
+        }
+        if (incomingBundle == null) {
+            return pjp.proceed(); // nothing to do
+        }
+
+        NewProviderBundle existingProvider = null;
+        try {
+            existingProvider = genericResourceService.get("providertest", incomingBundle.getId());
+        } catch (Exception e) {
+            logger.warn("Could not retrieve existing provider bundle for emails: {}", e.getMessage());
+        }
+
+        Object result = pjp.proceed();
+        if (shouldSendEmails && result instanceof NewProviderBundle updatedProvider && existingProvider != null) {
+            logger.info("Sending emails regarding changes to Provider Admins and Provider audit state.");
+            sendEmailsAfterProviderUpdate(updatedProvider, existingProvider);
+        }
+
+        return result;
     }
 
     private void checkAndAddProviderToHLEVocabulary(NewProviderBundle bundle) {
@@ -110,5 +158,67 @@ public class PostProcessingAspect {
     private String createProviderHLEId(String id) {
         return "%s-%s".formatted(
                 Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey().toLowerCase().replace(" ", "_"), id);
+    }
+
+    private void sendEmailsAfterProviderUpdate(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
+        sendEmailsForAdminDifferences(updatedProvider, existingProvider);
+        sendEmailsForAuditInfo(updatedProvider);
+    }
+
+    private void sendEmailsForAdminDifferences(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
+        List<List<String>> differences = calculateDifferences(updatedProvider, existingProvider);
+        sendEmailsToProviderAdmins(differences);
+    }
+
+    private List<List<String>> calculateDifferences(NewProviderBundle updatedProvider, NewProviderBundle existingProvider) {
+        List<String> existingAdmins = extractEmails(existingProvider);
+        List<String> newAdmins = extractEmails(updatedProvider);
+        List<String> adminsAdded = new ArrayList<>(newAdmins);
+        adminsAdded.removeAll(existingAdmins);
+        List<String> adminsDeleted = new ArrayList<>(existingAdmins);
+        adminsDeleted.removeAll(newAdmins);
+
+        List<List<String>> differences = new ArrayList<>();
+        differences.add(adminsAdded);
+        differences.add(adminsDeleted);
+        return differences;
+    }
+
+    private List<String> extractEmails(NewProviderBundle providerBundle) {
+        List<String> emails = new ArrayList<>();
+
+        Object usersObj = providerBundle.getProvider().get("users"); //TODO: how to enforce that users will be always in the model
+        if (usersObj instanceof Collection<?>) {
+            for (Object obj : (Collection<?>) usersObj) {
+                if (obj instanceof User user) {
+                    emails.add(user.getEmail().toLowerCase());
+                }
+            }
+        }
+        return emails;
+    }
+
+    private void sendEmailsToProviderAdmins(List<List<String>> differences) {
+        if (!differences.getFirst().isEmpty()) {
+//            emailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded); //TODO: fix & enable
+        }
+        if (!differences.getLast().isEmpty()) {
+//            emailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted); //TODO: fix & enable
+        }
+    }
+
+    private void sendEmailsForAuditInfo(NewProviderBundle updatedProvider) {
+        if (updatedProvider.getLatestAuditInfo() != null &&
+                LoggingInfo.ActionType.INVALID.getKey().equals(updatedProvider.getLatestAuditInfo().getActionType())) {
+            long latestAudit = Long.parseLong(updatedProvider.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(updatedProvider.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate) {
+//                emailService.notifyPortalAdminsForInvalidProviderUpdate(bundle); //TODO: fix & enable
+            }
+        }
+    }
+
+    private void notifyProviderAdminsForProviderDeletion(NewProviderBundle bundle) {
+//        emailService.notifyProviderAdminsForProviderDeletion(bundle); //TODO: fix & enable
     }
 }

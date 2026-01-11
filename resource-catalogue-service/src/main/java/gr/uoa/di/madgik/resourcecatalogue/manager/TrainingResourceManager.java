@@ -54,7 +54,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     private final ProviderService providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService catalogueService;
     private final PublicTrainingResourceService publicTrainingResourceManager;
@@ -76,7 +76,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
 
     public TrainingResourceManager(ProviderService providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
-                                   @Lazy RegistrationMailService registrationMailService,
+                                   @Lazy EmailService emailService,
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService catalogueService,
                                    PublicTrainingResourceService publicTrainingResourceManager,
@@ -88,7 +88,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         this.providerService = providerService;
         this.idCreator = idCreator;
         this.securityService = securityService;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
@@ -263,7 +263,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
             long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidTrainingResourceUpdate(ret);
+                emailService.notifyPortalAdminsForInvalidTrainingResourceUpdate(ret);
             }
         }
 
@@ -390,7 +390,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         // send notification emails to Provider Admins
         ProviderBundle provider = providerService.get(trainingResource.getTrainingResource().getCatalogueId(),
                 trainingResource.getTrainingResource().getResourceOrganisation(), auth);
-        registrationMailService.notifyProviderAdminsForBundleAuditing(trainingResource, provider.getProvider().getUsers());
+        emailService.notifyProviderAdminsForBundleAuditing(trainingResource, provider.getProvider().getUsers());
 
         logger.info("Audited Training Resource '{}'-'{}' with [actionType: {}]",
                 trainingResource.getTrainingResource().getId(), trainingResource.getTrainingResource().getTitle(), actionType);
@@ -432,7 +432,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
                 trainingResourceBundle.getTrainingResource().getCatalogueId(), false);
         logger.info("Mailing provider '{}'-'{}' for outdated Training Resources", providerBundle.getId(), providerBundle.getProvider().getName());
-        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResourceBundle, providerBundle);
+        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResourceBundle, providerBundle);
     }
 
     @Override
@@ -624,7 +624,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, trainingResourceBundle.getId());
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, trainingResourceBundle, auth);
+        emailService.sendEmailsForMovedResources(oldProvider, newProvider, trainingResourceBundle, auth);
 
         return trainingResourceBundle;
     }

@@ -53,7 +53,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     private final ProviderService providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final VocabularyService vocabularyService;
     private final PublicServiceService publicServiceManager;
     private final MigrationService migrationService;
@@ -71,7 +71,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
     public ServiceBundleManager(ProviderService providerService,
                                 IdCreator idCreator, @Lazy SecurityService securityService,
-                                @Lazy RegistrationMailService registrationMailService,
+                                @Lazy EmailService emailService,
                                 @Lazy VocabularyService vocabularyService,
                                 @Lazy PublicServiceService publicServiceManager,
                                 @Lazy MigrationService migrationService,
@@ -87,7 +87,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
         this.securityService = securityService;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.vocabularyService = vocabularyService;
         this.publicServiceManager = publicServiceManager;
         this.migrationService = migrationService;
@@ -295,7 +295,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
             long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidServiceUpdate(ret);
+                emailService.notifyPortalAdminsForInvalidServiceUpdate(ret);
             }
         }
 
@@ -409,7 +409,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
 
 
         // send notification emails to Provider Admins
-        registrationMailService.notifyProviderAdminsForBundleAuditing(service, provider.getProvider().getUsers());
+        emailService.notifyProviderAdminsForBundleAuditing(service, provider.getProvider().getUsers());
 
         logger.info("Audited Service '{}'-'{}' with [actionType: {}]",
                 service.getService().getId(), service.getService().getName(), actionType);
@@ -471,7 +471,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         ServiceBundle serviceBundle = get(resourceId, catalogueId, false);
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId(), false);
         logger.info("Mailing provider '{}'-'{}' for outdated Resources", providerBundle.getId(), providerBundle.getProvider().getName());
-        registrationMailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(serviceBundle, providerBundle);
+        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(serviceBundle, providerBundle);
     }
 
     public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
@@ -532,7 +532,7 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE
 
         // emails to EPOT, old and new Provider
-        registrationMailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
+        emailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
 
         return serviceBundle;
     }

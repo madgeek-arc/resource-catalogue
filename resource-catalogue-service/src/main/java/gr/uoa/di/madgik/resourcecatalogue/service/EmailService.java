@@ -45,13 +45,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-//TODO: test
-//TODO: getSimpleName() returns eg. ProviderBundle instead of Provider
-//TODO: rename to something more general (MailService?)
 @Component
-public class RegistrationMailService {
+public class EmailService {
 
-    private static final Logger logger = LoggerFactory.getLogger(RegistrationMailService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final MailService mailService;
     private final Configuration cfg;
     private final ProviderManager providerManager;
@@ -76,13 +73,13 @@ public class RegistrationMailService {
     private final String servicesPrefix;
     private final String trainingsPrefix;
 
-    public RegistrationMailService(MailService mailService, Configuration cfg,
-                                   SecurityService securityService,
-                                   @Lazy ProviderManager providerManager,
-                                   @Lazy ServiceBundleManager serviceBundleManager,
-                                   @Lazy TrainingResourceManager trainingResourceManager,
-                                   @Lazy InteroperabilityRecordManager interoperabilityRecordManager,
-                                   CatalogueProperties properties) {
+    public EmailService(MailService mailService, Configuration cfg,
+                        SecurityService securityService,
+                        @Lazy ProviderManager providerManager,
+                        @Lazy ServiceBundleManager serviceBundleManager,
+                        @Lazy TrainingResourceManager trainingResourceManager,
+                        @Lazy InteroperabilityRecordManager interoperabilityRecordManager,
+                        CatalogueProperties properties) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.securityService = securityService;

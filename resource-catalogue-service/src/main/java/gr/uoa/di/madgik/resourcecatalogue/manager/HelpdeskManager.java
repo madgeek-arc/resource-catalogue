@@ -23,7 +23,6 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -45,7 +44,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     private final TrainingResourceService trainingResourceService;
     private final PublicHelpdeskService publicHelpdeskManager;
     private final SecurityService securityService;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
 
@@ -56,7 +55,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
                            TrainingResourceService trainingResourceService,
                            PublicHelpdeskService publicHelpdeskManager,
                            @Lazy SecurityService securityService,
-                           @Lazy RegistrationMailService registrationMailService,
+                           @Lazy EmailService emailService,
                            @Lazy ProviderResourcesCommonMethods commonMethods,
                            IdCreator idCreator) {
         super(HelpdeskBundle.class);
@@ -64,7 +63,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
         this.trainingResourceService = trainingResourceService;
         this.publicHelpdeskManager = publicHelpdeskManager;
         this.securityService = securityService;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.commonMethods = commonMethods;
         this.idCreator = idCreator;
     }
@@ -119,7 +118,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
         super.add(helpdesk, null);
         logger.info("Added Helpdesk with id '{}'", helpdesk.getId());
 
-        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(helpdesk, "post");
+        emailService.sendEmailsForHelpdeskExtensionToPortalAdmins(helpdesk, "post");
 
         return helpdesk;
     }
@@ -171,7 +170,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
         resourceService.updateResource(existingResource);
         logger.info("Updated Helpdesk with id '{}'", ret.getId());
 
-        registrationMailService.sendEmailsForHelpdeskExtensionToPortalAdmins(ret, "put");
+        emailService.sendEmailsForHelpdeskExtensionToPortalAdmins(ret, "put");
 
         return ret;
     }

@@ -141,7 +141,7 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
         existing.markAudit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
-//        registrationMailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
+//        mailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
 
         logger.info("Audited '{}' with ID '{}' [actionType: {}]", getResourceTypeName(), existing.getId(), actionType);
 

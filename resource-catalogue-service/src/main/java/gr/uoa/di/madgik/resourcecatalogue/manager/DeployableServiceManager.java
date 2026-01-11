@@ -56,7 +56,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     private final CatalogueService catalogueService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final PublicDeployableServiceService publicDeployableServiceService;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
 
     @Autowired
     private FacetLabelService facetLabelService;
@@ -71,7 +71,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
                                     @Lazy VocabularyService vocabularyService,
                                     CatalogueService catalogueService,
                                     PublicDeployableServiceService publicDeployableServiceService,
-                                    RegistrationMailService registrationMailService,
+                                    EmailService emailService,
                                     @Lazy ProviderResourcesCommonMethods commonMethods) {
         super(DeployableServiceBundle.class);
         this.providerService = providerService;
@@ -81,7 +81,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         this.catalogueService = catalogueService;
         this.publicDeployableServiceService = publicDeployableServiceService;
         this.commonMethods = commonMethods;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -359,7 +359,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
 
         ProviderBundle provider = providerService.get(deployableService.getDeployableService().getResourceOrganisation(),
                 deployableService.getDeployableService().getCatalogueId(), false);
-        registrationMailService.notifyProviderAdminsForBundleAuditing(deployableService, provider.getProvider().getUsers());
+        emailService.notifyProviderAdminsForBundleAuditing(deployableService, provider.getProvider().getUsers());
 
         logger.info("Audited Deployable Service '{}'-'{}' with [actionType: {}]",
                 deployableService.getDeployableService().getId(), deployableService.getDeployableService().getName(), actionType);

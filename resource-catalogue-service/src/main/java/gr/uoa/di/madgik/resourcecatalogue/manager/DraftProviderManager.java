@@ -41,7 +41,7 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
 
     private final ProviderService providerManager;
     private final IdCreator idCreator;
-    private final RegistrationMailService registrationMailService;
+    private final EmailService emailService;
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
 
@@ -49,13 +49,13 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
     private String catalogueId;
 
     public DraftProviderManager(ProviderService providerManager,
-                                IdCreator idCreator, @Lazy RegistrationMailService registrationMailService,
+                                IdCreator idCreator, @Lazy EmailService emailService,
                                 @Lazy VocabularyService vocabularyService,
                                 ProviderResourcesCommonMethods commonMethods) {
         super(ProviderBundle.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;
-        this.registrationMailService = registrationMailService;
+        this.emailService = emailService;
         this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
     }
@@ -144,7 +144,7 @@ public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundl
             logger.info("Provider with id '{}' does not exist", bundle.getId());
         }
 
-        registrationMailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null);
+        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null);
         return bundle;
     }
 }
