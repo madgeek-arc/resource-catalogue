@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -40,16 +40,16 @@ import java.util.List;
 public class ServiceCrudController extends ResourceCrudController<ServiceBundle> {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceCrudController.class.getName());
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
 
-    ServiceCrudController(ServiceBundleService serviceBundleService) {
-        super(serviceBundleService);
-        this.serviceBundleService = serviceBundleService;
+    ServiceCrudController(ServiceService serviceService) {
+        super(serviceService);
+        this.serviceService = serviceService;
     }
 
     @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<ServiceBundle> bundles, @Parameter(hidden = true) Authentication auth) {
-        serviceBundleService.addBulk(bundles, auth);
+        serviceService.addBulk(bundles, auth);
     }
 }

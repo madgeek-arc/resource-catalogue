@@ -276,16 +276,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         return this.getAll(filter, auth);
     }
 
-    public InteroperabilityRecordBundle getOrElseReturnNull(String id) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle;
-        try {
-            interoperabilityRecordBundle = get(id);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-        return interoperabilityRecordBundle;
-    }
-
     @Override
     public Paging<InteroperabilityRecordBundle> getInteroperabilityRecordBundles(String catalogueId, String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();

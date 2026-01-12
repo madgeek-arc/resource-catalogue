@@ -119,14 +119,6 @@ public interface DeployableServiceService extends ResourceCatalogueService<Deplo
     DeployableServiceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
     /**
-     * Get a specific Deployable Service of the EOSC Catalogue, given its ID, or return null
-     *
-     * @param id Deployable Service ID
-     * @return {@link DeployableServiceBundle}
-     */
-    DeployableServiceBundle getOrElseReturnNull(String id);
-
-    /**
      * Create a Public Deployable Service
      *
      * @param resource Deployable Service

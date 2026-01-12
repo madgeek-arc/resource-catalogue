@@ -24,7 +24,7 @@ import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager;
-import gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager;
+import gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager;
 import gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
@@ -52,7 +52,7 @@ public class EmailService {
     private final MailService mailService;
     private final Configuration cfg;
     private final ProviderManager providerManager;
-    private final ServiceBundleManager serviceBundleManager;
+    private final ServiceManager serviceBundleManager;
     private final TrainingResourceManager trainingResourceManager;
     private final InteroperabilityRecordManager interoperabilityRecordManager;
     private final SecurityService securityService;
@@ -76,7 +76,7 @@ public class EmailService {
     public EmailService(MailService mailService, Configuration cfg,
                         SecurityService securityService,
                         @Lazy ProviderManager providerManager,
-                        @Lazy ServiceBundleManager serviceBundleManager,
+                        @Lazy ServiceManager serviceBundleManager,
                         @Lazy TrainingResourceManager trainingResourceManager,
                         @Lazy InteroperabilityRecordManager interoperabilityRecordManager,
                         CatalogueProperties properties) {

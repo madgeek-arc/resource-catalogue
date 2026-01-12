@@ -47,6 +47,7 @@ public class Vocabulary implements Identifiable {
         this.extras = extras;
     }
 
+    //TODO: remove any unused type after finalizing models v6
     public enum Type {
         // Node
         NODE("Node"),
@@ -83,6 +84,7 @@ public class Vocabulary implements Identifiable {
         RELATED_PLATFORM("Related platform"),
         SERVICE_CATEGORY("Service category"),
         MARKETPLACE_LOCATION("Marketplace location"),
+        CREDIT("Credit"),
         // States
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),

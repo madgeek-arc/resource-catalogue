@@ -406,18 +406,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         return deployableServiceBundle;
     }
 
-
-    @Override
-    public DeployableServiceBundle getOrElseReturnNull(String id) {
-        DeployableServiceBundle deployableServiceBundle;
-        try {
-            deployableServiceBundle = get(id);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-        return deployableServiceBundle;
-    }
-
     @Override
     public Browsing<DeployableServiceBundle> getAll(FacetFilter ff, Authentication auth) {
         updateFacetFilterConsideringTheAuthorization(ff, auth);

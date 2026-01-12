@@ -70,7 +70,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     private final ProviderService providerService;
     private final SearchService searchService;
     private final ParserService parserService;
-    private final ServiceBundleService serviceBundleManager;
+    private final ServiceService serviceBundleManager;
     private final VocabularyService vocabularyService;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
@@ -79,7 +79,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     ElasticStatisticsManager(RestHighLevelClient client, Analytics analyticsService,
                              ProviderService providerService,
                              SearchService searchService, ParserService parserService,
-                             ServiceBundleService serviceBundleManager,
+                             ServiceService serviceBundleManager,
                              VocabularyService vocabularyService) {
         this.client = client;
         this.analyticsService = analyticsService;

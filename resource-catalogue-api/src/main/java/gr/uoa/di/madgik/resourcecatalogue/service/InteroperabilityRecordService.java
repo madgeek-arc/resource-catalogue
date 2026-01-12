@@ -45,14 +45,6 @@ public interface InteroperabilityRecordService extends ResourceCatalogueService<
                                         Authentication auth);
 
     /**
-     * Get a specific Interoperability Record of an external Catalogue, given its ID, or return null
-     *
-     * @param id Interoperability Record ID
-     * @return {@link InteroperabilityRecordBundle}
-     */
-    InteroperabilityRecordBundle getOrElseReturnNull(String id);
-
-    /**
      * Create a Public Interoperability Record
      *
      * @param interoperabilityRecordBundle Interoperability Record

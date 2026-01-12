@@ -46,7 +46,7 @@ public class ProviderManagementAspect {
     private static final Logger logger = LoggerFactory.getLogger(ProviderManagementAspect.class);
 
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableServiceService deployableServiceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -68,7 +68,7 @@ public class ProviderManagementAspect {
     private String catalogueId;
 
     public ProviderManagementAspect(ProviderService providerService,
-                                    ServiceBundleService serviceBundleService,
+                                    ServiceService serviceService,
                                     TrainingResourceService trainingResourceService,
                                     DeployableServiceService deployableServiceService,
                                     InteroperabilityRecordService interoperabilityRecordService,
@@ -86,7 +86,7 @@ public class ProviderManagementAspect {
                                     EmailService emailService,
                                     SecurityService securityService) {
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.deployableServiceService = deployableServiceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
@@ -106,8 +106,8 @@ public class ProviderManagementAspect {
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftServiceManager.transformToNonDraft(..)) " +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.updateResource(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.addResource(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.updateResource(..))",
             returning = "serviceBundle")
     public void updateProviderState(final ServiceBundle serviceBundle) {
         logger.trace("Updating Provider States");
@@ -150,7 +150,7 @@ public class ProviderManagementAspect {
         emailService.sendOnboardingEmailsToCatalogueAdmins(catalogueBundle);
     }
 
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))",
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "serviceBundle")
     public void providerRegistrationEmails(final ServiceBundle serviceBundle) {
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(),
@@ -215,7 +215,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))",
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "serviceBundle")
     public void updatePublicProviderTemplateStatus(final ServiceBundle serviceBundle) {
         ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(),
@@ -252,10 +252,10 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.addResource(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftServiceManager.transformToNonDraft(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.changeProvider(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.changeProvider(..))",
             returning = "serviceBundle")
     public void addResourceAsPublic(final ServiceBundle serviceBundle) {
         if (serviceBundle.getStatus().equals("approved") && serviceBundle.isActive()) {
@@ -316,7 +316,7 @@ public class ProviderManagementAspect {
         }
     }
 
-    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.updateResource(..)) && args(serviceBundle, ..)")
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.updateResource(..)) && args(serviceBundle, ..)")
     public Object updatePublicResource(ProceedingJoinPoint pjp, ServiceBundle serviceBundle) {
         ServiceBundle init = ObjectUtils.clone(serviceBundle);
         ServiceBundle ret = null;
@@ -333,10 +333,10 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.publish(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.suspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.audit(..))",
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.publish(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.suspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.audit(..))",
             returning = "serviceBundle")
     public void updatePublicResource(final ServiceBundle serviceBundle) {
         try {
@@ -436,7 +436,7 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.delete(..))")
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.delete(..))")
     public void deletePublicService(JoinPoint joinPoint) {
         ServiceBundle serviceBundle = (ServiceBundle) joinPoint.getArgs()[0];
         publicServiceManager.delete(serviceBundle);
@@ -481,7 +481,7 @@ public class ProviderManagementAspect {
                 if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
                             serviceBundle.getService().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-                    serviceBundleService.verify(serviceBundle.getService().getId(), "pending", false, securityService.getAdminAccess());
+                    serviceService.verify(serviceBundle.getService().getId(), "pending", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(), e);
@@ -735,8 +735,8 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.addResource(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceBundleManager.verify(..))",
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.addResource(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "serviceBundle")
     public void assignEoscMonitoringGuidelineToService(final ServiceBundle serviceBundle) {
         if (serviceBundle.getStatus().equals("approved")) {

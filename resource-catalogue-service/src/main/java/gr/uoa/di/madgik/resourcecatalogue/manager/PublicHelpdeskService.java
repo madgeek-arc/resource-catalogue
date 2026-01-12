@@ -20,9 +20,8 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
@@ -40,15 +39,15 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
 
     private static final Logger logger = LoggerFactory.getLogger(PublicHelpdeskService.class);
     private final JmsService jmsService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicHelpdeskService(JmsService jmsService,
-                                 @Lazy ServiceBundleService serviceBundleService,
+                                 @Lazy ServiceService serviceService,
                                  @Lazy TrainingResourceService trainingResourceService) {
         super(HelpdeskBundle.class);
         this.jmsService = jmsService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
     }
 
@@ -127,7 +126,7 @@ public class PublicHelpdeskService extends ResourceCatalogueManager<HelpdeskBund
         // serviceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
+            resourceBundle = serviceService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
         } catch (CatalogueResourceNotFoundException e) {
             resourceBundle = trainingResourceService.get(bundle.getHelpdesk().getServiceId(), bundle.getHelpdesk().getCatalogueId(), false);
         }

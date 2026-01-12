@@ -109,7 +109,7 @@ public interface SecurityService {
      * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered
      * and provider is active
      */
-    boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
+    boolean resourceIsApprovedAndUserIsAdmin(Authentication auth, String resourceId);
 
     /**
      * @param id          service id

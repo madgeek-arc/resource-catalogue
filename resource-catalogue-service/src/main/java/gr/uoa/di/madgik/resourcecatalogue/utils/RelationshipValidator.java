@@ -23,7 +23,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,19 +36,19 @@ import java.util.Objects;
 public class RelationshipValidator {
 
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     @Autowired
     public RelationshipValidator(
             ProviderService providerService,
-            ServiceBundleService serviceBundleService,
+            ServiceService serviceService,
             TrainingResourceService trainingResourceService,
             InteroperabilityRecordService interoperabilityRecordService
     ) {
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
@@ -94,7 +94,7 @@ public class RelationshipValidator {
                 for (String requiredResource : requiredResources) {
                     if (requiredResource != null && !requiredResource.isEmpty()) {
                         try {
-                            serviceBundleService.get(requiredResource, catalogueId, false);
+                            serviceService.get(requiredResource, catalogueId, false);
                         } catch (CatalogueResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(requiredResource, catalogueId, false);
@@ -111,7 +111,7 @@ public class RelationshipValidator {
                 for (String relatedResource : relatedResources) {
                     if (relatedResource != null && !relatedResource.isEmpty()) {
                         try {
-                            serviceBundleService.get(relatedResource, catalogueId, false);
+                            serviceService.get(relatedResource, catalogueId, false);
                         } catch (CatalogueResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(relatedResource, catalogueId, false);
@@ -128,7 +128,7 @@ public class RelationshipValidator {
                 for (String eoscRelatedService : eoscRelatedServices) {
                     if (eoscRelatedService != null && !eoscRelatedService.isEmpty()) {
                         try {
-                            serviceBundleService.get(eoscRelatedService, catalogueId, false);
+                            serviceService.get(eoscRelatedService, catalogueId, false);
                         } catch (CatalogueResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(eoscRelatedService, catalogueId, false);

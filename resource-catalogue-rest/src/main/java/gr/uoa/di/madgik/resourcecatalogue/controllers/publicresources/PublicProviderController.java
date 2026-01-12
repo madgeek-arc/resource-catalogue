@@ -73,7 +73,7 @@ public class PublicProviderController {
                                  @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ProviderBundle bundle = service.get(id, catalogueId, true);
-        if (bundle.getMetadata().isPublished()) {
+        if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",

@@ -136,14 +136,6 @@ public interface TrainingResourceService extends ResourceCatalogueService<Traini
     TrainingResourceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
     /**
-     * Get a specific Training Resource of the EOSC Catalogue, given its ID, or return null
-     *
-     * @param id Training Resource ID
-     * @return {@link TrainingResourceBundle}
-     */
-    TrainingResourceBundle getOrElseReturnNull(String id);
-
-    /**
      * Create a Public Training Resource
      *
      * @param resource Training Resource

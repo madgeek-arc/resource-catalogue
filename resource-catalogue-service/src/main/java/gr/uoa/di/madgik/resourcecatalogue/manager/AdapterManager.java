@@ -45,7 +45,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ProviderService providerService;
 
@@ -55,7 +55,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
     public AdapterManager(OIDCSecurityService securityService,
                           VocabularyService vocabularyService,
                           ProviderResourcesCommonMethods commonMethods,
-                          IdCreator idCreator, ServiceBundleService serviceBundleService,
+                          IdCreator idCreator, ServiceService serviceService,
                           InteroperabilityRecordService interoperabilityRecordService,
                           ProviderService providerService) {
         super(AdapterBundle.class);
@@ -63,7 +63,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.idCreator = idCreator;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.providerService = providerService;
     }
@@ -285,7 +285,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
                 interoperabilityRecordService.get(id, catalogueId, false);
                 break;
             case "Service":
-                serviceBundleService.get(id, catalogueId, false);
+                serviceService.get(id, catalogueId, false);
                 break;
             default:
                 throw new ValidationException("Unsupported linked resource type: [" + type + "]. " +

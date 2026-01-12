@@ -21,16 +21,13 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.EOSCIFGuidelines;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
 
-public interface ServiceBundleService extends ResourceCatalogueService<ServiceBundle>, BundleOperations<ServiceBundle> {
+public interface ServiceService extends TestService<NewServiceBundle> {
 
     /**
      * Method to add a new resource.
@@ -184,14 +181,6 @@ public interface ServiceBundleService extends ResourceCatalogueService<ServiceBu
      */
     ServiceBundle updateEOSCIFGuidelines(String serviceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines,
                                          Authentication auth);
-
-    /**
-     * Get a specific Service of the EOSC Catalogue, given its ID, or return null
-     *
-     * @param id Service ID
-     * @return {@link ServiceBundle}
-     */
-    ServiceBundle getOrElseReturnNull(String id);
 
     /**
      * Create a Public Service

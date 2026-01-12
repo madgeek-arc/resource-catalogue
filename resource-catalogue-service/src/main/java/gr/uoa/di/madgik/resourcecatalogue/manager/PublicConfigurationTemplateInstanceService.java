@@ -18,10 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -32,16 +31,16 @@ public class PublicConfigurationTemplateInstanceService
         extends AbstractPublicResourceManager<ConfigurationTemplateInstanceBundle>
         implements PublicResourceService<ConfigurationTemplateInstanceBundle> {
 
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicConfigurationTemplateInstanceService(JmsService jmsService,
                                                       PidIssuer pidIssuer,
                                                       FacetLabelService facetLabelService,
-                                                      ServiceBundleService serviceBundleService,
+                                                      ServiceService serviceService,
                                                       TrainingResourceService trainingResourceService) {
         super(ConfigurationTemplateInstanceBundle.class, jmsService, pidIssuer, facetLabelService);
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
     }
 
@@ -55,7 +54,7 @@ public class PublicConfigurationTemplateInstanceService
         // resourceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getConfigurationTemplateInstance().getResourceId(),
+            resourceBundle = serviceService.get(bundle.getConfigurationTemplateInstance().getResourceId(),
                     bundle.getConfigurationTemplateInstance().getCatalogueId(), false);
         } catch (CatalogueResourceNotFoundException e) {
             resourceBundle = trainingResourceService.get(bundle.getConfigurationTemplateInstance().getResourceId(),

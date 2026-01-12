@@ -48,7 +48,7 @@ import java.util.*;
 public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle> implements MonitoringService {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final PublicMonitoringService publicMonitoringManager;
     private final SecurityService securityService;
@@ -67,7 +67,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     private final IdCreator idCreator;
 
 
-    public MonitoringManager(ServiceBundleService serviceBundleService,
+    public MonitoringManager(ServiceService serviceService,
                              TrainingResourceService trainingResourceService,
                              PublicMonitoringService publicMonitoringManager,
                              @Lazy SecurityService securityService,
@@ -76,7 +76,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
                              IdCreator idCreator,
                              WebClient.Builder webClientBuilder) {
         super(MonitoringBundle.class);
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.publicMonitoringManager = publicMonitoringManager;
         this.securityService = securityService;
@@ -105,7 +105,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")) {
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
+            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceService, resourceType);
         } else if (resourceType.equals("training_resource")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else {

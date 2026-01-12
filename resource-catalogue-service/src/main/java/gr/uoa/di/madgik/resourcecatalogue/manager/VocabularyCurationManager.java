@@ -43,7 +43,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
     private static final Logger logger = LoggerFactory.getLogger(VocabularyCurationManager.class);
     private final EmailService emailService;
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
 
     @Autowired
@@ -58,13 +58,13 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
 
     public VocabularyCurationManager(@Lazy EmailService emailService,
                                      ProviderService providerService,
-                                     ServiceBundleService serviceBundleService,
+                                     ServiceService serviceService,
                                      TrainingResourceService trainingResourceService,
                                      IdCreator idCreator) {
         super(VocabularyCuration.class);
         this.emailService = emailService;
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.idCreator = idCreator;
     }
@@ -207,7 +207,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             case "provider":
                 break;
             case "service":
-                ServiceBundle serviceBundle = serviceBundleService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId());
+                ServiceBundle serviceBundle = serviceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId());
                 if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())) {
                     throw new CatalogueResourceNotFoundException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.",
                             providerBundle.getId(), serviceBundle.getId()));

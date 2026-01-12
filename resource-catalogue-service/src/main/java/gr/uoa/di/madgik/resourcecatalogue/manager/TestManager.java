@@ -5,9 +5,12 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
@@ -78,6 +81,17 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     }
 
     @Override
+    public T getOrElseReturnNull(String id) {
+        T bundle;
+        try {
+            bundle = get(id);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
+        return bundle;
+    }
+
+    @Override
     public Browsing<T> getAll(FacetFilter ff, Authentication auth) {
         ff.setResourceType(getResourceTypeName());
         boolean authenticated = auth != null && auth.isAuthenticated();
@@ -86,7 +100,8 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
                 return getAll(ff);
             }
             if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
-                ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
+                //TODO: this works only for old Catalogues, Providers. How to proceed
+//                ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
                 return getAll(ff);
             }
         }

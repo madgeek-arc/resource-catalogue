@@ -22,7 +22,7 @@ import gr.uoa.di.madgik.resourcecatalogue.config.ServiceConfig;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class ServiceProviderRegistrationIT {
     ProviderService providerService;
 
     @Autowired
-    ServiceBundleService serviceBundleService;
+    ServiceService serviceService;
 
     @Autowired
     SecurityService securityService;
@@ -86,13 +86,13 @@ public class ServiceProviderRegistrationIT {
 
             serviceBundle = new ServiceBundle(createService("WP4_TestService", provider.getProvider()));
 
-            serviceBundle = serviceBundleService.addResource(serviceBundle, securityService.getAdminAccess());
+            serviceBundle = serviceService.addResource(serviceBundle, securityService.getAdminAccess());
 
             assert serviceBundle != null;
 
             providerService.verify(providerId, "rejected template", false, securityService.getAdminAccess());
 
-            serviceBundleService.updateResource(serviceBundle, "woof", securityService.getAdminAccess());
+            serviceService.updateResource(serviceBundle, "woof", securityService.getAdminAccess());
 
             providerService.verify(providerId, "approved", true, securityService.getAdminAccess());
             providerService.verify(providerId, "approved", false, securityService.getAdminAccess());

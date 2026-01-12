@@ -20,9 +20,8 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.apache.commons.beanutils.BeanUtils;
@@ -41,16 +40,16 @@ public class PublicMonitoringService
 
     private static final Logger logger = LoggerFactory.getLogger(PublicMonitoringService.class);
     private final JmsService jmsService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicMonitoringService(JmsService jmsService,
-                                   @Lazy ServiceBundleService serviceBundleService,
+                                   @Lazy ServiceService serviceService,
                                    @Lazy TrainingResourceService trainingResourceService
     ) {
         super(MonitoringBundle.class);
         this.jmsService = jmsService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
     }
 
@@ -131,7 +130,7 @@ public class PublicMonitoringService
         // serviceId
         Bundle<?> resourceBundle;
         try {
-            resourceBundle = serviceBundleService.get(bundle.getMonitoring().getServiceId(),
+            resourceBundle = serviceService.get(bundle.getMonitoring().getServiceId(),
                     bundle.getMonitoring().getCatalogueId(), false);
         } catch (CatalogueResourceNotFoundException e) {
             resourceBundle = trainingResourceService.get(bundle.getMonitoring().getServiceId(),

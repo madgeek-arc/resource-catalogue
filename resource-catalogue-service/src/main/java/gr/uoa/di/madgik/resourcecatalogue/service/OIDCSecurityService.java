@@ -42,7 +42,7 @@ public class OIDCSecurityService implements SecurityService {
     private final CatalogueService catalogueService;
     private final ProviderService providerService;
     private final ProviderTestService providerTestService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final DeployableServiceService deployableServiceService;
@@ -58,7 +58,7 @@ public class OIDCSecurityService implements SecurityService {
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
                                @Lazy ProviderService providerService,
                                @Lazy ProviderTestService providerTestService,
-                               @Lazy ServiceBundleService serviceBundleService,
+                               @Lazy ServiceService serviceService,
                                @Lazy TrainingResourceService trainingResourceService,
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
                                @Lazy DeployableServiceService deployableServiceService,
@@ -67,7 +67,7 @@ public class OIDCSecurityService implements SecurityService {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.providerTestService = providerTestService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.deployableServiceService = deployableServiceService;
@@ -199,32 +199,39 @@ public class OIDCSecurityService implements SecurityService {
     //TODO: when done, refactor PreAuthorization annotations to include them
     private String getProviderId(String resourceId) {
         String providerId;
-        Bundle<?> bundle = determineResourceType(resourceId);
+        NewBundle bundle = determineResourceType(resourceId);
         providerId = switch (bundle) {
-            case ServiceBundle serviceBundle -> serviceBundle.getService().getResourceOrganisation();
-            case TrainingResourceBundle trainingResourceBundle ->
-                    trainingResourceBundle.getTrainingResource().getResourceOrganisation();
-            case DeployableServiceBundle deployableServiceBundle ->
-                    deployableServiceBundle.getDeployableService().getResourceOrganisation();
-            case null, default -> ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().getProviderId();
+            case NewServiceBundle serviceBundle -> (String) serviceBundle.getService().get("serviceOwner");
+            //FIXME
+//            case TrainingResourceBundle trainingResourceBundle ->
+//                    trainingResourceBundle.getTrainingResource().getResourceOrganisation();
+//            case DeployableServiceBundle deployableServiceBundle ->
+//                    deployableServiceBundle.getDeployableService().getResourceOrganisation();
+//            case null, default -> ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().getProviderId();
+            case null, default -> null;
         };
         return providerId;
     }
 
-    private Bundle<?> determineResourceType(String resourceId) {
-        if (isService(resourceId)) {
-            return serviceBundleService.getOrElseReturnNull(resourceId);
-        } else if (isTrainingResource(resourceId)) {
-            return trainingResourceService.getOrElseReturnNull(resourceId);
-        } else if (isDeployableService(resourceId)) {
-            return deployableServiceService.getOrElseReturnNull(resourceId);
-        } else {
-            return interoperabilityRecordService.getOrElseReturnNull(resourceId);
+    private NewBundle determineResourceType(String id) {
+        if (isProvider(id)) {
+            return providerTestService.getOrElseReturnNull(id);
+        } else if (isService(id)) {
+            return serviceService.getOrElseReturnNull(id);
         }
+        //FIXME
+//        else if (isTrainingResource(resourceId)) {
+//            return trainingResourceService.getOrElseReturnNull(resourceId);
+//        } else if (isDeployableService(resourceId)) {
+//            return deployableServiceService.getOrElseReturnNull(resourceId);
+//        } else {
+//            return interoperabilityRecordService.getOrElseReturnNull(resourceId);
+//        }
+        return null;
     }
 
     private boolean isService(String id) {
-        return serviceBundleService.exists(id);
+        return serviceService.exists(id);
     }
 
     private boolean isTrainingResource(String id) {
@@ -298,14 +305,15 @@ public class OIDCSecurityService implements SecurityService {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", provider.getId());
 
-        Bundle<?> bundle = determineResourceType(resourceId);
-        boolean isServiceBundle = bundle instanceof ServiceBundle;
-        boolean isTrainingResource = bundle instanceof TrainingResourceBundle;
-        boolean isDeployableService = bundle instanceof DeployableServiceBundle;
+        NewBundle bundle = determineResourceType(resourceId);
+        boolean isServiceBundle = bundle instanceof NewServiceBundle;
+        //FIXME
+//        boolean isTrainingResource = bundle instanceof TrainingResourceBundle;
+//        boolean isDeployableService = bundle instanceof DeployableServiceBundle;
 
-        if ((isServiceBundle && serviceBundleService.getAll(ff, getAdminAccess()).getResults().isEmpty()) ||
+        if ((isServiceBundle && serviceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) /*||
                 (isTrainingResource && trainingResourceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) ||
-                (isDeployableService && deployableServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty())) {
+                (isDeployableService && deployableServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty())*/) {
             return true;
         }
 
@@ -313,43 +321,22 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId) {
-        String providerId = getProviderId(resourceId);
-        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
-        if (provider != null && provider.isActive()) {
-            return hasAdminAccess(auth, providerId);
+    public boolean resourceIsApprovedAndUserIsAdmin(Authentication auth, String id) {
+        NewBundle bundle = determineResourceType(id);
+        if (bundle != null) {
+            if (bundle instanceof NewProviderBundle) {
+                if (bundle.getStatus().equals("approved")) {
+                    return hasAdminAccess(auth, id);
+                }
+            } else {
+                String providerId = getProviderId(id);
+                NewProviderBundle provider = providerTestService.get(providerId);
+                if (provider.getStatus().equals("approved")) {
+                    return hasAdminAccess(auth, providerId);
+                }
+            }
         }
         return false;
-    }
-
-    @Override
-    public boolean providerIsActive(String id, String catalogueId, boolean published) {
-        ProviderBundle providerBundle = providerService.get(id, catalogueId, published);
-        return providerBundle.isActive();
-    }
-
-    @Override
-    public boolean serviceIsActive(String id, String catalogueId, boolean published) {
-        ServiceBundle serviceBundle = serviceBundleService.get(id, catalogueId, published);
-        return serviceBundle.isActive();
-    }
-
-    @Override
-    public boolean trainingResourceIsActive(String id, String catalogueId, boolean published) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId, published);
-        return trainingResourceBundle.isActive();
-    }
-
-    @Override
-    public boolean guidelineIsActive(String id, String catalogueId, boolean published) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId, published);
-        return interoperabilityRecordBundle.isActive();
-    }
-
-    @Override
-    public boolean deployableServiceIsActive(String id, String catalogueId, boolean published) {
-        DeployableServiceBundle deployableServiceBundle = deployableServiceService.get(id, catalogueId, published);
-        return deployableServiceBundle.isActive();
     }
     //endregion
 

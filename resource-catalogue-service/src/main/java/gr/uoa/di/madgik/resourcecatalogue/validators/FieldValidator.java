@@ -56,7 +56,7 @@ public class FieldValidator {
 
     private final VocabularyService vocabularyService;
     private final ProviderManager providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableServiceService deployableServiceService;
     private final CatalogueService catalogueService;
@@ -70,7 +70,7 @@ public class FieldValidator {
 
     public FieldValidator(VocabularyService vocabularyService,
                           ProviderManager providerService,
-                          @Lazy ServiceBundleService serviceBundleService,
+                          @Lazy ServiceService serviceService,
                           @Lazy TrainingResourceService trainingResourceService,
                           @Lazy CatalogueService catalogueService,
                           @Lazy InteroperabilityRecordService interoperabilityRecordService,
@@ -78,7 +78,7 @@ public class FieldValidator {
                           @Lazy AdapterService adapterService) {
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.catalogueService = catalogueService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.trainingResourceService = trainingResourceService;
@@ -347,9 +347,10 @@ public class FieldValidator {
             } else if (String.class.equals(o.getClass())) {
                 try {
                     if (annotation.containsResourceId()) {
-                        ServiceBundle serviceBundle = serviceBundleService.getOrElseReturnNull(o.toString());
-                        TrainingResourceBundle trainingResourceBundle = trainingResourceService.getOrElseReturnNull(o.toString());
-                        if (serviceBundle == null && trainingResourceBundle == null) {
+                        NewServiceBundle serviceBundle = serviceService.getOrElseReturnNull(o.toString());
+                        //FIXME
+//                        TrainingResourceBundle trainingResourceBundle = trainingResourceService.getOrElseReturnNull(o.toString());
+                        if (serviceBundle == null /*&& trainingResourceBundle == null*/) {
                             throw new ValidationException(
                                     String.format("Field [%s]: Should contain the ID of an existing Service " +
                                             "or Training Resource", field.getName()));
@@ -381,7 +382,7 @@ public class FieldValidator {
                                         field.getName()));
                     } else if ((gr.uoa.di.madgik.resourcecatalogue.domain.Service.class.equals(annotation.idClass())
                             || ServiceBundle.class.equals(annotation.idClass()))
-                            && serviceBundleService.get(o.toString()) == null) {
+                            && serviceService.get(o.toString()) == null) {
                         throw new ValidationException(
                                 String.format("Field [%s]: Should contain the ID of an existing Service",
                                         field.getName()));
@@ -454,9 +455,10 @@ public class FieldValidator {
 
     private boolean getResource(String className, Object o) {
         return switch (className) {
-            case "Service" -> serviceBundleService.getOrElseReturnNull(o.toString()) != null;
-            case "TrainingResource" -> trainingResourceService.getOrElseReturnNull(o.toString()) != null;
-            case "InteroperabilityRecord", "Guideline" -> interoperabilityRecordService.getOrElseReturnNull(o.toString()) != null;
+            case "Service" -> serviceService.getOrElseReturnNull(o.toString()) != null;
+            //FIXME
+//            case "TrainingResource" -> trainingResourceService.getOrElseReturnNull(o.toString()) != null;
+//            case "InteroperabilityRecord", "Guideline" -> interoperabilityRecordService.getOrElseReturnNull(o.toString()) != null;
             default -> false;
         };
     }

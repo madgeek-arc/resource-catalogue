@@ -18,7 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.EOSCIFGuidelines;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,10 +45,10 @@ public class ResourceExtrasController {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceExtrasController.class);
 
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
 
-    public ResourceExtrasController(ServiceBundleService serviceBundleService) {
-        this.serviceBundleService = serviceBundleService;
+    public ResourceExtrasController(ServiceService serviceService) {
+        this.serviceService = serviceService;
     }
 
     @Operation(summary = "Update a specific Service's EOSC Interoperability Framework Guidelines given its ID")
@@ -57,7 +57,7 @@ public class ResourceExtrasController {
     public ResponseEntity<ServiceBundle> updateEOSCIFGuidelines(@RequestParam String serviceId, @RequestParam String catalogueId,
                                                                 @RequestBody List<EOSCIFGuidelines> eoscIFGuidelines,
                                                                 @Parameter(hidden = true) Authentication auth) {
-        ServiceBundle serviceBundle = serviceBundleService.updateEOSCIFGuidelines(serviceId, catalogueId, eoscIFGuidelines, auth);
+        ServiceBundle serviceBundle = serviceService.updateEOSCIFGuidelines(serviceId, catalogueId, eoscIFGuidelines, auth);
         return new ResponseEntity<>(serviceBundle, HttpStatus.OK);
     }
 }

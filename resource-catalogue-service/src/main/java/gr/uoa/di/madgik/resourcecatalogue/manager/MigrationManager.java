@@ -36,7 +36,7 @@ public class MigrationManager implements MigrationService {
 
     private static final Logger logger = LoggerFactory.getLogger(MigrationManager.class);
 
-    private final ServiceBundleManager serviceBundleManager;
+    private final ServiceManager serviceBundleManager;
     private final PublicServiceService publicServiceManager;
     private final TrainingResourceManager trainingResourceManager;
     private final InteroperabilityRecordManager interoperabilityRecordManager;
@@ -54,7 +54,7 @@ public class MigrationManager implements MigrationService {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    public MigrationManager(ServiceBundleManager serviceBundleManager, PublicServiceService publicServiceManager,
+    public MigrationManager(ServiceManager serviceBundleManager, PublicServiceService publicServiceManager,
                             TrainingResourceManager trainingResourceManager, DatasourceManager datasourceManager,
                             InteroperabilityRecordManager interoperabilityRecordManager,
                             PublicTrainingResourceService publicTrainingResourceManager,

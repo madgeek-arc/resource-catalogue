@@ -46,9 +46,9 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
-public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle> implements ServiceBundleService {
+public class ServiceManager extends ResourceCatalogueManager<ServiceBundle> implements ServiceService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ServiceBundleManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
     private final ProviderService providerService;
     private final IdCreator idCreator;
@@ -69,20 +69,20 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ServiceBundleManager(ProviderService providerService,
-                                IdCreator idCreator, @Lazy SecurityService securityService,
-                                @Lazy EmailService emailService,
-                                @Lazy VocabularyService vocabularyService,
-                                @Lazy PublicServiceService publicServiceManager,
-                                @Lazy MigrationService migrationService,
-                                @Lazy DatasourceService datasourceService,
-                                @Lazy PublicDatasourceService publicDatasourceManager,
-                                @Lazy ProviderResourcesCommonMethods commonMethods,
-                                SynchronizerService<Service> synchronizerService,
-                                @Qualifier("serviceValidator") Validator serviceValidator,
-                                FacetLabelService facetLabelService,
-                                GenericResourceService genericResourceService,
-                                @Lazy RelationshipValidator relationshipValidator) {
+    public ServiceManager(ProviderService providerService,
+                          IdCreator idCreator, @Lazy SecurityService securityService,
+                          @Lazy EmailService emailService,
+                          @Lazy VocabularyService vocabularyService,
+                          @Lazy PublicServiceService publicServiceManager,
+                          @Lazy MigrationService migrationService,
+                          @Lazy DatasourceService datasourceService,
+                          @Lazy PublicDatasourceService publicDatasourceManager,
+                          @Lazy ProviderResourcesCommonMethods commonMethods,
+                          SynchronizerService<Service> synchronizerService,
+                          @Qualifier("serviceValidator") Validator serviceValidator,
+                          FacetLabelService facetLabelService,
+                          GenericResourceService genericResourceService,
+                          @Lazy RelationshipValidator relationshipValidator) {
         super(ServiceBundle.class);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
@@ -809,16 +809,6 @@ public class ServiceBundleManager extends ResourceCatalogueManager<ServiceBundle
         if (pidSet.size() < pidList.size()) {
             throw new ValidationException("EOSCIFGuidelines cannot have duplicate PIDs.");
         }
-    }
-
-    public ServiceBundle getOrElseReturnNull(String id) {
-        ServiceBundle serviceBundle;
-        try {
-            serviceBundle = get(id);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-        return serviceBundle;
     }
 
     @Override

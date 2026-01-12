@@ -19,11 +19,10 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -37,18 +36,18 @@ public class PublicResourceInteroperabilityRecordService
         extends AbstractPublicResourceManager<ResourceInteroperabilityRecordBundle>
         implements PublicResourceService<ResourceInteroperabilityRecordBundle> {
 
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     public PublicResourceInteroperabilityRecordService(JmsService jmsService,
-                                                       ServiceBundleService serviceBundleService,
+                                                       ServiceService serviceService,
                                                        TrainingResourceService trainingResourceService,
                                                        InteroperabilityRecordService interoperabilityRecordService,
                                                        PidIssuer pidIssuer,
                                                        FacetLabelService facetLabelService) {
         super(ResourceInteroperabilityRecordBundle.class, jmsService, pidIssuer, facetLabelService);
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
@@ -63,7 +62,7 @@ public class PublicResourceInteroperabilityRecordService
         // resourceId
         Bundle<?> resource;
         try {
-            resource = serviceBundleService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),
+            resource = serviceService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),
                     bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
         } catch (CatalogueResourceNotFoundException e) {
             resource = trainingResourceService.get(bundle.getResourceInteroperabilityRecord().getResourceId(),

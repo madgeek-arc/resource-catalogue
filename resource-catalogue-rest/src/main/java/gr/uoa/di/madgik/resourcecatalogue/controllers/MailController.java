@@ -53,7 +53,7 @@ public class MailController {
     @Autowired
     DraftResourceService<ProviderBundle> draftProviderService;
     @Autowired
-    ServiceBundleService serviceBundleService;
+    ServiceService serviceService;
     @Autowired
     DraftResourceService<ServiceBundle> draftServiceService;
     @Autowired
@@ -138,7 +138,7 @@ public class MailController {
     }
 
     private void addEmailsFromServices(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess) {
-        List<ServiceBundle> allServices = serviceBundleService.getAll(facetFilter, adminAccess).getResults();
+        List<ServiceBundle> allServices = serviceService.getAll(facetFilter, adminAccess).getResults();
         allServices.addAll(draftServiceService.getAll(facetFilter, adminAccess).getResults());
         for (ServiceBundle serviceBundle : allServices) {
             emails.add(serviceBundle.getService().getMainContact().getEmail());

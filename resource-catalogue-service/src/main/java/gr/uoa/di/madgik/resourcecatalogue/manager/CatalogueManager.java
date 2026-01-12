@@ -55,7 +55,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private final FieldValidator fieldValidator;
     private final EmailService emailService;
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -65,7 +65,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     public CatalogueManager(IdCreator idCreator,
                             @Lazy ProviderService providerService,
-                            @Lazy ServiceBundleService serviceBundleService,
+                            @Lazy ServiceService serviceService,
                             @Lazy TrainingResourceService trainingResourceService,
                             @Lazy InteroperabilityRecordService interoperabilityRecordService,
                             @Lazy FieldValidator fieldValidator,
@@ -80,7 +80,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         this.fieldValidator = fieldValidator;
         this.emailService = emailService;
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.commonMethods = commonMethods;
@@ -254,7 +254,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         deleteCatalogueResources(id, providerService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Services...");
-        deleteCatalogueResources(id, serviceBundleService, securityService.getAdminAccess());
+        deleteCatalogueResources(id, serviceService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Training Resources...");
         deleteCatalogueResources(id, trainingResourceService, securityService.getAdminAccess());

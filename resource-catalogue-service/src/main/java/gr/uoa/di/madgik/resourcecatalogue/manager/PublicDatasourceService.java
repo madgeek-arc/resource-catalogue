@@ -16,36 +16,27 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import org.apache.commons.beanutils.BeanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
-import java.lang.reflect.InvocationTargetException;
 
 @Service("publicDatasourceManager")
 public class PublicDatasourceService
         extends AbstractPublicResourceManager<DatasourceBundle>
         implements PublicResourceService<DatasourceBundle> {
 
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
 
     public PublicDatasourceService(JmsService jmsService,
                                    PidIssuer pidIssuer,
-                                   ServiceBundleService serviceBundleService,
+                                   ServiceService serviceService,
                                    FacetLabelService facetLabelService) {
         super(DatasourceBundle.class, jmsService, pidIssuer, facetLabelService);
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
     }
 
     @Override
@@ -56,7 +47,7 @@ public class PublicDatasourceService
     @Override
     public void updateIdsToPublic(DatasourceBundle bundle) {
         // serviceId
-        ServiceBundle serviceBundle = serviceBundleService.get(
+        ServiceBundle serviceBundle = serviceService.get(
                 bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId(), false);
         bundle.getDatasource().setServiceId(serviceBundle.getIdentifiers().getPid());
     }

@@ -453,17 +453,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     }
 
     @Override
-    public TrainingResourceBundle getOrElseReturnNull(String id) {
-        TrainingResourceBundle trainingResourceBundle;
-        try {
-            trainingResourceBundle = get(id);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-        return trainingResourceBundle;
-    }
-
-    @Override
     public Browsing<TrainingResourceBundle> getAll(FacetFilter ff, Authentication auth) {
         updateFacetFilterConsideringTheAuthorization(ff, auth);
 

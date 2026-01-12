@@ -22,7 +22,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -37,18 +37,18 @@ public class PublicServiceService
         implements PublicResourceService<ServiceBundle> {
 
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
 
     public PublicServiceService(JmsService jmsService,
                                 PidIssuer pidIssuer,
                                 FacetLabelService facetLabelService,
                                 ProviderService providerService,
-                                ServiceBundleService serviceBundleService,
+                                ServiceService serviceService,
                                 TrainingResourceService trainingResourceService) {
         super(ServiceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
     }
 
@@ -84,7 +84,7 @@ public class PublicServiceService
                 //TODO: do we allow related resources from different catalogues?
                 Bundle<?> relatedResource;
                 try {
-                    relatedResource = serviceBundleService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
+                    relatedResource = serviceService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
                 } catch (CatalogueResourceNotFoundException e) {
                     relatedResource = trainingResourceService.get(relatedResourceId, bundle.getService().getCatalogueId(), false);
                 }
@@ -101,7 +101,7 @@ public class PublicServiceService
                 //TODO: do we allow related resources from different catalogues?
                 Bundle<?> requiredResource;
                 try {
-                    requiredResource = serviceBundleService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
+                    requiredResource = serviceService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
                 } catch (CatalogueResourceNotFoundException e) {
                     requiredResource = trainingResourceService.get(requiredResourceId, bundle.getService().getCatalogueId(), false);
                 }

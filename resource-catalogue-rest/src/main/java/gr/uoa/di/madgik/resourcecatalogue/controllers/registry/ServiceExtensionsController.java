@@ -26,7 +26,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
 import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.validators.HelpdeskValidator;
 import gr.uoa.di.madgik.resourcecatalogue.validators.MonitoringValidator;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -61,7 +61,7 @@ public class ServiceExtensionsController {
     private static final Logger logger = LoggerFactory.getLogger(ServiceExtensionsController.class);
     private final HelpdeskService helpdeskService;
     private final MonitoringService monitoringService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     @Value("${argo.grnet.monitoring.availability:}")
     private String monitoringAvailability;
     @Value("${argo.grnet.monitoring.status:}")
@@ -80,11 +80,11 @@ public class ServiceExtensionsController {
 
     ServiceExtensionsController(HelpdeskService helpdeskService,
                                 MonitoringService monitoringService,
-                                ServiceBundleService serviceBundleService,
+                                ServiceService serviceService,
                                 GenericResourceService genericResourceService) {
         this.helpdeskService = helpdeskService;
         this.monitoringService = monitoringService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.genericResourceService = genericResourceService;
     }
 
@@ -398,7 +398,7 @@ public class ServiceExtensionsController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);
-        List<ServiceBundle> allServices = serviceBundleService.getAll(ff, null).getResults();
+        List<ServiceBundle> allServices = serviceService.getAll(ff, null).getResults();
         Map<String, String> serviceStatusMap = new HashMap<>();
         for (ServiceBundle serviceBundle : allServices) {
             serviceStatusMap.put(serviceBundle.getId(), getServiceMonitoringStatusValue(serviceBundle.getId()));

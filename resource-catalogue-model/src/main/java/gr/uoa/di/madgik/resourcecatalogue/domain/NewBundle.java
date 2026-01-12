@@ -36,6 +36,8 @@ public class NewBundle {
 
     private boolean draft;
 
+    private boolean legacy;
+
     private Identifiers identifiers;
 
     private List<LoggingInfo> loggingInfo = new ArrayList<>();
@@ -295,6 +297,14 @@ public class NewBundle {
 
     public void setDraft(boolean draft) {
         this.draft = draft;
+    }
+
+    public boolean isLegacy() {
+        return legacy;
+    }
+
+    public void setLegacy(boolean legacy) {
+        this.legacy = legacy;
     }
 
     public Identifiers getIdentifiers() {

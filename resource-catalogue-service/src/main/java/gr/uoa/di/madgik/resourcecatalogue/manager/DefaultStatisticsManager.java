@@ -52,7 +52,7 @@ public class DefaultStatisticsManager implements StatisticsService {
     private final ProviderService providerService;
     private final SearchService searchService;
     private final ParserService parserService;
-    private final ServiceBundleManager serviceBundleManager;
+    private final ServiceManager serviceBundleManager;
     private final VocabularyService vocabularyService;
 //    private final DataSource dataSource;
 
@@ -63,7 +63,7 @@ public class DefaultStatisticsManager implements StatisticsService {
                              ProviderService providerService,
                              SearchService searchService, ParserService parserService,
 //                             DataSource dataSource,
-                             ServiceBundleManager serviceBundleManager, VocabularyService vocabularyService) {
+                             ServiceManager serviceBundleManager, VocabularyService vocabularyService) {
         this.analyticsService = analyticsService;
         this.providerService = providerService;
         this.searchService = searchService;

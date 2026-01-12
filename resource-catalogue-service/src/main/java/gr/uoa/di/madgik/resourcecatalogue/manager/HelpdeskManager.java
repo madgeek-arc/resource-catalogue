@@ -40,7 +40,7 @@ import java.util.List;
 public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> implements HelpdeskService {
 
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final PublicHelpdeskService publicHelpdeskManager;
     private final SecurityService securityService;
@@ -51,7 +51,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public HelpdeskManager(ServiceBundleService serviceBundleService,
+    public HelpdeskManager(ServiceService serviceService,
                            TrainingResourceService trainingResourceService,
                            PublicHelpdeskService publicHelpdeskManager,
                            @Lazy SecurityService securityService,
@@ -59,7 +59,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
                            @Lazy ProviderResourcesCommonMethods commonMethods,
                            IdCreator idCreator) {
         super(HelpdeskBundle.class);
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.publicHelpdeskManager = publicHelpdeskManager;
         this.securityService = securityService;
@@ -86,7 +86,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")) {
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
+            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceService, resourceType);
         } else if (resourceType.equals("training_resource")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else {

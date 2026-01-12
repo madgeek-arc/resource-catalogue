@@ -42,7 +42,7 @@ public class InternalToPublicConsistency {
     private static final Logger logger = LoggerFactory.getLogger(InternalToPublicConsistency.class);
 
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableServiceService deployableServiceService;
     private final AdapterService adapterService;
@@ -79,7 +79,7 @@ public class InternalToPublicConsistency {
     private String consistencyCC;
 
     public InternalToPublicConsistency(ProviderService providerService,
-                                       ServiceBundleService serviceBundleService,
+                                       ServiceService serviceService,
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
                                        DeployableServiceService deployableServiceService,
@@ -97,7 +97,7 @@ public class InternalToPublicConsistency {
                                        PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                                        SecurityService securityService, Configuration cfg, MailService mailService) {
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.deployableServiceService = deployableServiceService;
         this.adapterService = adapterService;
@@ -124,7 +124,7 @@ public class InternalToPublicConsistency {
 //    @Scheduled(initialDelay = 0, fixedRate = 6000) // every 2 min
     protected void logInternalToPublicResourceConsistency() {
         List<ProviderBundle> allInternalApprovedProviders = providerService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> allInternalApprovedServices = serviceBundleService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> allInternalApprovedServices = serviceService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
         List<DeployableServiceBundle> allInternalApprovedDS = deployableServiceService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter("approved"), securityService.getAdminAccess()).getResults();

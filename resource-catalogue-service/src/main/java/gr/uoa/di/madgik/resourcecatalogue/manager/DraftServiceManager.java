@@ -39,7 +39,7 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
 
     private static final Logger logger = LoggerFactory.getLogger(DraftServiceManager.class);
 
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final IdCreator idCreator;
     private final VocabularyService vocabularyService;
     private final ProviderService providerService;
@@ -48,12 +48,12 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public DraftServiceManager(ServiceBundleService serviceBundleService,
+    public DraftServiceManager(ServiceService serviceService,
                                IdCreator idCreator, @Lazy VocabularyService vocabularyService,
                                @Lazy ProviderService providerService,
                                ProviderResourcesCommonMethods commonMethods) {
         super(ServiceBundle.class);
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.idCreator = idCreator;
         this.vocabularyService = vocabularyService;
         this.providerService = providerService;
@@ -119,7 +119,7 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
     @Override
     public ServiceBundle transformToNonDraft(ServiceBundle bundle, Authentication auth) {
         logger.trace("Attempting to transform the Draft Service with id '{}' to Service", bundle.getId());
-        serviceBundleService.validate(bundle);
+        serviceService.validate(bundle);
 
         // update loggingInfo
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
@@ -144,7 +144,7 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
         bundle.setDraft(false);
 
         try {
-            bundle = serviceBundleService.update(bundle, auth);
+            bundle = serviceService.update(bundle, auth);
         } catch (ResourceNotFoundException e) {
             logger.error(e.getMessage(), e);
         }

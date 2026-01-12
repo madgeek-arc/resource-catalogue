@@ -23,9 +23,8 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.EventService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +42,13 @@ public class EventManager extends ResourceManager<Event> implements EventService
 
     private static final Logger logger = LoggerFactory.getLogger(EventManager.class);
     private final ParserService parserService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
 
     public EventManager(ParserService parserService,
-                        @Lazy ServiceBundleService serviceBundleService) {
+                        @Lazy ServiceService serviceService) {
         super(Event.class);
         this.parserService = parserService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
     }
 
     @Scheduled(cron = "0 0 1 * * *")
@@ -219,7 +218,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     public Event setVisit(String serviceId, Float value) {
-        if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
+        if (!serviceService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
@@ -233,7 +232,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     public Event setAddToProject(String serviceId, Float value) {
-        if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
+        if (!serviceService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
@@ -247,7 +246,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     public Event setOrder(String serviceId, Float value) {
-        if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
+        if (!serviceService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
@@ -261,7 +260,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     public Event setScheduledFavourite(String serviceId, Float value) {
-        if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
+        if (!serviceService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;
@@ -275,7 +274,7 @@ public class EventManager extends ResourceManager<Event> implements EventService
     }
 
     public Event setScheduledRating(String serviceId, Float value) {
-        if (!serviceBundleService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
+        if (!serviceService.exists(new SearchService.KeyValue("resource_internal_id", serviceId))) {
             throw new ResourceNotFoundException(serviceId, "Service");
         }
         Event event;

@@ -37,7 +37,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
@@ -48,7 +48,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
     private final ConfigurationTemplateService ctService;
     private final ConfigurationTemplateInstanceService ctiService;
 
-    public ResourceInteroperabilityRecordManager(ServiceBundleService serviceBundleService,
+    public ResourceInteroperabilityRecordManager(ServiceService serviceService,
                                                  TrainingResourceService trainingResourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
@@ -57,7 +57,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
                                                  ConfigurationTemplateService ctService,
                                                  ConfigurationTemplateInstanceService ctiService) {
         super(ResourceInteroperabilityRecordBundle.class);
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.securityService = securityService;
@@ -87,7 +87,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")) {
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
+            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceService, resourceType);
         } else if (resourceType.equals("training_resource")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else {

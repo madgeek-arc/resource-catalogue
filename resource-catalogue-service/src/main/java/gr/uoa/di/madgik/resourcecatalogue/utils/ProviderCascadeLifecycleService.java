@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProviderCascadeLifecycleService {
 
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
-    public ProviderCascadeLifecycleService(ServiceBundleService serviceBundleService,
+    public ProviderCascadeLifecycleService(ServiceService serviceService,
                                            TrainingResourceService trainingResourceService,
                                            InteroperabilityRecordService interoperabilityRecordService) {
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
@@ -26,10 +26,10 @@ public class ProviderCascadeLifecycleService {
     public void deleteAllRelatedResources(NewProviderBundle bundle, Authentication auth) {
         String id = bundle.getId();
         String catalogueId = bundle.getCatalogueId();
-        serviceBundleService.getResourceBundles(catalogueId, id, auth)
+        serviceService.getResourceBundles(catalogueId, id, auth)
                 .getResults().stream()
                 .filter(s -> !s.getMetadata().isPublished())
-                .forEach(s -> serviceBundleService.delete(s));
+                .forEach(s -> serviceService.delete(s));
         trainingResourceService.getResourceBundles(catalogueId, id, auth)
                 .getResults().stream()
                 .filter(tr -> !tr.getMetadata().isPublished())
@@ -45,11 +45,11 @@ public class ProviderCascadeLifecycleService {
         String id = bundle.getId();
         String catalogueId = bundle.getCatalogueId();
         boolean suspended = bundle.isSuspended();
-        serviceBundleService.getResourceBundles(catalogueId, id, auth)
+        serviceService.getResourceBundles(catalogueId, id, auth)
                 .getResults().stream()
                 .filter(s -> !s.getMetadata().isPublished())
                 .forEach(s ->
-                        serviceBundleService.suspend(s.getId(), catalogueId, suspended, auth)
+                        serviceService.suspend(s.getId(), catalogueId, suspended, auth)
                 );
         trainingResourceService.getResourceBundles(catalogueId, id, auth)
                 .getResults().stream()

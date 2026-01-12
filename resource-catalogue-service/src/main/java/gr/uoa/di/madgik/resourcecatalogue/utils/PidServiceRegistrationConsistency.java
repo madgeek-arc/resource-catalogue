@@ -41,7 +41,7 @@ public class PidServiceRegistrationConsistency {
     private final PidIssuer pidIssuer;
 
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableServiceService deployableServiceService;
     private final AdapterService adapterService;
@@ -51,7 +51,7 @@ public class PidServiceRegistrationConsistency {
 
     public PidServiceRegistrationConsistency(PidIssuer pidIssuer,
                                              ProviderService providerService,
-                                             ServiceBundleService serviceBundleService,
+                                             ServiceService serviceService,
                                              TrainingResourceService trainingResourceService,
                                              InteroperabilityRecordService interoperabilityRecordService,
                                              DeployableServiceService deployableServiceService,
@@ -59,7 +59,7 @@ public class PidServiceRegistrationConsistency {
                                              SecurityService securityService) {
         this.pidIssuer = pidIssuer;
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.deployableServiceService = deployableServiceService;
         this.adapterService = adapterService;
@@ -71,7 +71,7 @@ public class PidServiceRegistrationConsistency {
     @Scheduled(cron = "0 0 0 * * *")
     protected void postUnregisteredResourcesToPIDService() {
         List<ProviderBundle> allPublicProviders = providerService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> allPublicServices = serviceBundleService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> allPublicServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allPublicTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<DeployableServiceBundle> allPublicDS = deployableServiceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allPublicIG = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();

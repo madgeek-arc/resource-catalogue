@@ -41,7 +41,7 @@ import java.util.List;
 public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle> implements DatasourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final SecurityService securityService;
     private final EmailService emailService;
     private final VocabularyService vocabularyService;
@@ -52,7 +52,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public DatasourceManager(ServiceBundleService serviceBundleService,
+    public DatasourceManager(ServiceService serviceService,
                              @Lazy SecurityService securityService,
                              @Lazy EmailService emailService,
                              @Lazy VocabularyService vocabularyService,
@@ -60,7 +60,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
                              OpenAIREDatasourceManager openAIREDatasourceManager,
                              IdCreator idCreator) {
         super(DatasourceBundle.class);
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.securityService = securityService;
         this.emailService = emailService;
         this.vocabularyService = vocabularyService;
@@ -207,7 +207,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         }
 
         // check if Service exists and if User belongs to Resource's Provider Admins
-        ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(serviceId, catalogueId, serviceBundleService, "service");
+        ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(serviceId, catalogueId, serviceService, "service");
         return super.validate(datasourceBundle);
     }
 
@@ -220,7 +220,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         DatasourceBundle datasourceBundle = get(id, catalogueId, false);
 
         // Verify that Service is Approved before proceeding
-        if (!serviceBundleService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId(), false)
+        if (!serviceService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId(), false)
                 .getStatus().equals("approved") && status.equals("approved")) {
             throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
         }

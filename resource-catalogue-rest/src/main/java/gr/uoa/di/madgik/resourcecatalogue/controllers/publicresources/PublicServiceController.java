@@ -23,7 +23,7 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,13 +47,13 @@ import java.util.Map;
 @Tag(name = "public service")
 public class PublicServiceController {
 
-    private final ServiceBundleService service;
+    private final ServiceService service;
     private final GenericResourceService genericService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PublicServiceController(ServiceBundleService service,
+    public PublicServiceController(ServiceService service,
                                    GenericResourceService genericService) {
         this.service = service;
         this.genericService = genericService;

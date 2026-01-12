@@ -16,28 +16,20 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import org.apache.commons.beanutils.BeanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +39,7 @@ public class PublicTrainingResourceService
         implements PublicResourceService<TrainingResourceBundle> {
 
     private final ProviderService providerService;
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
 
     @Value("${pid.service.enabled}")
@@ -57,11 +49,11 @@ public class PublicTrainingResourceService
                                          PidIssuer pidIssuer,
                                          FacetLabelService facetLabelService,
                                          ProviderService providerService,
-                                         @Lazy ServiceBundleService serviceBundleService,
+                                         @Lazy ServiceService serviceService,
                                          @Lazy TrainingResourceService trainingResourceService) {
         super(TrainingResourceBundle.class, jmsService, pidIssuer, facetLabelService);
         this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
     }
 
@@ -98,7 +90,7 @@ public class PublicTrainingResourceService
                 //TODO: do we allow related resources from different catalogues?
                 Bundle<?> eoscRelatedService;
                 try {
-                    eoscRelatedService = serviceBundleService.get(eoscRelatedServiceId,
+                    eoscRelatedService = serviceService.get(eoscRelatedServiceId,
                             bundle.getTrainingResource().getCatalogueId(), false);
                 } catch (CatalogueResourceNotFoundException e) {
                     eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId,

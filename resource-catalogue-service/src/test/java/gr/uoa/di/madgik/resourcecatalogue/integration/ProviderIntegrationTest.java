@@ -23,11 +23,10 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -54,7 +53,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     @MockitoSpyBean
     private ProviderResourcesCommonMethods commonMethods;
     @Mock
-    private ServiceBundleService serviceBundleService;
+    private ServiceService serviceService;
     private static String providerId;
 
     /**
@@ -195,7 +194,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         List<ServiceBundle> mockedList = mock(List.class);
         Paging<ServiceBundle> mockedPaging = mock(Paging.class);
         when(mockedPaging.getResults()).thenReturn(mockedList);
-        when(serviceBundleService.getResourceBundles(any(), any(), any())).thenReturn(mockedPaging);
+        when(serviceService.getResourceBundles(any(), any(), any())).thenReturn(mockedPaging);
 
 
         providerService.delete(providerBundle);
