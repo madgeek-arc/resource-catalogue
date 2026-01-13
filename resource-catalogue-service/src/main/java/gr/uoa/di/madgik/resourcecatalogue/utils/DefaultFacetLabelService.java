@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.registry.domain.Facet;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Value;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
@@ -109,9 +110,9 @@ public class DefaultFacetLabelService implements FacetLabelService {
         ff.setQuantity(maxQuantity);
 //        ff.addFilter("active", "true");
         // TODO: get all final providers (after deduplication process)
-        List<ProviderBundle> allProviders = providerService.getAll(ff, null).getResults();
+        List<NewProviderBundle> allProviders = providerService.getAll(ff, null).getResults();
         Map<String, String> providerNames = new TreeMap<>();
-        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), p.getProvider().getName()));
+        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), (String) p.getProvider().get("name")));
 
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 

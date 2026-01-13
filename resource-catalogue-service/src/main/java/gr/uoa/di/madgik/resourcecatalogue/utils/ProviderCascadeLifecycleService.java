@@ -23,46 +23,48 @@ public class ProviderCascadeLifecycleService {
     }
 
     //TODO: populate with other resources if needed
-    public void deleteAllRelatedResources(NewProviderBundle bundle, Authentication auth) {
-        String id = bundle.getId();
-        String catalogueId = bundle.getCatalogueId();
-        serviceService.getResourceBundles(catalogueId, id, auth)
-                .getResults().stream()
-                .filter(s -> !s.getMetadata().isPublished())
-                .forEach(s -> serviceService.delete(s));
-        trainingResourceService.getResourceBundles(catalogueId, id, auth)
-                .getResults().stream()
-                .filter(tr -> !tr.getMetadata().isPublished())
-                .forEach(tr -> trainingResourceService.delete(tr));
-        interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, id, auth)
-                .getResults().stream()
-                .filter(ig -> !ig.getMetadata().isPublished())
-                .forEach(ig -> interoperabilityRecordService.delete(ig));
-    }
+    //FIXME
+//    public void deleteAllRelatedResources(NewProviderBundle bundle, Authentication auth) {
+//        String id = bundle.getId();
+//        String catalogueId = bundle.getCatalogueId();
+//        serviceService.getResourceBundles(catalogueId, id, auth)
+//                .getResults().stream()
+//                .filter(s -> !s.getMetadata().isPublished())
+//                .forEach(s -> serviceService.delete(s));
+//        trainingResourceService.getResourceBundles(catalogueId, id, auth)
+//                .getResults().stream()
+//                .filter(tr -> !tr.getMetadata().isPublished())
+//                .forEach(tr -> trainingResourceService.delete(tr));
+//        interoperabilityRecordService.getInteroperabilityRecordBundles(catalogueId, id, auth)
+//                .getResults().stream()
+//                .filter(ig -> !ig.getMetadata().isPublished())
+//                .forEach(ig -> interoperabilityRecordService.delete(ig));
+//    }
 
     //TODO: populate with other resources if needed
-    public void suspendAllRelatedResources(NewProviderBundle bundle, Authentication auth) {
-        String id = bundle.getId();
-        String catalogueId = bundle.getCatalogueId();
-        boolean suspended = bundle.isSuspended();
-        serviceService.getResourceBundles(catalogueId, id, auth)
-                .getResults().stream()
-                .filter(s -> !s.getMetadata().isPublished())
-                .forEach(s ->
-                        serviceService.suspend(s.getId(), catalogueId, suspended, auth)
-                );
-        trainingResourceService.getResourceBundles(catalogueId, id, auth)
-                .getResults().stream()
-                .filter(tr -> !tr.getMetadata().isPublished())
-                .forEach(tr ->
-                        trainingResourceService.suspend(tr.getId(), catalogueId, suspended, auth)
-                );
-        interoperabilityRecordService
-                .getInteroperabilityRecordBundles(catalogueId, id, auth)
-                .getResults().stream()
-                .filter(ir -> !ir.getMetadata().isPublished())
-                .forEach(ir ->
-                        interoperabilityRecordService.suspend(ir.getId(), catalogueId, suspended, auth)
-                );
-    }
+    //FIXME
+//    public void suspendAllRelatedResources(NewProviderBundle bundle, Authentication auth) {
+//        String id = bundle.getId();
+//        String catalogueId = bundle.getCatalogueId();
+//        boolean suspended = bundle.isSuspended();
+//        serviceService.getResourceBundles(catalogueId, id, auth)
+//                .getResults().stream()
+//                .filter(s -> !s.getMetadata().isPublished())
+//                .forEach(s ->
+//                        serviceService.suspend(s.getId(), catalogueId, suspended, auth)
+//                );
+//        trainingResourceService.getResourceBundles(catalogueId, id, auth)
+//                .getResults().stream()
+//                .filter(tr -> !tr.getMetadata().isPublished())
+//                .forEach(tr ->
+//                        trainingResourceService.suspend(tr.getId(), catalogueId, suspended, auth)
+//                );
+//        interoperabilityRecordService
+//                .getInteroperabilityRecordBundles(catalogueId, id, auth)
+//                .getResults().stream()
+//                .filter(ir -> !ir.getMetadata().isPublished())
+//                .forEach(ir ->
+//                        interoperabilityRecordService.suspend(ir.getId(), catalogueId, suspended, auth)
+//                );
+//    }
 }

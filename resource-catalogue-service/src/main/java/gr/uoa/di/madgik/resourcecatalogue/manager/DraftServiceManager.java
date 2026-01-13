@@ -116,39 +116,42 @@ public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle>
         return transformToNonDraft(serviceBundle, auth);
     }
 
+    //FIXME
     @Override
     public ServiceBundle transformToNonDraft(ServiceBundle bundle, Authentication auth) {
-        logger.trace("Attempting to transform the Draft Service with id '{}' to Service", bundle.getId());
-        serviceService.validate(bundle);
-
-        // update loggingInfo
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                LoggingInfo.ActionType.REGISTERED.getKey());
-        loggingInfoList.add(loggingInfo);
-
-        // set resource status according to Provider's templateStatus
-        if (providerService.get(bundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
-            bundle.setStatus(vocabularyService.get("approved").getId());
-            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.APPROVED.getKey());
-            loggingInfoList.add(loggingInfoApproved);
-            bundle.setActive(true);
-        } else {
-            bundle.setStatus(vocabularyService.get("pending").getId());
-        }
-        bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfoList.getLast());
-
-        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-        bundle.setDraft(false);
-
-        try {
-            bundle = serviceService.update(bundle, auth);
-        } catch (ResourceNotFoundException e) {
-            logger.error(e.getMessage(), e);
-        }
-
         return bundle;
     }
+//        logger.trace("Attempting to transform the Draft Service with id '{}' to Service", bundle.getId());
+//        serviceService.validate(bundle);
+//
+//        // update loggingInfo
+//        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
+//        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+//                LoggingInfo.ActionType.REGISTERED.getKey());
+//        loggingInfoList.add(loggingInfo);
+//
+//        // set resource status according to Provider's templateStatus
+//        if (providerService.get(bundle.getService().getResourceOrganisation()).getTemplateStatus().equals("approved template")) {
+//            bundle.setStatus(vocabularyService.get("approved").getId());
+//            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
+//                    LoggingInfo.ActionType.APPROVED.getKey());
+//            loggingInfoList.add(loggingInfoApproved);
+//            bundle.setActive(true);
+//        } else {
+//            bundle.setStatus(vocabularyService.get("pending").getId());
+//        }
+//        bundle.setLoggingInfo(loggingInfoList);
+//        bundle.setLatestOnboardingInfo(loggingInfoList.getLast());
+//
+//        bundle.setMetadata(Metadata.updateMetadata(bundle.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
+//        bundle.setDraft(false);
+//
+//        try {
+//            bundle = serviceService.update(bundle, auth);
+//        } catch (ResourceNotFoundException e) {
+//            logger.error(e.getMessage(), e);
+//        }
+//
+//        return bundle;
+//    }
 }

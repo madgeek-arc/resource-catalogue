@@ -81,7 +81,7 @@ public class RelationshipValidator {
                 for (String resourceProvider : resourceProviders) {
                     if (resourceProvider != null && !resourceProvider.isEmpty()) {
                         try {
-                            providerService.get(resourceProvider, catalogueId, false);
+                            providerService.get(resourceProvider, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
                             throw new ValidationException(String.format("Field [resourceProviders]: " +
                                             "There is no Provider with ID '%s' in the %s Catalogue.",
@@ -94,7 +94,7 @@ public class RelationshipValidator {
                 for (String requiredResource : requiredResources) {
                     if (requiredResource != null && !requiredResource.isEmpty()) {
                         try {
-                            serviceService.get(requiredResource, catalogueId, false);
+                            serviceService.get(requiredResource, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(requiredResource, catalogueId, false);
@@ -111,7 +111,7 @@ public class RelationshipValidator {
                 for (String relatedResource : relatedResources) {
                     if (relatedResource != null && !relatedResource.isEmpty()) {
                         try {
-                            serviceService.get(relatedResource, catalogueId, false);
+                            serviceService.get(relatedResource, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(relatedResource, catalogueId, false);
@@ -128,7 +128,7 @@ public class RelationshipValidator {
                 for (String eoscRelatedService : eoscRelatedServices) {
                     if (eoscRelatedService != null && !eoscRelatedService.isEmpty()) {
                         try {
-                            serviceService.get(eoscRelatedService, catalogueId, false);
+                            serviceService.get(eoscRelatedService, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
                             try {
                                 trainingResourceService.get(eoscRelatedService, catalogueId, false);

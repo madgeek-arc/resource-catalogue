@@ -20,10 +20,9 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,40 +38,33 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Profile("beyond")
 @RestController
-@RequestMapping
+@RequestMapping(path = "public provider", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public provider")
 public class PublicProviderController {
 
     private final ProviderService service;
-    private final GenericResourceService genericService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public PublicProviderController(ProviderService service,
-                                    GenericResourceService genericService) {
+    public PublicProviderController(ProviderService service) {
         this.service = service;
-        this.genericService = genericService;
     }
 
     @Operation(description = "Returns the Public Provider with the given id.")
-    @GetMapping(path = "public/provider/{prefix}/{suffix}",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
-            "or @securityService.providerIsActive(#prefix+'/'+#suffix, null, true) " +
-            "or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
-                                 @PathVariable("prefix") String prefix,
-                                 @Parameter(description = "The right part of the ID after the '/'")
-                                 @PathVariable("suffix") String suffix,
+    @GetMapping(path = "public/provider/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> get(@PathVariable String prefix,
+                                 @PathVariable String suffix,
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle bundle = service.get(id, catalogueId, true);
+        NewProviderBundle bundle = service.getPublic(id, catalogueId);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
         }
@@ -81,56 +73,51 @@ public class PublicProviderController {
 
     }
 
-    @GetMapping(path = "public/provider/bundle/{prefix}/{suffix}",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "public/provider/bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
-                                       @PathVariable("prefix") String prefix,
-                                       @Parameter(description = "The right part of the ID after the '/'")
-                                       @PathVariable("suffix") String suffix,
+    public ResponseEntity<?> getBundle(@PathVariable String prefix,
+                                       @PathVariable String suffix,
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle providerBundle = service.get(id, catalogueId, true);
-        if (providerBundle.getMetadata().isPublished()) {
-            return new ResponseEntity<>(providerBundle, HttpStatus.OK);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Provider Bundle does not consist a Public entity"));
+        NewProviderBundle providerBundle = service.getPublic(id, catalogueId);
+        return new ResponseEntity<>(providerBundle, HttpStatus.OK);
     }
 
     @Operation(description = "Get a list of all Public Providers in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", description = "Suspended",
-            content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "public/provider/all",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<Provider>> getAll(@Parameter(hidden = true)
-                                                   @RequestParam MultiValueMap<String, Object> params) {
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @GetMapping(path = "public/provider/all")
+    public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
+                                                                        @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("provider");
         ff.addFilter("published", true);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved");
-        Paging<Provider> paging = genericService.getResults(ff).map(r -> ((ProviderBundle) r).getPayload());
-        return ResponseEntity.ok(paging);
+        Paging<NewProviderBundle> paging = service.getAll(ff);
+        return ResponseEntity.ok(paging.map(NewProviderBundle::getProvider));
     }
 
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", description = "Suspended",
-            content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
-    @GetMapping(path = "public/provider/bundle/all",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @GetMapping(path = "public/provider/bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                @RequestParam MultiValueMap<String, Object> params) {
+    public ResponseEntity<Paging<NewProviderBundle>> getAllBundles(@Parameter(hidden = true)
+                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("provider");
         ff.addFilter("published", true);
-        Paging<ProviderBundle> paging = genericService.getResults(ff);
+        ff.addFilter("active", true);
+        Paging<NewProviderBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
+    }
+
+    @Hidden
+    @PostMapping(path = "public/provider/add")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<NewProviderBundle> createPublicProvider(@RequestBody NewProviderBundle bundle,
+                                                                  @Parameter(hidden = true) Authentication auth) {
+        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }

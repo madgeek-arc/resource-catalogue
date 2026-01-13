@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
@@ -414,9 +415,9 @@ public class DefaultStatisticsManager implements StatisticsService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
 
-        for (ProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
+        for (NewProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
             Set<String> countries = new HashSet<>();
-            String country = providerBundle.getProvider().getLocation().getCountry();
+            String country = (String) providerBundle.getProvider().get("country");
             if (country.equalsIgnoreCase("WW")) {
                 countries.addAll(Arrays.asList(world));
             } else if (country.equalsIgnoreCase("EU")) {

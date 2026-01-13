@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
@@ -30,10 +31,10 @@ public class ResourceValidationUtils {
     public static void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
                                                                                                       ServiceService serviceService,
                                                                                                       String resourceType) {
-        ServiceBundle resourceBundle;
+        NewServiceBundle resourceBundle;
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists
-        resourceBundle = serviceService.get(resourceId, catalogueId, false);
+        resourceBundle = serviceService.get(resourceId, catalogueId);
         // check if Service is Public
         if (resourceBundle.getMetadata().isPublished()) {
             throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));

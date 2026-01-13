@@ -242,7 +242,7 @@ public class DeployableServiceController {
     }
 
     // Providing the Deployable Service id, set the Deployable Service to active or inactive.
-    @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "setActive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<DeployableServiceBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                              @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -254,20 +254,20 @@ public class DeployableServiceController {
     }
 
     // Get all pending Service Templates.
-    @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Browsing<DeployableService>> pendingTemplates(@Parameter(hidden = true) Authentication auth) {
-        List<ProviderBundle> pendingProviders = providerService.getInactive();
-        List<DeployableService> serviceTemplates = new ArrayList<>();
-        for (ProviderBundle provider : pendingProviders) {
-            if (provider.getTemplateStatus().equals("pending template")) {
-                serviceTemplates.addAll(service.getInactiveResources(
-                        provider.getId()).stream().map(DeployableServiceBundle::getDeployableService).toList());
-            }
-        }
-        Browsing<DeployableService> deployableServices = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
-        return ResponseEntity.ok(deployableServices);
-    }
+//    @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+//    public ResponseEntity<Browsing<DeployableService>> pendingTemplates(@Parameter(hidden = true) Authentication auth) {
+//        List<ProviderBundle> pendingProviders = providerService.getInactive();
+//        List<DeployableService> serviceTemplates = new ArrayList<>();
+//        for (ProviderBundle provider : pendingProviders) {
+//            if (provider.getTemplateStatus().equals("pending template")) {
+//                serviceTemplates.addAll(service.getInactiveResources(
+//                        provider.getId()).stream().map(DeployableServiceBundle::getDeployableService).toList());
+//            }
+//        }
+//        Browsing<DeployableService> deployableServices = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
+//        return ResponseEntity.ok(deployableServices);
+//    }
 
     @BrowseParameters
     @BrowseCatalogue
@@ -297,9 +297,9 @@ public class DeployableServiceController {
     }
 
 
-    @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "random", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<DeployableServiceBundle>> getRandomResources(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
+    public ResponseEntity<Paging<DeployableServiceBundle>> getRandom(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
                                                                               @RequestParam(defaultValue = "10") int quantity,
                                                                               @Parameter(hidden = true) Authentication auth) {
         Paging<DeployableServiceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
@@ -316,7 +316,7 @@ public class DeployableServiceController {
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-    @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public void changeProvider(@RequestParam String resourceId,
                                @RequestParam String newProvider,

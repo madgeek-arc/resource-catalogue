@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public interface CSVService {
      * @param list Provider list
      * @return {@link String}
      */
-    String listProvidersToCSV(List<ProviderBundle> list);
+    String listProvidersToCSV(List<NewProviderBundle> list);
 
     /**
      * Create a CSV from a list of Services
@@ -38,7 +38,7 @@ public interface CSVService {
      * @param list Service list
      * @return {@link String}
      */
-    String listServicesToCSV(List<ServiceBundle> list);
+    String listServicesToCSV(List<NewServiceBundle> list);
 
     /**
      * Create a CSV from a list of Vocabularies
@@ -65,6 +65,6 @@ public interface CSVService {
      * @return The CSV as String.
      */
     String computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
-                                                              List<ProviderBundle> providers,
-                                                              List<ServiceBundle> services) throws IOException;
+                                                                List<NewProviderBundle> providers,
+                                                                List<NewServiceBundle> services) throws IOException;
 }

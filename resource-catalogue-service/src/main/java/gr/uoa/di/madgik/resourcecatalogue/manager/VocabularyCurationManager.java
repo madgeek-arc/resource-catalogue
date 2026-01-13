@@ -87,7 +87,7 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
             vocEntryRequest.setUserId(AuthenticationInfo.getEmail(auth).toLowerCase());
         }
         // if vocabularyCuration doesn't exist
-        validate(vocabularyCuration, resourceType, auth);
+//        validate(vocabularyCuration, resourceType, auth); //FIXME
         if (vocabularyCuration.getVocabularyEntryRequests().size() == 1) {
             super.add(vocabularyCuration, auth);
             logger.info("Adding Vocabulary Curation: {}", vocabularyCuration);
@@ -100,132 +100,133 @@ public class VocabularyCurationManager extends ResourceManager<VocabularyCuratio
         return vocabularyCuration;
     }
 
+    //FIXME
     @Override
-    public VocabularyCuration update(VocabularyCuration vocabularyCuration, Authentication auth) {
-        super.update(vocabularyCuration, auth);
-        logger.debug("Updating Vocabulary Curation {}", vocabularyCuration);
-        return vocabularyCuration;
-    }
-
-    private VocabularyCuration validate(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
-        // check if vocabulary already exists
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<Vocabulary> allVocs = vocabularyService.getAll(ff, null).getResults();
-        List<String> allVocsIds = new ArrayList<>();
-        for (Vocabulary vocabulary : allVocs) {
-            allVocsIds.add(vocabulary.getName());
-        }
-        if (allVocsIds.contains(vocabularyCuration.getEntryValueName())) {
-            throw new ResourceAlreadyExistsException("Vocabulary with name " + vocabularyCuration.getEntryValueName() + " already exists.");
-        }
-
-        // check if vocabularyCuration already exists in "pending"
-        List<VocabularyCuration> allVocabularyCurations = getAll(ff, auth).getResults();
-        for (VocabularyCuration vocCuration : allVocabularyCurations) {
-            if (vocCuration.getEntryValueName().equalsIgnoreCase(vocabularyCuration.getEntryValueName()) &&
-                    vocCuration.getVocabulary().equalsIgnoreCase(vocabularyCuration.getVocabulary()) &&
-                    vocCuration.getStatus().equals(VocabularyCuration.Status.PENDING.getKey())) {
-                vocabularyCuration.setVocabularyEntryRequests(updateVocabularyRequestsList(vocCuration, vocabularyCuration));
-                vocabularyCuration.setId(vocCuration.getId());
-            }
-        }
-
-        // validate vocabulary
-        List<String> possibleValues = new ArrayList<>();
-        for (Vocabulary.Type vocab : Vocabulary.Type.values()) {
-            possibleValues.add(vocab.getKey().toLowerCase());
-        }
-        String voc = vocabularyCuration.getVocabulary();
-        if (!possibleValues.contains(voc.toLowerCase())) {
-            throw new ResourceNotFoundException(voc, "Vocabulary");
-        }
-
-        // check if parent exists
-        List<Vocabulary> specificVocs;
-        List<String> specificVocsIds = new ArrayList<>();
-        switch (vocabularyCuration.getVocabulary()) {
-            case "CATEGORY":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
-                    throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
-                } else {
-                    specificVocs = vocabularyService.getByType(Vocabulary.Type.SUPERCATEGORY);
-                    for (Vocabulary vocabulary : specificVocs) {
-                        specificVocsIds.add(vocabulary.getId());
-                    }
-                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
-                    }
-                }
-                break;
-            case "SUBCATEGORY":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
-                    throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
-                } else {
-                    specificVocs = vocabularyService.getByType(Vocabulary.Type.CATEGORY);
-                    for (Vocabulary vocabulary : specificVocs) {
-                        specificVocsIds.add(vocabulary.getId());
-                    }
-                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
-                    }
-                }
-                break;
-            case "PROVIDER MERIL SCIENTIFIC SUBDOMAIN":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
-                    throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
-                } else {
-                    specificVocs = vocabularyService.getByType(Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN);
-                    for (Vocabulary vocabulary : specificVocs) {
-                        specificVocsIds.add(vocabulary.getId());
-                    }
-                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
-                    }
-                }
-                break;
-            case "SCIENTIFIC SUBDOMAIN":
-                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
-                    throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
-                } else {
-                    specificVocs = vocabularyService.getByType(Vocabulary.Type.SCIENTIFIC_DOMAIN);
-                    for (Vocabulary vocabulary : specificVocs) {
-                        specificVocsIds.add(vocabulary.getId());
-                    }
-                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
-                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
-                    }
-                }
-                break;
-            default:
-                vocabularyCuration.setParent(null);
-        }
-
-        // validate if providerId/resourceId exists
-        ProviderBundle providerBundle = providerService.get(catalogueId, vocabularyCuration.getVocabularyEntryRequests().getFirst().getProviderId(), auth);
-        switch (resourceType) {
-            case "provider":
-                break;
-            case "service":
-                ServiceBundle serviceBundle = serviceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId());
-                if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())) {
-                    throw new CatalogueResourceNotFoundException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.",
-                            providerBundle.getId(), serviceBundle.getId()));
-                }
-                break;
-            case "training_resource":
-                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId(), catalogueId);
-                if (!trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals(providerBundle.getId())) {
-                    throw new CatalogueResourceNotFoundException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.",
-                            providerBundle.getId(), trainingResourceBundle.getId()));
-                }
-                break;
-            default:
-                throw new ValidationException("The resourceType you submitted is not supported. Possible resourceType " +
-                        "values: ['provider', 'service', 'datasource', 'training_resource']");
-        }
-        return vocabularyCuration;
-    }
+//    public VocabularyCuration update(VocabularyCuration vocabularyCuration, Authentication auth) {
+//        super.update(vocabularyCuration, auth);
+//        logger.debug("Updating Vocabulary Curation {}", vocabularyCuration);
+//        return vocabularyCuration;
+//    }
+//
+//    private VocabularyCuration validate(VocabularyCuration vocabularyCuration, String resourceType, Authentication auth) {
+//        // check if vocabulary already exists
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(maxQuantity);
+//        List<Vocabulary> allVocs = vocabularyService.getAll(ff, null).getResults();
+//        List<String> allVocsIds = new ArrayList<>();
+//        for (Vocabulary vocabulary : allVocs) {
+//            allVocsIds.add(vocabulary.getName());
+//        }
+//        if (allVocsIds.contains(vocabularyCuration.getEntryValueName())) {
+//            throw new ResourceAlreadyExistsException("Vocabulary with name " + vocabularyCuration.getEntryValueName() + " already exists.");
+//        }
+//
+//        // check if vocabularyCuration already exists in "pending"
+//        List<VocabularyCuration> allVocabularyCurations = getAll(ff, auth).getResults();
+//        for (VocabularyCuration vocCuration : allVocabularyCurations) {
+//            if (vocCuration.getEntryValueName().equalsIgnoreCase(vocabularyCuration.getEntryValueName()) &&
+//                    vocCuration.getVocabulary().equalsIgnoreCase(vocabularyCuration.getVocabulary()) &&
+//                    vocCuration.getStatus().equals(VocabularyCuration.Status.PENDING.getKey())) {
+//                vocabularyCuration.setVocabularyEntryRequests(updateVocabularyRequestsList(vocCuration, vocabularyCuration));
+//                vocabularyCuration.setId(vocCuration.getId());
+//            }
+//        }
+//
+//        // validate vocabulary
+//        List<String> possibleValues = new ArrayList<>();
+//        for (Vocabulary.Type vocab : Vocabulary.Type.values()) {
+//            possibleValues.add(vocab.getKey().toLowerCase());
+//        }
+//        String voc = vocabularyCuration.getVocabulary();
+//        if (!possibleValues.contains(voc.toLowerCase())) {
+//            throw new ResourceNotFoundException(voc, "Vocabulary");
+//        }
+//
+//        // check if parent exists
+//        List<Vocabulary> specificVocs;
+//        List<String> specificVocsIds = new ArrayList<>();
+//        switch (vocabularyCuration.getVocabulary()) {
+//            case "CATEGORY":
+//                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
+//                    throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
+//                } else {
+//                    specificVocs = vocabularyService.getByType(Vocabulary.Type.SUPERCATEGORY);
+//                    for (Vocabulary vocabulary : specificVocs) {
+//                        specificVocsIds.add(vocabulary.getId());
+//                    }
+//                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
+//                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+//                    }
+//                }
+//                break;
+//            case "SUBCATEGORY":
+//                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
+//                    throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
+//                } else {
+//                    specificVocs = vocabularyService.getByType(Vocabulary.Type.CATEGORY);
+//                    for (Vocabulary vocabulary : specificVocs) {
+//                        specificVocsIds.add(vocabulary.getId());
+//                    }
+//                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
+//                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+//                    }
+//                }
+//                break;
+//            case "PROVIDER MERIL SCIENTIFIC SUBDOMAIN":
+//                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
+//                    throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
+//                } else {
+//                    specificVocs = vocabularyService.getByType(Vocabulary.Type.PROVIDER_MERIL_SCIENTIFIC_DOMAIN);
+//                    for (Vocabulary vocabulary : specificVocs) {
+//                        specificVocsIds.add(vocabulary.getId());
+//                    }
+//                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
+//                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+//                    }
+//                }
+//                break;
+//            case "SCIENTIFIC SUBDOMAIN":
+//                if (vocabularyCuration.getParent() == null || vocabularyCuration.getParent().isEmpty()) {
+//                    throw new ValidationException("Vocabulary " + vocabularyCuration.getVocabulary() + " cannot have an empty parent.");
+//                } else {
+//                    specificVocs = vocabularyService.getByType(Vocabulary.Type.SCIENTIFIC_DOMAIN);
+//                    for (Vocabulary vocabulary : specificVocs) {
+//                        specificVocsIds.add(vocabulary.getId());
+//                    }
+//                    if (!specificVocsIds.contains(vocabularyCuration.getParent())) {
+//                        throw new CatalogueResourceNotFoundException("Parent vocabulary " + vocabularyCuration.getParent() + " does not exist.");
+//                    }
+//                }
+//                break;
+//            default:
+//                vocabularyCuration.setParent(null);
+//        }
+//
+//        // validate if providerId/resourceId exists
+//        NewProviderBundle providerBundle = providerService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getProviderId(), catalogueId);
+//        switch (resourceType) {
+//            case "provider":
+//                break;
+//            case "service":
+//                ServiceBundle serviceBundle = serviceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId());
+//                if (!serviceBundle.getService().getResourceOrganisation().equals(providerBundle.getId())) {
+//                    throw new CatalogueResourceNotFoundException(String.format("Provider with id [%s] does not have a Service with id [%s] registered.",
+//                            providerBundle.getId(), serviceBundle.getId()));
+//                }
+//                break;
+//            case "training_resource":
+//                TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(vocabularyCuration.getVocabularyEntryRequests().getFirst().getResourceId(), catalogueId);
+//                if (!trainingResourceBundle.getTrainingResource().getResourceOrganisation().equals(providerBundle.getId())) {
+//                    throw new CatalogueResourceNotFoundException(String.format("Provider with id [%s] does not have a Training Resource with id [%s] registered.",
+//                            providerBundle.getId(), trainingResourceBundle.getId()));
+//                }
+//                break;
+//            default:
+//                throw new ValidationException("The resourceType you submitted is not supported. Possible resourceType " +
+//                        "values: ['provider', 'service', 'datasource', 'training_resource']");
+//        }
+//        return vocabularyCuration;
+//    }
 
     public VocabularyCuration addFront(String resourceId, String providerId, String resourceType,
                                        String entryValueName, String vocabulary, String parent, Authentication auth) {

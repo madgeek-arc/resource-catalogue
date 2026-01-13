@@ -29,19 +29,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
-// TODO: REFACTOR
-//  1) Replace user.stream().filter/search? with facet filter  email=x
-//  2) Use facet filter to set status/published/active (in methods everywhere in general)
+//FIXME: need to work with external catalogues too -> get with catalogueId
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
 
     private final CatalogueService catalogueService;
     private final ProviderService providerService;
-    private final ProviderTestService providerTestService;
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -57,7 +52,6 @@ public class OIDCSecurityService implements SecurityService {
 
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
                                @Lazy ProviderService providerService,
-                               @Lazy ProviderTestService providerTestService,
                                @Lazy ServiceService serviceService,
                                @Lazy TrainingResourceService trainingResourceService,
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
@@ -66,7 +60,6 @@ public class OIDCSecurityService implements SecurityService {
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.providerService = providerService;
-        this.providerTestService = providerTestService;
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
@@ -137,11 +130,32 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private List<User> getProviderUsers(String id) {
-        ProviderBundle registeredProvider = checkProviderExistence(id);
-        if (registeredProvider == null || registeredProvider.getProvider().getUsers() == null) {
+        NewProviderBundle registeredProvider = checkProviderExistence(id);
+        if (registeredProvider == null) {
             return null;
         }
-        return registeredProvider.getProvider().getUsers();
+        Object usersObj = registeredProvider.getProvider().get("users");
+        if (!(usersObj instanceof List<?> usersList)) {
+            return null;
+        }
+
+        List<User> users = new ArrayList<>();
+        for (Object obj : usersList) {
+            if (obj instanceof Map<?, ?> userMap) {
+                users.add(mapToUser(userMap));
+            }
+        }
+        return users;
+    }
+
+    //TODO: make global
+    private User mapToUser(Map<?, ?> userMap) {
+        User user = new User();
+        user.setId((String) userMap.get("id"));
+        user.setName((String) userMap.get("name"));
+        user.setSurname((String) userMap.get("surname"));
+        user.setEmail((String) userMap.get("email"));
+        return user;
     }
 
     private List<User> getCatalogueUsers(String id) {
@@ -152,9 +166,9 @@ public class OIDCSecurityService implements SecurityService {
         return registeredCatalogue.getCatalogue().getUsers();
     }
 
-    private ProviderBundle checkProviderExistence(String providerId) {
+    private NewProviderBundle checkProviderExistence(String providerId) {
         try {
-            return providerService.get(providerId, adminAccess);
+            return providerService.get(providerId);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
@@ -175,7 +189,7 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean isApprovedProvider(String prefix, String suffix) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerTestService.get(id);
+        NewProviderBundle bundle = providerService.get(id);
         return "approved".equals(bundle.getStatus());
     }
     //endregion
@@ -215,7 +229,7 @@ public class OIDCSecurityService implements SecurityService {
 
     private NewBundle determineResourceType(String id) {
         if (isProvider(id)) {
-            return providerTestService.getOrElseReturnNull(id);
+            return providerService.getOrElseReturnNull(id);
         } else if (isService(id)) {
             return serviceService.getOrElseReturnNull(id);
         }
@@ -243,81 +257,81 @@ public class OIDCSecurityService implements SecurityService {
     }
 
 
+    //FIXME - how to get catalogueId
     @Override
-    public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.Service service) {
-        String providerId = service.getResourceOrganisation();
-        String catalogueId = service.getCatalogueId();
+    public boolean providerCanAddResources(Authentication auth, LinkedHashMap<String, Object> service, String catalogueId) {
+        String providerId = (String) service.get("serviceOwner");
         if (catalogueId == null || catalogueId.isEmpty()) {
             catalogueId = this.catalogueId;
         }
-        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
-        return providerCanAddResources(auth, provider, service.getId());
+        NewProviderBundle provider = providerService.get(providerId, catalogueId);
+        return canAddResources(auth, provider);
     }
 
+    //FIXME - how to get catalogueId
     @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource trainingResource) {
-        String providerId = trainingResource.getResourceOrganisation();
-        String catalogueId = trainingResource.getCatalogueId();
-        if (catalogueId == null || catalogueId.isEmpty()) {
-            catalogueId = this.catalogueId;
-        }
-        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
-        return providerCanAddResources(auth, provider, trainingResource.getId());
+        return false;
+//        String providerId = trainingResource.getResourceOrganisation();
+//        String catalogueId = trainingResource.getCatalogueId();
+//        if (catalogueId == null || catalogueId.isEmpty()) {
+//            catalogueId = this.catalogueId;
+//        }
+//        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
+//        return canAddResources(auth, provider, trainingResource.getId());
     }
 
+    //FIXME - how to get catalogueId
     @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.DeployableService deployableService) {
-        String providerId = deployableService.getResourceOrganisation();
-        String catalogueId = deployableService.getCatalogueId();
-        if (catalogueId == null || catalogueId.isEmpty()) {
-            catalogueId = this.catalogueId;
-        }
-        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
-        return providerCanAddResources(auth, provider, deployableService.getId());
+        return false;
+//        String providerId = deployableService.getResourceOrganisation();
+//        String catalogueId = deployableService.getCatalogueId();
+//        if (catalogueId == null || catalogueId.isEmpty()) {
+//            catalogueId = this.catalogueId;
+//        }
+//        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
+//        return canAddResources(auth, provider, deployableService.getId());
     }
 
+    //FIXME - how to get catalogueId
     @Override
     public boolean providerCanAddResources(Authentication auth, gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord interoperabilityRecord) {
-        String providerId = interoperabilityRecord.getProviderId();
-        String catalogueId = interoperabilityRecord.getCatalogueId();
-        if (catalogueId == null || catalogueId.isEmpty()) {
-            catalogueId = this.catalogueId;
-        }
-        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
-        return providerCanAddResources(auth, provider, interoperabilityRecord.getId());
+        return false;
+//        String providerId = interoperabilityRecord.getProviderId();
+//        String catalogueId = interoperabilityRecord.getCatalogueId();
+//        if (catalogueId == null || catalogueId.isEmpty()) {
+//            catalogueId = this.catalogueId;
+//        }
+//        ProviderBundle provider = providerService.get(catalogueId, providerId, auth);
+//        return canAddResources(auth, provider, interoperabilityRecord.getId());
     }
 
-    private boolean providerCanAddResources(Authentication auth, ProviderBundle provider, String resourceId) {
+    private boolean canAddResources(Authentication auth, NewProviderBundle provider) {
+        // provider related check
         if (!hasAdminAccess(auth, provider.getId())) {
             return false;
         }
-        if (provider.getStatus() == null) {
+        if (!provider.isActive()) {
+            return false;
+        }
+        String status = provider.getStatus();
+        if (status == null) {
             throw new ServiceException("Provider status field is null");
         }
-        if (provider.isActive() && "approved".equals(provider.getStatus())) {
-            return true;
-        }
-        return "no template status".equals(provider.getTemplateStatus()) &&
-                checkIfProviderHasRegisteredAServiceTemplate(provider, resourceId);
-    }
-
-    private boolean checkIfProviderHasRegisteredAServiceTemplate(ProviderBundle provider, String resourceId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", provider.getId());
-
-        NewBundle bundle = determineResourceType(resourceId);
-        boolean isServiceBundle = bundle instanceof NewServiceBundle;
-        //FIXME
-//        boolean isTrainingResource = bundle instanceof TrainingResourceBundle;
-//        boolean isDeployableService = bundle instanceof DeployableServiceBundle;
-
-        if ((isServiceBundle && serviceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) /*||
-                (isTrainingResource && trainingResourceService.getAll(ff, getAdminAccess()).getResults().isEmpty()) ||
-                (isDeployableService && deployableServiceService.getAll(ff, getAdminAccess()).getResults().isEmpty())*/) {
-            return true;
+        if (!"approved".equals(status)) {
+            return false;
         }
 
-        throw new ResourceException("You have already created a Service Template.", HttpStatus.CONFLICT);
+        // resource onboarding related check
+        String templateStatus = provider.getTemplateStatus();
+        if ("no template status".equals(templateStatus)) {
+            return true;
+        }
+        if ("rejected template status".equals(templateStatus)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -330,13 +344,43 @@ public class OIDCSecurityService implements SecurityService {
                 }
             } else {
                 String providerId = getProviderId(id);
-                NewProviderBundle provider = providerTestService.get(providerId);
+                NewProviderBundle provider = providerService.get(providerId);
                 if (provider.getStatus().equals("approved")) {
                     return hasAdminAccess(auth, providerId);
                 }
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean providerIsActive(String id, String catalogueId) {
+        NewProviderBundle providerBundle = providerService.get(id, catalogueId);
+        return providerBundle.isActive();
+    }
+
+    @Override
+    public boolean serviceIsActive(String id, String catalogueId) {
+        NewServiceBundle serviceBundle = serviceService.get(id, catalogueId);
+        return serviceBundle.isActive();
+    }
+
+    @Override
+    public boolean trainingResourceIsActive(String id, String catalogueId) {
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
+        return trainingResourceBundle.isActive();
+    }
+
+    @Override
+    public boolean guidelineIsActive(String id, String catalogueId) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
+        return interoperabilityRecordBundle.isActive();
+    }
+
+    @Override
+    public boolean deployableServiceIsActive(String id, String catalogueId) {
+        DeployableServiceBundle deployableServiceBundle = deployableServiceService.get(id, catalogueId);
+        return deployableServiceBundle.isActive();
     }
     //endregion
 

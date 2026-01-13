@@ -596,54 +596,59 @@ public class ServiceManager extends ResourceCatalogueManager<ServiceBundle> impl
     }
 
     @Override
-    public Map<String, List<ServiceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException {
-        Field serviceField = null;
-        try {
-            serviceField = Service.class.getDeclaredField(field);
-        } catch (NoSuchFieldException e) {
-            logger.warn("Attempt to find field '{}' in Service failed. Trying in ServiceBundle...", field);
-            serviceField = ServiceBundle.class.getDeclaredField(field);
-        }
-        serviceField.setAccessible(true);
-
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
-        Browsing<ServiceBundle> services = getAll(ff, auth);
-
-        final Field f = serviceField;
-        final String undef = "undefined";
-        return services.getResults().stream().collect(Collectors.groupingBy(service -> {
-            try {
-                return f.get(service.getPayload()) != null ? f.get(service.getPayload()).toString() : undef;
-            } catch (IllegalAccessException | IllegalArgumentException e) {
-                logger.warn("Warning", e);
-                try {
-                    return f.get(service) != null ? f.get(service).toString() : undef;
-                } catch (IllegalAccessException e1) {
-                    logger.error("ERROR", e1);
-                }
-                return undef;
-            }
-        }, Collectors.mapping((ServiceBundle service) -> service, toList())));
+    public Map<String, List<LinkedHashMap<String, Object>>> getBy(String field, Authentication auth)
+            throws NoSuchFieldException {
+        return null;
+        //FIXME
+//        Field serviceField = null;
+//        try {
+//            serviceField = Service.class.getDeclaredField(field);
+//        } catch (NoSuchFieldException e) {
+//            logger.warn("Attempt to find field '{}' in Service failed. Trying in ServiceBundle...", field);
+//            serviceField = ServiceBundle.class.getDeclaredField(field);
+//        }
+//        serviceField.setAccessible(true);
+//
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(maxQuantity);
+//        ff.addFilter("published", false);
+//        Browsing<NewServiceBundle> services = getAll(ff, auth);
+//
+//        final Field f = serviceField;
+//        final String undef = "undefined";
+//        return services.getResults().stream().collect(Collectors.groupingBy(service -> {
+//            try {
+//                return f.get(service.getPayload()) != null ? f.get(service.getPayload()).toString() : undef;
+//            } catch (IllegalAccessException | IllegalArgumentException e) {
+//                logger.warn("Warning", e);
+//                try {
+//                    return f.get(service) != null ? f.get(service).toString() : undef;
+//                } catch (IllegalAccessException e1) {
+//                    logger.error("ERROR", e1);
+//                }
+//                return undef;
+//            }
+//        }, Collectors.mapping((ServiceBundle service) -> service, toList())));
     }
 
+    //FIXME
     @Override
-    public List<ServiceBundle> getByIds(Authentication auth, String... ids) {
-        List<ServiceBundle> resources;
-        resources = Arrays.stream(ids)
-                .map(id ->
-                {
-                    try {
-                        return get(id, null, false);
-                    } catch (ServiceException | ResourceNotFoundException e) {
-                        return null;
-                    }
-
-                })
-                .filter(Objects::nonNull)
-                .toList();
-        return resources;
+    public List<NewServiceBundle> getByIds(Authentication auth, String... ids) {
+        return null;
+//        List<NewServiceBundle> resources;
+//        resources = Arrays.stream(ids)
+//                .map(id ->
+//                {
+//                    try {
+//                        return get(id, null);
+//                    } catch (ServiceException | ResourceNotFoundException e) {
+//                        return null;
+//                    }
+//
+//                })
+//                .filter(Objects::nonNull)
+//                .toList();
+//        return resources;
     }
 
     @Override

@@ -60,6 +60,7 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
         );
     }
 
+    //TODO: should we unify get and getPublic?
     @Override
     public T get(String id, String catalogueId) {
         if (catalogueId != null && !catalogueId.isBlank()) {
@@ -71,6 +72,19 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
         return genericResourceService.get(getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("published", "false"));
+    }
+
+    @Override
+    public T getPublic(String id, String catalogueId) {
+        if (catalogueId != null && !catalogueId.isBlank()) {
+            return genericResourceService.get(getResourceTypeName(),
+                    new SearchService.KeyValue("resource_internal_id", id),
+                    new SearchService.KeyValue("catalogue_id", catalogueId),
+                    new SearchService.KeyValue("published", "true"));
+        }
+        return genericResourceService.get(getResourceTypeName(),
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "true"));
     }
 
     //TODO: probably we do not need this IF we use the same get for drafts and non-drafts

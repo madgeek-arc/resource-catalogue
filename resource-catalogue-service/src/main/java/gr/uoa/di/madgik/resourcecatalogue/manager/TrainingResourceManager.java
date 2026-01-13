@@ -121,8 +121,8 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         }
         relationshipValidator.checkRelatedResourceIDsConsistency(trainingResourceBundle);
 
-        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        NewProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
+                trainingResourceBundle.getTrainingResource().getResourceOrganisation());
         if (providerBundle == null) {
             throw new CatalogueResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
                     trainingResourceBundle.getTrainingResource().getResourceOrganisation(), trainingResourceBundle.getTrainingResource().getCatalogueId()));
@@ -207,8 +207,8 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                 ret.getTrainingResource().getId(), ret.getTrainingResource().getCatalogueId());
         validateTrainingResource(ret);
 
-        ProviderBundle providerBundle = providerService.get(ret.getTrainingResource().getCatalogueId(),
-                ret.getTrainingResource().getResourceOrganisation(), auth);
+        NewProviderBundle providerBundle = providerService.get(ret.getTrainingResource().getResourceOrganisation(),
+                ret.getTrainingResource().getCatalogueId());
 
         // block Public Training Resource update
         if (existingTrainingResource.getMetadata().isPublished()) {
@@ -274,9 +274,9 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
+        List<NewProviderBundle> providers = providerService.getMy(ff, auth).getResults();
 
-        filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
+        filter.addFilter("resource_organisation", providers.stream().map(NewProviderBundle::getId).toList());
         filter.setResourceType(getResourceTypeName());
         return this.getAll(filter, auth);
     }
@@ -324,8 +324,8 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         TrainingResourceBundle trainingResourceBundle = getCatalogueResource(catalogueId, id, auth);
         trainingResourceBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
-        ProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        NewProviderBundle resourceProvider = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId());
 
         switch (status) {
             case "pending" -> resourceProvider.setTemplateStatus("pending template");
@@ -368,8 +368,8 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                     trainingResourceBundle.getStatus()), HttpStatus.CONFLICT);
         }
 
-        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        NewProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId());
         if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
             activeProvider = trainingResourceBundle.getTrainingResource().getResourceOrganisation();
         }
@@ -388,9 +388,9 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         trainingResource.markAudit(comment, actionType, auth);
 
         // send notification emails to Provider Admins
-        ProviderBundle provider = providerService.get(trainingResource.getTrainingResource().getCatalogueId(),
-                trainingResource.getTrainingResource().getResourceOrganisation(), auth);
-        emailService.notifyProviderAdminsForBundleAuditing(trainingResource, provider.getProvider().getUsers());
+        NewProviderBundle provider = providerService.get(trainingResource.getTrainingResource().getResourceOrganisation(),
+                trainingResource.getTrainingResource().getCatalogueId());
+//        emailService.notifyProviderAdminsForBundleAuditing(trainingResource, provider.getProvider().get("users")); //FIXME
 
         logger.info("Audited Training Resource '{}'-'{}' with [actionType: {}]",
                 trainingResource.getTrainingResource().getId(), trainingResource.getTrainingResource().getTitle(), actionType);
@@ -429,10 +429,10 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     @Override
     public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth) {
         TrainingResourceBundle trainingResourceBundle = get(resourceId, catalogueId, false);
-        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
-                trainingResourceBundle.getTrainingResource().getCatalogueId(), false);
-        logger.info("Mailing provider '{}'-'{}' for outdated Training Resources", providerBundle.getId(), providerBundle.getProvider().getName());
-        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResourceBundle, providerBundle);
+        NewProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId());
+        logger.info("Mailing provider '{}'-'{}' for outdated Training Resources", providerBundle.getId(), providerBundle.getProvider().get("name"));
+//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResourceBundle, providerBundle); //FIXME
     }
 
     @Override
@@ -562,12 +562,12 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
             throw new ValidationException(String.format("You cannot move Training Resource with id [%s] to another Provider as it" +
                     "is not yet Approved", trainingResourceBundle.getId()));
         }
-        ProviderBundle newProvider = providerService.get(newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(trainingResourceBundle.getTrainingResource().getCatalogueId(),
-                trainingResourceBundle.getTrainingResource().getResourceOrganisation(), auth);
+        NewProviderBundle newProvider = providerService.get(newProviderId);
+        NewProviderBundle oldProvider = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
+                trainingResourceBundle.getTrainingResource().getCatalogueId());
 
         // check that the 2 Providers co-exist under the same Catalogue
-        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
+        if (!oldProvider.getCatalogueId().equals(newProvider.getCatalogueId())) {
             throw new ValidationException("You cannot move a Training Resource to a Provider of another Catalogue");
         }
 
@@ -613,7 +613,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, trainingResourceBundle.getId());
 
         // emails to EPOT, old and new Provider
-        emailService.sendEmailsForMovedResources(oldProvider, newProvider, trainingResourceBundle, auth);
+//        emailService.sendEmailsForMovedResources(oldProvider, newProvider, trainingResourceBundle, auth); //FIXME
 
         return trainingResourceBundle;
     }

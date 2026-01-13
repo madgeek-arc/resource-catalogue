@@ -388,10 +388,10 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         existingCatalogue.markSuspend(suspend, auth);
 
         // Suspend Catalogue's resources
-        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(id), auth).getResults();
+        List<NewProviderBundle> providers = providerService.getAll(createFacetFilter(id), auth).getResults();
         if (providers != null && !providers.isEmpty()) {
-            for (ProviderBundle providerBundle : providers) {
-                providerService.suspend(providerBundle.getId(), id, suspend, auth);
+            for (NewProviderBundle providerBundle : providers) {
+                providerService.setSuspend(providerBundle.getId(), id, suspend, auth);
             }
         }
 

@@ -191,7 +191,7 @@ public class CatalogueController {
 
     @Hidden
     @Operation(summary = "Activates/Deactivates the specific Catalogue.")
-    @PatchMapping(path = "publish/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "setActive/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<CatalogueBundle> publish(@PathVariable String id,
                                                    @RequestParam(required = false) Boolean active,
@@ -260,7 +260,7 @@ public class CatalogueController {
     }
 
     @Operation(summary = "Audits a Catalogue.")
-    @PatchMapping(path = "auditCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "audit/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<CatalogueBundle> auditCatalogue(@PathVariable String id,
                                                           @RequestParam(required = false) String comment,

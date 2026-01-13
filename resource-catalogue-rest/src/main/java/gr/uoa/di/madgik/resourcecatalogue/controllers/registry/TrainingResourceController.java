@@ -263,7 +263,7 @@ public class TrainingResourceController {
     }
 
     // Providing the Training Resource id, set the Training Resource to active or inactive.
-    @PatchMapping(path = "publish/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "setActive/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerIsActiveAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<TrainingResourceBundle> setActive(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                             @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -274,21 +274,21 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceService.publish(id, active, auth));
     }
 
-    // Get all pending Service Templates.
-    @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Browsing<TrainingResource>> pendingTemplates(@Parameter(hidden = true) Authentication auth) {
-        List<ProviderBundle> pendingProviders = providerService.getInactive();
-        List<TrainingResource> serviceTemplates = new ArrayList<>();
-        for (ProviderBundle provider : pendingProviders) {
-            if (provider.getTemplateStatus().equals("pending template")) {
-                serviceTemplates.addAll(trainingResourceService.getInactiveResources(
-                        provider.getId()).stream().map(TrainingResourceBundle::getTrainingResource).toList());
-            }
-        }
-        Browsing<TrainingResource> trainingResources = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
-        return ResponseEntity.ok(trainingResources);
-    }
+//    // Get all pending Service Templates.
+//    @GetMapping(path = "pending/all", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+//    public ResponseEntity<Browsing<TrainingResource>> pendingTemplates(@Parameter(hidden = true) Authentication auth) {
+//        List<ProviderBundle> pendingProviders = providerService.getInactive();
+//        List<TrainingResource> serviceTemplates = new ArrayList<>();
+//        for (ProviderBundle provider : pendingProviders) {
+//            if (provider.getTemplateStatus().equals("pending template")) {
+//                serviceTemplates.addAll(trainingResourceService.getInactiveResources(
+//                        provider.getId()).stream().map(TrainingResourceBundle::getTrainingResource).toList());
+//            }
+//        }
+//        Browsing<TrainingResource> trainingResources = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
+//        return ResponseEntity.ok(trainingResources);
+//    }
 
     @BrowseParameters
     @BrowseCatalogue
@@ -304,7 +304,7 @@ public class TrainingResourceController {
         return ResponseEntity.ok(paging);
     }
 
-    @PatchMapping(path = "auditResource/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(path = "audit/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<TrainingResourceBundle> auditResource(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                                                 @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
@@ -318,9 +318,9 @@ public class TrainingResourceController {
     }
 
 
-    @GetMapping(path = "randomResources", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "random", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<TrainingResourceBundle>> getRandomResources(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
+    public ResponseEntity<Paging<TrainingResourceBundle>> getRandom(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
                                                                               @RequestParam(defaultValue = "10") int quantity,
                                                                               @Parameter(hidden = true) Authentication auth) {
         Paging<TrainingResourceBundle> trainingResourceBundlePaging = trainingResourceService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
@@ -349,7 +349,7 @@ public class TrainingResourceController {
     }
 
     // Move a Training Resource to another Provider
-    @PostMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(path = {"changeProvider"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public void changeProvider(@RequestParam String resourceId, @RequestParam String newProvider, @RequestParam(required = false) String comment, @Parameter(hidden = true) Authentication authentication) {
         trainingResourceService.changeProvider(resourceId, newProvider, comment, authentication);

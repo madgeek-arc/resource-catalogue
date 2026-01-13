@@ -154,7 +154,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         }
 
         logger.info("Deleting Provider: {} and all its Resources", bundle.getId());
-        cascadeLifecycleService.deleteAllRelatedResources(bundle, auth);
+//        cascadeLifecycleService.deleteAllRelatedResources(bundle, auth); //FIXME
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
 
 //        synchronizerService.syncDelete(bundle.getProvider()); //TODO: remove this?
@@ -245,7 +245,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 
         logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
         bundle.markSuspend(suspend, auth);
-        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
+//        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth); //FIXME
 
         try {
             return genericResourceService.update(getResourceTypeName(), id, bundle);

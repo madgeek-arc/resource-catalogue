@@ -16,9 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
@@ -65,8 +63,8 @@ public class PublicTrainingResourceService
     @Override
     public void updateIdsToPublic(TrainingResourceBundle bundle) {
         // Resource Organisation
-        ProviderBundle providerBundle = providerService.get(bundle.getTrainingResource().getResourceOrganisation(),
-                bundle.getTrainingResource().getCatalogueId(), false);
+        NewProviderBundle providerBundle = providerService.get(bundle.getTrainingResource().getResourceOrganisation(),
+                bundle.getTrainingResource().getCatalogueId());
         bundle.getTrainingResource().setResourceOrganisation(providerBundle.getIdentifiers().getPid());
 
         // Resource Providers
@@ -75,30 +73,31 @@ public class PublicTrainingResourceService
         if (existingResourceProviders != null && !existingResourceProviders.isEmpty()) {
             for (String resourceProviderId : existingResourceProviders) {
                 //TODO: do we allow related resources from different catalogues?
-                ProviderBundle resourceProvider = providerService.get(resourceProviderId,
-                        bundle.getTrainingResource().getCatalogueId(), false);
+                NewProviderBundle resourceProvider = providerService.get(resourceProviderId,
+                        bundle.getTrainingResource().getCatalogueId());
                 resourceProviders.add(resourceProvider.getIdentifiers().getPid());
             }
             bundle.getTrainingResource().setResourceProviders(resourceProviders);
         }
 
+        //FIXME
         // EOSC Related Services
-        List<String> eoscRelatedServices = new ArrayList<>();
-        List<String> existingEoscRelatedServices = bundle.getTrainingResource().getEoscRelatedServices();
-        if (existingEoscRelatedServices != null && !existingEoscRelatedServices.isEmpty()) {
-            for (String eoscRelatedServiceId : existingEoscRelatedServices) {
-                //TODO: do we allow related resources from different catalogues?
-                Bundle<?> eoscRelatedService;
-                try {
-                    eoscRelatedService = serviceService.get(eoscRelatedServiceId,
-                            bundle.getTrainingResource().getCatalogueId(), false);
-                } catch (CatalogueResourceNotFoundException e) {
-                    eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId,
-                            bundle.getTrainingResource().getCatalogueId(), false);
-                }
-                eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
-            }
-            bundle.getTrainingResource().setEoscRelatedServices(eoscRelatedServices);
-        }
+//        List<String> eoscRelatedServices = new ArrayList<>();
+//        List<String> existingEoscRelatedServices = bundle.getTrainingResource().getEoscRelatedServices();
+//        if (existingEoscRelatedServices != null && !existingEoscRelatedServices.isEmpty()) {
+//            for (String eoscRelatedServiceId : existingEoscRelatedServices) {
+//                //TODO: do we allow related resources from different catalogues?
+//                NewBundle eoscRelatedService;
+//                try {
+//                    eoscRelatedService = serviceService.get(eoscRelatedServiceId,
+//                            bundle.getTrainingResource().getCatalogueId());
+//                } catch (CatalogueResourceNotFoundException e) {
+//                    eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId,
+//                            bundle.getTrainingResource().getCatalogueId(), false);
+//                }
+//                eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
+//            }
+//            bundle.getTrainingResource().setEoscRelatedServices(eoscRelatedServices);
+//        }
     }
 }

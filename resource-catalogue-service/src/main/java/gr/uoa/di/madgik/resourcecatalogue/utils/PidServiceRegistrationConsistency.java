@@ -67,83 +67,84 @@ public class PidServiceRegistrationConsistency {
         this.securityService = securityService;
     }
 
+    //FIXME
 //    @Scheduled(initialDelay = 0, fixedRate = 6000)
-    @Scheduled(cron = "0 0 0 * * *")
-    protected void postUnregisteredResourcesToPIDService() {
-        List<ProviderBundle> allPublicProviders = providerService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> allPublicServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<TrainingResourceBundle> allPublicTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<DeployableServiceBundle> allPublicDS = deployableServiceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<InteroperabilityRecordBundle> allPublicIG = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<AdapterBundle> allPublicAdapters = adapterService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-
-        logger.info("PID Service registration consistency");
-        // check consistency for Providers
-        for (ProviderBundle providerBundle : allPublicProviders) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(providerBundle.getId());
-            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
-                if (pidServiceEnabled) {
-                    logger.info("Posting Provider with id {} to PID service", providerBundle.getId());
-                    pidIssuer.postPID(providerBundle.getId(), null);
-                }
-            }
-        }
-
-        // check consistency for Services
-        for (ServiceBundle serviceBundle : allPublicServices) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(serviceBundle.getId());
-            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
-                if (pidServiceEnabled) {
-                    logger.info("Posting Service with id {} to PID service", serviceBundle.getId());
-                    pidIssuer.postPID(serviceBundle.getId(), null);
-                }
-            }
-        }
-
-        // check consistency for Training Resources
-        for (TrainingResourceBundle trainingResourceBundle : allPublicTR) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(trainingResourceBundle.getId());
-            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
-                if (pidServiceEnabled) {
-                    logger.info("Posting Training Resource with id {} to PID service", trainingResourceBundle.getId());
-                    pidIssuer.postPID(trainingResourceBundle.getId(), null);
-                }
-            }
-        }
-
-        // check consistency for Deployable Services
-        for (DeployableServiceBundle deployableServiceBundle : allPublicDS) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(deployableServiceBundle.getId());
-            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
-                if (pidServiceEnabled) {
-                    logger.info("Posting Deployable Service with id {} to PID service", deployableServiceBundle.getId());
-                    pidIssuer.postPID(deployableServiceBundle.getId(), null);
-                }
-            }
-        }
-
-        // check consistency for Interoperability Records
-        for (InteroperabilityRecordBundle interoperabilityRecordBundle : allPublicIG) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(interoperabilityRecordBundle.getId());
-            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
-                if (pidServiceEnabled) {
-                    logger.info("Posting Interoperability Record with id {} to PID service", interoperabilityRecordBundle.getId());
-                    pidIssuer.postPID(interoperabilityRecordBundle.getId(), null);
-                }
-            }
-        }
-
-        // check consistency for Adapters
-        for (AdapterBundle adapterBundle : allPublicAdapters) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(adapterBundle.getId());
-            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
-                if (pidServiceEnabled) {
-                    logger.info("Posting Adapter with id {} to PID service", adapterBundle.getId());
-                    pidIssuer.postPID(adapterBundle.getId(), null);
-                }
-            }
-        }
-    }
+//    @Scheduled(cron = "0 0 0 * * *")
+//    protected void postUnregisteredResourcesToPIDService() {
+//        List<ProviderBundle> allPublicProviders = providerService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+//        List<ServiceBundle> allPublicServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+//        List<TrainingResourceBundle> allPublicTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+//        List<DeployableServiceBundle> allPublicDS = deployableServiceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+//        List<InteroperabilityRecordBundle> allPublicIG = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+//        List<AdapterBundle> allPublicAdapters = adapterService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+//
+//        logger.info("PID Service registration consistency");
+//        // check consistency for Providers
+//        for (ProviderBundle providerBundle : allPublicProviders) {
+//            HttpStatusCode httpStatusCode = getResourceFromPidService(providerBundle.getId());
+//            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
+//                if (pidServiceEnabled) {
+//                    logger.info("Posting Provider with id {} to PID service", providerBundle.getId());
+//                    pidIssuer.postPID(providerBundle.getId(), null);
+//                }
+//            }
+//        }
+//
+//        // check consistency for Services
+//        for (ServiceBundle serviceBundle : allPublicServices) {
+//            HttpStatusCode httpStatusCode = getResourceFromPidService(serviceBundle.getId());
+//            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
+//                if (pidServiceEnabled) {
+//                    logger.info("Posting Service with id {} to PID service", serviceBundle.getId());
+//                    pidIssuer.postPID(serviceBundle.getId(), null);
+//                }
+//            }
+//        }
+//
+//        // check consistency for Training Resources
+//        for (TrainingResourceBundle trainingResourceBundle : allPublicTR) {
+//            HttpStatusCode httpStatusCode = getResourceFromPidService(trainingResourceBundle.getId());
+//            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
+//                if (pidServiceEnabled) {
+//                    logger.info("Posting Training Resource with id {} to PID service", trainingResourceBundle.getId());
+//                    pidIssuer.postPID(trainingResourceBundle.getId(), null);
+//                }
+//            }
+//        }
+//
+//        // check consistency for Deployable Services
+//        for (DeployableServiceBundle deployableServiceBundle : allPublicDS) {
+//            HttpStatusCode httpStatusCode = getResourceFromPidService(deployableServiceBundle.getId());
+//            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
+//                if (pidServiceEnabled) {
+//                    logger.info("Posting Deployable Service with id {} to PID service", deployableServiceBundle.getId());
+//                    pidIssuer.postPID(deployableServiceBundle.getId(), null);
+//                }
+//            }
+//        }
+//
+//        // check consistency for Interoperability Records
+//        for (InteroperabilityRecordBundle interoperabilityRecordBundle : allPublicIG) {
+//            HttpStatusCode httpStatusCode = getResourceFromPidService(interoperabilityRecordBundle.getId());
+//            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
+//                if (pidServiceEnabled) {
+//                    logger.info("Posting Interoperability Record with id {} to PID service", interoperabilityRecordBundle.getId());
+//                    pidIssuer.postPID(interoperabilityRecordBundle.getId(), null);
+//                }
+//            }
+//        }
+//
+//        // check consistency for Adapters
+//        for (AdapterBundle adapterBundle : allPublicAdapters) {
+//            HttpStatusCode httpStatusCode = getResourceFromPidService(adapterBundle.getId());
+//            if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
+//                if (pidServiceEnabled) {
+//                    logger.info("Posting Adapter with id {} to PID service", adapterBundle.getId());
+//                    pidIssuer.postPID(adapterBundle.getId(), null);
+//                }
+//            }
+//        }
+//    }
 
     protected FacetFilter createFacetFilter() {
         FacetFilter ff = new FacetFilter();

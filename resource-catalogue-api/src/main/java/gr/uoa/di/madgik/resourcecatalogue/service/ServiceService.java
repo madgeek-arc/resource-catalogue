@@ -24,6 +24,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import org.springframework.security.core.Authentication;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,14 +80,14 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      * @return {@link Map}
      * @throws NoSuchFieldException
      */
-    Map<String, List<ServiceBundle>> getBy(String field, Authentication auth) throws NoSuchFieldException;
+    Map<String, List<LinkedHashMap<String, Object>>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
      * @param authentication Authentication
      * @param ids            List of Service IDs
      * @return the list of matching resources.
      */
-    List<ServiceBundle> getByIds(Authentication authentication, String... ids);
+    List<NewServiceBundle> getByIds(Authentication authentication, String... ids);
 
     /**
      * Check if the Resource exists.

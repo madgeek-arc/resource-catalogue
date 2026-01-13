@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
@@ -48,8 +49,8 @@ public class PublicInteroperabilityRecordService
     @Override
     public void updateIdsToPublic(InteroperabilityRecordBundle bundle) {
         // providerId
-        ProviderBundle providerBundle = providerService.get(bundle.getInteroperabilityRecord().getProviderId(),
-                bundle.getInteroperabilityRecord().getCatalogueId(), false);
+        NewProviderBundle providerBundle = providerService.get(bundle.getInteroperabilityRecord().getProviderId(),
+                bundle.getInteroperabilityRecord().getCatalogueId());
         bundle.getInteroperabilityRecord().setProviderId(providerBundle.getIdentifiers().getPid());
     }
 }

@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.dynamicproperties.PropertyChangeEvent;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
@@ -42,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
@@ -124,9 +126,9 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
 
-        List<ProviderBundle> providers = new ArrayList<>();
+        List<NewProviderBundle> providers = new ArrayList<>();
         try {
-            providers.addAll(providerService.getAll(ff, securityService.getAdminAccess()).getResults());
+            providers.addAll(providerService.getAll(ff).getResults());
         } catch (Exception e) {
             logger.warn("There are no Provider entries in DB");
         }
@@ -178,17 +180,31 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         return authorities;
     }
 
-    private Set<String> getProviderUserEmails(List<ProviderBundle> providerBundles) {
-        return providerBundles
-                .stream()
-                .flatMap(p -> (p.getProvider().getUsers() != null ? p.getProvider().getUsers() : new ArrayList<User>())
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .map(User::getEmail)
-                        .filter(Objects::nonNull)
-                        .map(String::toLowerCase))
-                .filter(u -> u != null && !Objects.equals("", u))
+    private Set<String> getProviderUserEmails(List<NewProviderBundle> providerBundles) {
+        return providerBundles.stream()
+                .flatMap(pb -> {
+                    Object usersObj = pb.getProvider().get("users");
+                    if (!(usersObj instanceof List<?> users)) {
+                        return Stream.empty();
+                    }
+                    return users.stream();
+                })
+                .filter(obj -> obj instanceof Map<?, ?>)
+                .map(obj -> mapToUser((Map<?, ?>) obj))
+                .map(User::getEmail)
+                .filter(email -> email != null && !email.isBlank())
+                .map(String::toLowerCase)
                 .collect(Collectors.toSet());
+    }
+
+    //TODO: make global
+    private User mapToUser(Map<?, ?> userMap) {
+        User user = new User();
+        user.setId((String) userMap.get("id"));
+        user.setName((String) userMap.get("name"));
+        user.setSurname((String) userMap.get("surname"));
+        user.setEmail((String) userMap.get("email"));
+        return user;
     }
 
     private Set<String> getCatalogueUserEmails(List<CatalogueBundle> catalogueBundles) {

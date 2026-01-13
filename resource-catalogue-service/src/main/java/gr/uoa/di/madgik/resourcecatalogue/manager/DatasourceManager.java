@@ -220,10 +220,11 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
         DatasourceBundle datasourceBundle = get(id, catalogueId, false);
 
         // Verify that Service is Approved before proceeding
-        if (!serviceService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId(), false)
-                .getStatus().equals("approved") && status.equals("approved")) {
-            throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
-        }
+        //FIXME
+//        if (!serviceService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId(), false)
+//                .getStatus().equals("approved") && status.equals("approved")) {
+//            throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
+//        }
 
         datasourceBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
 

@@ -86,8 +86,8 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
         bundle.setId(idCreator.generate(getResourceTypeName()));
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
 
-        ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
-                interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(), auth);
+        NewProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(),
+                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
         // check if Provider is approved
         if (!providerBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",

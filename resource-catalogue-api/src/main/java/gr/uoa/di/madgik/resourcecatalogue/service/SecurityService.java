@@ -20,6 +20,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
 
+import java.util.LinkedHashMap;
+
 public interface SecurityService {
 
     /**
@@ -76,11 +78,12 @@ public interface SecurityService {
     boolean userIsResourceAdmin(User user, String resourceId);
 
     /**
-     * @param auth    Authentication
-     * @param service Service
+     * @param auth        Authentication
+     * @param service     Service
+     * @param catalogueId Catalogue ID
      * @return True if provider where the service is registered is active and approved
      */
-    boolean providerCanAddResources(Authentication auth, Service service);
+    boolean providerCanAddResources(Authentication auth, LinkedHashMap<String, Object> service, String catalogueId);
 
     /**
      * @param auth             Authentication
@@ -114,42 +117,37 @@ public interface SecurityService {
     /**
      * @param id          service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if provider is active
      */
-    boolean providerIsActive(String id, String catalogueId, boolean published);
+    boolean providerIsActive(String id, String catalogueId);
 
     /**
      * @param id          service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if service is active
      */
-    boolean serviceIsActive(String id, String catalogueId, boolean published);
+    boolean serviceIsActive(String id, String catalogueId);
 
     /**
      * @param id          deployable service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if service is active
      */
-    boolean deployableServiceIsActive(String id, String catalogueId, boolean published);
+    boolean deployableServiceIsActive(String id, String catalogueId);
 
     /**
      * @param id          service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if training resource is active
      */
-    boolean trainingResourceIsActive(String id, String catalogueId, boolean published);
+    boolean trainingResourceIsActive(String id, String catalogueId);
 
     /**
      * @param id          service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if interoperability record (guideline) is active
      */
-    boolean guidelineIsActive(String id, String catalogueId, boolean published);
+    boolean guidelineIsActive(String id, String catalogueId);
 
     /**
      * @param auth Authentication

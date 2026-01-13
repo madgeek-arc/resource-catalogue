@@ -285,7 +285,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
                 interoperabilityRecordService.get(id, catalogueId, false);
                 break;
             case "Service":
-                serviceService.get(id, catalogueId, false);
+                serviceService.get(id, catalogueId);
                 break;
             default:
                 throw new ValidationException("Unsupported linked resource type: [" + type + "]. " +
@@ -297,16 +297,18 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         FacetFilter ff = new FacetFilter();
         ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
-        List<ProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
-        return providers
-                .stream()
-                .flatMap(p -> (p.getProvider().getUsers() != null ? p.getProvider().getUsers() : new ArrayList<User>())
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .map(User::getEmail)
-                        .filter(Objects::nonNull)
-                        .map(String::toLowerCase))
-                .filter(u -> u != null && !Objects.equals("", u))
-                .collect(Collectors.toSet());
+        List<NewProviderBundle> providers = providerService.getAll(ff, securityService.getAdminAccess()).getResults();
+        return null;
+        //FIXME
+//        return providers
+//                .stream()
+//                .flatMap(p -> (p.getProvider().getUsers() != null ? p.getProvider().getUsers() : new ArrayList<User>())
+//                        .stream()
+//                        .filter(Objects::nonNull)
+//                        .map(User::getEmail)
+//                        .filter(Objects::nonNull)
+//                        .map(String::toLowerCase))
+//                .filter(u -> u != null && !Objects.equals("", u))
+//                .collect(Collectors.toSet());
     }
 }

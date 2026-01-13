@@ -137,7 +137,7 @@ public class ProviderResourcesCommonMethods {
             }
         } else {
             if (providerId != null && !providerId.isEmpty()) {
-                ProviderBundle providerBundle = providerService.get(providerId, auth);
+                NewProviderBundle providerBundle = providerService.get(providerId, catalogueId);
                 if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
                     throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
                             HttpStatus.CONFLICT);

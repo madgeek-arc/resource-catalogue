@@ -398,9 +398,9 @@ public class ServiceExtensionsController {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);
-        List<ServiceBundle> allServices = serviceService.getAll(ff, null).getResults();
+        List<NewServiceBundle> allServices = serviceService.getAll(ff, null).getResults();
         Map<String, String> serviceStatusMap = new HashMap<>();
-        for (ServiceBundle serviceBundle : allServices) {
+        for (NewServiceBundle serviceBundle : allServices) {
             serviceStatusMap.put(serviceBundle.getId(), getServiceMonitoringStatusValue(serviceBundle.getId()));
         }
         return serviceStatusMap;

@@ -18,9 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
@@ -81,7 +79,7 @@ public class CSVController {
     public ResponseEntity<String> providersToCSV(@RequestParam(required = false) Boolean published,
                                                  @Parameter(hidden = true) Authentication auth,
                                                  HttpServletResponse response) {
-        Paging<ProviderBundle> providers = providerService.getAll(createFacetFilter(published), auth);
+        Paging<NewProviderBundle> providers = providerService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listProvidersToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
         logger.info("Downloaded Providers CSV list");
@@ -95,7 +93,7 @@ public class CSVController {
     public ResponseEntity<String> servicesToCSV(@RequestParam(required = false) Boolean published,
                                                 @Parameter(hidden = true) Authentication auth,
                                                 HttpServletResponse response) {
-        Paging<ServiceBundle> serviceBundles = serviceService.getAll(createFacetFilter(published), auth);
+        Paging<NewServiceBundle> serviceBundles = serviceService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listServicesToCSV(serviceBundles.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
         logger.info("Downloaded Services CSV list");
@@ -125,8 +123,8 @@ public class CSVController {
                                                         @Parameter(hidden = true) Authentication auth,
                                                         HttpServletResponse response) throws IOException {
         long timestamp = csvService.generateTimestampFromDate(date);
-        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(false), auth).getResults();
-        List<ServiceBundle> services = serviceService.getAll(createFacetFilter(false), auth).getResults();
+        List<NewProviderBundle> providers = providerService.getAll(createFacetFilter(false), auth).getResults();
+        List<NewServiceBundle> services = serviceService.getAll(createFacetFilter(false), auth).getResults();
         String csv = csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services);
 
         // Set the response headers
