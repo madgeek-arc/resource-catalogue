@@ -312,69 +312,6 @@ public class ProviderController {
     }
     //endregion
 
-
-    //region Drafts
-    @GetMapping(path = "/draft/{prefix}/{suffix}")
-    public ResponseEntity<?> getDraft(@PathVariable String prefix,
-                                      @PathVariable String suffix) {
-        String id = prefix + "/" + suffix;
-        NewProviderBundle draft = providerService.get(
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "false"),
-                new SearchService.KeyValue("draft", "true")
-        );
-        return new ResponseEntity<>(draft.getProvider(), HttpStatus.OK);
-    }
-
-    @PostMapping(path = "/draft")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> provider,
-                                      @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle bundle = new NewProviderBundle();
-        bundle.setProvider(provider);
-        NewProviderBundle ret = providerService.addDraft(bundle, auth);
-        logger.info("Added Draft Provider with id '{}'", bundle.getId());
-        return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
-    }
-
-    @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
-    public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> provider,
-                                         @Parameter(hidden = true) Authentication auth) {
-        String id = (String) provider.get("id");
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
-        bundle.setProvider(provider);
-        bundle = providerService.updateDraft(bundle, auth);
-        logger.info("Updated the Draft Provider with id '{}'", id);
-        return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
-    }
-
-    @DeleteMapping(path = "/draft/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
-    public void deleteDraft(@PathVariable String prefix,
-                            @PathVariable String suffix,
-                            @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
-        providerService.deleteDraft(bundle);
-    }
-
-    @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
-    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> provider,
-                                      @Parameter(hidden = true) Authentication auth) {
-        String id = (String) provider.get("id");
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
-        bundle.setProvider(provider);
-
-        providerService.updateDraft(bundle, auth);
-        logger.info("Finalizing Draft Provider with id '{}'", id);
-        bundle = providerService.finalizeDraft(bundle, auth);
-
-        return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
-    }
-    //endregion
-
     //region Provider-specific
     @GetMapping(path = "hasAdminAcceptedTerms")
     public boolean hasAdminAcceptedTerms(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
@@ -443,6 +380,68 @@ public class ProviderController {
         Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret =
                 providerService.getProviderIdToNameMap(catalogueId);
         return ResponseEntity.ok(ret);
+    }
+    //endregion
+
+    //region Drafts
+    @GetMapping(path = "/draft/{prefix}/{suffix}")
+    public ResponseEntity<?> getDraft(@PathVariable String prefix,
+                                      @PathVariable String suffix) {
+        String id = prefix + "/" + suffix;
+        NewProviderBundle draft = providerService.get(
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "false"),
+                new SearchService.KeyValue("draft", "true")
+        );
+        return new ResponseEntity<>(draft.getProvider(), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/draft")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> provider,
+                                      @Parameter(hidden = true) Authentication auth) {
+        NewProviderBundle bundle = new NewProviderBundle();
+        bundle.setProvider(provider);
+        NewProviderBundle ret = providerService.addDraft(bundle, auth);
+        logger.info("Added Draft Provider with id '{}'", bundle.getId());
+        return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
+    }
+
+    @PutMapping(path = "/draft")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
+    public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> provider,
+                                         @Parameter(hidden = true) Authentication auth) {
+        String id = (String) provider.get("id");
+        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        bundle.setProvider(provider);
+        bundle = providerService.updateDraft(bundle, auth);
+        logger.info("Updated the Draft Provider with id '{}'", id);
+        return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/draft/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+    public void deleteDraft(@PathVariable String prefix,
+                            @PathVariable String suffix,
+                            @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        providerService.deleteDraft(bundle);
+    }
+
+    @PutMapping(path = "draft/transform")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
+    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> provider,
+                                      @Parameter(hidden = true) Authentication auth) {
+        String id = (String) provider.get("id");
+        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        bundle.setProvider(provider);
+
+        providerService.updateDraft(bundle, auth);
+        logger.info("Finalizing Draft Provider with id '{}'", id);
+        bundle = providerService.finalizeDraft(bundle, auth);
+
+        return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
     //endregion
 }

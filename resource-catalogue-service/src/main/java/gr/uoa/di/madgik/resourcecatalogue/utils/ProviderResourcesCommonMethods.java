@@ -187,18 +187,6 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void deleteResourceRelatedServiceSubprofiles(String serviceId, String catalogueId) {
-        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
-        if (datasourceBundle != null) {
-            try {
-                logger.info("Deleting Datasource of Service with id: '{}'", serviceId);
-                datasourceService.delete(datasourceBundle);
-            } catch (ResourceNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-    }
-
     public void deleteResourceInteroperabilityRecords(String resourceId, String resourceType) {
         ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId);
         if (resourceInteroperabilityRecordBundle != null) {

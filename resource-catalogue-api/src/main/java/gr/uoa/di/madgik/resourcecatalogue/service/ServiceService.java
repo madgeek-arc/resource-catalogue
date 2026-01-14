@@ -31,46 +31,57 @@ import java.util.Map;
 public interface ServiceService extends TestService<NewServiceBundle> {
 
     /**
-     * Method to add a new resource.
      *
-     * @param resource Resource to be added
-     * @param auth     Authentication
-     * @return {@link ServiceBundle}
-     */
-    ServiceBundle addResource(ServiceBundle resource, Authentication auth);
-
-    /**
-     * Method to add a new resource from external catalogue.
-     *
-     * @param resource    Resource to be added
+     * @param providerId Provider ID
      * @param catalogueId Catalogue ID
-     * @param auth        Authentication
-     * @return {@link ServiceBundle}
+     * @param quantity Quantity to be fetched
+     * @param auth Authentication
+     * @return {@link Paging<NewServiceBundle>}
      */
-    ServiceBundle addResource(ServiceBundle resource, String catalogueId, Authentication auth);
+    Paging<NewServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId, int quantity, Authentication auth);
 
-    /**
-     * Method to update a resource.
-     *
-     * @param resource Resource to be added
-     * @param comment  Related comment
-     * @param auth     Authentication
-     * @return {@link ServiceBundle}
-     * @throws ResourceNotFoundException
-     */
-    ServiceBundle updateResource(ServiceBundle resource, String comment, Authentication auth);
 
-    /**
-     * Method to update a resource.
-     *
-     * @param resource    Resource to be added
-     * @param catalogueId Catalogue ID
-     * @param comment     Related comment
-     * @param auth        Authentication
-     * @return {@link ServiceBundle}
-     * @throws ResourceNotFoundException
-     */
-    ServiceBundle updateResource(ServiceBundle resource, String catalogueId, String comment, Authentication auth);
+//    /**
+//     * Method to add a new resource.
+//     *
+//     * @param resource Resource to be added
+//     * @param auth     Authentication
+//     * @return {@link ServiceBundle}
+//     */
+//    ServiceBundle addResource(ServiceBundle resource, Authentication auth);
+
+//    /**
+//     * Method to add a new resource from external catalogue.
+//     *
+//     * @param resource    Resource to be added
+//     * @param catalogueId Catalogue ID
+//     * @param auth        Authentication
+//     * @return {@link ServiceBundle}
+//     */
+//    ServiceBundle addResource(ServiceBundle resource, String catalogueId, Authentication auth);
+
+//    /**
+//     * Method to update a resource.
+//     *
+//     * @param resource Resource to be added
+//     * @param comment  Related comment
+//     * @param auth     Authentication
+//     * @return {@link ServiceBundle}
+//     * @throws ResourceNotFoundException
+//     */
+//    ServiceBundle updateResource(ServiceBundle resource, String comment, Authentication auth);
+
+//    /**
+//     * Method to update a resource.
+//     *
+//     * @param resource    Resource to be added
+//     * @param catalogueId Catalogue ID
+//     * @param comment     Related comment
+//     * @param auth        Authentication
+//     * @return {@link ServiceBundle}
+//     * @throws ResourceNotFoundException
+//     */
+//    ServiceBundle updateResource(ServiceBundle resource, String catalogueId, String comment, Authentication auth);
 
     /**
      * Get ResourceBundles by a specific field.
@@ -157,7 +168,7 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      * @param resourceId Service ID
      * @param auth       Authentication
      */
-    void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth);
+    void sendEmailNotificationToProviderForOutdatedService(String resourceId, Authentication auth);
 
     /**
      * Change the Provider of the specific Service

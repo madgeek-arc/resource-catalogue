@@ -8,10 +8,9 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -36,18 +35,15 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
 
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
-    private final CatalogueService catalogueService;
 
     private static final Logger logger = LoggerFactory.getLogger(TestManager.class);
 
     protected abstract String getResourceTypeName();
 
     public TestManager(GenericResourceService genericResourceService,
-                       SecurityService securityService,
-                       CatalogueService catalogueService) {
+                       SecurityService securityService) {
         this.genericResourceService = genericResourceService;
         this.securityService = securityService;
-        this.catalogueService = catalogueService;
     }
 
     //TODO: we don't need this
@@ -131,16 +127,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     }
 
     @Override
-    public Browsing<T> getMy(FacetFilter ff, Authentication auth) {
-        ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(10000);
-        ff.addFilter("published", false);
-        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
-        ff.addOrderBy("name", "asc");
-        return genericResourceService.getResults(ff);
-    }
-
-    @Override
     public T add(T bundle, Authentication auth) {
         return genericResourceService.add(getResourceTypeName(), bundle);
     }
@@ -169,7 +155,7 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
         T existing = get(id, catalogueId);
         existing.markAudit(comment, actionType, auth);
 
-        // send notification emails to Provider Admins
+        //TODO: cannot be here if "users" && other resources have different providerId field name (eg. serviceOwner)
 //        mailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
 
         logger.info("Audited '{}' with ID '{}' [actionType: {}]", getResourceTypeName(), existing.getId(), actionType);
@@ -180,6 +166,22 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
             throw new RuntimeException(e);
         }
         return existing;
+    }
+
+    @Override
+    public T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
+        T bundle = get(id, catalogueId);
+//        commonMethods.suspensionValidation(bundle, catalogueId, providerId, suspend, auth); //FIXME
+
+        logger.info("{} resource '{}' with id: '{}'", suspend ? "Suspending" : "Unsuspending",
+                getResourceTypeName(), bundle.getId());
+        bundle.markSuspend(suspend, auth);
+
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

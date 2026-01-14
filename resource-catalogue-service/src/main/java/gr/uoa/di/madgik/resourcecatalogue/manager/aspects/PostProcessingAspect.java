@@ -19,10 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.aspectj.lang.JoinPoint;
@@ -63,14 +60,21 @@ public class PostProcessingAspect {
                 logger.debug("Skipping HostingLegalEntityVocabularyUpdate – object is {}", obj.getClass());
                 return;
             }
-            checkAndAddProviderToHLEVocabulary(bundle);
+            checkAndAddProviderToHLEVocabularyAspect(bundle);
         });
         aspectRegistry.put("AfterProviderDeletionEmails", obj -> {
             if (!(obj instanceof NewProviderBundle bundle)) {
                 logger.debug("Skipping AfterProviderDeletionEmails – object is {}", obj.getClass());
                 return;
             }
-            notifyProviderAdminsForProviderDeletion(bundle);
+            notifyProviderAdminsForProviderDeletionAspect(bundle);
+        });
+        aspectRegistry.put("AfterServiceUpdateEmails", obj -> {
+            if (!(obj instanceof NewServiceBundle bundle)) {
+                logger.debug("Skipping AfterServiceUpdateEmails – object is {}", obj.getClass());
+                return;
+            }
+            notifyPortalAdminsForInvalidServiceUpdateAspect(bundle);
         });
     }
 
@@ -118,7 +122,7 @@ public class PostProcessingAspect {
         return result;
     }
 
-    private void checkAndAddProviderToHLEVocabulary(NewProviderBundle bundle) {
+    private void checkAndAddProviderToHLEVocabularyAspect(NewProviderBundle bundle) {
         // TODO: field type (in model) should be 'boolean', not radio with "true"/"false" values.
         boolean legalEntity = switch (bundle.getProvider().get("legalEntity")) {
             case Boolean value -> value;
@@ -218,7 +222,17 @@ public class PostProcessingAspect {
         }
     }
 
-    private void notifyProviderAdminsForProviderDeletion(NewProviderBundle bundle) {
+    private void notifyProviderAdminsForProviderDeletionAspect(NewProviderBundle bundle) {
 //        emailService.notifyProviderAdminsForProviderDeletion(bundle); //TODO: fix & enable
+    }
+
+    private void notifyPortalAdminsForInvalidServiceUpdateAspect(NewServiceBundle bundle) {
+        if (bundle.getLatestAuditInfo() != null && bundle.getLatestUpdateInfo() != null) {
+            long latestAudit = Long.parseLong(bundle.getLatestAuditInfo().getDate());
+            long latestUpdate = Long.parseLong(bundle.getLatestUpdateInfo().getDate());
+            if (latestAudit < latestUpdate && bundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
+//                emailService.notifyPortalAdminsForInvalidServiceUpdate(bundle); //FIXME
+            }
+        }
     }
 }

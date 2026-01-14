@@ -17,6 +17,16 @@ public interface TestService<T extends NewBundle> extends NewBundleOperations<T>
     T update(T bundle, String comment, Authentication auth);
 
     /**
+     *
+     * @param id Resource ID
+     * @param catalogueId Catalogue ID
+     * @param suspend true/false
+     * @param auth Authentication
+     * @return {@link T}
+     */
+    T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth)
+
+    /**
      * Create Public resource
      *
      * @param bundle resource

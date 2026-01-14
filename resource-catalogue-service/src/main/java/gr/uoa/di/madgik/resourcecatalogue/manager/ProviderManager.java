@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -50,6 +51,8 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 
     @Value("${catalogue.id}")
     private String catalogueId;
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
 
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
@@ -64,17 +67,17 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     private final ProviderCascadeLifecycleService cascadeLifecycleService;
 
     public ProviderManager(GenericResourceService genericResourceService,
-                               EmailService emailService,
-                               VocabularyService vocabularyService,
-                               ServiceService serviceService,
-                               TrainingResourceService trainingResourceService,
-                               InteroperabilityRecordService interoperabilityRecordService,
-                               IdCreator idCreator,
-                               ProviderResourcesCommonMethods commonMethods,
-                               SecurityService securityService,
-                               CatalogueService catalogueService,
-                               ProviderCascadeLifecycleService cascadeLifecycleService) {
-        super(genericResourceService, securityService, catalogueService);
+                           EmailService emailService,
+                           VocabularyService vocabularyService,
+                           ServiceService serviceService,
+                           TrainingResourceService trainingResourceService,
+                           InteroperabilityRecordService interoperabilityRecordService,
+                           IdCreator idCreator,
+                           ProviderResourcesCommonMethods commonMethods,
+                           SecurityService securityService,
+                           CatalogueService catalogueService,
+                           ProviderCascadeLifecycleService cascadeLifecycleService) {
+        super(genericResourceService, securityService);
         this.genericResourceService = genericResourceService;
         this.emailService = emailService;
         this.vocabularyService = vocabularyService;
@@ -93,10 +96,15 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         return "providertest";
     }
 
+    //region generic
     @Override
     public NewProviderBundle add(NewProviderBundle bundle, Authentication auth) {
         onboard(bundle, auth);
         NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
+
+        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
+//        VocabularyValidationUtils.validateScientificDomains();
+
 //        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
 //        synchronizerService.syncAdd(bundle.getProvider()); //TODO: remove this?
         return ret;
@@ -112,7 +120,6 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
             bundle.setId(idCreator.generate(getResourceTypeName()));
 //            commonMethods.createIdentifiers(bundle, getResourceTypeName(), false); //TODO: fix and enable
         } else {
-            bundle.setCatalogueId(catalogueId);
             bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
             commonMethods.checkCatalogueIdConsistency(bundle, catalogueId); //TODO: test me
             bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
@@ -133,6 +140,10 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
             return bundle;
         }
         bundle.markUpdate(auth, comment);
+
+        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
+//        VocabularyValidationUtils.validateScientificDomains();
+
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
 //            synchronizerService.syncUpdate(bundle.getProvider()); // TODO: remove this?
@@ -197,6 +208,34 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     }
 
     @Override
+    public NewProviderBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
+        NewProviderBundle bundle = get(id, catalogueId);
+//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend, auth); //FIXME
+
+        logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
+        bundle.markSuspend(suspend, auth);
+//        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth); //FIXME
+
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Browsing<NewProviderBundle> getMy(FacetFilter ff, Authentication auth) {
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
+        ff.addOrderBy("name", "asc");
+        return genericResourceService.getResults(ff);
+    }
+    //endregion
+
+    //region Provider-specific
+    @Override
     public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
         NewProviderBundle bundle = get(
                 new SearchService.KeyValue("resource_internal_id", id),
@@ -239,22 +278,6 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     }
 
     @Override
-    public NewProviderBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        NewProviderBundle bundle = get(id, catalogueId);
-//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend, auth); //FIXME
-
-        logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
-        bundle.markSuspend(suspend, auth);
-//        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth); //FIXME
-
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public void requestProviderDeletion(String providerId, Authentication auth) {
         NewProviderBundle provider = genericResourceService.get(getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", providerId),
@@ -282,19 +305,19 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     @Override
     public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("hosting_legal_entity", hle);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
         List<NewProviderBundle> providers = getAll(ff, auth).getResults();
-        List<ServiceBundle> services = new ArrayList<>();
+        List<NewServiceBundle> services = new ArrayList<>();
         List<TrainingResourceBundle> trainingResources = new ArrayList<>();
         List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
         createMapValuesForHLE(providers, "provider", mapValuesList);
         for (NewProviderBundle providerBundle : providers) {
-            services.addAll(serviceService.getResourceBundles(providerBundle.getCatalogueId(),
-                    providerBundle.getId(), auth).getResults());
+            services.addAll(serviceService.getAllServicesOfAProvider(providerBundle.getId(),
+                    providerBundle.getCatalogueId(), maxQuantity, auth).getResults());
             trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
                     providerBundle.getId(), auth).getResults());
             interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(
@@ -390,7 +413,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(10000);
+        ff.setQuantity(maxQuantity);
         ff.addFilter("status", "approved");
         ff.addFilter("active", true);
         ff.addFilter("draft", false);
@@ -402,6 +425,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         }
         return ff;
     }
+    //endregion
 
     //region Drafts
     @Override

@@ -57,16 +57,12 @@ public class RelationshipValidator {
     public void checkRelatedResourceIDsConsistency(Object o) {
         String catalogueId = null;
         List<String> resourceProviders = new ArrayList<>();
-        List<String> requiredResources = new ArrayList<>();
-        List<String> relatedResources = new ArrayList<>();
         List<String> eoscRelatedServices = new ArrayList<>();
         List<String> interoperabilityRecordIds = new ArrayList<>();
         if (o != null) {
             if (o instanceof ServiceBundle) {
                 catalogueId = ((ServiceBundle) o).getService().getCatalogueId();
                 resourceProviders = ((ServiceBundle) o).getService().getResourceProviders();
-                requiredResources = ((ServiceBundle) o).getService().getRequiredResources();
-                relatedResources = ((ServiceBundle) o).getService().getRelatedResources();
             }
             if (o instanceof TrainingResourceBundle) {
                 catalogueId = ((TrainingResourceBundle) o).getTrainingResource().getCatalogueId();
@@ -86,40 +82,6 @@ public class RelationshipValidator {
                             throw new ValidationException(String.format("Field [resourceProviders]: " +
                                             "There is no Provider with ID '%s' in the %s Catalogue.",
                                     resourceProvider, catalogueId));
-                        }
-                    }
-                }
-            }
-            if (requiredResources != null && !requiredResources.isEmpty() && requiredResources.stream().anyMatch(Objects::nonNull)) {
-                for (String requiredResource : requiredResources) {
-                    if (requiredResource != null && !requiredResource.isEmpty()) {
-                        try {
-                            serviceService.get(requiredResource, catalogueId);
-                        } catch (CatalogueResourceNotFoundException e) {
-                            try {
-                                trainingResourceService.get(requiredResource, catalogueId, false);
-                            } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("Field [requiredResources]: " +
-                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue.",
-                                        requiredResource, catalogueId));
-                            }
-                        }
-                    }
-                }
-            }
-            if (relatedResources != null && !relatedResources.isEmpty() && relatedResources.stream().anyMatch(Objects::nonNull)) {
-                for (String relatedResource : relatedResources) {
-                    if (relatedResource != null && !relatedResource.isEmpty()) {
-                        try {
-                            serviceService.get(relatedResource, catalogueId);
-                        } catch (CatalogueResourceNotFoundException e) {
-                            try {
-                                trainingResourceService.get(relatedResource, catalogueId, false);
-                            } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("Field [relatedResources]: " +
-                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue.",
-                                        relatedResource, catalogueId));
-                            }
                         }
                     }
                 }

@@ -28,7 +28,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,9 +48,6 @@ public class PublicProviderController {
 
     private final ProviderService service;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public PublicProviderController(ProviderService service) {
         this.service = service;
     }
@@ -62,7 +58,7 @@ public class PublicProviderController {
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                 @Parameter(hidden = true) Authentication auth) {
+                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         NewProviderBundle bundle = service.getPublic(id, catalogueId);
         if (bundle.isActive()) {
@@ -79,10 +75,10 @@ public class PublicProviderController {
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                       @Parameter(hidden = true) Authentication auth) {
+                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle providerBundle = service.getPublic(id, catalogueId);
-        return new ResponseEntity<>(providerBundle, HttpStatus.OK);
+        NewProviderBundle bundle = service.getPublic(id, catalogueId);
+        return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
     @Operation(description = "Get a list of all Public Providers in the Catalogue, based on a set of filters.")

@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.*;
 import org.slf4j.Logger;
@@ -35,9 +36,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Validator;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -46,7 +50,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
-public class ServiceManager extends ResourceCatalogueManager<ServiceBundle> implements ServiceService {
+public class ServiceManager extends TestManager<NewServiceBundle> implements ServiceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
@@ -68,6 +72,8 @@ public class ServiceManager extends ResourceCatalogueManager<ServiceBundle> impl
 
     @Value("${catalogue.id}")
     private String catalogueId;
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
 
     public ServiceManager(ProviderService providerService,
                           IdCreator idCreator, @Lazy SecurityService securityService,
@@ -102,497 +108,270 @@ public class ServiceManager extends ResourceCatalogueManager<ServiceBundle> impl
     }
 
     @Override
-    public String getResourceTypeName() {
-        return "service";
+    protected String getResourceTypeName() {
+        return "servicetest";
     }
 
+    //region generic
     @Override
-    public ServiceBundle addResource(ServiceBundle serviceBundle, Authentication auth) {
-        return addResource(serviceBundle, null, auth);
+    public NewServiceBundle add(NewServiceBundle service, Authentication auth) {
+        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+                service.getCatalogueId());
+        onboard(service, provider, auth);
+        onboardingValidation(service, provider);
+        NewServiceBundle ret = genericResourceService.add(getResourceTypeName(), service);
+//        synchronizerService.syncAdd(service.getService()); //TODO: remove this?
+        return ret;
     }
 
-    @Override
-    public ServiceBundle addResource(ServiceBundle serviceBundle, String catalogueId, Authentication auth) {
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue service
-            serviceBundle.getService().setCatalogueId(this.catalogueId);
-            serviceBundle.setId(idCreator.generate(getResourceTypeName()));
-            commonMethods.createIdentifiers(serviceBundle, getResourceTypeName(), false);
-        } else { // add provider from external catalogue
-            commonMethods.checkCatalogueIdConsistency(serviceBundle, catalogueId);
-            idCreator.validateId(serviceBundle.getId());
-            commonMethods.createIdentifiers(serviceBundle, getResourceTypeName(), true);
+    private void onboard(NewServiceBundle service, NewProviderBundle provider, Authentication auth) {
+        String catalogueId = service.getCatalogueId();
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
+            if (provider.getTemplateStatus().equals("approved template")) {
+                service.markOnboard(vocabularyService.get("approved").getId(), false, auth, null);
+                service.setActive(true);
+            } else {
+                service.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            }
+            service.setCatalogueId(this.catalogueId);
+            service.setId(idCreator.generate(getResourceTypeName()));
+//            commonMethods.createIdentifiers(service, getResourceTypeName(), false); //FIXME
+        } else {
+            service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            commonMethods.checkCatalogueIdConsistency(service, catalogueId);
+            idCreator.validateId(service.getId());
+//            commonMethods.createIdentifiers(service, getResourceTypeName(), true); //FIXME
         }
-        relationshipValidator.checkRelatedResourceIDsConsistency(serviceBundle);
+        service.setAuditState(Auditable.NOT_AUDITED);
+    }
 
-        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getCatalogueId(),
-                serviceBundle.getService().getResourceOrganisation(), auth);
-        if (providerBundle == null) {
-            throw new CatalogueResourceNotFoundException(String.format("Provider with id '%s' and catalogueId '%s' does not exist",
-                    serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId()));
+    private void onboardingValidation(NewServiceBundle service, NewProviderBundle provider) {
+//        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
+        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
+//        VocabularyValidationUtils.validateCategories();
+//        VocabularyValidationUtils.validateScientificDomains();
+        if (!provider.getStatus().equals("approved")) {
+            throw new ResourceException(String.format("The Provider '%s' you provided as a Service Owner " +
+                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
         }
-        // check if Provider is approved
-        if (!providerBundle.getStatus().equals("approved")) {
-            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Organisation is not yet approved",
-                    serviceBundle.getService().getResourceOrganisation()), HttpStatus.CONFLICT);
-        }
-        // check Provider's templateStatus
-        if (providerBundle.getTemplateStatus().equals("pending template")) {
+        if (provider.getTemplateStatus().equals("pending template")) {
             throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
-                    "Template.", providerBundle.getId()), HttpStatus.CONFLICT);
+                    "Template.", provider.getId()), HttpStatus.CONFLICT);
         }
-        // if Resource version is empty set it null
-        if ("".equals(serviceBundle.getService().getVersion())) {
-            serviceBundle.getService().setVersion(null);
-        }
-
-        validate(serviceBundle);
-
-        boolean active = providerBundle
-                .getTemplateStatus()
-                .equals("approved template");
-        serviceBundle.setActive(active);
-
-        // create new Metadata if not exists
-        if (serviceBundle.getMetadata() == null) {
-            serviceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
-        }
-
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(serviceBundle, auth);
-
-        // latestOnboardingInfo
-        serviceBundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
-
-        // resource status & extra loggingInfo for Approval
-        if (providerBundle.getTemplateStatus().equals("approved template")) {
-            serviceBundle.setStatus(vocabularyService.get("approved").getId());
-            LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.APPROVED.getKey());
-            loggingInfoList.add(loggingInfoApproved);
-
-            // latestOnboardingInfo
-            serviceBundle.setLatestOnboardingInfo(loggingInfoApproved);
-        } else {
-            serviceBundle.setStatus(vocabularyService.get("pending").getId());
-        }
-
-        // LoggingInfo
-        serviceBundle.setLoggingInfo(loggingInfoList);
-        serviceBundle.setAuditState(Auditable.NOT_AUDITED);
-
-        logger.info("Adding Service: {}", serviceBundle);
-        ServiceBundle ret;
-
-        prettifyServiceTextFields(serviceBundle, ",");
-
-        ret = super.add(serviceBundle, auth);
-
-        synchronizerService.syncAdd(serviceBundle.getPayload());
-
-        return ret;
     }
 
     @Override
-    public ServiceBundle updateResource(ServiceBundle serviceBundle, String comment, Authentication auth) {
-        return updateResource(serviceBundle, serviceBundle.getService().getCatalogueId(), comment, auth);
+    @Transactional
+    @TriggersAspects({"AfterServiceUpdateEmails"})
+    public NewServiceBundle update(NewServiceBundle service, String comment, Authentication auth) {
+        NewServiceBundle existing = get(service.getId(), service.getCatalogueId());
+        // check if there are actual changes in the Service
+        if (service.equals(existing)) {
+            return service;
+        }
+        service.markUpdate(auth, comment);
+//        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
+        checkAndResetServiceOnboarding(service);
+
+        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
+//        VocabularyValidationUtils.validateCategories();
+//        VocabularyValidationUtils.validateScientificDomains();
+
+        try {
+            return genericResourceService.update(getResourceTypeName(), service.getId(), service);
+//            synchronizerService.syncUpdate(service.getService()); // TODO: remove this?
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @Override
-    public ServiceBundle updateResource(ServiceBundle serviceBundle, String catalogueId, String comment, Authentication auth) {
-
-        ServiceBundle ret = ObjectUtils.clone(serviceBundle);
-        ServiceBundle existingService;
-        existingService = get(ret.getService().getId(), ret.getService().getCatalogueId(), false);
-        if (ret.getService().equals(existingService.getService())) {
-            return ret;
-        }
-
-        if (catalogueId == null || catalogueId.isEmpty()) {
-            ret.getService().setCatalogueId(this.catalogueId);
-        } else {
-            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
-        }
-        relationshipValidator.checkRelatedResourceIDsConsistency(ret);
-
-        logger.trace("Attempting to update the Service with id '{}' of the Catalogue '{}'",
-                ret.getService().getId(), ret.getService().getCatalogueId());
-        validate(ret);
-
-        ProviderBundle providerBundle = providerService.get(ret.getService().getCatalogueId(), ret.getService().getResourceOrganisation(), auth);
-
-        // if service version is empty set it null
-        if ("".equals(ret.getService().getVersion())) {
-            ret.getService().setVersion(null);
-        }
-
-        // block Public Service update
-        if (existingService.getMetadata().isPublished()) {
-            throw new ResourceException("You cannot directly update a Public Service", HttpStatus.FORBIDDEN);
-        }
-
-        // update existing service Metadata, ResourceExtras, Identifiers, MigrationStatus
-        ret.setMetadata(Metadata.updateMetadata(existingService.getMetadata(), AuthenticationInfo.getFullName(auth)));
-        ret.setResourceExtras(existingService.getResourceExtras());
-        ret.setIdentifiers(existingService.getIdentifiers());
-//        ret.setMigrationStatus(existingService.getMigrationStatus());
-
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingService, auth);
-        LoggingInfo loggingInfo;
-
-        // update VS version update
-        if (((ret.getService().getVersion() == null) && (existingService.getService().getVersion() == null)) ||
-                (ret.getService().getVersion().equals(existingService.getService().getVersion()))) {
-            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.UPDATED.getKey(), comment);
-        } else {
-            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                    LoggingInfo.ActionType.UPDATED_VERSION.getKey(), comment);
-        }
-        loggingInfoList.add(loggingInfo);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        ret.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        ret.setLatestUpdateInfo(loggingInfo);
-        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-
-        // set active/status
-        ret.setActive(existingService.isActive());
-        ret.setStatus(existingService.getStatus());
-        ret.setSuspended(existingService.isSuspended());
-
+    private void checkAndResetServiceOnboarding(NewServiceBundle service) {
+        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+                service.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
-        if (existingService.getStatus().equals(vocabularyService.get("rejected").getId())) {
-            if (providerBundle.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                ret.setStatus(vocabularyService.get("pending").getId());
-                ret.setActive(false);
-                providerBundle.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(providerBundle, null, auth);
+        if (service.getStatus().equals(vocabularyService.get("rejected").getId())) {
+            if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
+                service.setStatus(vocabularyService.get("pending").getId());
+                service.setActive(false);
+                provider.setTemplateStatus(vocabularyService.get("pending template").getId());
+                providerService.update(provider, "system update", securityService.getAdminAccess()); //TODO: this or generic?
             }
         }
-
-        // if a user updates a service with version to a service with null version then while searching for the service
-        // you get a "Service already exists" error.
-        if (existingService.getService().getVersion() != null && ret.getService().getVersion() == null) {
-            throw new ResourceException("You cannot update a Service registered with version to a Service with null version",
-                    HttpStatus.CONFLICT);
-        }
-
-        // block catalogueId updates from Provider Admins
-        if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
-            if (!existingService.getService().getCatalogueId().equals(ret.getService().getCatalogueId())) {
-                throw new ResourceException("You cannot change catalogueId", HttpStatus.FORBIDDEN);
-            }
-        }
-
-        prettifyServiceTextFields(serviceBundle, ",");
-
-        ret = super.update(ret, auth);
-        logger.info("Updating Service: {}", ret);
-
-        // send notification emails to Portal Admins
-        if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
-            long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
-            long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
-            if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                emailService.notifyPortalAdminsForInvalidServiceUpdate(ret);
-            }
-        }
-
-        synchronizerService.syncUpdate(serviceBundle.getPayload());
-
-        return ret;
     }
 
     @Override
-    public void delete(ServiceBundle serviceBundle) {
-        String catalogue = serviceBundle.getService().getCatalogueId();
-        commonMethods.blockResourceDeletion(serviceBundle.getStatus(), serviceBundle.getMetadata().isPublished());
-        commonMethods.deleteResourceRelatedServiceSubprofiles(serviceBundle.getId(), catalogue);
-        commonMethods.deleteResourceInteroperabilityRecords(serviceBundle.getId(), "Service");
-        logger.info("Deleting Service: {}", serviceBundle);
-        super.delete(serviceBundle);
-        synchronizerService.syncDelete(serviceBundle.getPayload());
+    @Transactional
+    public void delete(NewServiceBundle bundle) {
+        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+//        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName()); //FIXME
+        logger.info("Deleting Service: {} and all its Resource Interoperability Records", bundle.getId());
+        genericResourceService.delete(getResourceTypeName(), bundle.getId());
+//        synchronizerService.syncDelete(bundle.getStatus()); //TODO: remove this?
     }
 
-    @Override
-    public ServiceBundle validate(ServiceBundle serviceBundle) {
-        logger.debug("Validating Service with id: '{}'", serviceBundle.getId());
-
-        super.validate(serviceBundle);
-        serviceValidator.validate(serviceBundle, null);
-        return serviceBundle;
-    }
-
-    public ServiceBundle verify(String id, String status, Boolean active, Authentication auth) {
+    @Transactional
+    public NewServiceBundle setStatus(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
-        logger.trace("verifyResource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        ServiceBundle serviceBundle = get(id, catalogueId, false);
-        serviceBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
+        NewServiceBundle existing = get(id);
+        existing.markOnboard(status, active, auth, null);
 
-        ProviderBundle resourceProvider = providerService.get(serviceBundle.getService().getCatalogueId(), serviceBundle.getService().getResourceOrganisation(), auth);
+        updateProviderTemplateStatus(existing, status);
+
+        logger.info("Verifying Service: {}", existing);
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateProviderTemplateStatus(NewServiceBundle service, String status) {
+        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+                service.getCatalogueId());
         switch (status) {
             case "pending":
-                resourceProvider.setTemplateStatus("pending template");
+                provider.setTemplateStatus("pending template");
                 break;
             case "approved":
-                resourceProvider.setTemplateStatus("approved template");
+                provider.setTemplateStatus("approved template");
                 break;
             case "rejected":
-                resourceProvider.setTemplateStatus("rejected template");
+                provider.setTemplateStatus("rejected template");
                 break;
             default:
                 break;
         }
-        providerService.update(resourceProvider, auth);
-
-        logger.info("Verifying Service: {}", serviceBundle);
-        return super.update(serviceBundle, auth);
+        providerService.update(provider, "system update", securityService.getAdminAccess()); //TODO: this or generic?
     }
 
     @Override
-    public ServiceBundle publish(String serviceId, Boolean active, Authentication auth) {
-        ServiceBundle service;
-        String activeProvider = "";
-        service = this.get(serviceId, catalogueId, false);
+    public NewServiceBundle setActive(String id, Boolean active, Authentication auth) {
+        NewServiceBundle existing = get(id);
 
-        if ((service.getStatus().equals(vocabularyService.get("pending").getId()) ||
-                service.getStatus().equals(vocabularyService.get("rejected").getId())) && !service.isActive()) {
-            throw new ValidationException(String.format("You cannot activate this Service, because it's Inactive with status = [%s]", service.getStatus()));
+        NewProviderBundle provider = providerService.get((String) existing.getService().get("serviceOwner"),
+                existing.getCatalogueId());
+        if (active && !provider.isActive()) {
+            throw new ResourceException("You cannot activate the Service, as its Provider is inactive", HttpStatus.CONFLICT);
+        }
+        if ((existing.getStatus().equals(vocabularyService.get("pending").getId()) ||
+                existing.getStatus().equals(vocabularyService.get("rejected").getId())) && !existing.isActive()) {
+            throw new ValidationException("You cannot activate this Service, because it is not yet approved.");
         }
 
-        ProviderBundle providerBundle = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
-        if (providerBundle.getStatus().equals("approved") && providerBundle.isActive()) {
-            activeProvider = service.getService().getResourceOrganisation();
-        }
-        if (active && activeProvider.isEmpty()) {
-            throw new ResourceException("Service does not have active Providers", HttpStatus.CONFLICT);
-        }
-        service.markActive(active, auth);
-        publishServiceSubprofiles(service.getId(), service.getService().getCatalogueId(), active, auth);
-
-        this.update(service, auth);
-        return service;
-    }
-
-    public void publishServiceSubprofiles(String serviceId, String catalogueId, Boolean active, Authentication auth) {
-        DatasourceBundle bundle = datasourceService.get(serviceId, catalogueId);
-        logger.info("{} all related resources of the Service with id: '{}'", active ? "Activating" : "Deactivating", serviceId);
-        if (bundle != null && bundle.getStatus().equals("approved")) {
-            bundle.markActive(active, auth);
-
-            try {
-                logger.debug("Setting Datasource '{}' of the Service '{}' of the '{}' Catalogue to active: '{}'",
-                        bundle.getId(), bundle.getDatasource().getServiceId(),
-                        bundle.getDatasource().getCatalogueId(), bundle.isActive());
-                datasourceService.updateBundle(bundle, auth);
-                DatasourceBundle publicDatasourceBundle =
-                        publicDatasourceManager.getOrElseReturnNull(bundle.getIdentifiers().getPid());
-                if (publicDatasourceBundle != null) {
-                    publicDatasourceManager.update(bundle, auth);
-                }
-            } catch (ResourceNotFoundException e) {
-                logger.error("Could not update Datasource '{}' of the Service '{}' of the '{}' Catalogue",
-                        bundle.getId(), bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId());
-            }
+        existing.markActive(active, auth);
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
     }
+    //endregion
 
+    //region Service-specific
     @Override
-    public ServiceBundle audit(String serviceId, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        ServiceBundle service = get(serviceId, catalogueId, false);
-        ProviderBundle provider = providerService.get(service.getService().getCatalogueId(), service.getService().getResourceOrganisation(), auth);
-        service.markAudit(comment, actionType, auth);
-
-
-        // send notification emails to Provider Admins
-        emailService.notifyProviderAdminsForBundleAuditing(service, provider.getProvider().getUsers());
-
-        logger.info("Audited Service '{}'-'{}' with [actionType: {}]",
-                service.getService().getId(), service.getService().getName(), actionType);
-        return super.update(service, auth);
-    }
-
-    @Override
-    public List<ServiceBundle> getResourceBundles(String providerId, Authentication auth) {
-        return getResourceBundles(catalogueId, providerId, auth).getResults();
-    }
-
-    @Override
-    public Paging<ServiceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth) {
+    public Paging<NewServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId,
+                                                              int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
+        ff.addFilter("service_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
-        ff.setQuantity(maxQuantity);
+        ff.addFilter("draft", false);
+        ff.setQuantity(quantity);
         ff.addOrderBy("name", "asc");
-        return this.getAll(ff, auth);
+        return getAll(ff, auth);
     }
 
+    public void sendEmailNotificationToProviderForOutdatedService(String id, Authentication auth) {
+        NewServiceBundle service = get(id);
+        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+                service.getCatalogueId());
+        logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
+//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
+    }
+
+    //FIXME
+//    public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
+//        ServiceBundle serviceBundle = get(resourceId, catalogueId, false);
+//        // check Service's status
+//        if (!serviceBundle.getStatus().equals("approved")) {
+//            throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
+//                    "is not yet Approved", serviceBundle.getId()));
+//        }
+//        ProviderBundle newProvider = providerService.get(newProviderId, auth);
+//        ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getCatalogueId(),
+//                serviceBundle.getService().getResourceOrganisation(), auth);
+//
+//        // check that the 2 Providers co-exist under the same Catalogue
+//        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
+//            throw new ValidationException("You cannot move a Service to a Provider of another Catalogue");
+//        }
+//
+//        // update loggingInfo
+//        List<LoggingInfo> loggingInfoList = serviceBundle.getLoggingInfo();
+//        LoggingInfo loggingInfo;
+//        if (comment == null || comment.isEmpty()) {
+//            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
+//                    LoggingInfo.ActionType.MOVED.getKey());
+//        } else {
+//            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
+//                    LoggingInfo.ActionType.MOVED.getKey(), comment);
+//        }
+//        loggingInfoList.add(loggingInfo);
+//        serviceBundle.setLoggingInfo(loggingInfoList);
+//
+//        // update latestUpdateInfo
+//        serviceBundle.setLatestUpdateInfo(loggingInfo);
+//
+//        // update metadata
+//        Metadata metadata = serviceBundle.getMetadata();
+//        metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
+//        metadata.setModifiedBy(AuthenticationInfo.getFullName(auth));
+//        metadata.setTerms(null);
+//        serviceBundle.setMetadata(metadata);
+//
+//        // update ResourceOrganisation
+//        serviceBundle.getService().setResourceOrganisation(newProviderId);
+//
+//        // update ResourceProviders
+//        List<String> resourceProviders = serviceBundle.getService().getResourceProviders();
+//        if (resourceProviders.contains(oldProvider.getId())) {
+//            resourceProviders.remove(oldProvider.getId());
+//            resourceProviders.add(newProviderId);
+//        }
+//
+//        // add Resource, delete the old one
+//        add(serviceBundle, auth);
+//        publicServiceManager.delete(get(resourceId, catalogueId, false)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+//        delete(get(resourceId, catalogueId, false));
+//
+//        // update other resources which had the old resource ID on their fields
+//        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE
+//
+//        // emails to EPOT, old and new Provider
+//        emailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
+//
+//        return serviceBundle;
+//    }
+
     @Override
-    public List<Service> getResources(String providerId, Authentication auth) {
-        ProviderBundle providerBundle = providerService.get(providerId, catalogueId, false);
+    public Browsing<NewServiceBundle> getMy(FacetFilter filter, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        if (auth != null && auth.isAuthenticated()) {
-            User user = User.of(auth);
-            // if user is ADMIN/EPOT or Provider Admin on the specific Provider, return its Services
-            if (securityService.hasPortalAdminRole(auth) ||
-                    securityService.userHasAdminAccess(user, providerId)) {
-                return this.getAll(ff, auth).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
-            }
-        }
-        // else return Provider's Services ONLY if he is active
-        if (providerBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
-            return this.getAll(ff, null).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
-        }
-        throw new InsufficientAuthenticationException("You cannot view the Services of the specific Provider");
-    }
+        ff.addFilter("draft", false); // A Draft Provider cannot have resources
+        List<NewProviderBundle> providers = providerService.getMy(ff, auth).getResults();
 
-    // for sendProviderMails on RegistrationMailService AND StatisticsManager
-    public List<Service> getResourcesByProvider(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return this.getAll(ff, securityService.getAdminAccess()).getResults().stream().map(ServiceBundle::getService).collect(Collectors.toList());
-    }
-
-    public void sendEmailNotificationsToProvidersWithOutdatedResources(String resourceId, Authentication auth) {
-        ServiceBundle serviceBundle = get(resourceId, catalogueId, false);
-        ProviderBundle providerBundle = providerService.get(serviceBundle.getService().getResourceOrganisation(), serviceBundle.getService().getCatalogueId(), false);
-        logger.info("Mailing provider '{}'-'{}' for outdated Resources", providerBundle.getId(), providerBundle.getProvider().getName());
-        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(serviceBundle, providerBundle);
-    }
-
-    public ServiceBundle changeProvider(String resourceId, String newProviderId, String comment, Authentication auth) {
-        ServiceBundle serviceBundle = get(resourceId, catalogueId, false);
-        // check Service's status
-        if (!serviceBundle.getStatus().equals("approved")) {
-            throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
-                    "is not yet Approved", serviceBundle.getId()));
-        }
-        ProviderBundle newProvider = providerService.get(newProviderId, auth);
-        ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getCatalogueId(),
-                serviceBundle.getService().getResourceOrganisation(), auth);
-
-        // check that the 2 Providers co-exist under the same Catalogue
-        if (!oldProvider.getProvider().getCatalogueId().equals(newProvider.getProvider().getCatalogueId())) {
-            throw new ValidationException("You cannot move a Service to a Provider of another Catalogue");
-        }
-
-        // update loggingInfo
-        List<LoggingInfo> loggingInfoList = serviceBundle.getLoggingInfo();
-        LoggingInfo loggingInfo;
-        if (comment == null || comment.isEmpty()) {
-            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
-                    LoggingInfo.ActionType.MOVED.getKey());
-        } else {
-            loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.MOVE.getKey(),
-                    LoggingInfo.ActionType.MOVED.getKey(), comment);
-        }
-        loggingInfoList.add(loggingInfo);
-        serviceBundle.setLoggingInfo(loggingInfoList);
-
-        // update latestUpdateInfo
-        serviceBundle.setLatestUpdateInfo(loggingInfo);
-
-        // update metadata
-        Metadata metadata = serviceBundle.getMetadata();
-        metadata.setModifiedAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(AuthenticationInfo.getFullName(auth));
-        metadata.setTerms(null);
-        serviceBundle.setMetadata(metadata);
-
-        // update ResourceOrganisation
-        serviceBundle.getService().setResourceOrganisation(newProviderId);
-
-        // update ResourceProviders
-        List<String> resourceProviders = serviceBundle.getService().getResourceProviders();
-        if (resourceProviders.contains(oldProvider.getId())) {
-            resourceProviders.remove(oldProvider.getId());
-            resourceProviders.add(newProviderId);
-        }
-
-        // add Resource, delete the old one
-        add(serviceBundle, auth);
-        publicServiceManager.delete(get(resourceId, catalogueId, false)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
-        delete(get(resourceId, catalogueId, false));
-
-        // update other resources which had the old resource ID on their fields
-        migrationService.updateRelatedToTheIdFieldsOfOtherResourcesOfThePortal(resourceId, resourceId); //TODO: SEE IF IT WORKS AS INTENDED AND REMOVE
-
-        // emails to EPOT, old and new Provider
-        emailService.sendEmailsForMovedResources(oldProvider, newProvider, serviceBundle, auth);
-
-        return serviceBundle;
-    }
-
-    public ServiceBundle createPublicResource(ServiceBundle serviceBundle, Authentication auth) {
-        publicServiceManager.add(serviceBundle, auth);
-        return serviceBundle;
-    }
-
-    @Override
-    public ServiceBundle suspend(String serviceId, String catalogueId, boolean suspend, Authentication auth) {
-        ServiceBundle existingService = get(serviceId, catalogueId, false);
-        commonMethods.suspensionValidation(existingService, existingService.getService().getCatalogueId(),
-                existingService.getService().getResourceOrganisation(), suspend, auth);
-        existingService.markSuspend(suspend, auth);
-
-        // Suspend Service's sub-profiles
-        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
-        if (datasourceBundle != null) {
-            try {
-                datasourceBundle.markSuspend(suspend, auth);
-                datasourceService.update(datasourceBundle, auth);
-            } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return super.update(existingService, auth);
-    }
-
-    @Override
-    public Browsing<ServiceBundle> getAll(FacetFilter filter, Authentication auth) {
-        updateFacetFilterConsideringTheAuthorization(filter, auth);
-        filter.setBrowseBy(this.getBrowseBy());
-        filter.setResourceType(getResourceTypeName());
-
-        Browsing<ServiceBundle> resources;
-        resources = genericResourceService.getResults(filter);
-        if (!resources.getResults().isEmpty() && !resources.getFacets().isEmpty()) {
-            resources.setFacets(facetLabelService.generateLabels(resources.getFacets()));
-        }
-
-        return resources;
-    }
-
-    @Override
-    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
         if (providers.isEmpty()) {
             return new Browsing<>();
         }
 
-        if (filter == null) {
-            filter = new FacetFilter();
-            filter.setQuantity(maxQuantity);
-        }
-        filter.addFilter("resource_organisation", providers.stream().map(ProviderBundle::getId).toList());
         filter.setResourceType(getResourceTypeName());
-        return this.getAll(filter, auth);
+        filter.setQuantity(maxQuantity);
+        filter.addFilter("published", false);
+        filter.addFilter("service_owner", providers.stream().map(NewProviderBundle::getId).toList());
+        ff.addOrderBy("name", "asc");
+        return genericResourceService.getResults(ff);
     }
 
     @Override
@@ -772,51 +551,6 @@ public class ServiceManager extends ResourceCatalogueManager<ServiceBundle> impl
     }
 
     @Override
-    public ServiceBundle updateEOSCIFGuidelines(String resourceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines, Authentication auth) {
-        ServiceBundle bundle = get(resourceId, catalogueId, false);
-        ResourceExtras resourceExtras = bundle.getResourceExtras();
-        if (resourceExtras == null) {
-            ResourceExtras newResourceExtras = new ResourceExtras();
-            List<EOSCIFGuidelines> newEOSCIFGuidelines = new ArrayList<>(eoscIFGuidelines);
-            newResourceExtras.setEoscIFGuidelines(newEOSCIFGuidelines);
-            bundle.setResourceExtras(newResourceExtras);
-        } else {
-            bundle.getResourceExtras().setEoscIFGuidelines(eoscIFGuidelines);
-        }
-        // check PID consistency
-        checkEOSCIFGuidelinesPIDConsistency(bundle);
-
-        createLoggingInfoEntriesForResourceExtraUpdates(bundle, auth);
-        validate(bundle);
-        update(bundle, auth);
-        logger.info("Updated field eoscIFGuidelines of the Resource '{}'", resourceId);
-        return bundle;
-    }
-
-    /**
-     * Adds spaces after ',' if they don't already exist and removes spaces before
-     *
-     * @param serviceBundle
-     * @param specialCharacters
-     * @return
-     */
-    protected ServiceBundle prettifyServiceTextFields(ServiceBundle serviceBundle, String specialCharacters) {
-        serviceBundle.getService().setTagline(TextUtils.prettifyText(serviceBundle.getService().getTagline(), specialCharacters));
-        return serviceBundle;
-    }
-
-    private void checkEOSCIFGuidelinesPIDConsistency(ServiceBundle serviceBundle) {
-        List<String> pidList = new ArrayList<>();
-        for (EOSCIFGuidelines eoscIFGuideline : serviceBundle.getResourceExtras().getEoscIFGuidelines()) {
-            pidList.add(eoscIFGuideline.getPid());
-        }
-        Set<String> pidSet = new HashSet<>(pidList);
-        if (pidSet.size() < pidList.size()) {
-            throw new ValidationException("EOSCIFGuidelines cannot have duplicate PIDs.");
-        }
-    }
-
-    @Override
     public List<ServiceBundle> getInactiveResources(String providerId) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_organisation", providerId);
@@ -829,13 +563,6 @@ public class ServiceManager extends ResourceCatalogueManager<ServiceBundle> impl
         return this.getAll(ff, null).getResults();
     }
 
-    private void createLoggingInfoEntriesForResourceExtraUpdates(ServiceBundle bundle, Authentication auth) {
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                LoggingInfo.ActionType.UPDATED.getKey());
-        loggingInfoList.add(loggingInfo);
-        bundle.setLoggingInfo(loggingInfoList);
-    }
 
     private void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
         // if user is Unauthorized, return active ONLY
@@ -847,4 +574,48 @@ public class ServiceManager extends ResourceCatalogueManager<ServiceBundle> impl
             filter.addFilter("published", false);
         }
     }
+    //endregion
+
+    //region Drafts
+    @Override
+    public NewServiceBundle addDraft(NewServiceBundle bundle, Authentication auth) {
+        bundle.markDraft(auth, null);
+        bundle.setId(idCreator.generate(getResourceTypeName()));
+        bundle.setCatalogueId(catalogueId);
+//        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false); //FIXME
+
+        NewServiceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
+        return ret;
+    }
+
+    @Override
+    public NewServiceBundle updateDraft(NewServiceBundle bundle, Authentication auth) {
+        bundle.markUpdate(auth, null);
+        try {
+            NewServiceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
+            return ret;
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteDraft(NewServiceBundle bundle) {
+        genericResourceService.delete(getResourceTypeName(), bundle.getId());
+    }
+
+    @Override
+    public NewServiceBundle finalizeDraft(NewServiceBundle service, Authentication auth) {
+        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+                service.getCatalogueId());
+        if (provider.getTemplateStatus().equals("approved template")) {
+            service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+        } else {
+            service.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+        }
+        service = update(service, auth);
+
+        return service;
+    }
+    //endregion
 }
