@@ -18,36 +18,32 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.*;
+import gr.uoa.di.madgik.catalogue.service.ModelService;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Validator;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @org.springframework.stereotype.Service
 public class ServiceManager extends TestManager<NewServiceBundle> implements ServiceService {
@@ -57,18 +53,10 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     private final ProviderService providerService;
     private final IdCreator idCreator;
     private final SecurityService securityService;
-    private final EmailService emailService;
     private final VocabularyService vocabularyService;
-    private final PublicServiceService publicServiceManager;
-    private final MigrationService migrationService;
-    private final DatasourceService datasourceService;
-    private final PublicDatasourceService publicDatasourceManager;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final SynchronizerService<Service> synchronizerService;
-    private final Validator serviceValidator;
-    private final FacetLabelService facetLabelService;
     private final GenericResourceService genericResourceService;
-    private final RelationshipValidator relationshipValidator;
+    private final ModelService modelService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -79,32 +67,21 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
                           IdCreator idCreator, @Lazy SecurityService securityService,
                           @Lazy EmailService emailService,
                           @Lazy VocabularyService vocabularyService,
-                          @Lazy PublicServiceService publicServiceManager,
-                          @Lazy MigrationService migrationService,
                           @Lazy DatasourceService datasourceService,
-                          @Lazy PublicDatasourceService publicDatasourceManager,
                           @Lazy ProviderResourcesCommonMethods commonMethods,
                           SynchronizerService<Service> synchronizerService,
                           @Qualifier("serviceValidator") Validator serviceValidator,
                           FacetLabelService facetLabelService,
                           GenericResourceService genericResourceService,
-                          @Lazy RelationshipValidator relationshipValidator) {
-        super(ServiceBundle.class);
+                          @Lazy RelationshipValidator relationshipValidator, ModelService modelService) {
+        super(genericResourceService, securityService);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
         this.securityService = securityService;
-        this.emailService = emailService;
         this.vocabularyService = vocabularyService;
-        this.publicServiceManager = publicServiceManager;
-        this.migrationService = migrationService;
-        this.datasourceService = datasourceService;
-        this.publicDatasourceManager = publicDatasourceManager;
         this.commonMethods = commonMethods;
-        this.synchronizerService = synchronizerService;
-        this.serviceValidator = serviceValidator;
-        this.facetLabelService = facetLabelService;
         this.genericResourceService = genericResourceService;
-        this.relationshipValidator = relationshipValidator;
+        this.modelService = modelService;
     }
 
     @Override
@@ -377,203 +354,127 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     @Override
     public Map<String, List<LinkedHashMap<String, Object>>> getBy(String field, Authentication auth)
             throws NoSuchFieldException {
-        return null;
-        //FIXME
-//        Field serviceField = null;
-//        try {
-//            serviceField = Service.class.getDeclaredField(field);
-//        } catch (NoSuchFieldException e) {
-//            logger.warn("Attempt to find field '{}' in Service failed. Trying in ServiceBundle...", field);
-//            serviceField = ServiceBundle.class.getDeclaredField(field);
-//        }
-//        serviceField.setAccessible(true);
-//
-//        FacetFilter ff = new FacetFilter();
-//        ff.setQuantity(maxQuantity);
-//        ff.addFilter("published", false);
-//        Browsing<NewServiceBundle> services = getAll(ff, auth);
-//
-//        final Field f = serviceField;
-//        final String undef = "undefined";
-//        return services.getResults().stream().collect(Collectors.groupingBy(service -> {
-//            try {
-//                return f.get(service.getPayload()) != null ? f.get(service.getPayload()).toString() : undef;
-//            } catch (IllegalAccessException | IllegalArgumentException e) {
-//                logger.warn("Warning", e);
-//                try {
-//                    return f.get(service) != null ? f.get(service).toString() : undef;
-//                } catch (IllegalAccessException e1) {
-//                    logger.error("ERROR", e1);
-//                }
-//                return undef;
-//            }
-//        }, Collectors.mapping((ServiceBundle service) -> service, toList())));
+
+        List<String> fields = modelService.getAllModelFieldNames("m-b-service"); //TODO: I don't like this
+        if (!fields.contains(field)) {
+            throw new NoSuchFieldException("Unknown field: " + field);
+        }
+
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
+        Browsing<NewServiceBundle> serviceBundles = getAll(ff, auth);
+
+        Map<String, List<LinkedHashMap<String, Object>>> result = new LinkedHashMap<>();
+        for (NewServiceBundle bundle : serviceBundles.getResults()) {
+            LinkedHashMap<String, Object> service = bundle.getService();
+            Object keyValue = service.get(field);
+            String key = keyValue == null ? "UNKNOWN" : keyValue.toString();
+            result.computeIfAbsent(key, k -> new ArrayList<>()).add(service);
+        }
+        return result;
     }
 
     //FIXME
     @Override
     public List<NewServiceBundle> getByIds(Authentication auth, String... ids) {
+        List<NewServiceBundle> resources;
+        resources = Arrays.stream(ids)
+                .map(id ->
+                {
+                    try {
+                        return get(id, catalogueId);
+                    } catch (ServiceException | ResourceNotFoundException e) {
+                        return null;
+                    }
+
+                })
+                .filter(Objects::nonNull)
+                .toList();
+        return resources;
+    }
+
+    @Override
+    public NewBundle getServiceTemplate(String providerId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("service_owner", providerId);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
+        List<NewServiceBundle> allProviderServices = getAll(ff, auth).getResults();
+        for (NewServiceBundle bundle : allProviderServices) {
+            if (bundle.getStatus().equals(vocabularyService.get("pending").getId())) {
+                return bundle;
+            }
+        }
         return null;
-//        List<NewServiceBundle> resources;
-//        resources = Arrays.stream(ids)
-//                .map(id ->
-//                {
-//                    try {
-//                        return get(id, null);
-//                    } catch (ServiceException | ResourceNotFoundException e) {
-//                        return null;
-//                    }
+    }
+
+    //TODO: find usages or delete
+//    @Override
+//    protected Browsing<ServiceBundle> getResults(FacetFilter filter) {
+//        Browsing<ServiceBundle> browsing;
+//        filter.setResourceType(getResourceTypeName());
+//        browsing = super.getResults(filter);
 //
-//                })
-//                .filter(Objects::nonNull)
-//                .toList();
-//        return resources;
-    }
-
-    @Override
-    public boolean exists(SearchService.KeyValue... ids) {
-        Resource resource;
-        resource = this.searchService.searchFields(getResourceTypeName(), ids);
-        return resource != null;
-    }
-
-    @Override
-    public Bundle<?> getResourceTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        List<ServiceBundle> allProviderResources = getAll(ff, auth).getResults();
-        for (ServiceBundle resourceBundle : allProviderResources) {
-            if (resourceBundle.getStatus().equals(vocabularyService.get("pending").getId())) {
-                return resourceBundle;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    protected Browsing<ServiceBundle> getResults(FacetFilter filter) {
-        Browsing<ServiceBundle> browsing;
-        filter.setResourceType(getResourceTypeName());
-        browsing = super.getResults(filter);
-
-        browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
-        return browsing;
-    }
-
-    public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
-        ff.setQuantity(0);
-
-        Map<String, List<Object>> allFilters = ff.getFilterLists();
-
-        List<String> reverseOrderedKeys = new LinkedList<>(allFilters.keySet());
-        Collections.reverse(reverseOrderedKeys);
-
-        for (String filterKey : reverseOrderedKeys) {
-            Map<String, List<Object>> someFilters = new LinkedHashMap<>(allFilters);
-
-            // if last filter is "active" continue to next iteration
-            if ("active".equals(filterKey)) {
-                continue;
-            }
-            someFilters.remove(filterKey);
-
-            FacetFilter facetFilter = FacetFilter.from(someFilters);
-            facetFilter.setResourceType(getResourceTypeName());
-            facetFilter.setBrowseBy(Collections.singletonList(filterKey));
-            List<Facet> facetsCategory = getResults(facetFilter).getFacets(); // CORRECT FACETS ?
-
-            for (Facet facet : serviceFacets) {
-                if (facet.getField().equals(filterKey)) {
-                    for (Facet facetCategory : facetsCategory) {
-                        if (facetCategory.getField().equals(facet.getField())) {
-                            serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-            break;
-        }
-
-        return removeEmptyFacets(serviceFacets);
-    }
-
-    private List<Facet> removeEmptyFacets(List<Facet> facetList) {
-        return facetList.stream().filter(facet -> !facet.getValues().isEmpty()).toList();
-    }
-
-    @Override
-    public Paging<ServiceBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(maxQuantity);
-        facetFilter.addFilter("status", "approved");
-        facetFilter.addFilter("published", false);
-
-        Browsing<ServiceBundle> serviceBrowsing = getAll(facetFilter, auth);
-        List<ServiceBundle> servicesToBeAudited = new ArrayList<>();
-
-        long todayEpochMillis = System.currentTimeMillis();
-        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
-                .atZone(ZoneId.systemDefault())
-                .minusMonths(auditingInterval)
-                .toEpochSecond();
-
-        for (ServiceBundle serviceBundle : serviceBrowsing.getResults()) {
-            LoggingInfo auditInfo = serviceBundle.getLatestAuditInfo();
-            if (auditInfo == null) {
-                // Include services that have never been audited
-                servicesToBeAudited.add(serviceBundle);
-            } else {
-                try {
-                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
-                    if (auditEpochSeconds < intervalEpochSeconds) {
-                        // Include services that were last audited before the threshold
-                        servicesToBeAudited.add(serviceBundle);
-                    }
-                } catch (NumberFormatException e) {
-                }
-            }
-        }
-
-        // Shuffle the list randomly
-        Collections.shuffle(servicesToBeAudited);
-
-        // Limit the list to the requested quantity
-        if (servicesToBeAudited.size() > quantity) {
-            servicesToBeAudited = servicesToBeAudited.subList(0, quantity);
-        }
-
-        return new Browsing<>(servicesToBeAudited.size(), 0, servicesToBeAudited.size(), servicesToBeAudited,
-                serviceBrowsing.getFacets());
-    }
-
-    @Override
-    public List<ServiceBundle> getInactiveResources(String providerId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_organisation", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        ff.addFilter("active", false);
-        ff.setFrom(0);
-        ff.setQuantity(maxQuantity);
-        ff.addOrderBy("name", "asc");
-        return this.getAll(ff, null).getResults();
-    }
+//        browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
+//        return browsing;
+//    }
+//
+    //TODO: find usages or delete
+//    public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
+//        ff.setQuantity(0);
+//
+//        Map<String, List<Object>> allFilters = ff.getFilterLists();
+//
+//        List<String> reverseOrderedKeys = new LinkedList<>(allFilters.keySet());
+//        Collections.reverse(reverseOrderedKeys);
+//
+//        for (String filterKey : reverseOrderedKeys) {
+//            Map<String, List<Object>> someFilters = new LinkedHashMap<>(allFilters);
+//
+//            // if last filter is "active" continue to next iteration
+//            if ("active".equals(filterKey)) {
+//                continue;
+//            }
+//            someFilters.remove(filterKey);
+//
+//            FacetFilter facetFilter = FacetFilter.from(someFilters);
+//            facetFilter.setResourceType(getResourceTypeName());
+//            facetFilter.setBrowseBy(Collections.singletonList(filterKey));
+//            List<Facet> facetsCategory = getResults(facetFilter).getFacets(); // CORRECT FACETS ?
+//
+//            for (Facet facet : serviceFacets) {
+//                if (facet.getField().equals(filterKey)) {
+//                    for (Facet facetCategory : facetsCategory) {
+//                        if (facetCategory.getField().equals(facet.getField())) {
+//                            serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
+//                            break;
+//                        }
+//                    }
+//                    break;
+//                }
+//            }
+//            break;
+//        }
+//
+//        return removeEmptyFacets(serviceFacets);
+//    }
+//
+//    private List<Facet> removeEmptyFacets(List<Facet> facetList) {
+//        return facetList.stream().filter(facet -> !facet.getValues().isEmpty()).toList();
+//    }
 
 
-    private void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
-        // if user is Unauthorized, return active ONLY
-        if (auth == null || !auth.isAuthenticated() || (
-                !securityService.hasRole(auth, "ROLE_PROVIDER") &&
-                        !securityService.hasRole(auth, "ROLE_EPOT") &&
-                        !securityService.hasRole(auth, "ROLE_ADMIN"))) {
-            filter.addFilter("active", true);
-            filter.addFilter("published", false);
-        }
-    }
+//    private void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
+//        // if user is Unauthorized, return active ONLY
+//        if (auth == null || !auth.isAuthenticated() || (
+//                !securityService.hasRole(auth, "ROLE_PROVIDER") &&
+//                        !securityService.hasRole(auth, "ROLE_EPOT") &&
+//                        !securityService.hasRole(auth, "ROLE_ADMIN"))) {
+//            filter.addFilter("active", true);
+//            filter.addFilter("published", false);
+//        }
+//    }
     //endregion
 
     //region Drafts

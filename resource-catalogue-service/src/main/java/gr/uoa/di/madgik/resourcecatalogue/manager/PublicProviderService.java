@@ -39,8 +39,9 @@ public class PublicProviderService
         return "provider";
     }
 
-    @Override
-    public void updateIdsToPublic(ProviderBundle resource) {
-        // no-op
-    }
+    //FIXME
+//    @Override
+//    public void updateIdsToPublic(ProviderBundle resource) {
+//        // no-op
+//    }
 }

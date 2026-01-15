@@ -46,11 +46,12 @@ public class PublicInteroperabilityRecordService
     }
 
 
-    @Override
-    public void updateIdsToPublic(InteroperabilityRecordBundle bundle) {
-        // providerId
-        NewProviderBundle providerBundle = providerService.get(bundle.getInteroperabilityRecord().getProviderId(),
-                bundle.getInteroperabilityRecord().getCatalogueId());
-        bundle.getInteroperabilityRecord().setProviderId(providerBundle.getIdentifiers().getPid());
-    }
+    //FIXME
+//    @Override
+//    public void updateIdsToPublic(InteroperabilityRecordBundle bundle) {
+//        // providerId
+//        NewProviderBundle providerBundle = providerService.get(bundle.getInteroperabilityRecord().getProviderId(),
+//                bundle.getInteroperabilityRecord().getCatalogueId());
+//        bundle.getInteroperabilityRecord().setProviderId(providerBundle.getIdentifiers().getPid());
+//    }
 }

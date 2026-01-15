@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -48,11 +49,12 @@ public class ResourceTemplateBundleController {
 
     // Get the Provider's Template (status = "pending" or "rejected")
     @GetMapping(path = {"templates"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Bundle<?> getProviderTemplate(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
-        Bundle<?> template = serviceService.getResourceTemplate(id, auth);
-        if (template == null) {
-            template = trainingResourceService.getResourceTemplate(id, auth);
-        }
+    public NewBundle getProviderTemplate(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
+        NewBundle template = serviceService.getServiceTemplate(id, auth);
+        //FIXME
+//        if (template == null) {
+//            template = trainingResourceService.getResourceTemplate(id, auth);
+//        }
         return template;
     }
 }

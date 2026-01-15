@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class TestUtils {
@@ -37,8 +38,8 @@ public class TestUtils {
         return bundle;
     }
 
-    public static ProviderBundle createProviderBundle() {
-        ProviderBundle bundle = new ProviderBundle();
+    public static NewProviderBundle createProviderBundle() {
+        NewProviderBundle bundle = new NewProviderBundle();
         bundle.setProvider(createProvider());
         return bundle;
     }
@@ -74,24 +75,24 @@ public class TestUtils {
         catalogue.setScope("Test Scope");
         catalogue.setLogo(createURL());
         catalogue.setLocation(createProviderLocation());
-        catalogue.setMainContact(createProviderMainContact());
+//        catalogue.setMainContact(createProviderMainContact());
         catalogue.setPublicContacts(createProviderPublicContacts());
-        catalogue.setUsers(createUsers());
+//        catalogue.setUsers(createUsers());
         return catalogue;
     }
 
-    public static Provider createProvider() {
-        Provider provider = new Provider();
-        provider.setAbbreviation("Test Abbreviation");
-        provider.setName("Test Provider");
-        provider.setWebsite(createURL());
-        provider.setLegalEntity(false);
-        provider.setDescription("Test Description");
-        provider.setLogo(createURL());
-        provider.setLocation(createProviderLocation());
-        provider.setMainContact(createProviderMainContact());
-        provider.setPublicContacts(createProviderPublicContacts());
-        provider.setUsers(createUsers());
+    public static LinkedHashMap<String, Object> createProvider() {
+        LinkedHashMap<String, Object> provider = new LinkedHashMap<>();
+        provider.put("name", "Test Provider");
+        provider.put("abbreviation", "Test Abbreviation");
+        provider.put("website", createURL());
+        provider.put("country", "AD");
+        provider.put("legalEntity", "false");
+        provider.put("description", "Test Description");
+        provider.put("logo", createURL());
+        provider.put("scientificDomains", createScientificDomains());
+        provider.put("mainContact", createProviderMainContact());
+        provider.put("users", createUsers());
         return provider;
     }
 
@@ -168,10 +169,11 @@ public class TestUtils {
         return location;
     }
 
-    private static ProviderMainContact createProviderMainContact() {
-        ProviderMainContact contact = new ProviderMainContact();
-        contact.setFirstName("MainContact FirstName");
-        contact.setEmail("main@email.com");
+    private static LinkedHashMap<String, Object> createProviderMainContact() {
+        LinkedHashMap<String, Object> contact = new LinkedHashMap<>();
+        contact.put("mainFirstName", "FirstName");
+        contact.put("mainLastName", "LastName");
+        contact.put("mainEmail", "main@email.com");
         return contact;
     }
 
@@ -183,15 +185,15 @@ public class TestUtils {
         return List.of(contact1, contact2);
     }
 
-    private static List<User> createUsers() {
-        User user1 = new User();
-        User user2 = new User();
-        user1.setName("User");
-        user1.setSurname("One");
-        user1.setEmail("user1@email.com");
-        user2.setName("User");
-        user2.setSurname("Two");
-        user2.setEmail("user2@email.com");
+    private static List<LinkedHashMap<String, Object>> createUsers() {
+        LinkedHashMap<String, Object> user1 = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> user2 = new LinkedHashMap<>();
+        user1.put("userName", "UserName");
+        user1.put("userSurname", "UserSurname");
+        user1.put("email", "user1@email.com");
+        user2.put("userName", "UserName2");
+        user2.put("userSurname", "UserSurname2");
+        user2.put("email", "user2@email.com");
         return List.of(user1, user2);
     }
 

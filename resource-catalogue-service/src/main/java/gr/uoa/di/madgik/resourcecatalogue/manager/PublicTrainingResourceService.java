@@ -60,25 +60,26 @@ public class PublicTrainingResourceService
         return "training_resource";
     }
 
-    @Override
-    public void updateIdsToPublic(TrainingResourceBundle bundle) {
-        // Resource Organisation
-        NewProviderBundle providerBundle = providerService.get(bundle.getTrainingResource().getResourceOrganisation(),
-                bundle.getTrainingResource().getCatalogueId());
-        bundle.getTrainingResource().setResourceOrganisation(providerBundle.getIdentifiers().getPid());
-
-        // Resource Providers
-        List<String> resourceProviders = new ArrayList<>();
-        List<String> existingResourceProviders = bundle.getTrainingResource().getResourceProviders();
-        if (existingResourceProviders != null && !existingResourceProviders.isEmpty()) {
-            for (String resourceProviderId : existingResourceProviders) {
-                //TODO: do we allow related resources from different catalogues?
-                NewProviderBundle resourceProvider = providerService.get(resourceProviderId,
-                        bundle.getTrainingResource().getCatalogueId());
-                resourceProviders.add(resourceProvider.getIdentifiers().getPid());
-            }
-            bundle.getTrainingResource().setResourceProviders(resourceProviders);
-        }
+    //FIXME
+//    @Override
+//    public void updateIdsToPublic(TrainingResourceBundle bundle) {
+//        // Resource Organisation
+//        NewProviderBundle providerBundle = providerService.get(bundle.getTrainingResource().getResourceOrganisation(),
+//                bundle.getTrainingResource().getCatalogueId());
+//        bundle.getTrainingResource().setResourceOrganisation(providerBundle.getIdentifiers().getPid());
+//
+//        // Resource Providers
+//        List<String> resourceProviders = new ArrayList<>();
+//        List<String> existingResourceProviders = bundle.getTrainingResource().getResourceProviders();
+//        if (existingResourceProviders != null && !existingResourceProviders.isEmpty()) {
+//            for (String resourceProviderId : existingResourceProviders) {
+//                //TODO: do we allow related resources from different catalogues?
+//                NewProviderBundle resourceProvider = providerService.get(resourceProviderId,
+//                        bundle.getTrainingResource().getCatalogueId());
+//                resourceProviders.add(resourceProvider.getIdentifiers().getPid());
+//            }
+//            bundle.getTrainingResource().setResourceProviders(resourceProviders);
+//        }
 
         //FIXME
         // EOSC Related Services
@@ -99,5 +100,5 @@ public class PublicTrainingResourceService
 //            }
 //            bundle.getTrainingResource().setEoscRelatedServices(eoscRelatedServices);
 //        }
-    }
+//    }
 }

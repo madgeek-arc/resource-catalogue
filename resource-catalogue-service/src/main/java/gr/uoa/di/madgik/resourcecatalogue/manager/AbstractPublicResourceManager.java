@@ -62,7 +62,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle<?>> extends
         }
 
         // sets public ids to fields
-        updateIdsToPublic(t);
+//        updateIdsToPublic(t); //FIXME
 
         T ret;
         logger.info("{} '{}' is being published with id '{}'", t.getClass().getSimpleName(), lowerLevelId, t.getId());
@@ -79,7 +79,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle<?>> extends
         t.getMetadata().setPublished(true);
 
         // sets public ids to fields
-        updateIdsToPublic(t);
+//        updateIdsToPublic(t); //FIXME
 
         logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         T ret = super.update(t, null);

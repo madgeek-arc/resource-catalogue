@@ -20,6 +20,7 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -35,6 +36,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,13 +71,13 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     public ProviderManager(GenericResourceService genericResourceService,
                            EmailService emailService,
                            VocabularyService vocabularyService,
-                           ServiceService serviceService,
-                           TrainingResourceService trainingResourceService,
-                           InteroperabilityRecordService interoperabilityRecordService,
+                           @Lazy ServiceService serviceService, //FIXME
+                           @Lazy TrainingResourceService trainingResourceService, //FIXME
+                           @Lazy InteroperabilityRecordService interoperabilityRecordService, //FIXME
                            IdCreator idCreator,
                            ProviderResourcesCommonMethods commonMethods,
                            SecurityService securityService,
-                           CatalogueService catalogueService,
+                           CatalogueService catalogueService, //FIXME
                            ProviderCascadeLifecycleService cascadeLifecycleService) {
         super(genericResourceService, securityService);
         this.genericResourceService = genericResourceService;

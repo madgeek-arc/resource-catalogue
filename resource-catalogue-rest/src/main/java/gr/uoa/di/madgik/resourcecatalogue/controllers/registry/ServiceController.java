@@ -47,6 +47,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
@@ -56,8 +57,6 @@ public class ServiceController {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
     private final ServiceService serviceService;
-    private final DraftResourceService<ServiceBundle> draftServiceService;
-    private final ProviderService providerService;
     private final GenericResourceService genericResourceService;
 
     @Value("${auditing.interval:6}")
@@ -70,13 +69,9 @@ public class ServiceController {
     private String catalogueName;
 
     ServiceController(ServiceService service,
-                      DraftResourceService<ServiceBundle> draftServiceService,
-                      ProviderService provider,
                       GenericResourceService genericResourceService) {
         this.serviceService = service;
-        this.draftServiceService = draftServiceService;
-        this.providerService = provider;
-        this.genericResourceService = genericResourceService;
+        this.genericResourceService = genericResourceService; //TODO: try to remove this
     }
 
     //region generic
@@ -147,11 +142,11 @@ public class ServiceController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+    public ResponseEntity<Paging<NewServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true)
+                                                                               @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
-        ff.setResourceType("service");
         ff.addFilter("published", false);
-        Paging<ServiceBundle> paging = genericResourceService.getResults(ff);
+        Paging<NewServiceBundle> paging = serviceService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -355,34 +350,21 @@ public class ServiceController {
     @GetMapping(path = "ids")
     public ResponseEntity<List<LinkedHashMap<String, Object>>> getSomeServices(@RequestParam("ids") String[] ids,
                                                                                @Parameter(hidden = true) Authentication auth) {
-        return null;
-        //FIXME
-//        return ResponseEntity.ok(serviceService.getByIds(auth, ids)
-//                .stream()
-//                .map(ServiceBundle::getService)
-//                .collect(Collectors.toList()));
+        return ResponseEntity.ok(serviceService.getByIds(auth, ids)
+                .stream()
+                .map(NewServiceBundle::getService)
+                .collect(Collectors.toList()));
     }
 
+    //TODO: hard test
     @Tag(name = "ServiceRead")
     @Operation(summary = "Get all Services in the catalogue organized by a specific field (e.g. name).")
     @GetMapping(path = "by/{field}")
-    public ResponseEntity<Map<String, List<LinkedHashMap<String, Object>>>> getBy(@PathVariable(value = "field") Service.Field field,
+    public ResponseEntity<Map<String, List<LinkedHashMap<String, Object>>>> getBy(@PathVariable(value = "field") String field,
                                                                                   @Parameter(hidden = true) Authentication auth)
             throws NoSuchFieldException {
-        return null;
-        //FIXME
-//        Map<String, List<LinkedHashMap<String, Object>>> results;
-//        results = serviceService.getBy(field.getKey(), auth);
-//        Map<String, List<?>> serviceResults = new TreeMap<>();
-//        for (Map.Entry<String, List<LinkedHashMap<String, Object>>> services : results.entrySet()) {
-//            List<?> items = services.getValue()
-//                    .stream()
-//                    .map(NewServiceBundle::getService).collect(Collectors.toList());
-//            if (!items.isEmpty()) {
-//                serviceResults.put(services.getKey(), items);
-//            }
-//        }
-//        return ResponseEntity.ok(serviceResults);
+        Map<String, List<LinkedHashMap<String, Object>>> ret = serviceService.getBy(field, auth);
+        return ResponseEntity.ok(ret);
     }
 
     @Tag(name = "ServiceRead")
@@ -416,23 +398,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceService.getAll(ff), HttpStatus.OK);
     }
 
-    @Tag(name = "ServiceAdmin")
-    @GetMapping(path = "pending/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Browsing<?>> pendingTemplates(@Parameter(hidden = true) Authentication auth) {
-        return null;
-        //FIXME
-//        List<NewProviderBundle> pendingProviders = providerService.getInactive();
-//        List<?> serviceTemplates = new ArrayList<>();
-//        for (NewProviderBundle provider : pendingProviders) {
-//            if (provider.getTemplateStatus().equals("pending template")) {
-//                serviceTemplates.addAll(serviceService.getInactiveResources(provider.getId()).stream().map(ServiceBundle::getService).toList());
-//            }
-//        }
-//        Browsing<Service> services = new Browsing<>(serviceTemplates.size(), 0, serviceTemplates.size(), serviceTemplates, null);
-//        return ResponseEntity.ok(services);
-    }
-
     @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "getSharedResources/{prefix}/{suffix}")
@@ -461,15 +426,16 @@ public class ServiceController {
         serviceService.sendEmailNotificationToProviderForOutdatedService(serviceId, auth);
     }
 
-    @Tag(name = "ServiceAdmin")
-    @PutMapping(path = {"changeProvider"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public void changeProvider(@RequestParam String resourceId,
-                               @RequestParam String newProvider,
-                               @RequestParam(required = false) String comment,
-                               @Parameter(hidden = true) Authentication authentication) {
-        serviceService.changeProvider(resourceId, newProvider, comment, authentication);
-    }
+    //FIXME
+//    @Tag(name = "ServiceAdmin")
+//    @PutMapping(path = {"changeProvider"})
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+//    public void changeProvider(@RequestParam String resourceId,
+//                               @RequestParam String newProvider,
+//                               @RequestParam(required = false) String comment,
+//                               @Parameter(hidden = true) Authentication authentication) {
+//        serviceService.changeProvider(resourceId, newProvider, comment, authentication);
+//    }
 
     // front-end use (Service/Datasource/TR forms)
     @Tag(name = "ServiceRead")

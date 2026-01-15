@@ -43,7 +43,7 @@ public class PidServiceRegistrationConsistency {
     private final ProviderService providerService;
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
-    private final DeployableServiceService deployableServiceService;
+//    private final DeployableServiceService deployableServiceService;
     private final AdapterService adapterService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
@@ -54,14 +54,14 @@ public class PidServiceRegistrationConsistency {
                                              ServiceService serviceService,
                                              TrainingResourceService trainingResourceService,
                                              InteroperabilityRecordService interoperabilityRecordService,
-                                             DeployableServiceService deployableServiceService,
+//                                             DeployableServiceService deployableServiceService,
                                              AdapterService adapterService,
                                              SecurityService securityService) {
         this.pidIssuer = pidIssuer;
         this.providerService = providerService;
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
-        this.deployableServiceService = deployableServiceService;
+//        this.deployableServiceService = deployableServiceService;
         this.adapterService = adapterService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.securityService = securityService;

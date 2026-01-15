@@ -4,6 +4,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +15,9 @@ public class ProviderCascadeLifecycleService {
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
-    public ProviderCascadeLifecycleService(ServiceService serviceService,
-                                           TrainingResourceService trainingResourceService,
-                                           InteroperabilityRecordService interoperabilityRecordService) {
+    public ProviderCascadeLifecycleService(@Lazy ServiceService serviceService, //FIXME
+                                           @Lazy TrainingResourceService trainingResourceService, //FIXME
+                                           @Lazy InteroperabilityRecordService interoperabilityRecordService) { //FIXME
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;

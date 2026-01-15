@@ -14,7 +14,6 @@
 // * limitations under the License.
 // */
 //
- //FIXME
 //package gr.uoa.di.madgik.resourcecatalogue.integration;
 //
 //import gr.uoa.di.madgik.catalogue.exception.ValidationException;
@@ -28,6 +27,7 @@
 //import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 //import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 //import org.junit.jupiter.api.Order;
+//import org.junit.jupiter.api.Test;
 //import org.mockito.Mock;
 //import org.mockito.MockedStatic;
 //import org.mockito.Mockito;
@@ -35,6 +35,7 @@
 //import org.springframework.security.authentication.InsufficientAuthenticationException;
 //import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 //
+//import java.util.LinkedHashMap;
 //import java.util.List;
 //
 //import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createCatalogueBundle;
@@ -70,7 +71,7 @@
 //     * catalogue matches the expected ID.
 //     * </p>
 //     */
-////    @Test
+//    @Test
 //    @Order(1)
 //    void addEOSCCatalogue() {
 //        Metadata metadata = new Metadata();
@@ -107,12 +108,12 @@
 //     * provider matches the expected ID. The test also stores the provider ID for further use.
 //     * </p>
 //     */
-////    @Test
+//    @Test
 //    @Order(2)
 //    void addProviderSucceeds() {
 //        Metadata metadata = new Metadata();
 //        Metadata dummyMetadata = Mockito.spy(metadata);
-//        ProviderBundle providerBundle = createProviderBundle();
+//        NewProviderBundle providerBundle = createProviderBundle();
 //
 //        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
 //        try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
@@ -123,8 +124,7 @@
 //
 //            providerService.add(providerBundle, securityService.getAdminAccess());
 //
-//            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(),
-//                    securityService.getAdminAccess());
+//            NewProviderBundle retrievedProvider = providerService.get(providerBundle.getId());
 //            assertNotNull(retrievedProvider, "Provider should be found in the database.");
 //            assertEquals(providerBundle.getId(), retrievedProvider.getId(),
 //                    "Provider ID should match the expected value.");
@@ -148,19 +148,19 @@
 //     *   <li>The provider's updated name matches the expected value.</li>
 //     * </ul>
 //     */
-////    @Test
+//    @Test
 //    @Order(3)
 //    void updateProviderSucceeds() {
-//        ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
-//        assertEquals("Test Provider", providerBundle.getProvider().getName(),
+//        NewProviderBundle providerBundle = providerService.get(providerId);
+//        assertEquals("Test Provider", providerBundle.getProvider().get("name"),
 //                "The provider's initial name should match the expected value.");
 //
-//        providerBundle.getProvider().setName("Updated Test Provider");
+//        providerBundle.getProvider().put("name", "Updated Test Provider");
 //        providerService.update(providerBundle, securityService.getAdminAccess());
 //
-//        ProviderBundle updatedProvider = providerService.get(providerId, securityService.getAdminAccess());
+//        NewProviderBundle updatedProvider = providerService.get(providerId);
 //        assertNotNull(updatedProvider, "Updated provider should exist in the database.");
-//        assertEquals("Updated Test Provider", updatedProvider.getProvider().getName(),
+//        assertEquals("Updated Test Provider", updatedProvider.getProvider().get("name"),
 //                "The updated provider name should match the new value.");
 //    }
 //
@@ -186,22 +186,22 @@
 //     *
 //     * @throws InterruptedException if the thread sleep operation is interrupted.
 //     */
-////    @Test
+//    @Test
 //    @Order(4)
 //    void deleteProviderSucceeds() throws InterruptedException {
-//        ProviderBundle providerBundle = providerService.get(providerId, securityService.getAdminAccess());
+//        NewProviderBundle providerBundle = providerService.get(providerId);
 //        assertNotNull(providerBundle, "Provider should exist before deletion.");
 //
-//        List<ServiceBundle> mockedList = mock(List.class);
-//        Paging<ServiceBundle> mockedPaging = mock(Paging.class);
+//        List<NewServiceBundle> mockedList = mock(List.class);
+//        Paging<NewServiceBundle> mockedPaging = mock(Paging.class);
 //        when(mockedPaging.getResults()).thenReturn(mockedList);
-//        when(serviceService.getResourceBundles(any(), any(), any())).thenReturn(mockedPaging);
+////        when(serviceService.getResourceBundles(any(), any(), any())).thenReturn(mockedPaging); //FIXME
 //
 //
 //        providerService.delete(providerBundle);
 //        Thread.sleep(1000); //TODO: find a better way to clear cache
 //        ResourceException thrownException = assertThrows(ResourceException.class,
-//                () -> providerService.get(providerId, securityService.getAdminAccess()));
+//                () -> providerService.get(providerId));
 //        assertEquals("provider does not exist!", thrownException.getMessage(),
 //                "The exception message should indicate that the resource does not exist.");
 //    }
@@ -214,9 +214,9 @@
 //     * <p>
 //     * This is critical for ensuring that unauthorized access is not allowed during provider creation.
 //     */
-////    @Test
+//    @Test
 //    void addProviderFailsOnAuthentication() {
-//        ProviderBundle inputProviderBundle = new ProviderBundle();
+//        NewProviderBundle inputProviderBundle = new NewProviderBundle();
 //
 //        assertThrows(InsufficientAuthenticationException.class, () ->
 //                providerService.add(inputProviderBundle, null));
@@ -231,10 +231,10 @@
 //     * This is crucial for maintaining data integrity and ensuring that incomplete or invalid data
 //     * cannot be added to the system.
 //     */
-////    @Test
+//    @Test
 //    void addProviderFailsOnMandatoryFieldValidation() {
-//        ProviderBundle inputProviderBundle = new ProviderBundle();
-//        inputProviderBundle.setProvider(new Provider());
+//        NewProviderBundle inputProviderBundle = new NewProviderBundle();
+//        inputProviderBundle.setProvider(new LinkedHashMap<>());
 //
 //        ValidationException exception = assertThrows(ValidationException.class, () ->
 //                providerService.add(inputProviderBundle, securityService.getAdminAccess()));
@@ -255,11 +255,11 @@
 //     * This helps maintain consistency with predefined standards and ensures only valid vocabulary values
 //     * are accepted.
 //     */
-////    @Test
+//    @Test
 //    void addProviderFailsOnVocabularyValidation() {
 //        String invalidCountryValue = "Asgard";
-//        ProviderBundle inputProviderBundle = createProviderBundle();
-//        inputProviderBundle.getProvider().getLocation().setCountry(invalidCountryValue);
+//        NewProviderBundle inputProviderBundle = createProviderBundle();
+//        inputProviderBundle.getProvider().put("country", invalidCountryValue);
 //
 //        ValidationException exception = assertThrows(ValidationException.class, () ->
 //                providerService.add(inputProviderBundle, securityService.getAdminAccess()));
@@ -288,13 +288,13 @@
 //     *
 //     * <p>An assertion ensures that the initial ID is not retained in the retrieved ProviderBundle.</p>
 //     */
-////    @Test
+//    @Test
 //    void addProviderEnsureIdIsAssignedByThePortal() {
 //        providerId = "@my-ID>!?";
 //        Metadata metadata = new Metadata();
 //        Metadata dummyMetadata = Mockito.spy(metadata);
-//        ProviderBundle providerBundle = createProviderBundle();
-//        providerBundle.getProvider().setId(providerId);
+//        NewProviderBundle providerBundle = createProviderBundle();
+//        providerBundle.setId(providerId);
 //
 //        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
 //        try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
@@ -305,9 +305,8 @@
 //
 //            providerService.add(providerBundle, securityService.getAdminAccess());
 //
-//            ProviderBundle retrievedProvider = providerService.get(providerBundle.getId(),
-//                    securityService.getAdminAccess());
-//            assertNotEquals(providerId, retrievedProvider.getProvider().getId(),
+//            NewProviderBundle retrievedProvider = providerService.get(providerBundle.getId());
+//            assertNotEquals(providerId, retrievedProvider.getId(),
 //                    "The ID should have been overwritten by the portal's business logic");
 //        }
 //    }

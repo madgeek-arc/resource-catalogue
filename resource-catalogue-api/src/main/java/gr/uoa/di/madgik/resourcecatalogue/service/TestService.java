@@ -24,7 +24,7 @@ public interface TestService<T extends NewBundle> extends NewBundleOperations<T>
      * @param auth Authentication
      * @return {@link T}
      */
-    T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth)
+    T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth);
 
     /**
      * Create Public resource

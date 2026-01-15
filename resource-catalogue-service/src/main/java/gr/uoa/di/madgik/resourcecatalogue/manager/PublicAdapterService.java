@@ -40,8 +40,9 @@ public class PublicAdapterService
         return "adapter";
     }
 
-    @Override
-    public void updateIdsToPublic(AdapterBundle resource) {
-        // no-op
-    }
+    //FIXME
+//    @Override
+//    public void updateIdsToPublic(AdapterBundle resource) {
+//        // no-op
+//    }
 }

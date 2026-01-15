@@ -21,5 +21,5 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 
 public interface PublicResourceService<T extends Identifiable> extends ResourceService<T> {
 
-    void updateIdsToPublic(T resource);
+//    void updateIdsToPublic(T resource); //FIXME
 }

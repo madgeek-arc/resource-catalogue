@@ -100,13 +100,13 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      */
     List<NewServiceBundle> getByIds(Authentication authentication, String... ids);
 
-    /**
-     * Check if the Resource exists.
-     *
-     * @param ids List of Service IDs
-     * @return {@link boolean}
-     */
-    boolean exists(SearchService.KeyValue... ids);
+//    /**
+//     * Check if the Resource exists.
+//     *
+//     * @param ids List of Service IDs
+//     * @return {@link boolean}
+//     */
+//    boolean exists(SearchService.KeyValue... ids);
 
     /**
      * Get resource.
@@ -117,41 +117,41 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      */
     Resource getResource(String id, String catalogueId);
 
-    /**
-     * Get a list of Service Bundles of a specific Provider of the EOSC Catalogue
-     *
-     * @param providerId Provider ID
-     * @param auth       Authentication
-     * @return {@link List}&lt;{@link ServiceBundle}&gt;
-     */
-    List<ServiceBundle> getResourceBundles(String providerId, Authentication auth);
+//    /**
+//     * Get a list of Service Bundles of a specific Provider of the EOSC Catalogue
+//     *
+//     * @param providerId Provider ID
+//     * @param auth       Authentication
+//     * @return {@link List}&lt;{@link ServiceBundle}&gt;
+//     */
+//    List<ServiceBundle> getResourceBundles(String providerId, Authentication auth);
 
-    /**
-     * Get a paging of Service Bundles of a specific Provider of an external Catalogue
-     *
-     * @param catalogueId Catalogue ID
-     * @param providerId  Provider ID
-     * @param auth        Authentication
-     * @return {@link Paging}&lt;{@link ServiceBundle}&gt;
-     */
-    Paging<ServiceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
+//    /**
+//     * Get a paging of Service Bundles of a specific Provider of an external Catalogue
+//     *
+//     * @param catalogueId Catalogue ID
+//     * @param providerId  Provider ID
+//     * @param auth        Authentication
+//     * @return {@link Paging}&lt;{@link ServiceBundle}&gt;
+//     */
+//    Paging<ServiceBundle> getResourceBundles(String catalogueId, String providerId, Authentication auth);
 
-    /**
-     * Get a list of Services of a specific Provider of the EOSC Catalogue
-     *
-     * @param providerId Provider ID
-     * @param auth       Authentication
-     * @return {@link List}&lt;{@link Service}&gt;
-     */
-    List<? extends Service> getResources(String providerId, Authentication auth);
+//    /**
+//     * Get a list of Services of a specific Provider of the EOSC Catalogue
+//     *
+//     * @param providerId Provider ID
+//     * @param auth       Authentication
+//     * @return {@link List}&lt;{@link Service}&gt;
+//     */
+//    List<? extends Service> getResources(String providerId, Authentication auth);
 
-    /**
-     * Get all inactive Services of a specific Provider, providing its ID
-     *
-     * @param providerId Provider ID
-     * @return {@link List}&lt;{@link ServiceBundle}&gt;
-     */
-    List<ServiceBundle> getInactiveResources(String providerId);
+//    /**
+//     * Get all inactive Services of a specific Provider, providing its ID
+//     *
+//     * @param providerId Provider ID
+//     * @return {@link List}&lt;{@link ServiceBundle}&gt;
+//     */
+//    List<ServiceBundle> getInactiveResources(String providerId);
 
     /**
      * Get an EOSC Provider's Service Template, if exists, else return null
@@ -160,7 +160,7 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      * @param auth       Authentication
      * @return {@link Bundle}
      */
-    Bundle<?> getResourceTemplate(String providerId, Authentication auth);
+    NewBundle getServiceTemplate(String providerId, Authentication auth);
 
     /**
      * Send email notifications to all Providers with outdated Services
@@ -170,46 +170,37 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      */
     void sendEmailNotificationToProviderForOutdatedService(String resourceId, Authentication auth);
 
-    /**
-     * Change the Provider of the specific Service
-     *
-     * @param resourceId  Service ID
-     * @param newProvider New Provider ID
-     * @param comment     Comment
-     * @param auth        Authentication
-     * @return {@link ServiceBundle}
-     */
-    ServiceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
+//    /**
+//     * Change the Provider of the specific Service
+//     *
+//     * @param resourceId  Service ID
+//     * @param newProvider New Provider ID
+//     * @param comment     Comment
+//     * @param auth        Authentication
+//     * @return {@link ServiceBundle}
+//     */
+//    ServiceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
 
 
-    /**
-     * Updates the EOSC Interoperability Framework Guidelines of the specific Service Bundle
-     *
-     * @param serviceId        Service ID
-     * @param catalogueId      Catalogue ID
-     * @param eoscIFGuidelines EOSC Interoperability Framework Guidelines
-     * @param auth             Authentication
-     * @return {@link ServiceBundle}
-     */
-    ServiceBundle updateEOSCIFGuidelines(String serviceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines,
-                                         Authentication auth);
+//    /**
+//     * Updates the EOSC Interoperability Framework Guidelines of the specific Service Bundle
+//     *
+//     * @param serviceId        Service ID
+//     * @param catalogueId      Catalogue ID
+//     * @param eoscIFGuidelines EOSC Interoperability Framework Guidelines
+//     * @param auth             Authentication
+//     * @return {@link ServiceBundle}
+//     */
+//    ServiceBundle updateEOSCIFGuidelines(String serviceId, String catalogueId, List<EOSCIFGuidelines> eoscIFGuidelines,
+//                                         Authentication auth);
 
-    /**
-     * Create a Public Service
-     *
-     * @param resource Service
-     * @param auth     Authentication
-     * @return {@link ServiceBundle}
-     */
-    ServiceBundle createPublicResource(ServiceBundle resource, Authentication auth);
-
-    /**
-     * Publish Service's related resources
-     *
-     * @param serviceId   Service ID
-     * @param catalogueId Catalogue ID
-     * @param active      True/False
-     * @param auth        Authentication
-     */
-    void publishServiceSubprofiles(String serviceId, String catalogueId, Boolean active, Authentication auth);
+//    /**
+//     * Publish Service's related resources
+//     *
+//     * @param serviceId   Service ID
+//     * @param catalogueId Catalogue ID
+//     * @param active      True/False
+//     * @param auth        Authentication
+//     */
+//    void publishServiceSubprofiles(String serviceId, String catalogueId, Boolean active, Authentication auth);
 }
