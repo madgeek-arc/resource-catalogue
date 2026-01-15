@@ -165,7 +165,7 @@
     {
       "label": "Order",
       "multivalued": false,
-      "name": "order",
+      "name": "order_link",
       "path": "$.service.order",
       "type": "java.lang.String"
     },
