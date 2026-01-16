@@ -328,18 +328,6 @@ public class InteroperabilityRecordController {
         return new ResponseEntity<>(interoperabilityRecordBundle, HttpStatus.OK);
     }
 
-    // Create a Public InteroperabilityRecord if something went bad during its creation
-    @Tag(name = "InteroperabilityRecordWrite")
-    @Hidden
-    @PostMapping(path = "createPublicInteroperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<InteroperabilityRecordBundle> createPublicInteroperabilityRecord(@RequestBody InteroperabilityRecordBundle interoperabilityRecordBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("Attempt to create a Public Interoperability Record from Interoperability Record '{}'-'{}' of the '{}' Catalogue",
-                interoperabilityRecordBundle.getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getTitle(),
-                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-        return ResponseEntity.ok(interoperabilityRecordService.createPublicInteroperabilityRecord(interoperabilityRecordBundle, auth));
-    }
-
     @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Suspends a specific Interoperability Record.")
     @PutMapping(path = "suspend", produces = {MediaType.APPLICATION_JSON_VALUE})

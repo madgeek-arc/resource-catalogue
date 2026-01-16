@@ -18,19 +18,19 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.DeployableServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,7 +46,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -300,16 +299,16 @@ public class DeployableServiceController {
     @GetMapping(path = "random", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DeployableServiceBundle>> getRandom(@Parameter(name = "quantity", description = "Quantity to be fetched", content = @Content(schema = @Schema(type = "string", defaultValue = "10")))
-                                                                              @RequestParam(defaultValue = "10") int quantity,
-                                                                              @Parameter(hidden = true) Authentication auth) {
+                                                                     @RequestParam(defaultValue = "10") int quantity,
+                                                                     @Parameter(hidden = true) Authentication auth) {
         Paging<DeployableServiceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
-                                                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
-                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
+                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
         DeployableServiceBundle bundle = service.get(id, catalogueId, false);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
@@ -323,17 +322,6 @@ public class DeployableServiceController {
                                @RequestParam(required = false) String comment,
                                @Parameter(hidden = true) Authentication authentication) {
         service.changeProvider(resourceId, newProvider, comment, authentication);
-    }
-
-    // Create a Public DeployableService if something went bad during its creation
-    @Hidden
-    @PostMapping(path = "createPublicDeployableService", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<DeployableServiceBundle> createPublicDeployableService(@RequestBody DeployableServiceBundle bundle,
-                                                                                 @Parameter(hidden = true) Authentication auth) {
-        logger.info("Attempt to create a Public Deployable Service from Deployable Service '{}'-'{}' of the '{}' Catalogue",
-                bundle.getId(), bundle.getDeployableService().getName(), bundle.getDeployableService().getCatalogueId());
-        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 
     @Hidden

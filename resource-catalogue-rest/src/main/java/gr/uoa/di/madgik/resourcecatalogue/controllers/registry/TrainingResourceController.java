@@ -368,18 +368,6 @@ public class TrainingResourceController {
         return ResponseEntity.ok(trainingResourceService.getAll(ff, null));
     }
 
-    // Create a Public TrainingResource if something went bad during its creation
-    @Hidden
-    @PostMapping(path = "createPublicTrainingResource", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<TrainingResourceBundle> createPublicTrainingResource(@RequestBody TrainingResourceBundle trainingResourceBundle, @Parameter(hidden = true) Authentication auth) {
-        logger.info("Attempts to create a Public Training Resource from Training Resource '{}'-'{}' of the '{}' Catalogue",
-                trainingResourceBundle.getId(),
-                trainingResourceBundle.getTrainingResource().getTitle(),
-                trainingResourceBundle.getTrainingResource().getCatalogueId());
-        return ResponseEntity.ok(trainingResourceService.createPublicResource(trainingResourceBundle, auth));
-    }
-
     @PostMapping(path = "addTrainingResourceBundle", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TrainingResourceBundle> add(@RequestBody TrainingResourceBundle trainingResourceBundle, Authentication authentication) {

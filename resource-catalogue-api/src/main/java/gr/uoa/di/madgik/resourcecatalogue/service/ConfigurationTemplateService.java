@@ -48,16 +48,6 @@ public interface ConfigurationTemplateService extends ResourceCatalogueService<C
     ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth);
 
     /**
-     * Create a Public Configuration Template
-     *
-     * @param configurationTemplateBundle  Configuration Template
-     * @param auth                         Authentication
-     * @return {@link ConfigurationTemplateBundle}
-     */
-    ConfigurationTemplateBundle createPublicConfigurationTemplate(
-            ConfigurationTemplateBundle configurationTemplateBundle, Authentication auth);
-
-    /**
      * Return all Configuration Templates under a specific Interoperability Record ID
      *
      * @param allRequestParams search parameters

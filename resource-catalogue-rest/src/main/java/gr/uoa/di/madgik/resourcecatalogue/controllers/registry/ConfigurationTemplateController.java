@@ -138,15 +138,4 @@ public class ConfigurationTemplateController {
         logger.info("Added the Configuration Template with name '{}' and id '{}'", ctBundle.getConfigurationTemplate().getName(), ctBundle.getId());
         return new ResponseEntity<>(ctBundle, HttpStatus.CREATED);
     }
-
-    @Hidden
-    @PostMapping(path = "createPublicConfigurationTemplate", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateBundle> createPublicConfigurationTemplate(@RequestBody ConfigurationTemplateBundle configurationTemplateBundle,
-                                                                                         @Parameter(hidden = true) Authentication auth) {
-        logger.info("Attempt to create a Public Configuration Template from Configuration Template '{}'-'{}' of the '{}' Catalogue",
-                configurationTemplateBundle.getId(), configurationTemplateBundle.getConfigurationTemplate().getName(),
-                configurationTemplateBundle.getConfigurationTemplate().getCatalogueId());
-        return ResponseEntity.ok(configurationTemplateService.createPublicConfigurationTemplate(configurationTemplateBundle, auth));
-    }
 }

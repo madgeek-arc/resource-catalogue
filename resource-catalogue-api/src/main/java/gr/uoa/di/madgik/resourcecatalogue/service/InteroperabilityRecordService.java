@@ -45,16 +45,6 @@ public interface InteroperabilityRecordService extends ResourceCatalogueService<
                                         Authentication auth);
 
     /**
-     * Create a Public Interoperability Record
-     *
-     * @param interoperabilityRecordBundle Interoperability Record
-     * @param auth                         Authentication
-     * @return {@link InteroperabilityRecordBundle}
-     */
-    InteroperabilityRecordBundle createPublicInteroperabilityRecord(
-            InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth);
-
-    /**
      * Get a paging of Interoperability Record Bundles of a specific Provider of an existing Catalogue
      *
      * @param catalogueId Catalogue ID

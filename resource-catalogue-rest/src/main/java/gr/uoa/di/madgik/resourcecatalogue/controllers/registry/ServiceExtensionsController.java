@@ -206,32 +206,6 @@ public class ServiceExtensionsController {
         return new ResponseEntity<>(helpdeskBundle.getHelpdesk(), HttpStatus.OK);
     }
 
-    // Create a Public HelpdeskBundle if something went bad during its creation
-    @Hidden
-    @PostMapping(path = "createPublicHelpdesk", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<HelpdeskBundle> createPublicHelpdesk(@RequestBody HelpdeskBundle helpdeskBundle, @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(helpdeskService.createPublicResource(helpdeskBundle, auth));
-    }
-
-    @Hidden
-    @PostMapping(path = "createPublicHelpdesks", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void createPublicHelpdesks(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        ff.addFilter("published", false);
-        List<HelpdeskBundle> allHelpdesks = helpdeskService.getAll(ff, auth).getResults();
-        for (HelpdeskBundle helpdeskBundle : allHelpdesks) {
-            try {
-                helpdeskService.createPublicResource(helpdeskBundle, auth);
-            } catch (ResourceException e) {
-                logger.info("Helpdesk with ID '{}' is already registered as Public", helpdeskBundle.getId());
-            }
-        }
-    }
-
-
     //SECTION: MONITORING
     @Operation(summary = "Returns the Monitoring with the given id.")
     @GetMapping(path = "/monitoring/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -411,31 +385,6 @@ public class ServiceExtensionsController {
             return getMonitoringStatus(serviceId.split("/")[0], serviceId.split("/")[1], false).getFirst().getValue();
         } catch (NullPointerException e) {
             return "";
-        }
-    }
-
-    // Create a Public MonitoringBundle if something went bad during its creation
-    @Hidden
-    @PostMapping(path = "createPublicMonitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<MonitoringBundle> createPublicMonitoring(@RequestBody MonitoringBundle monitoringBundle, @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(monitoringService.createPublicResource(monitoringBundle, auth));
-    }
-
-    @Hidden
-    @PostMapping(path = "createPublicMonitorings", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void createPublicMonitorings(@Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(1000);
-        ff.addFilter("published", false);
-        List<MonitoringBundle> allMonitorings = monitoringService.getAll(ff, auth).getResults();
-        for (MonitoringBundle monitoringBundle : allMonitorings) {
-            try {
-                monitoringService.createPublicResource(monitoringBundle, auth);
-            } catch (ResourceException e) {
-                logger.info("Monitoring with ID '{}' is already registered as Public", monitoringBundle.getId());
-            }
         }
     }
 

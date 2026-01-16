@@ -48,7 +48,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final VocabularyService vocabularyService;
-    private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final EmailService emailService;
     private final ProviderResourcesCommonMethods commonMethods;
 
@@ -57,7 +56,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
 
     public InteroperabilityRecordManager(ProviderService providerService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
-                                         PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
                                          EmailService emailService,
                                          ProviderResourcesCommonMethods commonMethods) {
         super(InteroperabilityRecordBundle.class);
@@ -65,7 +63,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
-        this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.emailService = emailService;
         this.commonMethods = commonMethods;
     }
@@ -307,12 +304,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
     public Paging<InteroperabilityRecordBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         throw new UnsupportedOperationException("Not implemented.");
     }
-
-    public InteroperabilityRecordBundle createPublicInteroperabilityRecord(InteroperabilityRecordBundle interoperabilityRecordBundle, Authentication auth) {
-        publicInteroperabilityRecordManager.add(interoperabilityRecordBundle, auth);
-        return interoperabilityRecordBundle;
-    }
-
 
     public InteroperabilityRecordBundle suspend(String interoperabilityRecordId, String catalogueId, boolean suspend, Authentication auth) {
         InteroperabilityRecordBundle existingIG = get(interoperabilityRecordId, catalogueId, false);

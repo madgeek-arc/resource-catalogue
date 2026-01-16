@@ -40,7 +40,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
@@ -52,7 +51,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
                                                  TrainingResourceService trainingResourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
-                                                 PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                                                  IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator,
                                                  ConfigurationTemplateService ctService,
                                                  ConfigurationTemplateInstanceService ctiService) {
@@ -62,7 +60,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.securityService = securityService;
         this.commonMethods = commonMethods;
-        this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.idCreator = idCreator;
         this.relationshipValidator = relationshipValidator;
         this.ctService = ctService;
@@ -261,11 +258,5 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
                 }
             }
         }
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
-        publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, auth);
-        return resourceInteroperabilityRecordBundle;
     }
 }

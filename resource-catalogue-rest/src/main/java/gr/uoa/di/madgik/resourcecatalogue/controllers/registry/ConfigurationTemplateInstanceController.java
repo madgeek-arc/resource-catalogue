@@ -208,15 +208,4 @@ public class ConfigurationTemplateInstanceController {
         ResponseEntity<ConfigurationTemplateInstanceBundle> ret = new ResponseEntity<>(ctiService.update(configurationTemplateInstanceBundle, auth), HttpStatus.OK);
         return ret;
     }
-
-    @Hidden
-    @PostMapping(path = "createPublicConfigurationTemplateInstance", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ConfigurationTemplateInstanceBundle> createPublicConfigurationTemplateInstance(@RequestBody ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle,
-                                                                                                         @Parameter(hidden = true) Authentication auth) {
-        logger.info("Attempth to create a Public Configuration Template Instance from Configuration Template Instance '{}' of the '{}' Catalogue",
-                configurationTemplateInstanceBundle.getId(),
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId());
-        return ResponseEntity.ok(configurationTemplateInstanceService.createPublicConfigurationTemplateInstance(configurationTemplateInstanceBundle, auth));
-    }
 }

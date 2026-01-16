@@ -16,7 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -24,24 +25,22 @@ import org.springframework.stereotype.Service;
 
 
 @Service("publicProviderManager")
-public class PublicProviderService
-        extends AbstractPublicResourceManager<ProviderBundle>
-        implements PublicResourceService<ProviderBundle> {
+public class PublicProviderService extends AbstractPublicResourceManager<NewProviderBundle> {
 
-    public PublicProviderService(JmsService jmsService,
+    public PublicProviderService(GenericResourceService genericResourceService,
+                                 JmsService jmsService,
                                  PidIssuer pidIssuer,
                                  FacetLabelService facetLabelService) {
-        super(ProviderBundle.class, jmsService, pidIssuer, facetLabelService);
+        super(genericResourceService, jmsService, pidIssuer, facetLabelService);
     }
 
     @Override
-    public String getResourceTypeName() {
-        return "provider";
+    protected String getResourceTypeName() {
+        return "providertest";
     }
 
-    //FIXME
-//    @Override
-//    public void updateIdsToPublic(ProviderBundle resource) {
-//        // no-op
-//    }
+    @Override
+    public void updateIdsToPublic(NewProviderBundle bundle) {
+        // no-op
+    }
 }

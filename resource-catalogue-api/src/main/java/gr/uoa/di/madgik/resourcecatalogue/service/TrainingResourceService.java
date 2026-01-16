@@ -134,13 +134,4 @@ public interface TrainingResourceService extends ResourceCatalogueService<Traini
      * @return {@link   TrainingResourceBundle}
      */
     TrainingResourceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
-
-    /**
-     * Create a Public Training Resource
-     *
-     * @param resource Training Resource
-     * @param auth     Authentication
-     * @return {@link   TrainingResourceBundle}
-     */
-    TrainingResourceBundle createPublicResource(TrainingResourceBundle resource, Authentication auth);
 }

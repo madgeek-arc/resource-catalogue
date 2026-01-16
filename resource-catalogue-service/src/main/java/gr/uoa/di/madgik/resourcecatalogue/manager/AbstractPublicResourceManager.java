@@ -1,8 +1,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -12,8 +14,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 
-public abstract class AbstractPublicResourceManager<T extends Bundle<?>> extends ResourceCatalogueManager<T> implements PublicResourceService<T> {
+import java.lang.reflect.InvocationTargetException;
+
+public abstract class AbstractPublicResourceManager<T extends NewBundle>
+        implements gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService<T> {
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractPublicResourceManager.class);
+
+    protected final GenericResourceService genericResourceService;
     private final JmsService jmsService;
     private final PidIssuer pidIssuer;
     private final FacetLabelService facetLabelService;
@@ -21,36 +29,42 @@ public abstract class AbstractPublicResourceManager<T extends Bundle<?>> extends
     @Value("${pid.service.enabled}")
     private boolean pidServiceEnabled;
 
-    protected AbstractPublicResourceManager(Class<T> typeParameterClass, JmsService jmsService,
-                                         PidIssuer pidIssuer,
-                                         FacetLabelService facetLabelService) {
-        super(typeParameterClass);
+    protected abstract String getResourceTypeName();
+
+    //FIXME: Should PublicResourceService extend anything so here we override?
+    protected AbstractPublicResourceManager(GenericResourceService genericResourceService,
+                                            JmsService jmsService,
+                                            PidIssuer pidIssuer,
+                                            FacetLabelService facetLabelService) {
+        this.genericResourceService = genericResourceService;
         this.jmsService = jmsService;
         this.pidIssuer = pidIssuer;
         this.facetLabelService = facetLabelService;
     }
 
-    public T getOrElseReturnNull(String id) {
-        T datasourceBundle;
-        try {
-            datasourceBundle = get(id, true);
-        } catch (CatalogueResourceNotFoundException e) {
-            return null;
+    @Override
+    public T get(String id, String catalogueId) {
+        if (catalogueId != null && !catalogueId.isBlank()) {
+            return genericResourceService.get(getResourceTypeName(),
+                    new SearchService.KeyValue("resource_internal_id", id),
+                    new SearchService.KeyValue("catalogue_id", catalogueId),
+                    new SearchService.KeyValue("published", "true"));
         }
-        return datasourceBundle;
+        return genericResourceService.get(getResourceTypeName(),
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "true"));
     }
 
-    @Override
     public Browsing<T> getAll(FacetFilter facetFilter, Authentication authentication) {
-        Browsing<T> browsing = super.getAll(facetFilter, authentication);
-        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
-            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
-        }
+        Browsing<T> browsing = genericResourceService.getResults(facetFilter);
+        //TODO: test if we need this
+//        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
+//            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+//        }
         return browsing;
     }
 
-    @Override
-    public T add(T t, Authentication authentication) {
+    public T add(T t) {
         String lowerLevelId = t.getId();
         t.setId(t.getIdentifiers().getPid());
         t.getMetadata().setPublished(true);
@@ -62,39 +76,47 @@ public abstract class AbstractPublicResourceManager<T extends Bundle<?>> extends
         }
 
         // sets public ids to fields
-//        updateIdsToPublic(t); //FIXME
+        updateIdsToPublic(t);
 
         T ret;
         logger.info("{} '{}' is being published with id '{}'", t.getClass().getSimpleName(), lowerLevelId, t.getId());
-        ret = super.add(t, null);
+        ret = genericResourceService.add(getResourceTypeName(), t);
         jmsService.convertAndSendTopic("provider.create", t);
         return ret;
     }
 
-    @Override
-    public T update(T t, Authentication authentication) {
-        T published = super.get(t.getIdentifiers().getPid(), true);
+    public T update(T t) {
+        T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
         t.setIdentifiers(published.getIdentifiers());
         t.setId(published.getId());
         t.getMetadata().setPublished(true);
 
         // sets public ids to fields
-//        updateIdsToPublic(t); //FIXME
+        updateIdsToPublic(t);
 
         logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
-        T ret = super.update(t, null);
+        T ret;
+        try {
+            ret = genericResourceService.update(getResourceTypeName(), t.getId(), t);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
         jmsService.convertAndSendTopic("provider.update", t);
         return ret;
     }
 
-    @Override
     public void delete(T t) {
         try {
-            T publicT = get(t.getIdentifiers().getPid(), true);
-            logger.info("Deleting public {} with id '{}'", publicT.getClass().getSimpleName(), publicT.getId());
-            super.delete(publicT);
-            jmsService.convertAndSendTopic("provider.delete", publicT);
+            T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
+            logger.info("Deleting public {} with id '{}'", published.getClass().getSimpleName(), published.getId());
+            genericResourceService.delete(getResourceTypeName(), t.getId());
+            jmsService.convertAndSendTopic("provider.delete", published);
         } catch (CatalogueResourceNotFoundException ignore) {
         }
+    }
+
+    @Override
+    public T createPublicResource(T t, Authentication auth) {
+        return add(t);
     }
 }

@@ -51,18 +51,11 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Publishing Date",
-      "multivalued": false,
-      "name": "publishing_date",
-      "path": "$.service.publishingDate",
-      "type": "java.util.Date"
-    },
-    {
       "label": "Type",
       "multivalued": false,
-      "name": "type",
+      "name": "entity_type",
       "path": "$.service.type",
-      "type": "java.util.Date"
+      "type": "java.lang.String"
     },
     {
       "label": "Service Owner",

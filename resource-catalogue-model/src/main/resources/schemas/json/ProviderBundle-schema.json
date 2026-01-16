@@ -1,18 +1,6 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
   "$defs" : {
-    "ContactInfoTransfer" : {
-      "type" : "object",
-      "properties" : {
-        "acceptedTransfer" : {
-          "type" : "boolean"
-        },
-        "email" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
-    },
     "Identifiers" : {
       "type" : "object",
       "properties" : {
@@ -150,12 +138,6 @@
     },
     "templateStatus" : {
       "type" : "string"
-    },
-    "transferContactInformation" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/ContactInfoTransfer"
-      }
     }
   },
   "additionalProperties" : false

@@ -45,7 +45,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
     private final ProviderResourcesCommonMethods commonMethods;
     private final ProviderService providerService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final PublicConfigurationTemplateService publicConfigurationTemplateService;
     private final GenericResourceService genericResourceService;
 
     @Value("${catalogue.id}")
@@ -53,14 +52,12 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
 
     public ConfigurationTemplateManager(IdCreator idCreator, ProviderResourcesCommonMethods commonMethods,
                                         ProviderService providerService, InteroperabilityRecordService interoperabilityRecordService,
-                                        PublicConfigurationTemplateService publicConfigurationTemplateService,
                                         GenericResourceService genericResourceService) {
         super(ConfigurationTemplateBundle.class);
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.providerService = providerService;
         this.interoperabilityRecordService = interoperabilityRecordService;
-        this.publicConfigurationTemplateService = publicConfigurationTemplateService;
         this.genericResourceService = genericResourceService;
     }
 
@@ -211,10 +208,5 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
             ret.computeIfAbsent(igId, k -> new ArrayList<>()).add(ctId);
         }
         return ret;
-    }
-
-    public ConfigurationTemplateBundle createPublicConfigurationTemplate(ConfigurationTemplateBundle bundle, Authentication auth) {
-        publicConfigurationTemplateService.add(bundle, auth);
-        return bundle;
     }
 }

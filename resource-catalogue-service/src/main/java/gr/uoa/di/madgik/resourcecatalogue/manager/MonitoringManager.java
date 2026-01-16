@@ -51,7 +51,6 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
     private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
-    private final PublicMonitoringService publicMonitoringManager;
     private final SecurityService securityService;
     private final EmailService emailService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -70,7 +69,6 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
 
     public MonitoringManager(ServiceService serviceService,
                              TrainingResourceService trainingResourceService,
-                             PublicMonitoringService publicMonitoringManager,
                              @Lazy SecurityService securityService,
                              @Lazy EmailService emailService,
                              ProviderResourcesCommonMethods commonMethods,
@@ -79,7 +77,6 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         super(MonitoringBundle.class);
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
-        this.publicMonitoringManager = publicMonitoringManager;
         this.securityService = securityService;
         this.emailService = emailService;
         this.commonMethods = commonMethods;
@@ -308,13 +305,6 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
             monitoringStatuses.add(monitoringStatus);
         }
         return monitoringStatuses;
-    }
-
-    public MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth) {
-        logger.info("Attempt to create a Public Monitoring from Monitoring '{}' of the '{}' Catalogue",
-                monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId());
-        publicMonitoringManager.add(monitoringBundle, auth);
-        return monitoringBundle;
     }
 
     public List<MonitoringStatus> getAvailabilityOrStatus(String url, String field) {

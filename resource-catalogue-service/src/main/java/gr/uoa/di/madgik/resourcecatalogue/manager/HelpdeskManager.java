@@ -42,7 +42,6 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
     private static final Logger logger = LoggerFactory.getLogger(HelpdeskManager.class);
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
-    private final PublicHelpdeskService publicHelpdeskManager;
     private final SecurityService securityService;
     private final EmailService emailService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -53,7 +52,6 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
 
     public HelpdeskManager(ServiceService serviceService,
                            TrainingResourceService trainingResourceService,
-                           PublicHelpdeskService publicHelpdeskManager,
                            @Lazy SecurityService securityService,
                            @Lazy EmailService emailService,
                            @Lazy ProviderResourcesCommonMethods commonMethods,
@@ -61,7 +59,6 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
         super(HelpdeskBundle.class);
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
-        this.publicHelpdeskManager = publicHelpdeskManager;
         this.securityService = securityService;
         this.emailService = emailService;
         this.commonMethods = commonMethods;
@@ -194,12 +191,5 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
         super.delete(helpdesk);
         logger.info("Deleted Helpdesk with id '{}' of the Catalogue '{}'",
                 helpdesk.getHelpdesk().getId(), helpdesk.getHelpdesk().getCatalogueId());
-    }
-
-    public HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth) {
-        logger.info("Attempt to create a Public Helpdesk from Helpdesk '{}' of the '{}' Catalogue",
-                helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId());
-        publicHelpdeskManager.add(helpdeskBundle, auth);
-        return helpdeskBundle;
     }
 }

@@ -27,23 +27,6 @@ public interface TestService<T extends NewBundle> extends NewBundleOperations<T>
     T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth);
 
     /**
-     * Create Public resource
-     *
-     * @param bundle resource
-     * @param auth   Authentication
-     * @return {@link T}
-     */
-    T createPublicResource(T bundle, Authentication auth);
-
-    /**
-     *
-     * @param id          resource ID
-     * @param catalogueId catalogue ID
-     * @return {@link T}
-     */
-    T getPublic(String id, String catalogueId);
-
-    /**
      * Get a specific resource of the EOSC Catalogue, given its ID, or return null
      *
      * @param id resource ID

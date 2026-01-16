@@ -57,7 +57,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
     private final EmailService emailService;
     private final VocabularyService vocabularyService;
     private final CatalogueService catalogueService;
-    private final PublicTrainingResourceService publicTrainingResourceManager;
     private final MigrationService migrationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
@@ -79,7 +78,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
                                    @Lazy EmailService emailService,
                                    @Lazy VocabularyService vocabularyService,
                                    CatalogueService catalogueService,
-                                   PublicTrainingResourceService publicTrainingResourceManager,
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    @Lazy ProviderResourcesCommonMethods commonMethods,
                                    @Lazy MigrationService migrationService,
@@ -91,7 +89,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         this.emailService = emailService;
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
-        this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.synchronizerService = synchronizerService;
         this.commonMethods = commonMethods;
         this.migrationService = migrationService;
@@ -435,12 +432,6 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResourceBundle, providerBundle); //FIXME
     }
 
-    @Override
-    public TrainingResourceBundle createPublicResource(TrainingResourceBundle trainingResourceBundle, Authentication auth) {
-        publicTrainingResourceManager.add(trainingResourceBundle, auth);
-        return trainingResourceBundle;
-    }
-
     // for sendProviderMails on RegistrationMailService AND StatisticsManager
     public List<TrainingResource> getResources(String providerId) {
         FacetFilter ff = new FacetFilter();
@@ -606,7 +597,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
 
         // add Resource, delete the old one
         add(trainingResourceBundle, auth);
-        publicTrainingResourceManager.delete(get(resourceId, catalogueId, false)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+//        publicTrainingResourceManager.delete(get(resourceId, catalogueId, false)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
         delete(get(resourceId, catalogueId, false));
 
         // update other resources which had the old resource ID on their fields

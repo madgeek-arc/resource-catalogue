@@ -56,16 +56,6 @@ public interface ResourceInteroperabilityRecordService extends ResourceCatalogue
             ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType);
 
     /**
-     * Create a Public ResourceInteroperabilityRecord Bundle
-     *
-     * @param resourceInteroperabilityRecordBundle ResourceInteroperabilityRecord Bundle
-     * @param auth                                 Authentication
-     * @return {@link ResourceInteroperabilityRecordBundle}
-     */
-    ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(
-            ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth);
-
-    /**
      * Get a ResourceInteroperabilityRecord Bundle by its related resource ID
      *
      * @param resourceId resource ID related to the specific ResourceInteroperabilityRecord Bundle

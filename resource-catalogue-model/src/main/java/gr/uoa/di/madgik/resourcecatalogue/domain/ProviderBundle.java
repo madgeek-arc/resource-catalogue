@@ -16,15 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import java.util.List;
 import java.util.Objects;
 
 public class ProviderBundle extends Bundle<Provider> {
 
-//    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
+    //    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
     private String templateStatus;
-
-    private List<ContactInfoTransfer> transferContactInformation;
 
     public ProviderBundle() {
         // no arg constructor
@@ -66,25 +63,17 @@ public class ProviderBundle extends Bundle<Provider> {
         this.templateStatus = templateStatus;
     }
 
-    public List<ContactInfoTransfer> getTransferContactInformation() {
-        return transferContactInformation;
-    }
-
-    public void setTransferContactInformation(List<ContactInfoTransfer> transferContactInformation) {
-        this.transferContactInformation = transferContactInformation;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         ProviderBundle that = (ProviderBundle) o;
-        return Objects.equals(templateStatus, that.templateStatus) && Objects.equals(transferContactInformation, that.transferContactInformation);
+        return Objects.equals(templateStatus, that.templateStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), templateStatus, transferContactInformation);
+        return Objects.hash(super.hashCode(), templateStatus);
     }
 }

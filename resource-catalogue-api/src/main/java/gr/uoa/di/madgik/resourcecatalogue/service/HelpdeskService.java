@@ -42,15 +42,6 @@ public interface HelpdeskService extends ResourceCatalogueService<HelpdeskBundle
     HelpdeskBundle validate(HelpdeskBundle helpdeskBundle, String resourceType);
 
     /**
-     * Creates a Public version of the specific Helpdesk
-     *
-     * @param helpdeskBundle HelpdeskBundle
-     * @param auth           Authentication
-     * @return {@link HelpdeskBundle}
-     */
-    HelpdeskBundle createPublicResource(HelpdeskBundle helpdeskBundle, Authentication auth);
-
-    /**
      * Updates a Helpdesk Bundle
      *
      * @param helpdeskBundle HelpdeskBundle

@@ -117,13 +117,4 @@ public interface DeployableServiceService extends ResourceCatalogueService<Deplo
      * @return {@link   DeployableServiceBundle}
      */
     DeployableServiceBundle changeProvider(String resourceId, String newProvider, String comment, Authentication auth);
-
-    /**
-     * Create a Public Deployable Service
-     *
-     * @param resource Deployable Service
-     * @param auth     Authentication
-     * @return {@link   DeployableServiceBundle}
-     */
-    DeployableServiceBundle createPublicResource(DeployableServiceBundle resource, Authentication auth);
 }

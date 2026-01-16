@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,9 +48,12 @@ import java.util.Map;
 public class PublicProviderController {
 
     private final ProviderService service;
+    private final PublicResourceService<NewProviderBundle> publicService;
 
-    public PublicProviderController(ProviderService service) {
+    public PublicProviderController(ProviderService service,
+                                    PublicResourceService<NewProviderBundle> publicService) {
         this.service = service;
+        this.publicService = publicService;
     }
 
     @Operation(description = "Returns the Public Provider with the given id.")
@@ -60,7 +64,7 @@ public class PublicProviderController {
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = service.getPublic(id, catalogueId);
+        NewProviderBundle bundle = (NewProviderBundle) publicService.get(id, catalogueId);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
         }
@@ -77,7 +81,7 @@ public class PublicProviderController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = service.getPublic(id, catalogueId);
+        NewProviderBundle bundle = (NewProviderBundle) publicService.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -114,6 +118,6 @@ public class PublicProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> createPublicProvider(@RequestBody NewProviderBundle bundle,
                                                                   @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
+        return ResponseEntity.ok(publicService.createPublicResource(bundle, auth));
     }
 }

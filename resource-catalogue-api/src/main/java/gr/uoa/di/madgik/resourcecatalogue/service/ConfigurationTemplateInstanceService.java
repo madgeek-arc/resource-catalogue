@@ -49,14 +49,4 @@ public interface ConfigurationTemplateInstanceService extends ResourceCatalogueS
      * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
      */
     ConfigurationTemplateInstance getByResourceAndConfigurationTemplateId(String resourceId, String ctId);
-
-    /**
-     * Create a Public Configuration Template Instance
-     *
-     * @param configurationTemplateInstanceBundle Configuration Template Instance
-     * @param auth                                Authentication
-     * @return {@link ConfigurationTemplateInstanceBundle}
-     */
-    ConfigurationTemplateInstanceBundle createPublicConfigurationTemplateInstance(
-            ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth);
 }

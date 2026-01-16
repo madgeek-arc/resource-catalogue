@@ -67,15 +67,6 @@ public interface MonitoringService extends ResourceCatalogueService<MonitoringBu
      */
     void updateBundle(MonitoringBundle monitoringBundle, Authentication auth);
 
-    /**
-     * Creates a Public version of the specific Monitoring
-     *
-     * @param monitoringBundle MonitoringBundle
-     * @param auth             Authentication
-     * @return {@link MonitoringBundle}
-     */
-    MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth);
-
 
     // Argo GRNET Monitoring Status methods
 

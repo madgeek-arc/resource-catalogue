@@ -48,14 +48,12 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final IdCreator idCreator;
-    private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceService;
 
     public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService configInstanceService,
                                                 @Lazy ConfigurationTemplateService configService,
                                                 @Lazy ResourceInteroperabilityRecordService rirService,
                                                 SecurityService securityService, IdCreator idCreator,
-                                                ProviderResourcesCommonMethods commonMethods,
-                                                PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceService) {
+                                                ProviderResourcesCommonMethods commonMethods) {
         super(ConfigurationTemplateInstanceBundle.class);
         this.configInstanceService = configInstanceService;
         this.configService = configService;
@@ -63,7 +61,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         this.securityService = securityService;
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
-        this.publicConfigurationTemplateInstanceService = publicConfigurationTemplateInstanceService;
     }
 
     @Override
@@ -255,11 +252,5 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         if (!ctKeys.containsAll(ctiKeys)) {
             throw new ValidationException("Configuration Template Instance does not contain the required model in its payload");
         }
-    }
-
-    public ConfigurationTemplateInstanceBundle createPublicConfigurationTemplateInstance(
-            ConfigurationTemplateInstanceBundle bundle, Authentication auth) {
-        publicConfigurationTemplateInstanceService.add(bundle, auth);
-        return bundle;
     }
 }

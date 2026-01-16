@@ -55,7 +55,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     private final VocabularyService vocabularyService;
     private final CatalogueService catalogueService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final PublicDeployableServiceService publicDeployableServiceService;
     private final EmailService emailService;
 
     @Autowired
@@ -70,7 +69,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
                                     IdCreator idCreator, @Lazy SecurityService securityService,
                                     @Lazy VocabularyService vocabularyService,
                                     CatalogueService catalogueService,
-                                    PublicDeployableServiceService publicDeployableServiceService,
                                     EmailService emailService,
                                     @Lazy ProviderResourcesCommonMethods commonMethods) {
         super(DeployableServiceBundle.class);
@@ -79,7 +77,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.catalogueService = catalogueService;
-        this.publicDeployableServiceService = publicDeployableServiceService;
         this.commonMethods = commonMethods;
         this.emailService = emailService;
     }
@@ -400,12 +397,6 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
     }
 
     @Override
-    public DeployableServiceBundle createPublicResource(DeployableServiceBundle deployableServiceBundle, Authentication auth) {
-        publicDeployableServiceService.add(deployableServiceBundle, auth);
-        return deployableServiceBundle;
-    }
-
-    @Override
     public Browsing<DeployableServiceBundle> getAll(FacetFilter ff, Authentication auth) {
         updateFacetFilterConsideringTheAuthorization(ff, auth);
 
@@ -550,7 +541,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
 
         // add Resource, delete the old one
         add(deployableServiceBundle, auth);
-        publicDeployableServiceService.delete(get(resourceId, catalogueId, false)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
+//        publicDeployableServiceService.delete(get(resourceId, catalogueId, false)); // FIXME: ProviderManagementAspect's deletePublicDatasource is not triggered
         delete(get(resourceId, catalogueId, false));
 
         return deployableServiceBundle;

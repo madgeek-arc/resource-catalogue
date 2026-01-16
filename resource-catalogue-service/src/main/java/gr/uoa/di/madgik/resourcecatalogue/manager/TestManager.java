@@ -70,19 +70,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
                 new SearchService.KeyValue("published", "false"));
     }
 
-    @Override
-    public T getPublic(String id, String catalogueId) {
-        if (catalogueId != null && !catalogueId.isBlank()) {
-            return genericResourceService.get(getResourceTypeName(),
-                    new SearchService.KeyValue("resource_internal_id", id),
-                    new SearchService.KeyValue("catalogue_id", catalogueId),
-                    new SearchService.KeyValue("published", "true"));
-        }
-        return genericResourceService.get(getResourceTypeName(),
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "true"));
-    }
-
     //TODO: probably we do not need this IF we use the same get for drafts and non-drafts
     //TODO: draft functionality is default-catalogue specific, meaning the IDs are always unique
     @Override
@@ -281,12 +268,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     @Override
     public boolean exists(String id) {
         return false;
-    }
-
-    //TODO: move to PublicController
-    @Override
-    public T createPublicResource(T bundle, Authentication auth) {
-        return null;
     }
     //endregion
 }
