@@ -82,11 +82,11 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue provider
             interoperabilityRecordBundle.getInteroperabilityRecord().setCatalogueId(this.catalogueId);
             interoperabilityRecordBundle.setId(idCreator.generate(getResourceTypeName()));
-            commonMethods.createIdentifiers(interoperabilityRecordBundle, getResourceTypeName(), false);
+//            commonMethods.createIdentifiers(interoperabilityRecordBundle, getResourceTypeName(), false);
         } else { // external catalogue
-            commonMethods.checkCatalogueIdConsistency(interoperabilityRecordBundle, catalogueId);
+//            commonMethods.validateCatalogueId(interoperabilityRecordBundle, catalogueId);
             idCreator.validateId(interoperabilityRecordBundle.getId());
-            commonMethods.createIdentifiers(interoperabilityRecordBundle, getResourceTypeName(), true);
+//            commonMethods.createIdentifiers(interoperabilityRecordBundle, getResourceTypeName(), true);
         }
         logger.trace("Attempting to add a new Interoperability Record: {}", interoperabilityRecordBundle.getInteroperabilityRecord());
 
@@ -151,7 +151,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueManager<Inte
         if (catalogueId == null || catalogueId.isEmpty()) {
             ret.getInteroperabilityRecord().setCatalogueId(this.catalogueId);
         } else {
-            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
+//            commonMethods.validateCatalogueId(ret, catalogueId);
         }
 
         validate(ret);

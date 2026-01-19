@@ -110,11 +110,11 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue provider
             trainingResourceBundle.getTrainingResource().setCatalogueId(this.catalogueId);
             trainingResourceBundle.setId(idCreator.generate(getResourceTypeName()));
-            commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), false);
+//            commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), false);
         } else { // add provider from external catalogue
-            commonMethods.checkCatalogueIdConsistency(trainingResourceBundle, catalogueId);
+//            commonMethods.validateCatalogueId(trainingResourceBundle, catalogueId);
             idCreator.validateId(trainingResourceBundle.getId());
-            commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), true);
+//            commonMethods.createIdentifiers(trainingResourceBundle, getResourceTypeName(), true);
         }
         relationshipValidator.checkRelatedResourceIDsConsistency(trainingResourceBundle);
 
@@ -196,7 +196,7 @@ public class TrainingResourceManager extends ResourceCatalogueManager<TrainingRe
         if (catalogueId == null || catalogueId.isEmpty()) {
             ret.getTrainingResource().setCatalogueId(this.catalogueId);
         } else {
-            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
+//            commonMethods.validateCatalogueId(ret, catalogueId);
         }
         relationshipValidator.checkRelatedResourceIDsConsistency(ret);
 

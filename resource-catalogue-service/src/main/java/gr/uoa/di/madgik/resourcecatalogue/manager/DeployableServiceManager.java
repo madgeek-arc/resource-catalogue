@@ -96,11 +96,11 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) { // add catalogue deployable service
             deployableServiceBundle.getDeployableService().setCatalogueId(this.catalogueId);
             deployableServiceBundle.setId(idCreator.generate(getResourceTypeName()));
-            commonMethods.createIdentifiers(deployableServiceBundle, getResourceTypeName(), false);
+//            commonMethods.createIdentifiers(deployableServiceBundle, getResourceTypeName(), false);
         } else { // add deployable service from external catalogue
-            commonMethods.checkCatalogueIdConsistency(deployableServiceBundle, catalogueId);
+//            commonMethods.validateCatalogueId(deployableServiceBundle, catalogueId);
             idCreator.validateId(deployableServiceBundle.getId());
-            commonMethods.createIdentifiers(deployableServiceBundle, getResourceTypeName(), true);
+//            commonMethods.createIdentifiers(deployableServiceBundle, getResourceTypeName(), true);
         }
 
         NewProviderBundle providerBundle = providerService.get(deployableServiceBundle.getDeployableService().getResourceOrganisation(),
@@ -179,7 +179,7 @@ public class DeployableServiceManager extends ResourceCatalogueManager<Deployabl
         if (catalogueId == null || catalogueId.isEmpty()) {
             ret.getDeployableService().setCatalogueId(this.catalogueId);
         } else {
-            commonMethods.checkCatalogueIdConsistency(ret, catalogueId);
+//            commonMethods.validateCatalogueId(ret, catalogueId);
         }
 
         logger.trace("Attempting to update the Deployable Service with id '{}' of the Catalogue '{}'",

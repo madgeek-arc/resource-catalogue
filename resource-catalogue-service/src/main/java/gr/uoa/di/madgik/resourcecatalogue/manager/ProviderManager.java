@@ -71,13 +71,13 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     public ProviderManager(GenericResourceService genericResourceService,
                            EmailService emailService,
                            VocabularyService vocabularyService,
-                           @Lazy ServiceService serviceService, //FIXME
-                           @Lazy TrainingResourceService trainingResourceService, //FIXME
-                           @Lazy InteroperabilityRecordService interoperabilityRecordService, //FIXME
+                           @Lazy ServiceService serviceService,
+                           @Lazy TrainingResourceService trainingResourceService,
+                           @Lazy InteroperabilityRecordService interoperabilityRecordService,
                            IdCreator idCreator,
                            ProviderResourcesCommonMethods commonMethods,
                            SecurityService securityService,
-                           CatalogueService catalogueService, //FIXME
+                           CatalogueService catalogueService,
                            ProviderCascadeLifecycleService cascadeLifecycleService) {
         super(genericResourceService, securityService);
         this.genericResourceService = genericResourceService;
@@ -108,7 +108,6 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 //        VocabularyValidationUtils.validateScientificDomains();
 
 //        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
-//        synchronizerService.syncAdd(bundle.getProvider()); //TODO: remove this?
         return ret;
     }
 
@@ -116,17 +115,16 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         String catalogueId = bundle.getCatalogueId();
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
-            bundle.setCatalogueId(this.catalogueId); //TODO: how we proceed with instance's catalogue ID
+            bundle.setCatalogueId(this.catalogueId);
             bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
-            //TODO: make sure we need to create our own IDs instead of users giving them
             bundle.setId(idCreator.generate(getResourceTypeName()));
-//            commonMethods.createIdentifiers(bundle, getResourceTypeName(), false); //TODO: fix and enable
+            commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         } else {
             bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
-            commonMethods.checkCatalogueIdConsistency(bundle, catalogueId); //TODO: test me
+            commonMethods.validateCatalogueId(catalogueId);
             bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
             idCreator.validateId(bundle.getId());
-//            commonMethods.createIdentifiers(bundle, getResourceTypeName(), true); //TODO: fix and enable
+            commonMethods.createIdentifiers(bundle, getResourceTypeName(), true);
         }
 
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
@@ -148,13 +146,10 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-//            synchronizerService.syncUpdate(bundle.getProvider()); // TODO: remove this?
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
-
-    //TODO: Do we need specific model validation? -> VocabularyValidationUtils -> Should it be transferred into catalogue lib?
 
     @Override
     @Transactional // if deleteAllRelatedResources() fails, this should also fail
@@ -169,8 +164,6 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         logger.info("Deleting Provider: {} and all its Resources", bundle.getId());
 //        cascadeLifecycleService.deleteAllRelatedResources(bundle, auth); //FIXME
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
-
-//        synchronizerService.syncDelete(bundle.getProvider()); //TODO: remove this?
     }
 
     @Override
@@ -400,9 +393,9 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         // fetch non-catalogueId related public Providers
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicProviders = getAll(createFacetFilter(catalogueId, true)).getResults()
                 .stream()
-                .filter(c -> !c.getProvider().get("catalogueId").equals(catalogueId))
+                .filter(c -> !c.getCatalogueId().equals(catalogueId))
                 .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
-                        c.getProvider().get("id").toString(), c.getProvider().get("name").toString())
+                        c.getId(), c.getProvider().get("name").toString())
                 )
                 .toList();
 
@@ -435,7 +428,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         bundle.markDraft(auth, null);
         bundle.setId(idCreator.generate(getResourceTypeName()));
         bundle.setCatalogueId(catalogueId);
-//        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false); //FIXME
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
         NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);

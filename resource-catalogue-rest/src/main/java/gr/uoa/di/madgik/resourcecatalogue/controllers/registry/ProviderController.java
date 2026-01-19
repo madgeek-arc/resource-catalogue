@@ -49,7 +49,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-//TODO: Decide what to do with catalogueId, what we put on default Catalogue id
 
 @Profile("crud")
 @RestController
@@ -185,7 +184,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewProviderBundle> addBundle(@RequestBody NewProviderBundle provider,
                                                        @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle bundle = providerService.add(provider, auth); //TODO: do we want Admin adds to pass through regular update?
+        NewProviderBundle bundle = providerService.add(provider, auth);
         logger.info("Added ProviderBundle with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
@@ -195,14 +194,13 @@ public class ProviderController {
     public void addBulk(@RequestBody List<NewProviderBundle> providerList,
                         @Parameter(hidden = true) Authentication auth) {
         for (NewProviderBundle bundle : providerList) {
-            providerService.add(bundle, auth); //TODO: add creates ID, we want it?
+            providerService.add(bundle, auth);
         }
     }
 
-    //FIXME: how to proceed with IDs
     @Operation(summary = "Updates the Provider with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider[id])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> provider,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -219,7 +217,7 @@ public class ProviderController {
     public ResponseEntity<NewProviderBundle> updateBundle(@RequestBody NewProviderBundle provider,
                                                           @RequestParam(required = false) String comment,
                                                           @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle bundle = providerService.update(provider, comment, auth); //TODO: do we want Admin updates to pass through regular update?
+        NewProviderBundle bundle = providerService.update(provider, comment, auth);
         logger.info("Updated the Provider id '{}'", provider.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
@@ -408,7 +406,7 @@ public class ProviderController {
     }
 
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider[id])")
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> provider,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) provider.get("id");
@@ -430,7 +428,7 @@ public class ProviderController {
     }
 
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider[id])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> provider,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) provider.get("id");

@@ -111,7 +111,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
             datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
             emailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
-            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), false);
+//            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), false);
         } else {
             datasourceBundle.setActive(true);
             datasourceBundle.setStatus(vocabularyService.get("approved").getId());
@@ -120,7 +120,7 @@ public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle
             datasourceBundle.getLoggingInfo().add(loggingInfo);
             datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(1));
             idCreator.validateId(datasourceBundle.getId());
-            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), true);
+//            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), true);
         }
     }
 

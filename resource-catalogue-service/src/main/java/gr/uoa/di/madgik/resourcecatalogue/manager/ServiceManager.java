@@ -99,7 +99,6 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         onboard(service, provider, auth);
         onboardingValidation(service, provider);
         NewServiceBundle ret = genericResourceService.add(getResourceTypeName(), service);
-//        synchronizerService.syncAdd(service.getService()); //TODO: remove this?
         return ret;
     }
 
@@ -114,12 +113,12 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
             }
             service.setCatalogueId(this.catalogueId);
             service.setId(idCreator.generate(getResourceTypeName()));
-//            commonMethods.createIdentifiers(service, getResourceTypeName(), false); //FIXME
+            commonMethods.createIdentifiers(service, getResourceTypeName(), false);
         } else {
             service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
-            commonMethods.checkCatalogueIdConsistency(service, catalogueId);
+            commonMethods.validateCatalogueId(catalogueId);
             idCreator.validateId(service.getId());
-//            commonMethods.createIdentifiers(service, getResourceTypeName(), true); //FIXME
+            commonMethods.createIdentifiers(service, getResourceTypeName(), true);
         }
         service.setAuditState(Auditable.NOT_AUDITED);
     }
@@ -150,7 +149,7 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         }
         service.markUpdate(auth, comment);
 //        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
-        checkAndResetServiceOnboarding(service);
+        checkAndResetServiceOnboarding(service, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
@@ -164,7 +163,7 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         }
     }
 
-    private void checkAndResetServiceOnboarding(NewServiceBundle service) {
+    private void checkAndResetServiceOnboarding(NewServiceBundle service, Authentication auth) {
         NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
@@ -173,7 +172,7 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
                 service.setStatus(vocabularyService.get("pending").getId());
                 service.setActive(false);
                 provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(provider, "system update", securityService.getAdminAccess()); //TODO: this or generic?
+                providerService.update(provider, "system update", auth);
             }
         }
     }
@@ -185,7 +184,6 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
 //        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName()); //FIXME
         logger.info("Deleting Service: {} and all its Resource Interoperability Records", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
-//        synchronizerService.syncDelete(bundle.getStatus()); //TODO: remove this?
     }
 
     @Transactional
@@ -197,7 +195,7 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         NewServiceBundle existing = get(id);
         existing.markOnboard(status, active, auth, null);
 
-        updateProviderTemplateStatus(existing, status);
+        updateProviderTemplateStatus(existing, status, auth);
 
         logger.info("Verifying Service: {}", existing);
         try {
@@ -207,7 +205,7 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         }
     }
 
-    private void updateProviderTemplateStatus(NewServiceBundle service, String status) {
+    private void updateProviderTemplateStatus(NewServiceBundle service, String status, Authentication auth) {
         NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         switch (status) {
@@ -223,7 +221,7 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
             default:
                 break;
         }
-        providerService.update(provider, "system update", securityService.getAdminAccess()); //TODO: this or generic?
+        providerService.update(provider, "system update", auth);
     }
 
     @Override
@@ -461,7 +459,7 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         bundle.markDraft(auth, null);
         bundle.setId(idCreator.generate(getResourceTypeName()));
         bundle.setCatalogueId(catalogueId);
-//        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false); //FIXME
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
 
         NewServiceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
         return ret;

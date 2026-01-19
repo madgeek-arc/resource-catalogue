@@ -105,7 +105,7 @@ public class HelpdeskManager extends ResourceCatalogueManager<HelpdeskBundle> im
         logger.trace("Attempting to add a new Helpdesk: {}", helpdesk);
 
         helpdesk.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-        commonMethods.createIdentifiers(helpdesk, getResourceTypeName(), false);
+//        commonMethods.createIdentifiers(helpdesk, getResourceTypeName(), false);
         List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(helpdesk, auth);
         helpdesk.setLoggingInfo(loggingInfoList);
         helpdesk.setActive(true);

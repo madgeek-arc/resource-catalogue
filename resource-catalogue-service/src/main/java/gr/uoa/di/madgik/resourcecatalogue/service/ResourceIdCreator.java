@@ -90,6 +90,7 @@ public class ResourceIdCreator implements IdCreator {
         if (id == null || id.isEmpty()) {
             throw new ValidationException("ID cannot be null or empty");
         }
+        //TODO: warning instead of throw error
         if (id.length() > 50) {
             throw new ValidationException("ID is too long; max 50 characters allowed.");
         }

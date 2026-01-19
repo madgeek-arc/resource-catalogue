@@ -81,7 +81,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueManager<Confi
         }
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+//        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
 
         NewProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(),
                 interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());

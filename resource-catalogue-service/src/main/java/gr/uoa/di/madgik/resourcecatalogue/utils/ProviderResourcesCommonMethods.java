@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,63 +64,18 @@ public class ProviderResourcesCommonMethods {
         this.idCreator = idCreator;
     }
 
-    public void checkCatalogueIdConsistency(Object o, String catalogueId) {
-        if (!catalogueService.exists(catalogueId)) {
-            throw new ResourceNotFoundException(catalogueId, "Catalogue");
+    public void validateCatalogueId(String catalogueId) {
+        //TODO: we set it so this should never been thrown
+        if (!StringUtils.hasText(catalogueId)) {
+            throw new ResourceException("catalogueId must not be blank", HttpStatus.BAD_REQUEST);
         }
-        if (o != null) {
-            if (o instanceof ProviderBundle) {
-                if (((ProviderBundle) o).getPayload().getCatalogueId() == null || ((ProviderBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Provider's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((ProviderBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
-                    }
-                }
-                if (!catalogueService.get(catalogueId).getStatus().equals("approved")) {
-                    throw new ResourceException(String.format("The Catalogue '%s' is not yet approved", catalogueId),
-                            HttpStatus.CONFLICT);
-                }
-            }
-            if (o instanceof ServiceBundle) {
-                if (((ServiceBundle) o).getPayload().getCatalogueId() == null || ((ServiceBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((ServiceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Service's 'catalogueId' don't match");
-                    }
-                }
-            }
-            if (o instanceof TrainingResourceBundle) {
-                if (((TrainingResourceBundle) o).getPayload().getCatalogueId() == null ||
-                        ((TrainingResourceBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Training Resource's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((TrainingResourceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Training Resource's 'catalogueId' don't match");
-                    }
-                }
-            }
-            if (o instanceof DeployableServiceBundle) {
-                if (((DeployableServiceBundle) o).getPayload().getCatalogueId() == null ||
-                        ((DeployableServiceBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Deployable Service's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((DeployableServiceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Deployable Service's 'catalogueId' don't match");
-                    }
-                }
-            }
-            if (o instanceof InteroperabilityRecordBundle) {
-                if (((InteroperabilityRecordBundle) o).getPayload().getCatalogueId() == null ||
-                        ((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Interoperability Record's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Interoperability Record's 'catalogueId' don't match");
-                    }
-                }
-            }
+        if (!catalogueService.exists(catalogueId)) {
+            throw new ResourceException(String.format("The Catalogue '%s' does not exist", catalogueId),
+                    HttpStatus.CONFLICT);
+        }
+        if (!catalogueService.get(catalogueId).getStatus().equals("approved")) {
+            throw new ResourceException(String.format("The Catalogue '%s' is not yet approved", catalogueId),
+                    HttpStatus.CONFLICT);
         }
     }
 
@@ -166,7 +122,7 @@ public class ProviderResourcesCommonMethods {
         return LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), type, actionType, comment);
     }
 
-    public void createIdentifiers(Bundle<?> bundle, String resourceType, boolean external) {
+    public void createIdentifiers(NewBundle bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();
         if (external) {
             identifiers.setOriginalId(bundle.getId());

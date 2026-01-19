@@ -177,7 +177,7 @@ public class AdapterManager extends ResourceCatalogueManager<AdapterBundle> impl
         }
         adapter.markOnboard(status, active, auth, null);
         adapter.setId(idCreator.generate(getResourceTypeName()));
-        commonMethods.createIdentifiers(adapter, getResourceTypeName(), false);
+//        commonMethods.createIdentifiers(adapter, getResourceTypeName(), false);
         adapter.setAuditState(Auditable.NOT_AUDITED);
 //        adapter.setLatestOnboardingInfo(loggingInfoList.getLast());
 

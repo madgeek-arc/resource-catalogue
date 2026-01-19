@@ -128,7 +128,7 @@ public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle
         validate(monitoring, resourceType);
 
         monitoring.setId(idCreator.generate(getResourceTypeName()));
-        commonMethods.createIdentifiers(monitoring, getResourceTypeName(), false);
+//        commonMethods.createIdentifiers(monitoring, getResourceTypeName(), false);
         logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 
         monitoring.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth),

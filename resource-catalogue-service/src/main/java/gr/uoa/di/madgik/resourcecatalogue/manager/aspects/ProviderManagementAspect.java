@@ -179,26 +179,23 @@ public class ProviderManagementAspect {
         if (bundle.getStatus().equals("approved") && bundle.isActive()) {
             try {
                 publicProviderService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceException e) {
                 publicProviderService.add(ObjectUtils.clone(bundle));
             }
         }
     }
 
-    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.update(..)) && args(bundle, ..)")
-    public Object updatePublicProvider(ProceedingJoinPoint pjp, NewProviderBundle bundle) {
-        NewProviderBundle init = ObjectUtils.clone(bundle);
-        NewProviderBundle ret = null;
+    //TODO: why it changed?
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.update(..)) " +
+            "&& args(providerBundle,..)", returning = "ret", argNames = "providerBundle,ret")
+    public void updatePublicProvider(NewProviderBundle providerBundle, NewProviderBundle ret) {
         try {
-            ret = (NewProviderBundle) pjp.proceed();
-            if (!ret.equals(init)) {
+            if (!ret.equals(providerBundle)) {
                 publicProviderService.update(ObjectUtils.clone(ret));
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
         }
-        return ret;
     }
 
     @Async
@@ -261,7 +258,7 @@ public class ProviderManagementAspect {
         if (service.getStatus().equals("approved") && service.isActive()) {
             try {
                 publicServiceManager.get(service.getIdentifiers().getPid(), service.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceException e) {
                 publicServiceManager.add(ObjectUtils.clone(service));
             }
         }
@@ -278,7 +275,7 @@ public class ProviderManagementAspect {
 //            try {
 //                publicTrainingResourceManager.get(trainingResourceBundle.getIdentifiers().getPid(),
 //                        trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
-//            } catch (CatalogueResourceNotFoundException e) {
+//            } catch (ResourceException e) {
 //                publicTrainingResourceManager.add(ObjectUtils.clone(trainingResourceBundle), null);
 //            }
 //        }
@@ -294,7 +291,7 @@ public class ProviderManagementAspect {
 //            try {
 //                publicDeployableServiceManager.get(deployableServiceBundle.getIdentifiers().getPid(),
 //                        deployableServiceBundle.getDeployableService().getCatalogueId(), true);
-//            } catch (CatalogueResourceNotFoundException e) {
+//            } catch (ResourceException e) {
 //                publicDeployableServiceManager.add(ObjectUtils.clone(deployableServiceBundle), null);
 //            }
 //        }
@@ -309,7 +306,7 @@ public class ProviderManagementAspect {
 //            try {
 //                publicInteroperabilityRecordManager.get(interoperabilityRecordBundle.getIdentifiers().getPid(),
 //                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), true);
-//            } catch (CatalogueResourceNotFoundException e) {
+//            } catch (ResourceException e) {
 //                publicInteroperabilityRecordManager.add(ObjectUtils.clone(interoperabilityRecordBundle), null);
 //            }
 //        }
@@ -531,7 +528,7 @@ public class ProviderManagementAspect {
 //            try {
 //                publicDatasourceManager.get(datasourceBundle.getIdentifiers().getPid(),
 //                        datasourceBundle.getDatasource().getCatalogueId(), true);
-//            } catch (CatalogueResourceNotFoundException e) {
+//            } catch (ResourceException e) {
 //                publicDatasourceManager.add(ObjectUtils.clone(datasourceBundle), null);
 //            }
 //        }
@@ -580,7 +577,7 @@ public class ProviderManagementAspect {
 //            publicResourceInteroperabilityRecordManager.get(
 //                    resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
 //                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), true);
-//        } catch (CatalogueResourceNotFoundException e) {
+//        } catch (ResourceException e) {
 //            publicResourceInteroperabilityRecordManager.add(ObjectUtils.clone(resourceInteroperabilityRecordBundle), null);
 //        }
 //    }
@@ -747,7 +744,7 @@ public class ProviderManagementAspect {
 //            InteroperabilityRecordBundle guideline;
 //            try {
 //                guideline = interoperabilityRecordService.getEOSCMonitoringGuideline();
-//            } catch (CatalogueResourceNotFoundException e) {
+//            } catch (CatalogueResourceNotFoundException e) { //TODO: probably needs ResourceException
 //                logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for service: {}",
 //                        service.getId());
 //                return;

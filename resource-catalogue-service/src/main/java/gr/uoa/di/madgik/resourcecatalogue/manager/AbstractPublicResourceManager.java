@@ -31,7 +31,6 @@ public abstract class AbstractPublicResourceManager<T extends NewBundle>
 
     protected abstract String getResourceTypeName();
 
-    //FIXME: Should PublicResourceService extend anything so here we override?
     protected AbstractPublicResourceManager(GenericResourceService genericResourceService,
                                             JmsService jmsService,
                                             PidIssuer pidIssuer,
@@ -85,19 +84,21 @@ public abstract class AbstractPublicResourceManager<T extends NewBundle>
         return ret;
     }
 
+    //TODO: hard test
     public T update(T t) {
         T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
-        t.setIdentifiers(published.getIdentifiers());
-        t.setId(published.getId());
-        t.getMetadata().setPublished(true);
+        published.setPayload(t.getPayload());
+//        t.setIdentifiers(published.getIdentifiers());
+//        t.setId(published.getId());
+//        t.getMetadata().setPublished(true);
 
         // sets public ids to fields
-        updateIdsToPublic(t);
+        updateIdsToPublic(published);
 
         logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         T ret;
         try {
-            ret = genericResourceService.update(getResourceTypeName(), t.getId(), t);
+            ret = genericResourceService.update(getResourceTypeName(), published.getId(), published);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -109,7 +110,7 @@ public abstract class AbstractPublicResourceManager<T extends NewBundle>
         try {
             T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
             logger.info("Deleting public {} with id '{}'", published.getClass().getSimpleName(), published.getId());
-            genericResourceService.delete(getResourceTypeName(), t.getId());
+            genericResourceService.delete(getResourceTypeName(), published.getId());
             jmsService.convertAndSendTopic("provider.delete", published);
         } catch (CatalogueResourceNotFoundException ignore) {
         }

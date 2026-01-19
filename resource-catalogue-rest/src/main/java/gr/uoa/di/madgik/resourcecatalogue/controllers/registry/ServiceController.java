@@ -211,7 +211,7 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewServiceBundle> addBundle(@RequestBody NewServiceBundle service,
                                                       @Parameter(hidden = true) Authentication auth) {
-        NewServiceBundle bundle = serviceService.add(service, auth); //TODO: do we want Admin adds to pass through regular update?
+        NewServiceBundle bundle = serviceService.add(service, auth);
         logger.info("Added ServiceBundle with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
@@ -221,13 +221,13 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<NewServiceBundle> serviceList,
                         @Parameter(hidden = true) Authentication auth) {
-        serviceService.addBulk(serviceList, auth); ////TODO: add creates ID, we want it?
+        serviceService.addBulk(serviceList, auth);
     }
 
     @Tag(name = "ServiceWrite")
     @Operation(summary = "Updates the Provider with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#service.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#service[id])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> service,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -245,7 +245,7 @@ public class ServiceController {
     public ResponseEntity<NewServiceBundle> updateBundle(@RequestBody NewServiceBundle service,
                                                          @RequestParam(required = false) String comment,
                                                          @Parameter(hidden = true) Authentication auth) {
-        NewServiceBundle bundle = serviceService.update(service, comment, auth); //TODO: do we want Admin updates to pass through regular update?
+        NewServiceBundle bundle = serviceService.update(service, comment, auth);
         logger.info("Updated the Service id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
@@ -530,7 +530,7 @@ public class ServiceController {
 
     @Tag(name = "ServiceWrite")
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service[id])")
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> service,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) service.get("id");
@@ -554,7 +554,7 @@ public class ServiceController {
 
     @Tag(name = "ServiceWrite")
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service[id])")
     public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> service,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) service.get("id");

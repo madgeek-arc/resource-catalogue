@@ -75,7 +75,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueManag
         validateInstanceAgainstTemplate(bundle);
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+//        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         logger.trace("Attempting to add a new ConfigurationTemplateInstance: {}", bundle);
 
         bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth),

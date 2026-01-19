@@ -8,12 +8,10 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -21,10 +19,7 @@ import org.springframework.security.core.Authentication;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //TODO: resource-specific method -> inside corresponding manager/service
 //TODO: true universal method (all resources will use it) -> inside here (generic)
@@ -56,7 +51,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
         );
     }
 
-    //TODO: should we unify get and getPublic?
     @Override
     public T get(String id, String catalogueId) {
         if (catalogueId != null && !catalogueId.isBlank()) {
@@ -124,7 +118,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
             return bundle;
         }
         bundle.markUpdate(auth, null); //TODO: make sure all resources will use this
-        validate(bundle);
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -135,6 +128,11 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     private boolean hasChanged(T bundle) {
         T existing = get(bundle.getId(), bundle.getCatalogueId());
         return !bundle.equals(existing);
+    }
+
+    public T validate(T bundle) {
+        logger.debug("Validating resource '{}' with id: '{}'", getResourceTypeName(), bundle.getId());
+        return genericResourceService.validate(getResourceTypeName(), bundle);
     }
 
     @Override
@@ -242,12 +240,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     @Override
     public List<T> delAll() {
         return List.of();
-    }
-
-    @Override
-    public T validate(T bundle) {
-        logger.debug("Validating resource '{}' with id: '{}'", getResourceTypeName(), bundle.getId());
-        return genericResourceService.validate(getResourceTypeName(), bundle);
     }
 
     @Override

@@ -15,9 +15,9 @@ public class ProviderCascadeLifecycleService {
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
-    public ProviderCascadeLifecycleService(@Lazy ServiceService serviceService, //FIXME
-                                           @Lazy TrainingResourceService trainingResourceService, //FIXME
-                                           @Lazy InteroperabilityRecordService interoperabilityRecordService) { //FIXME
+    public ProviderCascadeLifecycleService(@Lazy ServiceService serviceService,
+                                           @Lazy TrainingResourceService trainingResourceService,
+                                           @Lazy InteroperabilityRecordService interoperabilityRecordService) {
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;

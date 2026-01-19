@@ -101,7 +101,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
         relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
 
         bundle.setId(idCreator.generate(getResourceTypeName()));
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+//        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", bundle);
 
         //TODO: refactor getAdminAccess to have more info

@@ -125,10 +125,6 @@ public class OIDCSecurityService implements SecurityService {
         return Optional.of(Objects.requireNonNull(User.of(auth)));
     }
 
-    private boolean isProvider(String id) {
-        return providerService.exists(id);
-    }
-
     private List<User> getProviderUsers(String id) {
         NewProviderBundle registeredProvider = checkProviderExistence(id);
         if (registeredProvider == null) {
@@ -244,16 +240,30 @@ public class OIDCSecurityService implements SecurityService {
         return null;
     }
 
+    private boolean isProvider(String id) {
+        try {
+            providerService.get(id);
+            return true;
+        } catch (ResourceException e) {
+            return false;
+        }
+    }
+
     private boolean isService(String id) {
-        return serviceService.exists(id);
+        try {
+            serviceService.get(id);
+            return true;
+        } catch (ResourceException e) {
+            return false;
+        }
     }
 
     private boolean isTrainingResource(String id) {
-        return trainingResourceService.exists(id);
+        return trainingResourceService.get(id) != null;
     }
 
     private boolean isDeployableService(String id) {
-        return deployableServiceService.exists(id);
+        return deployableServiceService.get(id) != null;
     }
 
 

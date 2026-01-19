@@ -49,25 +49,25 @@ public class PublicServiceService extends AbstractPublicResourceManager<NewServi
     }
 
     @Override
-    public void updateIdsToPublic(NewServiceBundle bundle) {
+    public void updateIdsToPublic(NewServiceBundle service) {
         // Service Owner
-        NewProviderBundle providerBundle = providerService.get(
-                (String) bundle.getService().get("serviceOwner"),
-                bundle.getCatalogueId()
+        NewProviderBundle provider = providerService.get(
+                (String) service.getService().get("serviceOwner"),
+                service.getCatalogueId()
         );
-        bundle.getService().put("serviceOwner", providerBundle.getIdentifiers().getPid());
+        service.getService().put("serviceOwner", provider.getIdentifiers().getPid());
 
         // Service Providers
-        Object providersObj = bundle.getService().get("serviceProviders");
+        Object providersObj = service.getService().get("serviceProviders");
         if (providersObj instanceof List<?> providersList && !providersList.isEmpty()) {
             List<String> updatedServiceProviders = new ArrayList<>();
             for (Object providerObj : providersList) {
                 if (providerObj instanceof String providerId) {
-                    NewProviderBundle resourceProvider = providerService.get(providerId, bundle.getCatalogueId());
-                    updatedServiceProviders.add(resourceProvider.getIdentifiers().getPid());
+                    NewProviderBundle bundle = providerService.get(providerId, service.getCatalogueId());
+                    updatedServiceProviders.add(bundle.getIdentifiers().getPid());
                 }
             }
-            bundle.getService().put("serviceProviders", updatedServiceProviders);
+            service.getService().put("serviceProviders", updatedServiceProviders);
         }
     }
 }
