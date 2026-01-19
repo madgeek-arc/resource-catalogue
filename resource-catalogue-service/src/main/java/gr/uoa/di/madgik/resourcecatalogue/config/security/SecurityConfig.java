@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -78,7 +79,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/resourcesync/**").permitAll()
-                                .requestMatchers("/dump/", "/restore/", "/resources/**", "/resourceType/**",
+                                .requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
+                                .requestMatchers(
+                                        "/logs/**",
+                                        "/forms/**",
+                                        "/dump/",
+                                        "/restore/",
+                                        "/resources/**",
+                                        "/resourceType/**",
                                         "/search/**").hasAuthority("ROLE_ADMIN")
                                 .anyRequest().permitAll()
                 )
