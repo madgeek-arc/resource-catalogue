@@ -43,7 +43,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Validator;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 @org.springframework.stereotype.Service
 public class ServiceManager extends TestManager<NewServiceBundle> implements ServiceService {
@@ -349,32 +351,6 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         filter.addFilter("service_owner", providers.stream().map(NewProviderBundle::getId).toList());
         ff.addOrderBy("name", "asc");
         return genericResourceService.getResults(ff);
-    }
-
-    @Override
-    public Map<String, List<LinkedHashMap<String, Object>>> getBy(String field, Authentication auth)
-            throws NoSuchFieldException {
-
-        return null;
-        //TODO: do we want to call model service?
-//        List<String> fields = modelService.getAllModelFieldNames("m-b-service"); //TODO: I don't like this
-//        if (!fields.contains(field)) {
-//            throw new NoSuchFieldException("Unknown field: " + field);
-//        }
-//
-//        FacetFilter ff = new FacetFilter();
-//        ff.setQuantity(maxQuantity);
-//        ff.addFilter("published", false);
-//        Browsing<NewServiceBundle> serviceBundles = getAll(ff, auth);
-//
-//        Map<String, List<LinkedHashMap<String, Object>>> result = new LinkedHashMap<>();
-//        for (NewServiceBundle bundle : serviceBundles.getResults()) {
-//            LinkedHashMap<String, Object> service = bundle.getService();
-//            Object keyValue = service.get(field);
-//            String key = keyValue == null ? "UNKNOWN" : keyValue.toString();
-//            result.computeIfAbsent(key, k -> new ArrayList<>()).add(service);
-//        }
-//        return result;
     }
 
     //FIXME

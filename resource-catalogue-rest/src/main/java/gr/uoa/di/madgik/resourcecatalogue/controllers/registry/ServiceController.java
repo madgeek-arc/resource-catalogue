@@ -23,9 +23,10 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.DraftResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -354,17 +355,6 @@ public class ServiceController {
                 .stream()
                 .map(NewServiceBundle::getService)
                 .collect(Collectors.toList()));
-    }
-
-    //TODO: hard test
-    @Tag(name = "ServiceRead")
-    @Operation(summary = "Get all Services in the catalogue organized by a specific field (e.g. name).")
-    @GetMapping(path = "by/{field}")
-    public ResponseEntity<Map<String, List<LinkedHashMap<String, Object>>>> getBy(@PathVariable(value = "field") String field,
-                                                                                  @Parameter(hidden = true) Authentication auth)
-            throws NoSuchFieldException {
-        Map<String, List<LinkedHashMap<String, Object>>> ret = serviceService.getBy(field, auth);
-        return ResponseEntity.ok(ret);
     }
 
     @Tag(name = "ServiceRead")

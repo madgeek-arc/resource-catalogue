@@ -19,23 +19,21 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
 import org.springframework.security.core.Authentication;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public interface ServiceService extends TestService<NewServiceBundle> {
 
     /**
      *
-     * @param providerId Provider ID
+     * @param providerId  Provider ID
      * @param catalogueId Catalogue ID
-     * @param quantity Quantity to be fetched
-     * @param auth Authentication
+     * @param quantity    Quantity to be fetched
+     * @param auth        Authentication
      * @return {@link Paging<NewServiceBundle>}
      */
     Paging<NewServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId, int quantity, Authentication auth);
@@ -82,16 +80,6 @@ public interface ServiceService extends TestService<NewServiceBundle> {
 //     * @throws ResourceNotFoundException
 //     */
 //    ServiceBundle updateResource(ServiceBundle resource, String catalogueId, String comment, Authentication auth);
-
-    /**
-     * Get ResourceBundles by a specific field.
-     *
-     * @param field Specific field to fetch the Bundles
-     * @param auth  Authentication
-     * @return {@link Map}
-     * @throws NoSuchFieldException
-     */
-    Map<String, List<LinkedHashMap<String, Object>>> getBy(String field, Authentication auth) throws NoSuchFieldException;
 
     /**
      * @param authentication Authentication
