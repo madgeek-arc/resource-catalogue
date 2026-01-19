@@ -355,24 +355,26 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     public Map<String, List<LinkedHashMap<String, Object>>> getBy(String field, Authentication auth)
             throws NoSuchFieldException {
 
-        List<String> fields = modelService.getAllModelFieldNames("m-b-service"); //TODO: I don't like this
-        if (!fields.contains(field)) {
-            throw new NoSuchFieldException("Unknown field: " + field);
-        }
-
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
-        Browsing<NewServiceBundle> serviceBundles = getAll(ff, auth);
-
-        Map<String, List<LinkedHashMap<String, Object>>> result = new LinkedHashMap<>();
-        for (NewServiceBundle bundle : serviceBundles.getResults()) {
-            LinkedHashMap<String, Object> service = bundle.getService();
-            Object keyValue = service.get(field);
-            String key = keyValue == null ? "UNKNOWN" : keyValue.toString();
-            result.computeIfAbsent(key, k -> new ArrayList<>()).add(service);
-        }
-        return result;
+        return null;
+        //TODO: do we want to call model service?
+//        List<String> fields = modelService.getAllModelFieldNames("m-b-service"); //TODO: I don't like this
+//        if (!fields.contains(field)) {
+//            throw new NoSuchFieldException("Unknown field: " + field);
+//        }
+//
+//        FacetFilter ff = new FacetFilter();
+//        ff.setQuantity(maxQuantity);
+//        ff.addFilter("published", false);
+//        Browsing<NewServiceBundle> serviceBundles = getAll(ff, auth);
+//
+//        Map<String, List<LinkedHashMap<String, Object>>> result = new LinkedHashMap<>();
+//        for (NewServiceBundle bundle : serviceBundles.getResults()) {
+//            LinkedHashMap<String, Object> service = bundle.getService();
+//            Object keyValue = service.get(field);
+//            String key = keyValue == null ? "UNKNOWN" : keyValue.toString();
+//            result.computeIfAbsent(key, k -> new ArrayList<>()).add(service);
+//        }
+//        return result;
     }
 
     //FIXME
