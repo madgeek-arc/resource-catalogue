@@ -314,7 +314,7 @@ public class CatalogueController {
 
     @Hidden
     @Operation(description = "Get all the Provider Bundles of a specific Catalogue.")
-    @GetMapping(path = "{catalogueId}/{providerId}/service/bundle/all")
+    @GetMapping(path = "{catalogueId}/provider/bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<NewProviderBundle>> getAllCatalogueProviderBundles(@PathVariable String catalogueId,
                                                                                     @Parameter(hidden = true)
