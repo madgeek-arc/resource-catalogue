@@ -124,12 +124,11 @@ public class ProviderResourcesCommonMethods {
 
     public void createIdentifiers(NewBundle bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();
+        identifiers.setPid(idCreator.generate(resourceType));
         if (external) {
             identifiers.setOriginalId(bundle.getId());
-            identifiers.setPid(idCreator.generate(resourceType));
         } else {
-            identifiers.setOriginalId(bundle.getId());
-            identifiers.setPid(bundle.getId());
+            identifiers.setOriginalId(identifiers.getPid() + "00");
         }
         bundle.setIdentifiers(identifiers);
     }

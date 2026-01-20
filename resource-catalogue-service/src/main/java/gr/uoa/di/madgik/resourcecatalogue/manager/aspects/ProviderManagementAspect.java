@@ -186,23 +186,27 @@ public class ProviderManagementAspect {
     }
 
     //TODO: why it changed?
-    @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.update(..)) " +
-            "&& args(providerBundle,..)", returning = "ret", argNames = "providerBundle,ret")
-    public void updatePublicProvider(NewProviderBundle providerBundle, NewProviderBundle ret) {
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.update(..)) && args(bundle, ..)")
+    public Object updatePublicProvider(ProceedingJoinPoint pjp, NewProviderBundle bundle) {
+        NewProviderBundle init = ObjectUtils.clone(bundle);
+        NewProviderBundle ret = null;
         try {
-            if (!ret.equals(providerBundle)) {
+            ret = (NewProviderBundle) pjp.proceed();
+            if (!ret.equals(init)) {
                 publicProviderService.update(ObjectUtils.clone(ret));
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
+        return ret;
     }
 
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setStatus(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.audit(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.audit(..))",
             returning = "bundle")
     public void updatePublicProvider(final NewProviderBundle bundle) {
         try {
@@ -331,8 +335,8 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setStatus(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.audit(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.audit(..))",
             returning = "service")
     public void updatePublicResource(final NewServiceBundle service) {
         try {

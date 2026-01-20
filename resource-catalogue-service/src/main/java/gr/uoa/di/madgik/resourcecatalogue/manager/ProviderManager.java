@@ -117,8 +117,8 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
             bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
             bundle.setCatalogueId(this.catalogueId);
             bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
-            bundle.setId(idCreator.generate(getResourceTypeName()));
             commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+            bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
             bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
             commonMethods.validateCatalogueId(catalogueId);
@@ -426,9 +426,9 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     @Override
     public NewProviderBundle addDraft(NewProviderBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
-        bundle.setId(idCreator.generate(getResourceTypeName()));
         bundle.setCatalogueId(catalogueId);
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        bundle.setId(bundle.getIdentifiers().getOriginalId());
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
         NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);

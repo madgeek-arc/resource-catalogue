@@ -112,8 +112,8 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
                 service.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
             }
             service.setCatalogueId(this.catalogueId);
-            service.setId(idCreator.generate(getResourceTypeName()));
             commonMethods.createIdentifiers(service, getResourceTypeName(), false);
+            service.setId(service.getIdentifiers().getOriginalId());
         } else {
             service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
             commonMethods.validateCatalogueId(catalogueId);
@@ -457,9 +457,9 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     @Override
     public NewServiceBundle addDraft(NewServiceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
-        bundle.setId(idCreator.generate(getResourceTypeName()));
         bundle.setCatalogueId(catalogueId);
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        bundle.setId(bundle.getIdentifiers().getOriginalId());
 
         NewServiceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
         return ret;

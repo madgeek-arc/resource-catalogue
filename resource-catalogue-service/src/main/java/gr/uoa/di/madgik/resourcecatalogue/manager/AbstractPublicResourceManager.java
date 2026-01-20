@@ -84,21 +84,19 @@ public abstract class AbstractPublicResourceManager<T extends NewBundle>
         return ret;
     }
 
-    //TODO: hard test
     public T update(T t) {
         T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
-        published.setPayload(t.getPayload());
-//        t.setIdentifiers(published.getIdentifiers());
-//        t.setId(published.getId());
-//        t.getMetadata().setPublished(true);
+        t.setIdentifiers(published.getIdentifiers());
+        t.setId(published.getId());
+        t.getMetadata().setPublished(true);
 
         // sets public ids to fields
-        updateIdsToPublic(published);
+        updateIdsToPublic(t);
 
         logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         T ret;
         try {
-            ret = genericResourceService.update(getResourceTypeName(), published.getId(), published);
+            ret = genericResourceService.update(getResourceTypeName(), t.getId(), t);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }

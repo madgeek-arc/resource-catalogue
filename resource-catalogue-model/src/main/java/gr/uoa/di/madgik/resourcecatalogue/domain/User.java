@@ -83,7 +83,7 @@ public class User implements Identifiable {
             user.email = principal.getAttribute("email");
             user.name = principal.getAttribute("given_name");
             user.surname = principal.getAttribute("family_name");
-        } else if (auth instanceof AdminAuthentication) { //TODO: is this used only for getAdminAcess(); method?
+        } else if (auth instanceof AdminAuthentication) {
             logger.trace("internal admin access");
             user.id = "system";
             user.email = "system";
