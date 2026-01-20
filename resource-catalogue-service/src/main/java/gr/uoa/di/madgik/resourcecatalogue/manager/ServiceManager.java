@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Objects;
 
 @org.springframework.stereotype.Service
-public class ServiceManager extends TestManager<NewServiceBundle> implements ServiceService {
+public class ServiceManager extends TestManager<ServiceBundle> implements ServiceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
@@ -67,12 +67,10 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
 
     public ServiceManager(ProviderService providerService,
                           IdCreator idCreator, @Lazy SecurityService securityService,
-                          @Lazy EmailService emailService,
                           @Lazy VocabularyService vocabularyService,
-                          @Lazy DatasourceService datasourceService,
                           @Lazy ProviderResourcesCommonMethods commonMethods,
                           SynchronizerService<Service> synchronizerService,
-                          @Qualifier("serviceValidator") Validator serviceValidator,
+//                          @Qualifier("serviceValidator") Validator serviceValidator,
                           FacetLabelService facetLabelService,
                           GenericResourceService genericResourceService,
                           @Lazy RelationshipValidator relationshipValidator, ModelService modelService) {
@@ -88,21 +86,21 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
 
     @Override
     protected String getResourceTypeName() {
-        return "servicetest";
+        return "service";
     }
 
     //region generic
     @Override
-    public NewServiceBundle add(NewServiceBundle service, Authentication auth) {
-        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+    public ServiceBundle add(ServiceBundle service, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         onboard(service, provider, auth);
         onboardingValidation(service, provider);
-        NewServiceBundle ret = genericResourceService.add(getResourceTypeName(), service);
+        ServiceBundle ret = genericResourceService.add(getResourceTypeName(), service);
         return ret;
     }
 
-    private void onboard(NewServiceBundle service, NewProviderBundle provider, Authentication auth) {
+    private void onboard(ServiceBundle service, ProviderBundle provider, Authentication auth) {
         String catalogueId = service.getCatalogueId();
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             if (provider.getTemplateStatus().equals("approved template")) {
@@ -116,14 +114,14 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
             service.setId(service.getIdentifiers().getOriginalId());
         } else {
             service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
-            commonMethods.validateCatalogueId(catalogueId);
+//            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(service.getId());
             commonMethods.createIdentifiers(service, getResourceTypeName(), true);
         }
         service.setAuditState(Auditable.NOT_AUDITED);
     }
 
-    private void onboardingValidation(NewServiceBundle service, NewProviderBundle provider) {
+    private void onboardingValidation(ServiceBundle service, ProviderBundle provider) {
 //        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
@@ -141,8 +139,8 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     @Override
     @Transactional
     @TriggersAspects({"AfterServiceUpdateEmails"})
-    public NewServiceBundle update(NewServiceBundle service, String comment, Authentication auth) {
-        NewServiceBundle existing = get(service.getId(), service.getCatalogueId());
+    public ServiceBundle update(ServiceBundle service, String comment, Authentication auth) {
+        ServiceBundle existing = get(service.getId(), service.getCatalogueId());
         // check if there are actual changes in the Service
         if (service.equals(existing)) {
             return service;
@@ -163,8 +161,8 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         }
     }
 
-    private void checkAndResetServiceOnboarding(NewServiceBundle service, Authentication auth) {
-        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+    private void checkAndResetServiceOnboarding(ServiceBundle service, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (service.getStatus().equals(vocabularyService.get("rejected").getId())) {
@@ -179,7 +177,7 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
 
     @Override
     @Transactional
-    public void delete(NewServiceBundle bundle) {
+    public void delete(ServiceBundle bundle) {
         commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
 //        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName()); //FIXME
         logger.info("Deleting Service: {} and all its Resource Interoperability Records", bundle.getId());
@@ -187,12 +185,12 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     }
 
     @Transactional
-    public NewServiceBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public ServiceBundle setStatus(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
-        NewServiceBundle existing = get(id);
+        ServiceBundle existing = get(id);
         existing.markOnboard(status, active, auth, null);
 
         updateProviderTemplateStatus(existing, status, auth);
@@ -205,8 +203,8 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         }
     }
 
-    private void updateProviderTemplateStatus(NewServiceBundle service, String status, Authentication auth) {
-        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+    private void updateProviderTemplateStatus(ServiceBundle service, String status, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         switch (status) {
             case "pending":
@@ -225,10 +223,10 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     }
 
     @Override
-    public NewServiceBundle setActive(String id, Boolean active, Authentication auth) {
-        NewServiceBundle existing = get(id);
+    public ServiceBundle setActive(String id, Boolean active, Authentication auth) {
+        ServiceBundle existing = get(id);
 
-        NewProviderBundle provider = providerService.get((String) existing.getService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) existing.getService().get("serviceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Service, as its Provider is inactive", HttpStatus.CONFLICT);
@@ -249,8 +247,8 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
 
     //region Service-specific
     @Override
-    public Paging<NewServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId,
-                                                              int quantity, Authentication auth) {
+    public Paging<ServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId,
+                                                           int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("service_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
@@ -262,8 +260,8 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     }
 
     public void sendEmailNotificationToProviderForOutdatedService(String id, Authentication auth) {
-        NewServiceBundle service = get(id);
-        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+        ServiceBundle service = get(id);
+        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
@@ -334,10 +332,10 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
 //    }
 
     @Override
-    public Browsing<NewServiceBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", false); // A Draft Provider cannot have resources
-        List<NewProviderBundle> providers = providerService.getMy(ff, auth).getResults();
+        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
 
         if (providers.isEmpty()) {
             return new Browsing<>();
@@ -346,15 +344,15 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
         filter.setResourceType(getResourceTypeName());
         filter.setQuantity(maxQuantity);
         filter.addFilter("published", false);
-        filter.addFilter("service_owner", providers.stream().map(NewProviderBundle::getId).toList());
+        filter.addFilter("service_owner", providers.stream().map(ProviderBundle::getId).toList());
         ff.addOrderBy("name", "asc");
         return genericResourceService.getResults(ff);
     }
 
     //FIXME
     @Override
-    public List<NewServiceBundle> getByIds(Authentication auth, String... ids) {
-        List<NewServiceBundle> resources;
+    public List<ServiceBundle> getByIds(Authentication auth, String... ids) {
+        List<ServiceBundle> resources;
         resources = Arrays.stream(ids)
                 .map(id ->
                 {
@@ -371,13 +369,13 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     }
 
     @Override
-    public NewBundle getServiceTemplate(String providerId, Authentication auth) {
+    public Bundle getServiceTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("service_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
-        List<NewServiceBundle> allProviderServices = getAll(ff, auth).getResults();
-        for (NewServiceBundle bundle : allProviderServices) {
+        List<ServiceBundle> allProviderServices = getAll(ff, auth).getResults();
+        for (ServiceBundle bundle : allProviderServices) {
             if (bundle.getStatus().equals(vocabularyService.get("pending").getId())) {
                 return bundle;
             }
@@ -455,21 +453,21 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
 
     //region Drafts
     @Override
-    public NewServiceBundle addDraft(NewServiceBundle bundle, Authentication auth) {
+    public ServiceBundle addDraft(ServiceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
-        NewServiceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
+        ServiceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
         return ret;
     }
 
     @Override
-    public NewServiceBundle updateDraft(NewServiceBundle bundle, Authentication auth) {
+    public ServiceBundle updateDraft(ServiceBundle bundle, Authentication auth) {
         bundle.markUpdate(auth, null);
         try {
-            NewServiceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
+            ServiceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -477,13 +475,13 @@ public class ServiceManager extends TestManager<NewServiceBundle> implements Ser
     }
 
     @Override
-    public void deleteDraft(NewServiceBundle bundle) {
+    public void deleteDraft(ServiceBundle bundle) {
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
 
     @Override
-    public NewServiceBundle finalizeDraft(NewServiceBundle service, Authentication auth) {
-        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+    public ServiceBundle finalizeDraft(ServiceBundle service, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         if (provider.getTemplateStatus().equals("approved template")) {
             service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);

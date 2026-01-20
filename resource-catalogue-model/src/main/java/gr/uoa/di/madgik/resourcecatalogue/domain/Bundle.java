@@ -16,24 +16,17 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 
 import java.beans.Transient;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-public class Bundle<T extends Identifiable> implements Identifiable {
+public class Bundle {
 
-    @Schema(hidden = true)
-    @FieldValidation
-    private T payload;
+    private LinkedHashMap<String, Object> payload = new LinkedHashMap<>();
 
     private Metadata metadata;
 
@@ -47,8 +40,6 @@ public class Bundle<T extends Identifiable> implements Identifiable {
 
     private Identifiers identifiers;
 
-    private MigrationStatus migrationStatus;
-
     private List<LoggingInfo> loggingInfo = new ArrayList<>();
 
     private LoggingInfo latestAuditInfo;
@@ -58,8 +49,9 @@ public class Bundle<T extends Identifiable> implements Identifiable {
     private LoggingInfo latestUpdateInfo;
 
     private String status;
-
     private String auditState;
+
+    private String catalogueId;
 
     public Bundle() {
     }
@@ -70,14 +62,21 @@ public class Bundle<T extends Identifiable> implements Identifiable {
             this.setStatus(status);
 
             this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
-            LoggingInfo onboardingInfo = null;
-            if (loggingInfo.isEmpty()) {
+            LoggingInfo onboardingInfo;
+            if (loggingInfo.isEmpty() ||
+                    (loggingInfo.stream().anyMatch(
+                            info -> LoggingInfo.Types.DRAFT.getKey().equals(info.getType())) &&
+                            loggingInfo.stream().noneMatch(
+                                    info -> LoggingInfo.Types.ONBOARD.getKey().equals(info.getType()))
+                    )
+            ) {
                 onboardingInfo = LoggingInfo.createLoggingInfoEntry(
                         user, LoggingInfo.Types.ONBOARD.getKey(),
                         LoggingInfo.ActionType.REGISTERED.getKey(), comment
                 );
                 this.setLatestOnboardingInfo(onboardingInfo);
                 this.getLoggingInfo().add(onboardingInfo);
+                this.setDraft(false);
             }
 
             if (status.toLowerCase().contains("approved")) {
@@ -233,25 +232,38 @@ public class Bundle<T extends Identifiable> implements Identifiable {
         this.auditState = auditState;
     }
 
-    @Override
-    public String getId() {
-        return payload.getId();
+    //TODO: test if we need to set draft = false
+    public void markDraft(Authentication auth, String comment) {
+        UserInfo user = UserInfo.of(auth);
+
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+        LoggingInfo draftInfo;
+        if (loggingInfo.isEmpty()) {
+            draftInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.DRAFT.getKey(),
+                    LoggingInfo.ActionType.CREATED.getKey(), comment
+            );
+            this.setLatestOnboardingInfo(draftInfo);
+            this.getLoggingInfo().add(draftInfo);
+        }
+        this.draft = true;
     }
 
-    @Override
+    public String getId() {
+        return this.getPayload().get("id").toString();
+    }
+
     public void setId(String id) {
-        if (this.payload != null) {
-            this.payload.setId(id);
-        }
+        this.getPayload().put("id", id);
     }
 
     @Transient
-    public T getPayload() {
+    public LinkedHashMap<String, Object> getPayload() {
         return payload;
     }
 
     @Transient
-    public void setPayload(T payload) {
+    public void setPayload(LinkedHashMap<String, Object> payload) {
         this.payload = payload;
     }
 
@@ -303,18 +315,7 @@ public class Bundle<T extends Identifiable> implements Identifiable {
         this.identifiers = identifiers;
     }
 
-    public MigrationStatus getMigrationStatus() {
-        return migrationStatus;
-    }
-
-    public void setMigrationStatus(MigrationStatus migrationStatus) {
-        this.migrationStatus = migrationStatus;
-    }
-
     public List<LoggingInfo> getLoggingInfo() {
-        if (loggingInfo == null) {
-            loggingInfo = new ArrayList<>();
-        }
         return loggingInfo;
     }
 
@@ -347,7 +348,7 @@ public class Bundle<T extends Identifiable> implements Identifiable {
     }
 
     public String getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(String status) {
@@ -362,36 +363,11 @@ public class Bundle<T extends Identifiable> implements Identifiable {
         this.auditState = auditState;
     }
 
-
-    @Override
-    public String toString() {
-        return "Bundle{" +
-                "payload=" + payload +
-                ", metadata=" + metadata +
-                ", active=" + active +
-                ", suspended=" + suspended +
-                ", draft=" + draft +
-                ", legacy=" + legacy +
-                ", identifiers=" + identifiers +
-                ", migrationStatus=" + migrationStatus +
-                ", loggingInfo=" + loggingInfo +
-                ", latestAuditInfo=" + latestAuditInfo +
-                ", latestOnboardingInfo=" + latestOnboardingInfo +
-                ", latestUpdateInfo=" + latestUpdateInfo +
-                ", status='" + status + '\'' +
-                ", auditState='" + auditState + '\'' +
-                '}';
+    public String getCatalogueId() {
+        return catalogueId;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Bundle<?> bundle)) return false;
-        return active == bundle.active && suspended == bundle.suspended && draft == bundle.draft && legacy == bundle.legacy && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(identifiers, bundle.identifiers) && Objects.equals(migrationStatus, bundle.migrationStatus) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo) && Objects.equals(status, bundle.status) && Objects.equals(auditState, bundle.auditState);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(payload, metadata, active, suspended, draft, legacy, identifiers, migrationStatus, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo, status, auditState);
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
     }
 }

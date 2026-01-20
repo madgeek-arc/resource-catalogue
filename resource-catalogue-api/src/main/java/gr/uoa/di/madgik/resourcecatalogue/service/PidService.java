@@ -29,7 +29,7 @@ public interface PidService {
      * @param suffix PID suffix
      * @return Bundle<?>
      */
-    Bundle<?> get(String prefix, String suffix);
+    Bundle get(String prefix, String suffix);
 
     /**
      * Registers/Updates a PID on a specific resource

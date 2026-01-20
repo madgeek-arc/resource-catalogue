@@ -22,7 +22,6 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
@@ -256,9 +255,9 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.addFilter("active", true);
         ff.addFilter("status", "approved");
         ff.addFilter("published", false);
-        List<NewProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<String> providerNames = new ArrayList<>();
-        for (NewProviderBundle providerBundle : allActiveAndApprovedProviders) {
+        for (ProviderBundle providerBundle : allActiveAndApprovedProviders) {
             if ((boolean) providerBundle.getProvider().get("legalEntity")) {
                 providerNames.add((String) providerBundle.getProvider().get("name"));
             }

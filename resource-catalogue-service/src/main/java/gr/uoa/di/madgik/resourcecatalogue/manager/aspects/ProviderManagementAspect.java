@@ -20,7 +20,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -37,8 +36,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-
 @Profile("beyond")
 @Aspect
 @Component
@@ -48,10 +45,10 @@ public class ProviderManagementAspect {
 
     private final ProviderService providerService;
     private final ServiceService serviceService;
-    private final TrainingResourceService trainingResourceService;
-    private final DeployableServiceService deployableServiceService;
-    private final InteroperabilityRecordService interoperabilityRecordService;
-    private final ResourceInteroperabilityRecordService rirService;
+//    private final TrainingResourceService trainingResourceService;
+//    private final DeployableServiceService deployableServiceService;
+//    private final InteroperabilityRecordService interoperabilityRecordService;
+//    private final ResourceInteroperabilityRecordService rirService;
     private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceManager;
 //    private final PublicDatasourceService publicDatasourceManager;
@@ -59,7 +56,7 @@ public class ProviderManagementAspect {
 //    private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
 //    private final PublicConfigurationTemplateService publicConfigurationTemplateManager;
 //    private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager;
-    private final EmailService emailService;
+//    private final EmailService emailService;
     private final SecurityService securityService;
 //    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
 //    private final PublicAdapterService publicAdapterManager;
@@ -70,10 +67,10 @@ public class ProviderManagementAspect {
 
     public ProviderManagementAspect(ProviderService providerService,
                                     ServiceService serviceService,
-                                    TrainingResourceService trainingResourceService,
-                                    DeployableServiceService deployableServiceService,
-                                    InteroperabilityRecordService interoperabilityRecordService,
-                                    ResourceInteroperabilityRecordService rirService,
+//                                    TrainingResourceService trainingResourceService,
+//                                    DeployableServiceService deployableServiceService,
+//                                    InteroperabilityRecordService interoperabilityRecordService,
+//                                    ResourceInteroperabilityRecordService rirService,
                                     PublicProviderService publicProviderService,
                                     PublicServiceService publicServiceManager,
 //                                    PublicDatasourceService publicDatasourceManager,
@@ -84,14 +81,14 @@ public class ProviderManagementAspect {
 //                                    PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager,
 //                                    PublicAdapterService publicAdapterManager,
 //                                    PublicDeployableServiceService publicDeployableServiceManager,
-                                    EmailService emailService,
+//                                    EmailService emailService,
                                     SecurityService securityService) {
         this.providerService = providerService;
         this.serviceService = serviceService;
-        this.trainingResourceService = trainingResourceService;
-        this.deployableServiceService = deployableServiceService;
-        this.interoperabilityRecordService = interoperabilityRecordService;
-        this.rirService = rirService;
+//        this.trainingResourceService = trainingResourceService;
+//        this.deployableServiceService = deployableServiceService;
+//        this.interoperabilityRecordService = interoperabilityRecordService;
+//        this.rirService = rirService;
         this.publicProviderService = publicProviderService;
         this.publicServiceManager = publicServiceManager;
 //        this.publicDatasourceManager = publicDatasourceManager;
@@ -102,7 +99,7 @@ public class ProviderManagementAspect {
 //        this.publicConfigurationTemplateInstanceManager = publicConfigurationTemplateInstanceManager;
 //        this.publicAdapterManager = publicAdapterManager;
 //        this.publicDeployableServiceManager = publicDeployableServiceManager;
-        this.emailService = emailService;
+//        this.emailService = emailService;
         this.securityService = securityService;
     }
 
@@ -110,7 +107,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.update(..))",
             returning = "bundle")
-    public void updateProviderState(final NewServiceBundle bundle) {
+    public void updateProviderState(final ServiceBundle bundle) {
         logger.trace("Updating Provider States");
         updateServiceProviderStates(bundle);
     }
@@ -136,7 +133,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.finalizeDraft(..))",
             returning = "bundle")
-    public void providerRegistrationEmails(final NewProviderBundle bundle) {
+    public void providerRegistrationEmails(final ProviderBundle bundle) {
         logger.trace("Sending Registration emails");
         if (!bundle.getMetadata().isPublished() && bundle.getCatalogueId().equals(catalogueId)) {
 //            emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "providerManager"); //FIXME
@@ -153,8 +150,8 @@ public class ProviderManagementAspect {
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setStatus(..))",
             returning = "service")
-    public void providerRegistrationEmails(final NewServiceBundle service) {
-        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+    public void providerRegistrationEmails(final ServiceBundle service) {
+        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -175,7 +172,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setStatus(..))",
             returning = "bundle")
-    public void addProviderAsPublic(final NewProviderBundle bundle) {
+    public void addProviderAsPublic(final ProviderBundle bundle) {
         if (bundle.getStatus().equals("approved") && bundle.isActive()) {
             try {
                 publicProviderService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
@@ -187,11 +184,11 @@ public class ProviderManagementAspect {
 
     //TODO: why it changed?
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.update(..)) && args(bundle, ..)")
-    public Object updatePublicProvider(ProceedingJoinPoint pjp, NewProviderBundle bundle) {
-        NewProviderBundle init = ObjectUtils.clone(bundle);
-        NewProviderBundle ret = null;
+    public Object updatePublicProvider(ProceedingJoinPoint pjp, ProviderBundle bundle) {
+        ProviderBundle init = ObjectUtils.clone(bundle);
+        ProviderBundle ret = null;
         try {
-            ret = (NewProviderBundle) pjp.proceed();
+            ret = (ProviderBundle) pjp.proceed();
             if (!ret.equals(init)) {
                 publicProviderService.update(ObjectUtils.clone(ret));
             }
@@ -208,7 +205,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.audit(..))",
             returning = "bundle")
-    public void updatePublicProvider(final NewProviderBundle bundle) {
+    public void updatePublicProvider(final ProviderBundle bundle) {
         try {
             publicProviderService.update(ObjectUtils.clone(bundle));
         } catch (ResourceException | ResourceNotFoundException ignore) {
@@ -218,8 +215,8 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setStatus(..))",
             returning = "service")
-    public void updatePublicProviderTemplateStatus(final NewServiceBundle service) {
-        NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+    public void updatePublicProviderTemplateStatus(final ServiceBundle service) {
+        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
@@ -248,7 +245,7 @@ public class ProviderManagementAspect {
     @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.delete(..))")
     public void deletePublicProvider(JoinPoint joinPoint) {
-        NewProviderBundle bundle = (NewProviderBundle) joinPoint.getArgs()[0];
+        ProviderBundle bundle = (ProviderBundle) joinPoint.getArgs()[0];
         publicProviderService.delete(bundle);
     }
 
@@ -258,7 +255,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.finalizeDraft(..))",
             /*"|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.changeProvider(..))",*/
             returning = "service")
-    public void addResourceAsPublic(final NewServiceBundle service) {
+    public void addResourceAsPublic(final ServiceBundle service) {
         if (service.getStatus().equals("approved") && service.isActive()) {
             try {
                 publicServiceManager.get(service.getIdentifiers().getPid(), service.getCatalogueId());
@@ -317,11 +314,11 @@ public class ProviderManagementAspect {
 //    }
 
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.update(..)) && args(service, ..)")
-    public Object updatePublicResource(ProceedingJoinPoint pjp, NewServiceBundle service) {
-        NewServiceBundle init = ObjectUtils.clone(service);
-        NewServiceBundle ret = null;
+    public Object updatePublicResource(ProceedingJoinPoint pjp, ServiceBundle service) {
+        ServiceBundle init = ObjectUtils.clone(service);
+        ServiceBundle ret = null;
         try {
-            ret = (NewServiceBundle) pjp.proceed();
+            ret = (ServiceBundle) pjp.proceed();
             if (!ret.equals(init)) {
                 publicServiceManager.update(ObjectUtils.clone(ret));
             }
@@ -338,7 +335,7 @@ public class ProviderManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.audit(..))",
             returning = "service")
-    public void updatePublicResource(final NewServiceBundle service) {
+    public void updatePublicResource(final ServiceBundle service) {
         try {
             publicServiceManager.update(ObjectUtils.clone(service));
         } catch (ResourceException | ResourceNotFoundException ignore) {
@@ -438,7 +435,7 @@ public class ProviderManagementAspect {
     @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.delete(..))")
     public void deletePublicService(JoinPoint joinPoint) {
-        NewServiceBundle service = (NewServiceBundle) joinPoint.getArgs()[0];
+        ServiceBundle service = (ServiceBundle) joinPoint.getArgs()[0];
         publicServiceManager.delete(service);
     }
 
@@ -473,10 +470,10 @@ public class ProviderManagementAspect {
      * @param service
      */
     @Async
-    public void updateServiceProviderStates(NewServiceBundle service) {
+    public void updateServiceProviderStates(ServiceBundle service) {
         if (service.getCatalogueId().equals(catalogueId)) {
             try {
-                NewProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+                ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                         service.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",

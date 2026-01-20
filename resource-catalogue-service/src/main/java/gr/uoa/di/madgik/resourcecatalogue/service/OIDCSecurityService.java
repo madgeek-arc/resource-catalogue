@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
@@ -25,7 +24,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -35,13 +33,13 @@ import java.util.*;
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
 
-    private final CatalogueService catalogueService;
+//    private final CatalogueService catalogueService;
     private final ProviderService providerService;
     private final ServiceService serviceService;
-    private final TrainingResourceService trainingResourceService;
-    private final InteroperabilityRecordService interoperabilityRecordService;
-    private final DeployableServiceService deployableServiceService;
-    private final AdapterService adapterService;
+//    private final TrainingResourceService trainingResourceService;
+//    private final InteroperabilityRecordService interoperabilityRecordService;
+//    private final DeployableServiceService deployableServiceService;
+//    private final AdapterService adapterService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     @Value("${elastic.index.max_result_window:10000}")
@@ -50,21 +48,21 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public OIDCSecurityService(@Lazy CatalogueService catalogueService,
+    public OIDCSecurityService(/*@Lazy CatalogueService catalogueService,*/
                                @Lazy ProviderService providerService,
                                @Lazy ServiceService serviceService,
-                               @Lazy TrainingResourceService trainingResourceService,
-                               @Lazy InteroperabilityRecordService interoperabilityRecordService,
-                               @Lazy DeployableServiceService deployableServiceService,
-                               @Lazy AdapterService adapterService,
+//                               @Lazy TrainingResourceService trainingResourceService,
+//                               @Lazy InteroperabilityRecordService interoperabilityRecordService,
+//                               @Lazy DeployableServiceService deployableServiceService,
+//                               @Lazy AdapterService adapterService,
                                CatalogueProperties properties) {
-        this.catalogueService = catalogueService;
+//        this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.serviceService = serviceService;
-        this.trainingResourceService = trainingResourceService;
-        this.interoperabilityRecordService = interoperabilityRecordService;
-        this.deployableServiceService = deployableServiceService;
-        this.adapterService = adapterService;
+//        this.trainingResourceService = trainingResourceService;
+//        this.interoperabilityRecordService = interoperabilityRecordService;
+//        this.deployableServiceService = deployableServiceService;
+//        this.adapterService = adapterService;
     }
 
     @Override
@@ -109,7 +107,8 @@ public class OIDCSecurityService implements SecurityService {
     public boolean userHasAdminAccess(User user, @NotNull String id) {
         boolean isProvider = isProvider(id);
         //FIXME: if provider,catalogue have the same ID
-        List<User> users = isProvider ? getProviderUsers(id) : getCatalogueUsers(id);
+        List<User> users = getProviderUsers(id);
+//        List<User> users = isProvider ? getProviderUsers(id) : getCatalogueUsers(id); //FIXME
         if (users == null) {
             return false;
         }
@@ -126,7 +125,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private List<User> getProviderUsers(String id) {
-        NewProviderBundle registeredProvider = checkProviderExistence(id);
+        ProviderBundle registeredProvider = checkProviderExistence(id);
         if (registeredProvider == null) {
             return null;
         }
@@ -154,15 +153,15 @@ public class OIDCSecurityService implements SecurityService {
         return user;
     }
 
-    private List<User> getCatalogueUsers(String id) {
-        CatalogueBundle registeredCatalogue = checkCatalogueExistence(id);
-        if (registeredCatalogue == null || registeredCatalogue.getCatalogue().getUsers() == null) {
-            return null;
-        }
-        return registeredCatalogue.getCatalogue().getUsers();
-    }
+//    private List<User> getCatalogueUsers(String id) {
+//        CatalogueBundle registeredCatalogue = checkCatalogueExistence(id);
+//        if (registeredCatalogue == null || registeredCatalogue.getCatalogue().getUsers() == null) {
+//            return null;
+//        }
+//        return registeredCatalogue.getCatalogue().getUsers();
+//    }
 
-    private NewProviderBundle checkProviderExistence(String providerId) {
+    private ProviderBundle checkProviderExistence(String providerId) {
         try {
             return providerService.get(providerId);
         } catch (ResourceException | ResourceNotFoundException e) {
@@ -170,13 +169,13 @@ public class OIDCSecurityService implements SecurityService {
         }
     }
 
-    private CatalogueBundle checkCatalogueExistence(String id) {
-        try {
-            return catalogueService.get(id, adminAccess);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-    }
+//    private CatalogueBundle checkCatalogueExistence(String id) {
+//        try {
+//            return catalogueService.get(id, adminAccess);
+//        } catch (ResourceException | ResourceNotFoundException e) {
+//            return null;
+//        }
+//    }
 
     private boolean userMatches(User u1, User u2) {
         return u1.getEmail().equalsIgnoreCase(u2.getEmail());
@@ -185,7 +184,7 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean isApprovedProvider(String prefix, String suffix) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerService.get(id);
+        ProviderBundle bundle = providerService.get(id);
         return "approved".equals(bundle.getStatus());
     }
     //endregion
@@ -209,9 +208,9 @@ public class OIDCSecurityService implements SecurityService {
     //TODO: when done, refactor PreAuthorization annotations to include them
     private String getProviderId(String resourceId) {
         String providerId;
-        NewBundle bundle = determineResourceType(resourceId);
+        Bundle bundle = determineResourceType(resourceId);
         providerId = switch (bundle) {
-            case NewServiceBundle serviceBundle -> (String) serviceBundle.getService().get("serviceOwner");
+            case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("serviceOwner");
             //FIXME
 //            case TrainingResourceBundle trainingResourceBundle ->
 //                    trainingResourceBundle.getTrainingResource().getResourceOrganisation();
@@ -223,7 +222,7 @@ public class OIDCSecurityService implements SecurityService {
         return providerId;
     }
 
-    private NewBundle determineResourceType(String id) {
+    private Bundle determineResourceType(String id) {
         if (isProvider(id)) {
             return providerService.getOrElseReturnNull(id);
         } else if (isService(id)) {
@@ -258,13 +257,13 @@ public class OIDCSecurityService implements SecurityService {
         }
     }
 
-    private boolean isTrainingResource(String id) {
-        return trainingResourceService.get(id) != null;
-    }
-
-    private boolean isDeployableService(String id) {
-        return deployableServiceService.get(id) != null;
-    }
+//    private boolean isTrainingResource(String id) {
+//        return trainingResourceService.get(id) != null;
+//    }
+//
+//    private boolean isDeployableService(String id) {
+//        return deployableServiceService.get(id) != null;
+//    }
 
 
     //FIXME - how to get catalogueId
@@ -274,7 +273,7 @@ public class OIDCSecurityService implements SecurityService {
         if (catalogueId == null || catalogueId.isEmpty()) {
             catalogueId = this.catalogueId;
         }
-        NewProviderBundle provider = providerService.get(providerId, catalogueId);
+        ProviderBundle provider = providerService.get(providerId, catalogueId);
         return canAddResources(auth, provider);
     }
 
@@ -317,7 +316,7 @@ public class OIDCSecurityService implements SecurityService {
 //        return canAddResources(auth, provider, interoperabilityRecord.getId());
     }
 
-    private boolean canAddResources(Authentication auth, NewProviderBundle provider) {
+    private boolean canAddResources(Authentication auth, ProviderBundle provider) {
         // provider related check
         if (!hasAdminAccess(auth, provider.getId())) {
             return false;
@@ -346,15 +345,15 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean resourceIsApprovedAndUserIsAdmin(Authentication auth, String id) {
-        NewBundle bundle = determineResourceType(id);
+        Bundle bundle = determineResourceType(id);
         if (bundle != null) {
-            if (bundle instanceof NewProviderBundle) {
+            if (bundle instanceof ProviderBundle) {
                 if (bundle.getStatus().equals("approved")) {
                     return hasAdminAccess(auth, id);
                 }
             } else {
                 String providerId = getProviderId(id);
-                NewProviderBundle provider = providerService.get(providerId);
+                ProviderBundle provider = providerService.get(providerId);
                 if (provider.getStatus().equals("approved")) {
                     return hasAdminAccess(auth, providerId);
                 }
@@ -365,32 +364,38 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean providerIsActive(String id, String catalogueId) {
-        NewProviderBundle providerBundle = providerService.get(id, catalogueId);
+        ProviderBundle providerBundle = providerService.get(id, catalogueId);
         return providerBundle.isActive();
     }
 
     @Override
     public boolean serviceIsActive(String id, String catalogueId) {
-        NewServiceBundle serviceBundle = serviceService.get(id, catalogueId);
+        ServiceBundle serviceBundle = serviceService.get(id, catalogueId);
         return serviceBundle.isActive();
     }
 
+    //FIXME
     @Override
     public boolean trainingResourceIsActive(String id, String catalogueId) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
-        return trainingResourceBundle.isActive();
+//        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
+//        return trainingResourceBundle.isActive();
+        return false;
     }
 
+    //FIXME
     @Override
     public boolean guidelineIsActive(String id, String catalogueId) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
-        return interoperabilityRecordBundle.isActive();
+//        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
+//        return interoperabilityRecordBundle.isActive();
+        return false;
     }
 
+    //FIXME
     @Override
     public boolean deployableServiceIsActive(String id, String catalogueId) {
-        DeployableServiceBundle deployableServiceBundle = deployableServiceService.get(id, catalogueId);
-        return deployableServiceBundle.isActive();
+//        DeployableServiceBundle deployableServiceBundle = deployableServiceService.get(id, catalogueId);
+//        return deployableServiceBundle.isActive();
+        return false;
     }
     //endregion
 
@@ -402,25 +407,28 @@ public class OIDCSecurityService implements SecurityService {
                 .orElse(false);
     }
 
+    //FIXME
     @Override
     public boolean userHasAdapterAccess(User user, @NotNull String id) {
-        AdapterBundle registeredAdapter = checkAdapterExistence(id);
-        if (registeredAdapter == null || registeredAdapter.getAdapter().getAdmins() == null) {
-            return false;
-        }
-        List<User> adapterAdmins = registeredAdapter.getAdapter().getAdmins();
-
-        return adapterAdmins.parallelStream()
-                .filter(Objects::nonNull)
-                .anyMatch(u -> userMatches(u, user));
+        return false;
+//        AdapterBundle registeredAdapter = checkAdapterExistence(id);
+//        if (registeredAdapter == null || registeredAdapter.getAdapter().getAdmins() == null) {
+//            return false;
+//        }
+//        List<User> adapterAdmins = registeredAdapter.getAdapter().getAdmins();
+//
+//        return adapterAdmins.parallelStream()
+//                .filter(Objects::nonNull)
+//                .anyMatch(u -> userMatches(u, user));
     }
 
-    private AdapterBundle checkAdapterExistence(String adapterId) {
-        try {
-            return adapterService.get(adapterId, null, false);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
-    }
+    //FIXME
+//    private AdapterBundle checkAdapterExistence(String adapterId) {
+//        try {
+//            return adapterService.get(adapterId, null, false);
+//        } catch (ResourceException | ResourceNotFoundException e) {
+//            return null;
+//        }
+//    }
     //endregion
 }

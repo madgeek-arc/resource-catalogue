@@ -4,7 +4,7 @@ import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -16,7 +16,7 @@ import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class AbstractPublicResourceManager<T extends NewBundle>
+public abstract class AbstractPublicResourceManager<T extends Bundle>
         implements gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractPublicResourceManager.class);

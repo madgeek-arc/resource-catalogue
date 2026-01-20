@@ -22,7 +22,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
@@ -82,18 +82,18 @@ public class ProviderController {
                                  @SuppressWarnings("unused")
                                  @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        ProviderBundle bundle = providerService.get(id, catalogueId);
         return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<NewProviderBundle> getBundle(@PathVariable String prefix,
-                                                       @PathVariable String suffix,
-                                                       @SuppressWarnings("unused")
+    public ResponseEntity<ProviderBundle> getBundle(@PathVariable String prefix,
+                                                    @PathVariable String suffix,
+                                                    @SuppressWarnings("unused")
                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        ProviderBundle bundle = providerService.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -108,8 +108,8 @@ public class ProviderController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<NewProviderBundle> paging = providerService.getAll(ff, auth);
-        return ResponseEntity.ok(paging.map(NewProviderBundle::getProvider));
+        Paging<ProviderBundle> paging = providerService.getAll(ff, auth);
+        return ResponseEntity.ok(paging.map(ProviderBundle::getProvider));
     }
 
     @BrowseParameters
@@ -120,12 +120,12 @@ public class ProviderController {
     })
     @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<NewProviderBundle>> getAllBundles(@Parameter(hidden = true)
+    public ResponseEntity<Paging<ProviderBundle>> getAllBundles(@Parameter(hidden = true)
                                                                    @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<NewProviderBundle> paging = providerService.getAll(ff);
+        Paging<ProviderBundle> paging = providerService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -133,24 +133,24 @@ public class ProviderController {
     @BrowseParameters
     @GetMapping(path = "byCatalogue/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
-    public ResponseEntity<Paging<NewProviderBundle>> getByCatalogue(@Parameter(hidden = true)
+    public ResponseEntity<Paging<ProviderBundle>> getByCatalogue(@Parameter(hidden = true)
                                                                     @RequestParam MultiValueMap<String, Object> params,
-                                                                    @PathVariable String id,
-                                                                    @SuppressWarnings("unused")
+                                                                 @PathVariable String id,
+                                                                 @SuppressWarnings("unused")
                                                                     @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<NewProviderBundle> paging = providerService.getAll(ff);
+        Paging<ProviderBundle> paging = providerService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
     @Operation(summary = "Returns all Provider's of a User.")
     @GetMapping(path = "getMyProviders")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<NewProviderBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
-                                                         @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<List<ProviderBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
+                                                      @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", draft);
         return new ResponseEntity<>(providerService.getMy(ff, auth).getResults(), HttpStatus.OK);
@@ -162,9 +162,9 @@ public class ProviderController {
     })
     @GetMapping(path = "random")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<NewProviderBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
-                                                               @Parameter(hidden = true) Authentication auth) {
-        Paging<NewProviderBundle> paging = providerService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+    public ResponseEntity<Paging<ProviderBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
+                                                            @Parameter(hidden = true) Authentication auth) {
+        Paging<ProviderBundle> paging = providerService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 
@@ -173,27 +173,27 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> provider,
                                  @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle bundle = new NewProviderBundle();
+        ProviderBundle bundle = new ProviderBundle();
         bundle.setProvider(provider);
-        NewProviderBundle ret = providerService.add(bundle, auth);
+        ProviderBundle ret = providerService.add(bundle, auth);
         logger.info("Added Provider with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/bundle")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<NewProviderBundle> addBundle(@RequestBody NewProviderBundle provider,
-                                                       @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle bundle = providerService.add(provider, auth);
+    public ResponseEntity<ProviderBundle> addBundle(@RequestBody ProviderBundle provider,
+                                                    @Parameter(hidden = true) Authentication auth) {
+        ProviderBundle bundle = providerService.add(provider, auth);
         logger.info("Added ProviderBundle with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/addBulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<NewProviderBundle> providerList,
+    public void addBulk(@RequestBody List<ProviderBundle> providerList,
                         @Parameter(hidden = true) Authentication auth) {
-        for (NewProviderBundle bundle : providerList) {
+        for (ProviderBundle bundle : providerList) {
             providerService.add(bundle, auth);
         }
     }
@@ -205,7 +205,7 @@ public class ProviderController {
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = provider.get("id").toString();
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        ProviderBundle bundle = providerService.get(id, catalogueId);
         bundle.setProvider(provider);
         bundle = providerService.update(bundle, comment, auth);
         logger.info("Updated the Provider with id '{}'", id);
@@ -214,10 +214,10 @@ public class ProviderController {
 
     @PutMapping(path = "/bundle")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<NewProviderBundle> updateBundle(@RequestBody NewProviderBundle provider,
-                                                          @RequestParam(required = false) String comment,
-                                                          @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle bundle = providerService.update(provider, comment, auth);
+    public ResponseEntity<ProviderBundle> updateBundle(@RequestBody ProviderBundle provider,
+                                                       @RequestParam(required = false) String comment,
+                                                       @Parameter(hidden = true) Authentication auth) {
+        ProviderBundle bundle = providerService.update(provider, comment, auth);
         logger.info("Updated the Provider id '{}'", provider.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
@@ -228,7 +228,7 @@ public class ProviderController {
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle provider = providerService.get(id, catalogueId);
+        ProviderBundle provider = providerService.get(id, catalogueId);
 
         providerService.delete(provider);
         logger.info("Deleted the Provider with id '{}'", provider.getId());
@@ -239,13 +239,13 @@ public class ProviderController {
     @Operation(summary = "Verifies the Provider.")
     @PatchMapping(path = "verifyProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewProviderBundle> setStatus(@PathVariable String prefix,
-                                                       @PathVariable String suffix,
-                                                       @RequestParam(required = false) Boolean active,
-                                                       @RequestParam(required = false) String status,
-                                                       @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ProviderBundle> setStatus(@PathVariable String prefix,
+                                                    @PathVariable String suffix,
+                                                    @RequestParam(required = false) Boolean active,
+                                                    @RequestParam(required = false) String status,
+                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle provider = providerService.setStatus(id, status, active, auth);
+        ProviderBundle provider = providerService.setStatus(id, status, active, auth);
         logger.info("Verify Provider with id: '{}' | status: '{}' | active: '{}'",
                 provider.getId(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
@@ -255,12 +255,12 @@ public class ProviderController {
     @PatchMapping(path = "setActive/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.resourceIsApprovedAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<NewProviderBundle> setActive(@PathVariable String prefix,
-                                                       @PathVariable String suffix,
-                                                       @RequestParam(required = false) Boolean active,
-                                                       @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ProviderBundle> setActive(@PathVariable String prefix,
+                                                    @PathVariable String suffix,
+                                                    @RequestParam(required = false) Boolean active,
+                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle provider = providerService.setActive(id, active, auth);
+        ProviderBundle provider = providerService.setActive(id, active, auth);
         logger.info("Attempt to save Provider with id '{}' as '{}'", id, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
@@ -268,24 +268,24 @@ public class ProviderController {
     @Operation(summary = "Audits the Provider.")
     @PatchMapping(path = "audit/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewProviderBundle> audit(@PathVariable String prefix,
-                                                   @PathVariable String suffix,
-                                                   @RequestParam("catalogueId") String catalogueId,
-                                                   @RequestParam(required = false) String comment,
-                                                   @RequestParam LoggingInfo.ActionType actionType,
-                                                   @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ProviderBundle> audit(@PathVariable String prefix,
+                                                @PathVariable String suffix,
+                                                @RequestParam("catalogueId") String catalogueId,
+                                                @RequestParam(required = false) String comment,
+                                                @RequestParam LoggingInfo.ActionType actionType,
+                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle provider = providerService.audit(id, catalogueId, comment, actionType, auth);
+        ProviderBundle provider = providerService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
     @Operation(description = "Suspends a Provider and all its resources.")
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public NewProviderBundle suspend(@RequestParam String id,
-                                     @RequestParam String catalogueId,
-                                     @RequestParam boolean suspend,
-                                     @Parameter(hidden = true) Authentication auth) {
+    public ProviderBundle suspend(@RequestParam String id,
+                                  @RequestParam String catalogueId,
+                                  @RequestParam boolean suspend,
+                                  @Parameter(hidden = true) Authentication auth) {
         return providerService.setSuspend(id, catalogueId, suspend, auth);
     }
 
@@ -295,7 +295,7 @@ public class ProviderController {
                                                                 @PathVariable String suffix,
                                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        ProviderBundle bundle = providerService.get(id, catalogueId);
         List<LoggingInfo> loggingInfoHistory = providerService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -303,7 +303,7 @@ public class ProviderController {
     @Operation(summary = "Validates the Provider without actually changing the repository.")
     @PostMapping(path = "validate")
     public ResponseEntity<Void> validate(@RequestBody LinkedHashMap<String, Object> provider) {
-        NewProviderBundle bundle = new NewProviderBundle();
+        ProviderBundle bundle = new ProviderBundle();
         bundle.setProvider(provider);
         providerService.validate(bundle);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -362,10 +362,10 @@ public class ProviderController {
 
     @PutMapping(path = "changeCatalogue")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewProviderBundle> changeCatalogue(@RequestParam String catalogueId,
-                                                             @RequestParam String providerId,
-                                                             @RequestParam String newCatalogueId,
-                                                             @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ProviderBundle> changeCatalogue(@RequestParam String catalogueId,
+                                                          @RequestParam String providerId,
+                                                          @RequestParam String newCatalogueId,
+                                                          @Parameter(hidden = true) Authentication auth) {
 //        NewProviderBundle bundle = migrationService.changeProviderCatalogue(providerId, catalogueId, newCatalogueId, auth);
 //        return ResponseEntity.ok(bundle);
         return null;
@@ -386,7 +386,7 @@ public class ProviderController {
     public ResponseEntity<?> getDraft(@PathVariable String prefix,
                                       @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle draft = providerService.get(
+        ProviderBundle draft = providerService.get(
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("published", "false"),
                 new SearchService.KeyValue("draft", "true")
@@ -398,9 +398,9 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> provider,
                                       @Parameter(hidden = true) Authentication auth) {
-        NewProviderBundle bundle = new NewProviderBundle();
+        ProviderBundle bundle = new ProviderBundle();
         bundle.setProvider(provider);
-        NewProviderBundle ret = providerService.addDraft(bundle, auth);
+        ProviderBundle ret = providerService.addDraft(bundle, auth);
         logger.info("Added Draft Provider with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
     }
@@ -410,7 +410,7 @@ public class ProviderController {
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> provider,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) provider.get("id");
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        ProviderBundle bundle = providerService.get(id, catalogueId);
         bundle.setProvider(provider);
         bundle = providerService.updateDraft(bundle, auth);
         logger.info("Updated the Draft Provider with id '{}'", id);
@@ -423,7 +423,7 @@ public class ProviderController {
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        ProviderBundle bundle = providerService.get(id, catalogueId);
         providerService.deleteDraft(bundle);
     }
 
@@ -432,7 +432,7 @@ public class ProviderController {
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> provider,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) provider.get("id");
-        NewProviderBundle bundle = providerService.get(id, catalogueId);
+        ProviderBundle bundle = providerService.get(id, catalogueId);
         bundle.setProvider(provider);
 
         providerService.updateDraft(bundle, auth);

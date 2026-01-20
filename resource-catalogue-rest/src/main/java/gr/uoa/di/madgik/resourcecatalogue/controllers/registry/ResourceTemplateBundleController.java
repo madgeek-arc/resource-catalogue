@@ -17,9 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,18 +37,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class ResourceTemplateBundleController {
 
     private final ServiceService serviceService;
-    private final TrainingResourceService trainingResourceService;
 
-    public ResourceTemplateBundleController(ServiceService serviceService,
-                                            TrainingResourceService trainingResourceService) {
+    public ResourceTemplateBundleController(ServiceService serviceService) {
         this.serviceService = serviceService;
-        this.trainingResourceService = trainingResourceService;
     }
 
     // Get the Provider's Template (status = "pending" or "rejected")
     @GetMapping(path = {"templates"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public NewBundle getProviderTemplate(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
-        NewBundle template = serviceService.getServiceTemplate(id, auth);
+    public Bundle getProviderTemplate(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
+        Bundle template = serviceService.getServiceTemplate(id, auth);
         //FIXME
 //        if (template == null) {
 //            template = trainingResourceService.getResourceTemplate(id, auth);

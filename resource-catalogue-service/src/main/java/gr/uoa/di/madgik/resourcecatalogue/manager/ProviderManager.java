@@ -20,7 +20,6 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -46,7 +45,7 @@ import java.util.*;
 
 //TODO: REMOVE ANY LOGIC THAT RELATES WITH MODEL'S FIELDS (eg. name, users, HLE)
 @org.springframework.stereotype.Service("providerManager")
-public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.TestManager<NewProviderBundle>
+public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.TestManager<ProviderBundle>
         implements ProviderService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);
@@ -57,52 +56,40 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     protected int maxQuantity;
 
     private final GenericResourceService genericResourceService;
-    private final EmailService emailService;
     private final VocabularyService vocabularyService;
     private final ServiceService serviceService;
-    private final TrainingResourceService trainingResourceService;
-    private final InteroperabilityRecordService interoperabilityRecordService;
     private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
     private final SecurityService securityService;
-    private final CatalogueService catalogueService;
     private final ProviderCascadeLifecycleService cascadeLifecycleService;
 
     public ProviderManager(GenericResourceService genericResourceService,
-                           EmailService emailService,
                            VocabularyService vocabularyService,
                            @Lazy ServiceService serviceService,
-                           @Lazy TrainingResourceService trainingResourceService,
-                           @Lazy InteroperabilityRecordService interoperabilityRecordService,
                            IdCreator idCreator,
                            ProviderResourcesCommonMethods commonMethods,
                            SecurityService securityService,
-                           CatalogueService catalogueService,
                            ProviderCascadeLifecycleService cascadeLifecycleService) {
         super(genericResourceService, securityService);
         this.genericResourceService = genericResourceService;
-        this.emailService = emailService;
         this.vocabularyService = vocabularyService;
         this.serviceService = serviceService;
-        this.trainingResourceService = trainingResourceService;
-        this.interoperabilityRecordService = interoperabilityRecordService;
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.securityService = securityService;
-        this.catalogueService = catalogueService;
         this.cascadeLifecycleService = cascadeLifecycleService;
     }
 
     @Override
     protected String getResourceTypeName() {
-        return "providertest";
+        return "provider";
     }
 
     //region generic
     @Override
-    public NewProviderBundle add(NewProviderBundle bundle, Authentication auth) {
+    public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
         onboard(bundle, auth);
-        NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
+        ProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
@@ -111,7 +98,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         return ret;
     }
 
-    private void onboard(NewProviderBundle bundle, Authentication auth) {
+    private void onboard(ProviderBundle bundle, Authentication auth) {
         String catalogueId = bundle.getCatalogueId();
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
@@ -121,7 +108,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
             bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
             bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
-            commonMethods.validateCatalogueId(catalogueId);
+//            commonMethods.validateCatalogueId(catalogueId); //FIXME
             bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
             idCreator.validateId(bundle.getId());
             commonMethods.createIdentifiers(bundle, getResourceTypeName(), true);
@@ -133,8 +120,8 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 
     @Override
     @TriggersAspects({"HostingLegalEntityVocabularyUpdate", "AfterProviderUpdateEmails"})
-    public NewProviderBundle update(NewProviderBundle bundle, String comment, Authentication auth) {
-        NewProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId());
+    public ProviderBundle update(ProviderBundle bundle, String comment, Authentication auth) {
+        ProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Provider
         if (bundle.equals(existing)) {
             return bundle;
@@ -154,7 +141,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     @Override
     @Transactional // if deleteAllRelatedResources() fails, this should also fail
     @TriggersAspects({"AfterProviderDeletionEmails"})
-    public void delete(NewProviderBundle bundle) {
+    public void delete(ProviderBundle bundle) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // block Public Provider deletion
         if (bundle.getMetadata().isPublished()) {
@@ -168,12 +155,12 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 
     @Override
     @TriggersAspects({"HostingLegalEntityVocabularyUpdate"})
-    public NewProviderBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public ProviderBundle setStatus(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
-        NewProviderBundle existing = get(id);
+        ProviderBundle existing = get(id);
         existing.markOnboard(status, active, auth, null);
 
         logger.info("Verifying Provider: {}", existing);
@@ -185,8 +172,8 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     }
 
     @Override
-    public NewProviderBundle setActive(String id, Boolean active, Authentication auth) {
-        NewProviderBundle existing = get(id);
+    public ProviderBundle setActive(String id, Boolean active, Authentication auth) {
+        ProviderBundle existing = get(id);
 
         if ((existing.getStatus().equals(vocabularyService.get("pending").getId()) ||
                 existing.getStatus().equals(vocabularyService.get("rejected").getId())) && !existing.isActive()) {
@@ -203,8 +190,8 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     }
 
     @Override
-    public NewProviderBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        NewProviderBundle bundle = get(id, catalogueId);
+    public ProviderBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
+        ProviderBundle bundle = get(id, catalogueId);
 //        commonMethods.suspensionValidation(existing, catalogueId, id, suspend, auth); //FIXME
 
         logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
@@ -219,7 +206,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     }
 
     @Override
-    public Browsing<NewProviderBundle> getMy(FacetFilter ff, Authentication auth) {
+    public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
         ff.setResourceType(getResourceTypeName());
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
@@ -232,7 +219,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     //region Provider-specific
     @Override
     public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
-        NewProviderBundle bundle = get(
+        ProviderBundle bundle = get(
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("published", "false")
         );
@@ -250,7 +237,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 
     @Override
     public void adminAcceptedTerms(String id, Authentication auth) {
-        NewProviderBundle bundle = get(id);
+        ProviderBundle bundle = get(id);
         String userEmail = AuthenticationInfo.getEmail(auth);
 
         List<String> existingTerms = bundle.getMetadata().getTerms();
@@ -274,7 +261,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 
     @Override
     public void requestProviderDeletion(String providerId, Authentication auth) {
-        NewProviderBundle provider = genericResourceService.get(getResourceTypeName(),
+        ProviderBundle provider = genericResourceService.get(getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", providerId),
                 new SearchService.KeyValue("published", "false"));
 
@@ -305,22 +292,22 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
-        List<NewProviderBundle> providers = getAll(ff, auth).getResults();
-        List<NewServiceBundle> services = new ArrayList<>();
-        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
-        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
+        List<ProviderBundle> providers = getAll(ff, auth).getResults();
+        List<ServiceBundle> services = new ArrayList<>();
+//        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
+//        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
         createMapValuesForHLE(providers, "provider", mapValuesList);
-        for (NewProviderBundle providerBundle : providers) {
+        for (ProviderBundle providerBundle : providers) {
             services.addAll(serviceService.getAllServicesOfAProvider(providerBundle.getId(),
                     providerBundle.getCatalogueId(), maxQuantity, auth).getResults());
-            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
-                    providerBundle.getId(), auth).getResults());
-            interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(
-                    providerBundle.getCatalogueId(), providerBundle.getId(), auth).getResults());
+//            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
+//                    providerBundle.getId(), auth).getResults());
+//            interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(
+//                    providerBundle.getCatalogueId(), providerBundle.getId(), auth).getResults());
         }
         createMapValuesForHLE(services, "service", mapValuesList);
-        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
-        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
+//        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
+//        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
         return mapValuesList;
     }
 
@@ -333,7 +320,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
             CatalogueValue value = new CatalogueValue();
             switch (resourceType) {
                 case "provider":
-                    NewProviderBundle providerBundle = (NewProviderBundle) obj;
+                    ProviderBundle providerBundle = (ProviderBundle) obj;
                     value.setId(providerBundle.getId());
                     value.setName(providerBundle.getProvider().get("name").toString());
                     value.setCatalogue(providerBundle.getCatalogueId());
@@ -341,21 +328,21 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
                 case "service":
                     ServiceBundle serviceBundle = (ServiceBundle) obj;
                     value.setId(serviceBundle.getId());
-                    value.setName(serviceBundle.getService().getName());
-                    value.setCatalogue(serviceBundle.getService().getCatalogueId());
+                    value.setName((String) serviceBundle.getService().get("name"));
+                    value.setCatalogue(serviceBundle.getCatalogueId());
                     break;
-                case "training_resource":
-                    TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
-                    value.setId(trainingResourceBundle.getId());
-                    value.setName(trainingResourceBundle.getTrainingResource().getTitle());
-                    value.setCatalogue(trainingResourceBundle.getTrainingResource().getCatalogueId());
-                    break;
-                case "interoperability_record":
-                    InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
-                    value.setId(interoperabilityRecordBundle.getId());
-                    value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
-                    value.setCatalogue(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-                    break;
+//                case "training_resource":
+//                    TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
+//                    value.setId(trainingResourceBundle.getId());
+//                    value.setName(trainingResourceBundle.getTrainingResource().getTitle());
+//                    value.setCatalogue(trainingResourceBundle.getTrainingResource().getCatalogueId());
+//                    break;
+//                case "interoperability_record":
+//                    InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
+//                    value.setId(interoperabilityRecordBundle.getId());
+//                    value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
+//                    value.setCatalogue(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
+//                    break;
                 default:
                     break;
             }
@@ -365,7 +352,7 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
         mapValuesList.add(mapValues);
     }
 
-    private List<String> extractEmails(NewProviderBundle providerBundle) {
+    private List<String> extractEmails(ProviderBundle providerBundle) {
         List<String> emails = new ArrayList<>();
 
         Object usersObj = providerBundle.getProvider().get("users"); //TODO: how to enforce that users will be always in the model
@@ -424,22 +411,22 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
 
     //region Drafts
     @Override
-    public NewProviderBundle addDraft(NewProviderBundle bundle, Authentication auth) {
+    public ProviderBundle addDraft(ProviderBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
-        NewProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
+        ProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
         return ret;
     }
 
     @Override
-    public NewProviderBundle updateDraft(NewProviderBundle bundle, Authentication auth) {
+    public ProviderBundle updateDraft(ProviderBundle bundle, Authentication auth) {
         bundle.markUpdate(auth, null);
         try {
-            NewProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
+            ProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -447,12 +434,12 @@ public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.
     }
 
     @Override
-    public void deleteDraft(NewProviderBundle bundle) {
+    public void deleteDraft(ProviderBundle bundle) {
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
 
     @Override
-    public NewProviderBundle finalizeDraft(NewProviderBundle bundle, Authentication auth) {
+    public ProviderBundle finalizeDraft(ProviderBundle bundle, Authentication auth) {
         bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
         bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 

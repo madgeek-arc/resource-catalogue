@@ -18,11 +18,8 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
@@ -31,7 +28,7 @@ public class ResourceValidationUtils {
     public static void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
                                                                                                       ServiceService serviceService,
                                                                                                       String resourceType) {
-        NewServiceBundle resourceBundle;
+        ServiceBundle resourceBundle;
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists
         resourceBundle = serviceService.get(resourceId, catalogueId);
@@ -46,23 +43,24 @@ public class ResourceValidationUtils {
         }
     }
 
-    public static void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
-                                                                            TrainingResourceService trainingResourceService,
-                                                                            String resourceType) {
-        TrainingResourceBundle trainingResourceBundle;
-        resourceType = StringUtils.capitalize(resourceType);
-        // check if Resource exists
-        trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId, false);
-        // check if Service is Public
-        if (trainingResourceBundle.getMetadata().isPublished()) {
-            throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));
-        }
-        // check if TR is Active + Approved
-        if (!trainingResourceBundle.isActive() || !trainingResourceBundle.getStatus().equals("approved")) {
-            throw new ResourceException(String.format("%s with ID '%s' is not Approved and/or Active",
-                    resourceType, resourceId), HttpStatus.CONFLICT);
-        }
-    }
+    //FIXME
+//    public static void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
+//                                                                            TrainingResourceService trainingResourceService,
+//                                                                            String resourceType) {
+//        TrainingResourceBundle trainingResourceBundle;
+//        resourceType = StringUtils.capitalize(resourceType);
+//        // check if Resource exists
+//        trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId, false);
+//        // check if Service is Public
+//        if (trainingResourceBundle.getMetadata().isPublished()) {
+//            throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));
+//        }
+//        // check if TR is Active + Approved
+//        if (!trainingResourceBundle.isActive() || !trainingResourceBundle.getStatus().equals("approved")) {
+//            throw new ResourceException(String.format("%s with ID '%s' is not Approved and/or Active",
+//                    resourceType, resourceId), HttpStatus.CONFLICT);
+//        }
+//    }
 
     private ResourceValidationUtils() {
     }

@@ -24,9 +24,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -86,18 +84,18 @@ public class ServiceController {
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = serviceService.get(id, catalogueId);
         return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceRead")
     @GetMapping(path = "/bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<NewServiceBundle> getBundle(@PathVariable String prefix,
-                                                      @PathVariable String suffix,
-                                                      @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ServiceBundle> getBundle(@PathVariable String prefix,
+                                                   @PathVariable String suffix,
+                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = serviceService.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -113,8 +111,8 @@ public class ServiceController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<NewServiceBundle> paging = serviceService.getAll(ff, auth);
-        return ResponseEntity.ok(paging.map(NewServiceBundle::getService));
+        Paging<ServiceBundle> paging = serviceService.getAll(ff, auth);
+        return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
     @Tag(name = "ServiceAdmin")
@@ -126,12 +124,12 @@ public class ServiceController {
     })
     @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<NewServiceBundle>> getAllBundles(@Parameter(hidden = true)
+    public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<NewServiceBundle> paging = serviceService.getAll(ff);
+        Paging<ServiceBundle> paging = serviceService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -143,11 +141,11 @@ public class ServiceController {
     @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<NewServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true)
+    public ResponseEntity<Paging<ServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true)
                                                                                @RequestParam MultiValueMap<String, Object> allRequestParams) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.addFilter("published", false);
-        Paging<NewServiceBundle> paging = serviceService.getAll(ff);
+        Paging<ServiceBundle> paging = serviceService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -156,24 +154,24 @@ public class ServiceController {
     @BrowseParameters
     @GetMapping(path = "byCatalogue/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
-    public ResponseEntity<Paging<NewServiceBundle>> getByCatalogue(@Parameter(hidden = true)
+    public ResponseEntity<Paging<ServiceBundle>> getByCatalogue(@Parameter(hidden = true)
                                                                    @RequestParam MultiValueMap<String, Object> params,
-                                                                   @PathVariable String id,
-                                                                   @SuppressWarnings("unused")
+                                                                @PathVariable String id,
+                                                                @SuppressWarnings("unused")
                                                                    @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<NewServiceBundle> paging = serviceService.getAll(ff);
+        Paging<ServiceBundle> paging = serviceService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
     @Tag(name = "ServiceRead")
     @Operation(summary = "Returns all Services's of a User.")
     @GetMapping(path = "getMyServices")
-    public ResponseEntity<List<NewServiceBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
-                                                        @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<List<ServiceBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
+                                                     @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", draft);
         return new ResponseEntity<>(serviceService.getMy(ff, auth).getResults(), HttpStatus.OK);
@@ -186,9 +184,9 @@ public class ServiceController {
     })
     @GetMapping(path = "random")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<NewServiceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
-                                                              @Parameter(hidden = true) Authentication auth) {
-        Paging<NewServiceBundle> paging = serviceService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+    public ResponseEntity<Paging<ServiceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
+                                                           @Parameter(hidden = true) Authentication auth) {
+        Paging<ServiceBundle> paging = serviceService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 
@@ -199,9 +197,9 @@ public class ServiceController {
             "@securityService.providerCanAddResources(#auth, #service, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> service,
                                  @Parameter(hidden = true) Authentication auth) {
-        NewServiceBundle bundle = new NewServiceBundle();
+        ServiceBundle bundle = new ServiceBundle();
         bundle.setService(service);
-        NewServiceBundle ret = serviceService.add(bundle, auth);
+        ServiceBundle ret = serviceService.add(bundle, auth);
         logger.info("Added Service with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
@@ -209,9 +207,9 @@ public class ServiceController {
     @Tag(name = "ServiceAdmin")
     @PostMapping(path = {"/bundle"})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<NewServiceBundle> addBundle(@RequestBody NewServiceBundle service,
-                                                      @Parameter(hidden = true) Authentication auth) {
-        NewServiceBundle bundle = serviceService.add(service, auth);
+    public ResponseEntity<ServiceBundle> addBundle(@RequestBody ServiceBundle service,
+                                                   @Parameter(hidden = true) Authentication auth) {
+        ServiceBundle bundle = serviceService.add(service, auth);
         logger.info("Added ServiceBundle with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
@@ -219,7 +217,7 @@ public class ServiceController {
     @Tag(name = "ServiceAdmin")
     @PostMapping(path = "/addBulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<NewServiceBundle> serviceList,
+    public void addBulk(@RequestBody List<ServiceBundle> serviceList,
                         @Parameter(hidden = true) Authentication auth) {
         serviceService.addBulk(serviceList, auth);
     }
@@ -232,7 +230,7 @@ public class ServiceController {
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = service.get("id").toString();
-        NewServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = serviceService.get(id, catalogueId);
         bundle.setService(service);
         bundle = serviceService.update(bundle, comment, auth);
         logger.info("Updated the Service with id '{}'", service.get("id"));
@@ -242,10 +240,10 @@ public class ServiceController {
     @Tag(name = "ServiceAdmin")
     @PutMapping(path = {"/bundle"})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<NewServiceBundle> updateBundle(@RequestBody NewServiceBundle service,
-                                                         @RequestParam(required = false) String comment,
-                                                         @Parameter(hidden = true) Authentication auth) {
-        NewServiceBundle bundle = serviceService.update(service, comment, auth);
+    public ResponseEntity<ServiceBundle> updateBundle(@RequestBody ServiceBundle service,
+                                                      @RequestParam(required = false) String comment,
+                                                      @Parameter(hidden = true) Authentication auth) {
+        ServiceBundle bundle = serviceService.update(service, comment, auth);
         logger.info("Updated the Service id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
@@ -258,7 +256,7 @@ public class ServiceController {
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle service = serviceService.get(id, catalogueId);
+        ServiceBundle service = serviceService.get(id, catalogueId);
 
         serviceService.delete(service);
         logger.info("Deleted the Service with id '{}'", service.getId());
@@ -270,13 +268,13 @@ public class ServiceController {
     @Operation(summary = "Verifies the Service.")
     @PatchMapping(path = "verifyResource/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewServiceBundle> setStatus(@PathVariable String prefix,
-                                                      @PathVariable String suffix,
-                                                      @RequestParam(required = false) Boolean active,
-                                                      @RequestParam(required = false) String status,
-                                                      @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ServiceBundle> setStatus(@PathVariable String prefix,
+                                                   @PathVariable String suffix,
+                                                   @RequestParam(required = false) Boolean active,
+                                                   @RequestParam(required = false) String status,
+                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle service = serviceService.setStatus(id, status, active, auth);
+        ServiceBundle service = serviceService.setStatus(id, status, active, auth);
         logger.info("Verify Service with id: '{}' | status: '{}' | active: '{}'",
                 service.getId(), status, active);
         return new ResponseEntity<>(service, HttpStatus.OK);
@@ -287,12 +285,12 @@ public class ServiceController {
     @PatchMapping(path = "setActive/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.resourceIsApprovedAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<NewServiceBundle> setActive(@PathVariable String prefix,
-                                                      @PathVariable String suffix,
-                                                      @RequestParam Boolean active,
-                                                      @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ServiceBundle> setActive(@PathVariable String prefix,
+                                                   @PathVariable String suffix,
+                                                   @RequestParam Boolean active,
+                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle service = serviceService.setActive(id, active, auth);
+        ServiceBundle service = serviceService.setActive(id, active, auth);
         logger.info("Attempt to save Service with id '{}' as '{}'", id, active);
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
@@ -301,14 +299,14 @@ public class ServiceController {
     @Operation(summary = "Audits the Service.")
     @PatchMapping(path = "audit/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<NewServiceBundle> audit(@PathVariable String prefix,
-                                                  @PathVariable String suffix,
-                                                  @RequestParam("catalogueId") String catalogueId,
-                                                  @RequestParam(required = false) String comment,
-                                                  @RequestParam LoggingInfo.ActionType actionType,
-                                                  @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ServiceBundle> audit(@PathVariable String prefix,
+                                               @PathVariable String suffix,
+                                               @RequestParam("catalogueId") String catalogueId,
+                                               @RequestParam(required = false) String comment,
+                                               @RequestParam LoggingInfo.ActionType actionType,
+                                               @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle service = serviceService.audit(id, catalogueId, comment, actionType, auth);
+        ServiceBundle service = serviceService.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(service, HttpStatus.OK);
     }
 
@@ -316,10 +314,10 @@ public class ServiceController {
     @Operation(summary = "Suspends a specific Service.")
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public NewServiceBundle suspend(@RequestParam String id,
-                                    @RequestParam String catalogueId,
-                                    @RequestParam boolean suspend,
-                                    @Parameter(hidden = true) Authentication auth) {
+    public ServiceBundle suspend(@RequestParam String id,
+                                 @RequestParam String catalogueId,
+                                 @RequestParam boolean suspend,
+                                 @Parameter(hidden = true) Authentication auth) {
         return serviceService.setSuspend(id, catalogueId, suspend, auth);
     }
 
@@ -330,7 +328,7 @@ public class ServiceController {
                                                                 @PathVariable String suffix,
                                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = serviceService.get(id, catalogueId);
         List<LoggingInfo> loggingInfoHistory = serviceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -339,7 +337,7 @@ public class ServiceController {
     @Operation(summary = "Validates the Service without actually changing the repository.")
     @PostMapping(path = "validate")
     public ResponseEntity<Void> validate(@RequestBody LinkedHashMap<String, Object> service) {
-        NewServiceBundle bundle = new NewServiceBundle();
+        ServiceBundle bundle = new ServiceBundle();
         bundle.setService(service);
         serviceService.validate(bundle);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -353,7 +351,7 @@ public class ServiceController {
                                                                                @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(serviceService.getByIds(auth, ids)
                 .stream()
-                .map(NewServiceBundle::getService)
+                .map(ServiceBundle::getService)
                 .collect(Collectors.toList()));
     }
 
@@ -361,11 +359,11 @@ public class ServiceController {
     @BrowseParameters
     @GetMapping(path = "byProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
-    public ResponseEntity<Paging<NewServiceBundle>> getServicesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
-                                                                          @PathVariable String prefix,
-                                                                          @PathVariable String suffix,
-                                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Paging<ServiceBundle>> getServicesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
+                                                                       @PathVariable String prefix,
+                                                                       @PathVariable String suffix,
+                                                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("service_owner", id);
@@ -436,34 +434,35 @@ public class ServiceController {
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = new ArrayList<>();
         // fetch catalogueId related non-public Resources
 
+        //FIXME
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedServices = genericResourceService
                 .getResults(createFacetFilter(catalogueId, false, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), (String) c.getService().get("name")))
                 .toList();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedTrainingResources = genericResourceService
-                .getResults(createFacetFilter(catalogueId, false, "training_resource")).getResults()
-                .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
-                .toList();
-        // fetch non-catalogueId related public Resources
+//        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedTrainingResources = genericResourceService
+//                .getResults(createFacetFilter(catalogueId, false, "training_resource")).getResults()
+//                .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
+//                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
+//                .toList();
+//        // fetch non-catalogueId related public Resources
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicServices = genericResourceService
                 .getResults(createFacetFilter(catalogueId, true, "service")).getResults()
                 .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .filter(c -> !c.getService().getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getService().getName()))
+                .filter(c -> !c.getCatalogueId().equals(catalogueId))
+                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), (String) c.getService().get("name")))
                 .toList();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicTrainingResources = genericResourceService
-                .getResults(createFacetFilter(catalogueId, true, "training_resource")).getResults()
-                .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
-                .filter(c -> !c.getTrainingResource().getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
-                .toList();
+//        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicTrainingResources = genericResourceService
+//                .getResults(createFacetFilter(catalogueId, true, "training_resource")).getResults()
+//                .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
+//                .filter(c -> !c.getTrainingResource().getCatalogueId().equals(catalogueId))
+//                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
+//                .toList();
 
         allResources.addAll(catalogueRelatedServices);
-        allResources.addAll(catalogueRelatedTrainingResources);
+//        allResources.addAll(catalogueRelatedTrainingResources);
         allResources.addAll(publicServices);
-        allResources.addAll(publicTrainingResources);
+//        allResources.addAll(publicTrainingResources);
         ret.put("RESOURCES_VOC", allResources);
 
         return ResponseEntity.ok(ret);
@@ -492,7 +491,7 @@ public class ServiceController {
     public ResponseEntity<?> getDraft(@PathVariable String prefix,
                                       @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle draft = serviceService.get(
+        ServiceBundle draft = serviceService.get(
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("published", "false"),
                 new SearchService.KeyValue("draft", "true")
@@ -503,11 +502,11 @@ public class ServiceController {
     @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}")
-    public ResponseEntity<Browsing<NewServiceBundle>> getProviderDraftServices(@PathVariable String prefix,
-                                                                               @PathVariable String suffix,
-                                                                               @Parameter(hidden = true)
+    public ResponseEntity<Browsing<ServiceBundle>> getProviderDraftServices(@PathVariable String prefix,
+                                                                            @PathVariable String suffix,
+                                                                            @Parameter(hidden = true)
                                                                                @RequestParam MultiValueMap<String, Object> params,
-                                                                               @Parameter(hidden = true) Authentication auth) {
+                                                                            @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("service_owner", id);
@@ -521,9 +520,9 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> service,
                                       @Parameter(hidden = true) Authentication auth) {
-        NewServiceBundle bundle = new NewServiceBundle();
+        ServiceBundle bundle = new ServiceBundle();
         bundle.setService(service);
-        NewServiceBundle ret = serviceService.addDraft(bundle, auth);
+        ServiceBundle ret = serviceService.addDraft(bundle, auth);
         logger.info("Added Draft Service with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
@@ -534,7 +533,7 @@ public class ServiceController {
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> service,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) service.get("id");
-        NewServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = serviceService.get(id, catalogueId);
         bundle.setService(service);
         bundle = serviceService.updateDraft(bundle, auth);
         logger.info("Updated the Draft Service with id '{}'", id);
@@ -548,7 +547,7 @@ public class ServiceController {
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = serviceService.get(id, catalogueId);
         serviceService.deleteDraft(bundle);
     }
 
@@ -558,7 +557,7 @@ public class ServiceController {
     public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> service,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) service.get("id");
-        NewServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = serviceService.get(id, catalogueId);
         bundle.setService(service);
 
         serviceService.updateDraft(bundle, auth);

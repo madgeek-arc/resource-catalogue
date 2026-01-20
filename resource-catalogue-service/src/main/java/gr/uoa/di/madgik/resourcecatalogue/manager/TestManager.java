@@ -9,7 +9,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import java.util.*;
 //TODO: some but not all resources need a method -> create a new interface with default implementation
 
 @org.springframework.stereotype.Service("testManager")
-public abstract class TestManager<T extends NewBundle> implements TestService<T> {
+public abstract class TestManager<T extends Bundle> implements TestService<T> {
 
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;

@@ -20,13 +20,12 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface ServiceService extends TestService<NewServiceBundle> {
+public interface ServiceService extends TestService<ServiceBundle> {
 
     /**
      *
@@ -34,9 +33,9 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      * @param catalogueId Catalogue ID
      * @param quantity    Quantity to be fetched
      * @param auth        Authentication
-     * @return {@link Paging<NewServiceBundle>}
+     * @return {@link Paging< ServiceBundle >}
      */
-    Paging<NewServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId, int quantity, Authentication auth);
+    Paging<ServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId, int quantity, Authentication auth);
 
 
 //    /**
@@ -86,7 +85,7 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      * @param ids            List of Service IDs
      * @return the list of matching resources.
      */
-    List<NewServiceBundle> getByIds(Authentication authentication, String... ids);
+    List<ServiceBundle> getByIds(Authentication authentication, String... ids);
 
 //    /**
 //     * Check if the Resource exists.
@@ -148,7 +147,7 @@ public interface ServiceService extends TestService<NewServiceBundle> {
      * @param auth       Authentication
      * @return {@link Bundle}
      */
-    NewBundle getServiceTemplate(String providerId, Authentication auth);
+    Bundle getServiceTemplate(String providerId, Authentication auth);
 
     /**
      * Send email notifications to all Providers with outdated Services

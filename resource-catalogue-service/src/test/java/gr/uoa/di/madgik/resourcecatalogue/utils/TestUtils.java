@@ -32,35 +32,37 @@ import java.util.List;
 
 public class TestUtils {
 
-    public static CatalogueBundle createCatalogueBundle() {
-        CatalogueBundle bundle = new CatalogueBundle();
-        bundle.setCatalogue(createCatalogue());
-        return bundle;
-    }
+    //FIXME
+//    public static CatalogueBundle createCatalogueBundle() {
+//        CatalogueBundle bundle = new CatalogueBundle();
+//        bundle.setCatalogue(createCatalogue());
+//        return bundle;
+//    }
 
-    public static NewProviderBundle createProviderBundle() {
-        NewProviderBundle bundle = new NewProviderBundle();
+    public static ProviderBundle createProviderBundle() {
+        ProviderBundle bundle = new ProviderBundle();
         bundle.setProvider(createProvider());
         return bundle;
     }
 
     public static ServiceBundle createServiceBundle() {
         ServiceBundle bundle = new ServiceBundle();
-        bundle.setService(createService());
+//        bundle.setService(createService()); //FIXME
         return bundle;
     }
 
-    public static DatasourceBundle createDatasourceBundle() {
-        DatasourceBundle bundle = new DatasourceBundle();
-        bundle.setDatasource(createDatasource());
-        return bundle;
-    }
-
-    public static TrainingResourceBundle createTrainingResourceBundle() {
-        TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.setTrainingResource(createTrainingResource());
-        return bundle;
-    }
+    //FIXME
+//    public static DatasourceBundle createDatasourceBundle() {
+//        DatasourceBundle bundle = new DatasourceBundle();
+//        bundle.setDatasource(createDatasource());
+//        return bundle;
+//    }
+//
+//    public static TrainingResourceBundle createTrainingResourceBundle() {
+//        TrainingResourceBundle bundle = new TrainingResourceBundle();
+//        bundle.setTrainingResource(createTrainingResource());
+//        return bundle;
+//    }
 
     public static Catalogue createCatalogue() {
         Catalogue catalogue = new Catalogue();

@@ -17,9 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -30,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("publicServiceManager")
-public class PublicServiceService extends AbstractPublicResourceManager<NewServiceBundle> {
+public class PublicServiceService extends AbstractPublicResourceManager<ServiceBundle> {
 
     private final ProviderService providerService;
 
@@ -45,13 +44,13 @@ public class PublicServiceService extends AbstractPublicResourceManager<NewServi
 
     @Override
     protected String getResourceTypeName() {
-        return "servicetest";
+        return "service";
     }
 
     @Override
-    public void updateIdsToPublic(NewServiceBundle service) {
+    public void updateIdsToPublic(ServiceBundle service) {
         // Service Owner
-        NewProviderBundle provider = providerService.get(
+        ProviderBundle provider = providerService.get(
                 (String) service.getService().get("serviceOwner"),
                 service.getCatalogueId()
         );
@@ -63,7 +62,7 @@ public class PublicServiceService extends AbstractPublicResourceManager<NewServi
             List<String> updatedServiceProviders = new ArrayList<>();
             for (Object providerObj : providersList) {
                 if (providerObj instanceof String providerId) {
-                    NewProviderBundle bundle = providerService.get(providerId, service.getCatalogueId());
+                    ProviderBundle bundle = providerService.get(providerId, service.getCatalogueId());
                     updatedServiceProviders.add(bundle.getIdentifiers().getPid());
                 }
             }

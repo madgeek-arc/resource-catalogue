@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import org.springframework.security.core.Authentication;
 
-public interface TestService<T extends NewBundle> extends NewBundleOperations<T>, ResourceService<T>,
+public interface TestService<T extends Bundle> extends BundleOperations<T>, ResourceService<T>,
         DraftTestResourceService<T> {
 
     /**

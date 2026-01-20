@@ -4,7 +4,7 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -32,10 +32,10 @@ import java.util.Map;
 public class PublicServiceController {
 
     private final ServiceService service;
-    private final PublicResourceService<NewServiceBundle> publicService;
+    private final PublicResourceService<ServiceBundle> publicService;
 
     public PublicServiceController(ServiceService service,
-                                   PublicResourceService<NewServiceBundle> publicService) {
+                                   PublicResourceService<ServiceBundle> publicService) {
         this.service = service;
         this.publicService = publicService;
     }
@@ -50,7 +50,7 @@ public class PublicServiceController {
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle bundle = publicService.get(id, catalogueId);
+        ServiceBundle bundle = publicService.get(id, catalogueId);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
         }
@@ -66,7 +66,7 @@ public class PublicServiceController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        NewServiceBundle bundle = publicService.get(id, catalogueId);
+        ServiceBundle bundle = publicService.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -80,8 +80,8 @@ public class PublicServiceController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", true);
         ff.addFilter("active", true);
-        Paging<NewServiceBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(NewServiceBundle::getService));
+        Paging<ServiceBundle> paging = service.getAll(ff);
+        return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
     @BrowseParameters
@@ -89,20 +89,20 @@ public class PublicServiceController {
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "public/service/adminPage/all") //TODO: rename this ugliness - SOS external teams use it SOS
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<NewServiceBundle>> getAllBundles(@Parameter(hidden = true)
+    public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", true);
         ff.addFilter("active", true);
-        Paging<NewServiceBundle> paging = service.getAll(ff);
+        Paging<ServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
     @Hidden
     @PostMapping(path = "public/service/add")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<NewServiceBundle> createPublicService(@RequestBody NewServiceBundle bundle,
-                                                                @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<ServiceBundle> createPublicService(@RequestBody ServiceBundle bundle,
+                                                             @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(publicService.createPublicResource(bundle, auth));
     }
 }
