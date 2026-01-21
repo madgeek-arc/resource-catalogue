@@ -45,7 +45,7 @@ import java.util.*;
 
 //TODO: REMOVE ANY LOGIC THAT RELATES WITH MODEL'S FIELDS (eg. name, users, HLE)
 @org.springframework.stereotype.Service("providerManager")
-public class ProviderManager extends gr.uoa.di.madgik.resourcecatalogue.manager.TestManager<ProviderBundle>
+public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBundle>
         implements ProviderService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManager.class);

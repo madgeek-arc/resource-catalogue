@@ -34,13 +34,11 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.Validator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -48,7 +46,7 @@ import java.util.List;
 import java.util.Objects;
 
 @org.springframework.stereotype.Service
-public class ServiceManager extends TestManager<ServiceBundle> implements ServiceService {
+public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundle> implements ServiceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 

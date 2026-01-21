@@ -25,7 +25,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface ProviderService extends TestService<ProviderBundle> {
+public interface ProviderService extends ResourceCatalogueGenericService<ProviderBundle> {
 
     /**
      * Send email to Portal Admins requesting a Provider's deletion

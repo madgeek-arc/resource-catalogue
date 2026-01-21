@@ -11,7 +11,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -26,17 +26,17 @@ import java.util.*;
 //TODO: some but not all resources need a method -> create a new interface with default implementation
 
 @org.springframework.stereotype.Service("testManager")
-public abstract class TestManager<T extends Bundle> implements TestService<T> {
+public abstract class ResourceCatalogueGenericManager<T extends Bundle> implements ResourceCatalogueGenericService<T> {
 
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
 
-    private static final Logger logger = LoggerFactory.getLogger(TestManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceCatalogueGenericManager.class);
 
     protected abstract String getResourceTypeName();
 
-    public TestManager(GenericResourceService genericResourceService,
-                       SecurityService securityService) {
+    public ResourceCatalogueGenericManager(GenericResourceService genericResourceService,
+                                           SecurityService securityService) {
         this.genericResourceService = genericResourceService;
         this.securityService = securityService;
     }

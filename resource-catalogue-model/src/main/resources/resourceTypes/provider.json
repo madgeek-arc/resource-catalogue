@@ -294,15 +294,15 @@
     {
       "label": null,
       "multivalued": false,
-      "name": "templateStatus",
-      "path": "$.templateStatus",
+      "name": "audit_state",
+      "path": "$.auditState",
       "type": "java.lang.String"
     },
     {
       "label": null,
       "multivalued": false,
-      "name": "audit_state",
-      "path": "$.auditState",
+      "name": "templateStatus",
+      "path": "$.templateStatus",
       "type": "java.lang.String"
     }
   ],

@@ -35,10 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -119,7 +116,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
 
 
     @Override
-    public Datasource get(String id) {
+    public LinkedHashMap<String, Object> get(String id) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("id", id);
         String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
@@ -141,9 +138,9 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     }
 
     @Override
-    public Map<Integer, List<Datasource>> getAll(FacetFilter ff) {
-        Map<Integer, List<Datasource>> datasourceMap = new HashMap<>();
-        List<Datasource> allDatasources = new ArrayList<>();
+    public Map<Integer, List<LinkedHashMap<String, Object>>> getAll(FacetFilter ff) {
+        Map<Integer, List<LinkedHashMap<String, Object>>> datasourceMap = new HashMap<>();
+        List<LinkedHashMap<String, Object>> allDatasources = new ArrayList<>();
         String[] datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff);
         int total = Integer.parseInt(datasourcesAsJSON[0]);
         String allOpenAIREDatasources = datasourcesAsJSON[1];
@@ -154,7 +151,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
                 JSONObject map = arr.getJSONObject(i);
                 Gson gson = new Gson();
                 JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                Datasource datasource = transformOpenAIREToEOSCDatasource(jsonObj);
+                LinkedHashMap<String, Object> datasource = transformOpenAIREToEOSCDatasource(jsonObj);
                 if (datasource != null) {
                     allDatasources.add(datasource);
                 }
@@ -165,10 +162,10 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
         throw new CatalogueResourceNotFoundException("There are no OpenAIRE Datasources");
     }
 
-    private Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource) {
-        Datasource datasource = new Datasource();
+    private LinkedHashMap<String, Object> transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource) {
+        LinkedHashMap<String, Object> datasource = new LinkedHashMap<>();
         String id = openaireDatasource.getAsJsonObject().get("id").getAsString().replaceAll("\"", "");
-        datasource.setId(id);
+        datasource.put("id", id);
         return datasource;
     }
 

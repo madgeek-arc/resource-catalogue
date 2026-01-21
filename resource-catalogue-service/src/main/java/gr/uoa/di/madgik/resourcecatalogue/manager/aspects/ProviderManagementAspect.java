@@ -203,7 +203,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setStatus(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.audit(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "bundle")
     public void updatePublicProvider(final ProviderBundle bundle) {
         try {
@@ -332,8 +332,8 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setStatus(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TestManager.audit(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "service")
     public void updatePublicResource(final ServiceBundle service) {
         try {

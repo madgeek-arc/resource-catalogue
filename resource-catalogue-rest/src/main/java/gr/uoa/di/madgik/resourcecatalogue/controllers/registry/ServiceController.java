@@ -52,10 +52,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "service", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "service")
-public class ServiceController {
+public class ServiceController extends ResourceCatalogueGenericController<ServiceBundle, ServiceService> {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
-    private final ServiceService serviceService;
+
     private final GenericResourceService genericResourceService;
 
     @Value("${auditing.interval:6}")
@@ -64,13 +64,10 @@ public class ServiceController {
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    @Value("${catalogue.name:Resource Catalogue}")
-    private String catalogueName;
-
-    ServiceController(ServiceService service,
+    ServiceController(ServiceService serviceService,
                       GenericResourceService genericResourceService) {
-        this.serviceService = service;
-        this.genericResourceService = genericResourceService; //TODO: try to remove this
+        super(serviceService, "Service");
+        this.genericResourceService = genericResourceService;
     }
 
     //region generic
@@ -79,12 +76,12 @@ public class ServiceController {
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') || " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) || " +
-            "@securityService.serviceIsActive(#prefix+'/'+#suffix, #catalogueId)")
+            "@securityService.serviceIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
     }
 
@@ -95,7 +92,7 @@ public class ServiceController {
                                                    @PathVariable String suffix,
                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -111,7 +108,8 @@ public class ServiceController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<ServiceBundle> paging = serviceService.getAll(ff, auth);
+        Paging<ServiceBundle> paging = service.getAll(ff, auth);
+        logger.info("service");
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
@@ -125,11 +123,11 @@ public class ServiceController {
     @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                  @RequestParam MultiValueMap<String, Object> params) {
+                                                               @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<ServiceBundle> paging = serviceService.getAll(ff);
+        Paging<ServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -138,14 +136,14 @@ public class ServiceController {
     @Tag(name = "ServiceAdmin")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
     @GetMapping(path = "adminPage/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true)
-                                                                               @RequestParam MultiValueMap<String, Object> allRequestParams) {
-        FacetFilter ff = FacetFilter.from(allRequestParams);
+                                                                            @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
-        Paging<ServiceBundle> paging = serviceService.getAll(ff);
+        Paging<ServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -155,15 +153,15 @@ public class ServiceController {
     @GetMapping(path = "byCatalogue/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
     public ResponseEntity<Paging<ServiceBundle>> getByCatalogue(@Parameter(hidden = true)
-                                                                   @RequestParam MultiValueMap<String, Object> params,
+                                                                @RequestParam MultiValueMap<String, Object> params,
                                                                 @PathVariable String id,
                                                                 @SuppressWarnings("unused")
-                                                                   @Parameter(hidden = true) Authentication auth) {
+                                                                @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("catalogue_id", id);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<ServiceBundle> paging = serviceService.getAll(ff);
+        Paging<ServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -174,7 +172,7 @@ public class ServiceController {
                                                      @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", draft);
-        return new ResponseEntity<>(serviceService.getMy(ff, auth).getResults(), HttpStatus.OK);
+        return new ResponseEntity<>(service.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceAdmin")
@@ -186,7 +184,7 @@ public class ServiceController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                            @Parameter(hidden = true) Authentication auth) {
-        Paging<ServiceBundle> paging = serviceService.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+        Paging<ServiceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 
@@ -195,11 +193,11 @@ public class ServiceController {
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.providerCanAddResources(#auth, #service, @resourceCatalogueInfo.catalogueId)")
-    public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> service,
+    public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                  @Parameter(hidden = true) Authentication auth) {
         ServiceBundle bundle = new ServiceBundle();
-        bundle.setService(service);
-        ServiceBundle ret = serviceService.add(bundle, auth);
+        bundle.setService(serviceMap);
+        ServiceBundle ret = service.add(bundle, auth);
         logger.info("Added Service with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
@@ -207,9 +205,9 @@ public class ServiceController {
     @Tag(name = "ServiceAdmin")
     @PostMapping(path = {"/bundle"})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ServiceBundle> addBundle(@RequestBody ServiceBundle service,
+    public ResponseEntity<ServiceBundle> addBundle(@RequestBody ServiceBundle serviceBundle,
                                                    @Parameter(hidden = true) Authentication auth) {
-        ServiceBundle bundle = serviceService.add(service, auth);
+        ServiceBundle bundle = service.add(serviceBundle, auth);
         logger.info("Added ServiceBundle with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
@@ -219,31 +217,31 @@ public class ServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<ServiceBundle> serviceList,
                         @Parameter(hidden = true) Authentication auth) {
-        serviceService.addBulk(serviceList, auth);
+        service.addBulk(serviceList, auth);
     }
 
     @Tag(name = "ServiceWrite")
-    @Operation(summary = "Updates the Provider with the given id.")
+    @Operation(summary = "Updates the Service with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#service[id])")
-    public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> service,
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#serviceMap['id'])")
+    public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
-        String id = service.get("id").toString();
-        ServiceBundle bundle = serviceService.get(id, catalogueId);
-        bundle.setService(service);
-        bundle = serviceService.update(bundle, comment, auth);
-        logger.info("Updated the Service with id '{}'", service.get("id"));
+        String id = serviceMap.get("id").toString();
+        ServiceBundle bundle = service.get(id, catalogueId);
+        bundle.setService(serviceMap);
+        bundle = service.update(bundle, comment, auth);
+        logger.info("Updated the Service with id '{}'", serviceMap.get("id"));
         return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceAdmin")
     @PutMapping(path = {"/bundle"})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ServiceBundle> updateBundle(@RequestBody ServiceBundle service,
+    public ResponseEntity<ServiceBundle> updateBundle(@RequestBody ServiceBundle serviceBundle,
                                                       @RequestParam(required = false) String comment,
                                                       @Parameter(hidden = true) Authentication auth) {
-        ServiceBundle bundle = serviceService.update(service, comment, auth);
+        ServiceBundle bundle = service.update(serviceBundle, comment, auth);
         logger.info("Updated the Service id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
@@ -256,17 +254,16 @@ public class ServiceController {
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle service = serviceService.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id, catalogueId);
 
-        serviceService.delete(service);
-        logger.info("Deleted the Service with id '{}'", service.getId());
-        return new ResponseEntity<>(service.getService(), HttpStatus.OK);
+        service.delete(bundle);
+        logger.info("Deleted the Service with id '{}'", bundle.getId());
+        return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
     }
 
-    //TODO: rename path -> notify front-end
     @Tag(name = "ServiceAdmin")
     @Operation(summary = "Verifies the Service.")
-    @PatchMapping(path = "verifyResource/{prefix}/{suffix}")
+    @PatchMapping(path = "verify/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ServiceBundle> setStatus(@PathVariable String prefix,
                                                    @PathVariable String suffix,
@@ -274,10 +271,10 @@ public class ServiceController {
                                                    @RequestParam(required = false) String status,
                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle service = serviceService.setStatus(id, status, active, auth);
+        ServiceBundle bundle = service.setStatus(id, status, active, auth);
         logger.info("Verify Service with id: '{}' | status: '{}' | active: '{}'",
-                service.getId(), status, active);
-        return new ResponseEntity<>(service, HttpStatus.OK);
+                bundle.getId(), status, active);
+        return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
     @Tag(name = "ServiceWrite")
@@ -290,9 +287,9 @@ public class ServiceController {
                                                    @RequestParam Boolean active,
                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle service = serviceService.setActive(id, active, auth);
+        ServiceBundle bundle = service.setActive(id, active, auth);
         logger.info("Attempt to save Service with id '{}' as '{}'", id, active);
-        return new ResponseEntity<>(service, HttpStatus.OK);
+        return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
     @Tag(name = "ServiceAdmin")
@@ -306,8 +303,8 @@ public class ServiceController {
                                                @RequestParam LoggingInfo.ActionType actionType,
                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle service = serviceService.audit(id, catalogueId, comment, actionType, auth);
-        return new ResponseEntity<>(service, HttpStatus.OK);
+        ServiceBundle bundle = service.audit(id, catalogueId, comment, actionType, auth);
+        return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
     @Tag(name = "ServiceAdmin")
@@ -318,7 +315,7 @@ public class ServiceController {
                                  @RequestParam String catalogueId,
                                  @RequestParam boolean suspend,
                                  @Parameter(hidden = true) Authentication auth) {
-        return serviceService.setSuspend(id, catalogueId, suspend, auth);
+        return service.setSuspend(id, catalogueId, suspend, auth);
     }
 
     @Tag(name = "ServiceRead")
@@ -328,18 +325,18 @@ public class ServiceController {
                                                                 @PathVariable String suffix,
                                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = serviceService.get(id, catalogueId);
-        List<LoggingInfo> loggingInfoHistory = serviceService.getLoggingInfoHistory(bundle);
+        ServiceBundle bundle = service.get(id, catalogueId);
+        List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
     @Tag(name = "ServiceWrite")
     @Operation(summary = "Validates the Service without actually changing the repository.")
     @PostMapping(path = "validate")
-    public ResponseEntity<Void> validate(@RequestBody LinkedHashMap<String, Object> service) {
+    public ResponseEntity<Void> validate(@RequestBody LinkedHashMap<String, Object> serviceMap) {
         ServiceBundle bundle = new ServiceBundle();
-        bundle.setService(service);
-        serviceService.validate(bundle);
+        bundle.setService(serviceMap);
+        service.validate(bundle);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -349,7 +346,7 @@ public class ServiceController {
     @GetMapping(path = "ids")
     public ResponseEntity<List<LinkedHashMap<String, Object>>> getSomeServices(@RequestParam("ids") String[] ids,
                                                                                @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(serviceService.getByIds(auth, ids)
+        return ResponseEntity.ok(service.getByIds(auth, ids)
                 .stream()
                 .map(ServiceBundle::getService)
                 .collect(Collectors.toList()));
@@ -370,7 +367,7 @@ public class ServiceController {
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        return new ResponseEntity<>(serviceService.getAllServicesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK);
+        return new ResponseEntity<>(service.getAllServicesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceRead")
@@ -383,7 +380,7 @@ public class ServiceController {
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         ff.addFilter("active", false);
-        return new ResponseEntity<>(serviceService.getAll(ff), HttpStatus.OK);
+        return new ResponseEntity<>(service.getAll(ff), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceRead")
@@ -401,7 +398,7 @@ public class ServiceController {
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("active", true);
-        return new ResponseEntity<>(serviceService.getAll(ff, auth), HttpStatus.OK);
+        return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceAdmin")
@@ -410,8 +407,8 @@ public class ServiceController {
     public void sendEmailNotificationToProviderForOutdatedService(@PathVariable String prefix,
                                                                   @PathVariable String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
-        String serviceId = prefix + "/" + suffix;
-        serviceService.sendEmailNotificationToProviderForOutdatedService(serviceId, auth);
+        String id = prefix + "/" + suffix;
+        service.sendEmailNotificationToProviderForOutdatedService(id, auth);
     }
 
     //FIXME
@@ -422,9 +419,10 @@ public class ServiceController {
 //                               @RequestParam String newProvider,
 //                               @RequestParam(required = false) String comment,
 //                               @Parameter(hidden = true) Authentication authentication) {
-//        serviceService.changeProvider(resourceId, newProvider, comment, authentication);
+//        service.changeProvider(resourceId, newProvider, comment, authentication);
 //    }
 
+    //TODO: populate with Datasources and move somewhere else
     // front-end use (Service/Datasource/TR forms)
     @Tag(name = "ServiceRead")
     @Hidden
@@ -491,7 +489,7 @@ public class ServiceController {
     public ResponseEntity<?> getDraft(@PathVariable String prefix,
                                       @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ServiceBundle draft = serviceService.get(
+        ServiceBundle draft = service.get(
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("published", "false"),
                 new SearchService.KeyValue("draft", "true")
@@ -505,37 +503,37 @@ public class ServiceController {
     public ResponseEntity<Browsing<ServiceBundle>> getProviderDraftServices(@PathVariable String prefix,
                                                                             @PathVariable String suffix,
                                                                             @Parameter(hidden = true)
-                                                                               @RequestParam MultiValueMap<String, Object> params,
+                                                                            @RequestParam MultiValueMap<String, Object> params,
                                                                             @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("service_owner", id);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
-        return new ResponseEntity<>(serviceService.getAll(ff, auth), HttpStatus.OK);
+        return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceWrite")
     @PostMapping(path = "/draft")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> service,
+    public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                       @Parameter(hidden = true) Authentication auth) {
         ServiceBundle bundle = new ServiceBundle();
-        bundle.setService(service);
-        ServiceBundle ret = serviceService.addDraft(bundle, auth);
+        bundle.setService(serviceMap);
+        ServiceBundle ret = service.addDraft(bundle, auth);
         logger.info("Added Draft Service with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getService(), HttpStatus.CREATED);
     }
 
     @Tag(name = "ServiceWrite")
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service[id])")
-    public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> service,
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceMap['id'])")
+    public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                          @Parameter(hidden = true) Authentication auth) {
-        String id = (String) service.get("id");
-        ServiceBundle bundle = serviceService.get(id, catalogueId);
-        bundle.setService(service);
-        bundle = serviceService.updateDraft(bundle, auth);
+        String id = (String) serviceMap.get("id");
+        ServiceBundle bundle = service.get(id, catalogueId);
+        bundle.setService(serviceMap);
+        bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Service with id '{}'", id);
         return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
     }
@@ -547,22 +545,22 @@ public class ServiceController {
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = serviceService.get(id, catalogueId);
-        serviceService.deleteDraft(bundle);
+        ServiceBundle bundle = service.get(id, catalogueId);
+        service.deleteDraft(bundle);
     }
 
     @Tag(name = "ServiceWrite")
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #service[id])")
-    public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> service,
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceMap['id'])")
+    public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                               @Parameter(hidden = true) Authentication auth) {
-        String id = (String) service.get("id");
-        ServiceBundle bundle = serviceService.get(id, catalogueId);
-        bundle.setService(service);
+        String id = (String) serviceMap.get("id");
+        ServiceBundle bundle = service.get(id, catalogueId);
+        bundle.setService(serviceMap);
 
-        serviceService.updateDraft(bundle, auth);
+        service.updateDraft(bundle, auth);
         logger.info("Finalizing Draft Service with id '{}'", id);
-        bundle = serviceService.finalizeDraft(bundle, auth);
+        bundle = service.finalizeDraft(bundle, auth);
 
         return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
     }
