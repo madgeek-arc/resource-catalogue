@@ -25,7 +25,7 @@ import java.util.*;
 //TODO: true universal method (all resources will use it) -> inside here (generic)
 //TODO: some but not all resources need a method -> create a new interface with default implementation
 
-@org.springframework.stereotype.Service("testManager")
+@org.springframework.stereotype.Service("resourceCatalogueGenericManager")
 public abstract class ResourceCatalogueGenericManager<T extends Bundle> implements ResourceCatalogueGenericService<T> {
 
     private final GenericResourceService genericResourceService;
