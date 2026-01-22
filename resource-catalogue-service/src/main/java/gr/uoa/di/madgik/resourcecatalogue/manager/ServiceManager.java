@@ -52,11 +52,9 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     private final ProviderService providerService;
     private final IdCreator idCreator;
-    private final SecurityService securityService;
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
-    private final ModelService modelService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -64,9 +62,10 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     protected int maxQuantity;
 
     public ServiceManager(ProviderService providerService,
-                          IdCreator idCreator, @Lazy SecurityService securityService,
-                          @Lazy VocabularyService vocabularyService,
-                          @Lazy ProviderResourcesCommonMethods commonMethods,
+                          IdCreator idCreator,
+                          SecurityService securityService,
+                          VocabularyService vocabularyService,
+                          ProviderResourcesCommonMethods commonMethods,
                           SynchronizerService<Service> synchronizerService,
 //                          @Qualifier("serviceValidator") Validator serviceValidator,
                           FacetLabelService facetLabelService,
@@ -75,11 +74,9 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         super(genericResourceService, securityService);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
-        this.securityService = securityService;
         this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
-        this.modelService = modelService;
     }
 
     @Override

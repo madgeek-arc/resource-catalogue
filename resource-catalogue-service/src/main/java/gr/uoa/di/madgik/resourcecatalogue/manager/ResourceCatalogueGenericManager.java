@@ -28,10 +28,10 @@ import java.util.*;
 @org.springframework.stereotype.Service("resourceCatalogueGenericManager")
 public abstract class ResourceCatalogueGenericManager<T extends Bundle> implements ResourceCatalogueGenericService<T> {
 
-    private final GenericResourceService genericResourceService;
-    private final SecurityService securityService;
-
     private static final Logger logger = LoggerFactory.getLogger(ResourceCatalogueGenericManager.class);
+
+    protected final GenericResourceService genericResourceService;
+    protected final SecurityService securityService;
 
     protected abstract String getResourceTypeName();
 
