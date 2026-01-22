@@ -1,279 +1,388 @@
-///*
-// * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
-// *
-// * Licensed under the Apache License, Version 2.0 (the "License");
-// * you may not use this file except in compliance with the License.
-// * You may obtain a copy of the License at
-// *
-// *      https://www.apache.org/licenses/LICENSE-2.0
-// *
-// * Unless required by applicable law or agreed to in writing, software
-// * distributed under the License is distributed on an "AS IS" BASIS,
-// * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// * See the License for the specific language governing permissions and
-// * limitations under the License.
-// */
-//
-//package gr.uoa.di.madgik.resourcecatalogue.manager;
-//
-//import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-//import gr.uoa.di.madgik.registry.domain.FacetFilter;
-//import gr.uoa.di.madgik.registry.domain.Paging;
-//import gr.uoa.di.madgik.registry.domain.Resource;
-//import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-//import gr.uoa.di.madgik.registry.service.SearchService;
-//import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-//import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
-//import gr.uoa.di.madgik.resourcecatalogue.service.*;
-//import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-//import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-//import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-//import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.context.annotation.Lazy;
-//import org.springframework.security.core.Authentication;
-//
-//import java.util.List;
-//
-//@org.springframework.stereotype.Service
-//public class DatasourceManager extends ResourceCatalogueManager<DatasourceBundle> implements DatasourceService {
-//
-//    private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
-//    private final ServiceService serviceService;
-//    private final SecurityService securityService;
-//    private final EmailService emailService;
-//    private final VocabularyService vocabularyService;
-//    private final ProviderResourcesCommonMethods commonMethods;
-//    private final OpenAIREDatasourceManager openAIREDatasourceManager;
-//    private final IdCreator idCreator;
-//
-//    @Value("${catalogue.id}")
-//    private String catalogueId;
-//
-//    public DatasourceManager(ServiceService serviceService,
-//                             @Lazy SecurityService securityService,
-//                             @Lazy EmailService emailService,
-//                             @Lazy VocabularyService vocabularyService,
-//                             @Lazy ProviderResourcesCommonMethods commonMethods,
-//                             OpenAIREDatasourceManager openAIREDatasourceManager,
-//                             IdCreator idCreator) {
-//        super(DatasourceBundle.class);
-//        this.serviceService = serviceService;
-//        this.securityService = securityService;
-//        this.emailService = emailService;
-//        this.vocabularyService = vocabularyService;
-//        this.commonMethods = commonMethods;
-//        this.openAIREDatasourceManager = openAIREDatasourceManager;
-//        this.idCreator = idCreator;
-//    }
-//
-//    @Override
-//    public String getResourceTypeName() {
-//        return "datasource";
-//    }
-//
-//    public DatasourceBundle get(String serviceId, String catalogueId) {
-//        Resource res = where(false,
-//                new SearchService.KeyValue("service_id", serviceId),
-//                new SearchService.KeyValue("catalogue_id", catalogueId),
-//                new SearchService.KeyValue("published", "false"));
-//        return res != null ? deserialize(res) : null;
-//    }
-//
-//    @Override
-//    public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication auth) {
-//
-//        // if Datasource has ID -> check if it exists in OpenAIRE Datasources list
-//        if (datasourceBundle.getId() != null && !datasourceBundle.getId().isEmpty()) {
-//            checkOpenAIREIDExistence(datasourceBundle);
-//        }
-//        logger.trace("Attempting to add a new Datasource: {}", datasourceBundle);
-//
-//        datasourceBundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-//        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(datasourceBundle, auth);
-//        datasourceBundle.setLoggingInfo(loggingInfoList);
-//        differentiateInternalFromExternalCatalogueAddition(datasourceBundle);
-//
-//        this.validateDatasource(datasourceBundle);
-//
-//        super.add(datasourceBundle, null);
-//        logger.info("Added the Datasource with id '{}' for Service '{}'", datasourceBundle.getId(),
-//                datasourceBundle.getDatasource().getServiceId());
-//        return datasourceBundle;
-//    }
-//
-//    private void differentiateInternalFromExternalCatalogueAddition(DatasourceBundle datasourceBundle) {
-//        if (catalogueId == null || catalogueId.isEmpty() || datasourceBundle.getDatasource().getCatalogueId().equals(catalogueId)) {
-//            datasourceBundle.setActive(false);
-//            datasourceBundle.setStatus(vocabularyService.get("pending").getId());
-//            datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().getFirst());
-//            datasourceBundle.setId(idCreator.generate(getResourceTypeName()));
-//            emailService.sendEmailsForDatasourceExtensionToPortalAdmins(datasourceBundle, "post");
-////            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), false);
-//        } else {
-//            datasourceBundle.setActive(true);
-//            datasourceBundle.setStatus(vocabularyService.get("approved").getId());
-//            LoggingInfo loggingInfo = commonMethods.createLoggingInfo(securityService.getAdminAccess(),
-//                    LoggingInfo.Types.ONBOARD.getKey(), LoggingInfo.ActionType.APPROVED.getKey());
-//            datasourceBundle.getLoggingInfo().add(loggingInfo);
-//            datasourceBundle.setLatestOnboardingInfo(datasourceBundle.getLoggingInfo().get(1));
-//            idCreator.validateId(datasourceBundle.getId());
-////            commonMethods.createIdentifiers(datasourceBundle, getResourceTypeName(), true);
-//        }
-//    }
-//
-//    @Override
-//    public DatasourceBundle update(DatasourceBundle datasourceBundle, String comment, Authentication auth) {
-//        logger.trace("Attempting to update the Datasource with id '{}'", datasourceBundle.getId());
-//
-//        DatasourceBundle ret = ObjectUtils.clone(datasourceBundle);
-//        Resource existingResource = getResource(datasourceBundle.getId(),
-//                datasourceBundle.getDatasource().getCatalogueId(), false);
-//        DatasourceBundle existingDatasource = deserialize(existingResource);
-//        // check if there are actual changes in the Datasource
-//        if (ret.getDatasource().equals(existingDatasource.getDatasource())) {
-//            return ret;
-//        }
-//
-//        super.validate(ret);
-//        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-//        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
-//        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-//                LoggingInfo.ActionType.UPDATED.getKey(), comment);
-//        loggingInfoList.add(loggingInfo);
-//        ret.setLoggingInfo(loggingInfoList);
-//
-//        // latestLoggingInfo
-//        ret.setLatestUpdateInfo(loggingInfo);
-//        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-//        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-//        ret.setActive(existingDatasource.isActive());
-//
-//        // if status = "rejected", update to "pending"
-//        if (existingDatasource.getStatus().equals(vocabularyService.get("rejected").getId())) {
-//            ret.setStatus(vocabularyService.get("pending").getId());
-//        }
-//
-//        // block user from updating serviceId
-//        if (!ret.getDatasource().getServiceId().equals(existingDatasource.getDatasource().getServiceId()) && !securityService.hasRole(auth, "ROLE_ADMIN")) {
-//            throw new ValidationException("You cannot change the Service Id with which this Datasource is related");
-//        }
-//
-//        // block catalogueId updates from Provider Admins
-//        if (!securityService.hasRole(auth, "ROLE_ADMIN")) {
-//            if (!existingDatasource.getDatasource().getCatalogueId().equals(ret.getDatasource().getCatalogueId())) {
-//                throw new ValidationException("You cannot change catalogueId");
-//            }
-//        }
-//
-//        existingResource.setPayload(serialize(ret));
-//        existingResource.setResourceType(getResourceType());
-//
-//        resourceService.updateResource(existingResource);
-//        logger.info("Updated Datasource with id '{}'", ret.getId());
-//
-//        emailService.sendEmailsForDatasourceExtensionToPortalAdmins(ret, "put");
-//        return ret;
-//    }
-//
-//    public void updateBundle(DatasourceBundle datasourceBundle, Authentication auth) {
-//        logger.trace("Attempting to update the Datasource: {}", datasourceBundle);
-//
-//        Resource existing = getResource(datasourceBundle.getId(),
-//                datasourceBundle.getDatasource().getCatalogueId(), false);
-//        if (existing == null) {
-//            throw new ResourceNotFoundException(datasourceBundle.getId(), "Datasource");
-//        }
-//
-//        existing.setPayload(serialize(datasourceBundle));
-//        existing.setResourceType(getResourceType());
-//
-//        resourceService.updateResource(existing);
-//    }
-//
-//    public DatasourceBundle validateDatasource(DatasourceBundle datasourceBundle) {
-//        String serviceId = datasourceBundle.getDatasource().getServiceId();
-//        String catalogueId = datasourceBundle.getDatasource().getCatalogueId();
-//
-//        try {
-//            DatasourceBundle existingDatasource = get(serviceId, catalogueId, false);
-//            if (existingDatasource != null) {
-//                throw new ValidationException(String.format("Service [%s] of the Catalogue [%s] has already a Datasource " +
-//                        "registered, with id: [%s]", serviceId, catalogueId, existingDatasource.getId()));
-//            }
-//        } catch (CatalogueResourceNotFoundException ignored) {
-//        }
-//
-//        // check if Service exists and if User belongs to Resource's Provider Admins
-//        ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(serviceId, catalogueId, serviceService, "service");
-//        return super.validate(datasourceBundle);
-//    }
-//
-//    public DatasourceBundle verify(String id, String status, Boolean active, Authentication auth) {
-//        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-//        if (!statusVocabulary.getType().equals("Resource state")) {
-//            throw new ValidationException(String.format("Vocabulary %s does not consist an Resource state!", status));
-//        }
-//        logger.trace("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-//        DatasourceBundle datasourceBundle = get(id, catalogueId, false);
-//
-//        // Verify that Service is Approved before proceeding
-//        //FIXME
-////        if (!serviceService.get(datasourceBundle.getDatasource().getServiceId(), datasourceBundle.getDatasource().getCatalogueId(), false)
-////                .getStatus().equals("approved") && status.equals("approved")) {
-////            throw new ValidationException("You cannot approve a Datasource when its Service is in Pending or Rejected state");
-////        }
-//
-//        datasourceBundle.markOnboard(vocabularyService.get(status).getId(), active, auth, null);
-//
-//        logger.info("Verifying Datasource with id: '{}' | status: '{}' | active: '{}'", datasourceBundle.getId(), status, active);
-//        return super.update(datasourceBundle, auth);
-//    }
-//
-//    @Override
-//    public void delete(DatasourceBundle datasourceBundle) {
-//        super.delete(datasourceBundle);
-//        logger.info("Deleted Datasource with id '{}' of the Catalogue '{}'",
-//                datasourceBundle.getDatasource().getId(), datasourceBundle.getDatasource().getCatalogueId());
-//    }
-//
-//    @Override
-//    public Paging<DatasourceBundle> getResourceBundles(String catalogueId, String serviceId, Authentication auth) {
-//        FacetFilter ff = new FacetFilter();
-//        ff.addFilter("service_id", serviceId);
-//        ff.addFilter("catalogue_id", catalogueId);
-//        ff.setQuantity(maxQuantity);
-//        return this.getAll(ff, auth);
-//    }
-//
-//    // OpenAIRE
-//    private void checkOpenAIREIDExistence(DatasourceBundle datasourceBundle) {
-//        Datasource datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
-//        if (datasource != null) {
-//            datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
-//        } else {
-//            throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an OpenAIRE" +
-//                    " Datasource", datasourceBundle.getId()));
-//        }
-//    }
-//
-//    public boolean isDatasourceRegisteredOnOpenAIRE(String id) {
-//        DatasourceBundle datasourceBundle = get(id);
-//        boolean found = false;
-//        String registerBy;
-//        if (datasourceBundle != null) {
-//            String originalOpenAIREId = datasourceBundle.getOriginalOpenAIREId();
-//            if (originalOpenAIREId != null && !originalOpenAIREId.isEmpty()) {
-//                registerBy = openAIREDatasourceManager.getRegisterBy(originalOpenAIREId);
-//                if (registerBy != null && !registerBy.isEmpty()) {
-//                    found = true;
-//                }
-//            }
-//        } else {
-//            throw new ResourceNotFoundException(id, "Datasource");
-//        }
-//        return found;
-//    }
-//}
+/*
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package gr.uoa.di.madgik.resourcecatalogue.manager;
+
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
+
+@org.springframework.stereotype.Service
+public class DatasourceManager extends ResourceCatalogueGenericManager<DatasourceBundle> implements DatasourceService {
+
+    private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
+
+    private final ProviderService providerService;
+    private final VocabularyService vocabularyService;
+    private final ProviderResourcesCommonMethods commonMethods;
+    private final OpenAIREDatasourceManager openAIREDatasourceManager;
+    private final IdCreator idCreator;
+    private final SecurityService securityService;
+    private final GenericResourceService genericResourceService;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
+
+    public DatasourceManager(ProviderService providerService,
+                             @Lazy VocabularyService vocabularyService,
+                             @Lazy ProviderResourcesCommonMethods commonMethods,
+                             OpenAIREDatasourceManager openAIREDatasourceManager,
+                             IdCreator idCreator,
+                             GenericResourceService genericResourceService,
+                             SecurityService securityService) {
+        super(genericResourceService, securityService);
+        this.providerService = providerService;
+        this.vocabularyService = vocabularyService;
+        this.commonMethods = commonMethods;
+        this.openAIREDatasourceManager = openAIREDatasourceManager;
+        this.idCreator = idCreator;
+        this.securityService = securityService;
+        this.genericResourceService = genericResourceService;
+    }
+
+    @Override
+    public String getResourceTypeName() {
+        return "datasource";
+    }
+
+    //region generic
+    @Override
+    public DatasourceBundle add(DatasourceBundle datasource, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
+                datasource.getCatalogueId());
+        onboard(datasource, provider, auth);
+        onboardingValidation(datasource, provider);
+        DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), datasource);
+        return ret;
+    }
+
+    private void onboard(DatasourceBundle datasource, ProviderBundle provider, Authentication auth) {
+        String catalogueId = datasource.getCatalogueId();
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
+            if (provider.getTemplateStatus().equals("approved template")) {
+                datasource.markOnboard(vocabularyService.get("approved").getId(), false, auth, null);
+                datasource.setActive(true);
+            } else {
+                datasource.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            }
+            datasource.setCatalogueId(this.catalogueId);
+            commonMethods.createIdentifiers(datasource, getResourceTypeName(), false);
+            datasource.setId(datasource.getIdentifiers().getOriginalId());
+        } else {
+            datasource.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+//            commonMethods.validateCatalogueId(catalogueId); //FIXME
+            idCreator.validateId(datasource.getId());
+            commonMethods.createIdentifiers(datasource, getResourceTypeName(), true);
+        }
+        datasource.setAuditState(Auditable.NOT_AUDITED);
+    }
+
+    private void onboardingValidation(DatasourceBundle datasource, ProviderBundle provider) {
+//        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
+        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
+//        VocabularyValidationUtils.validateCategories();
+//        VocabularyValidationUtils.validateScientificDomains();
+        if (!provider.getStatus().equals("approved")) {
+            throw new ResourceException(String.format("The Provider '%s' you provided as a Service Owner " +
+                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
+        }
+        if (provider.getTemplateStatus().equals("pending template")) {
+            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
+                    "Template.", provider.getId()), HttpStatus.CONFLICT);
+        }
+    }
+
+    @Override
+    @Transactional
+    @TriggersAspects({"AfterServiceUpdateEmails"})
+    public DatasourceBundle update(DatasourceBundle datasource, String comment, Authentication auth) {
+        DatasourceBundle existing = get(datasource.getId(), datasource.getCatalogueId());
+        // check if there are actual changes in the Service
+        if (datasource.equals(existing)) {
+            return datasource;
+        }
+        datasource.markUpdate(auth, comment);
+//        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
+        checkAndResetDatasourceOnboarding(datasource, auth);
+
+        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
+//        VocabularyValidationUtils.validateCategories();
+//        VocabularyValidationUtils.validateScientificDomains();
+
+        try {
+            return genericResourceService.update(getResourceTypeName(), datasource.getId(), datasource);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void checkAndResetDatasourceOnboarding(DatasourceBundle datasource, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
+                datasource.getCatalogueId());
+        // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
+        if (datasource.getStatus().equals(vocabularyService.get("rejected").getId())) {
+            if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
+                datasource.setStatus(vocabularyService.get("pending").getId());
+                datasource.setActive(false);
+                provider.setTemplateStatus(vocabularyService.get("pending template").getId());
+                providerService.update(provider, "system update", auth);
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void delete(DatasourceBundle bundle) {
+        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+//        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName()); //FIXME
+        logger.info("Deleting Datasource: {} and all its Resource Interoperability Records", bundle.getId());
+        genericResourceService.delete(getResourceTypeName(), bundle.getId());
+    }
+
+    @Transactional
+    public DatasourceBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
+        }
+        DatasourceBundle existing = get(id);
+        existing.markOnboard(status, active, auth, null);
+
+        updateProviderTemplateStatus(existing, status, auth);
+
+        logger.info("Verifying Datasource: {}", existing);
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateProviderTemplateStatus(DatasourceBundle datasource, String status, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
+                datasource.getCatalogueId());
+        switch (status) {
+            case "pending":
+                provider.setTemplateStatus("pending template");
+                break;
+            case "approved":
+                provider.setTemplateStatus("approved template");
+                break;
+            case "rejected":
+                provider.setTemplateStatus("rejected template");
+                break;
+            default:
+                break;
+        }
+        providerService.update(provider, "system update", auth);
+    }
+
+    @Override
+    public DatasourceBundle setActive(String id, Boolean active, Authentication auth) {
+        DatasourceBundle existing = get(id);
+
+        ProviderBundle provider = providerService.get((String) existing.getDatasource().get("serviceOwner"),
+                existing.getCatalogueId());
+        if (active && !provider.isActive()) {
+            throw new ResourceException("You cannot activate the Datasource, as its Provider is inactive", HttpStatus.CONFLICT);
+        }
+        if ((existing.getStatus().equals(vocabularyService.get("pending").getId()) ||
+                existing.getStatus().equals(vocabularyService.get("rejected").getId())) && !existing.isActive()) {
+            throw new ValidationException("You cannot activate this Datasource, because it is not yet approved.");
+        }
+
+        existing.markActive(active, auth);
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, existing);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    //endregion
+
+    //region EOSC Service-specific
+    @Override
+    public Paging<DatasourceBundle> getAllEOSCServicesOfAProvider(String providerId, String catalogueId,
+                                                                  int quantity, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("service_owner", providerId);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        ff.setQuantity(quantity);
+        ff.addOrderBy("name", "asc");
+        return getAll(ff, auth);
+    }
+
+    public void sendEmailNotificationToProviderForOutdatedEOSCService(String id, Authentication auth) {
+        DatasourceBundle datasource = get(id);
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
+                datasource.getCatalogueId());
+        logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
+//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
+    }
+
+    @Override
+    public Browsing<DatasourceBundle> getMy(FacetFilter filter, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("draft", false); // A Draft Provider cannot have resources
+        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
+
+        if (providers.isEmpty()) {
+            return new Browsing<>();
+        }
+
+        filter.setResourceType(getResourceTypeName());
+        filter.setQuantity(maxQuantity);
+        filter.addFilter("published", false);
+        filter.addFilter("service_owner", providers.stream().map(ProviderBundle::getId).toList());
+        ff.addOrderBy("name", "asc");
+        return genericResourceService.getResults(ff);
+    }
+
+    //FIXME
+    @Override
+    public List<DatasourceBundle> getByIds(Authentication auth, String... ids) {
+        List<DatasourceBundle> resources;
+        resources = Arrays.stream(ids)
+                .map(id ->
+                {
+                    try {
+                        return get(id, catalogueId);
+                    } catch (ServiceException | ResourceNotFoundException e) {
+                        return null;
+                    }
+
+                })
+                .filter(Objects::nonNull)
+                .toList();
+        return resources;
+    }
+
+    @Override
+    public Bundle getServiceTemplate(String providerId, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("service_owner", providerId);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("published", false);
+        List<DatasourceBundle> allProviderServices = getAll(ff, auth).getResults();
+        for (DatasourceBundle bundle : allProviderServices) {
+            if (bundle.getStatus().equals(vocabularyService.get("pending").getId())) {
+                return bundle;
+            }
+        }
+        return null;
+    }
+
+    // OpenAIRE
+    private void checkOpenAIREIDExistence(DatasourceBundle datasourceBundle) {
+        LinkedHashMap<String, Object> datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
+        if (datasource != null) {
+            datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
+        } else {
+            throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an " +
+                    "OpenAIRE Datasource", datasourceBundle.getId()));
+        }
+    }
+
+    public boolean isDatasourceRegisteredOnOpenAIRE(String id) {
+        DatasourceBundle datasourceBundle = get(id);
+        boolean found = false;
+        String registerBy;
+        if (datasourceBundle != null) {
+            String originalOpenAIREId = datasourceBundle.getOriginalOpenAIREId();
+            if (originalOpenAIREId != null && !originalOpenAIREId.isEmpty()) {
+                registerBy = openAIREDatasourceManager.getRegisterBy(originalOpenAIREId);
+                if (registerBy != null && !registerBy.isEmpty()) {
+                    found = true;
+                }
+            }
+        } else {
+            throw new ResourceNotFoundException(id, "Datasource");
+        }
+        return found;
+    }
+    //endregion
+
+    //region Drafts
+    @Override
+    public DatasourceBundle addDraft(DatasourceBundle bundle, Authentication auth) {
+        bundle.markDraft(auth, null);
+        bundle.setCatalogueId(catalogueId);
+        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        bundle.setId(bundle.getIdentifiers().getOriginalId());
+
+        DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
+        return ret;
+    }
+
+    @Override
+    public DatasourceBundle updateDraft(DatasourceBundle bundle, Authentication auth) {
+        bundle.markUpdate(auth, null);
+        try {
+            DatasourceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
+            return ret;
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteDraft(DatasourceBundle bundle) {
+        genericResourceService.delete(getResourceTypeName(), bundle.getId());
+    }
+
+    @Override
+    public DatasourceBundle finalizeDraft(DatasourceBundle datasource, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
+                datasource.getCatalogueId());
+        if (provider.getTemplateStatus().equals("approved template")) {
+            datasource.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+        } else {
+            datasource.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+        }
+        datasource = update(datasource, auth);
+
+        return datasource;
+    }
+    //endregion
+}

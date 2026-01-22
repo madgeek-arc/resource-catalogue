@@ -4,7 +4,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import org.springframework.security.core.Authentication;
 
 public interface ResourceCatalogueGenericService<T extends Bundle>
-        extends BundleOperations<T>, ResourceService<T>, DraftTestResourceService<T> {
+        extends BundleOperations<T>, ResourceService<T>, DraftService<T> {
 
     /**
      * Update a resource providing a meaningful comment

@@ -25,17 +25,18 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface ServiceService extends ResourceCatalogueGenericService<ServiceBundle> {
+public interface ServiceService extends ResourceCatalogueGenericService<ServiceBundle>,
+        EOSCServiceService<ServiceBundle>, DraftService<ServiceBundle> {
 
-    /**
-     *
-     * @param providerId  Provider ID
-     * @param catalogueId Catalogue ID
-     * @param quantity    Quantity to be fetched
-     * @param auth        Authentication
-     * @return {@link Paging< ServiceBundle >}
-     */
-    Paging<ServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId, int quantity, Authentication auth);
+//    /**
+//     *
+//     * @param providerId  Provider ID
+//     * @param catalogueId Catalogue ID
+//     * @param quantity    Quantity to be fetched
+//     * @param auth        Authentication
+//     * @return {@link Paging< ServiceBundle >}
+//     */
+//    Paging<ServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId, int quantity, Authentication auth);
 
 
 //    /**
@@ -80,13 +81,6 @@ public interface ServiceService extends ResourceCatalogueGenericService<ServiceB
 //     */
 //    ServiceBundle updateResource(ServiceBundle resource, String catalogueId, String comment, Authentication auth);
 
-    /**
-     * @param authentication Authentication
-     * @param ids            List of Service IDs
-     * @return the list of matching resources.
-     */
-    List<ServiceBundle> getByIds(Authentication authentication, String... ids);
-
 //    /**
 //     * Check if the Resource exists.
 //     *
@@ -94,15 +88,6 @@ public interface ServiceService extends ResourceCatalogueGenericService<ServiceB
 //     * @return {@link boolean}
 //     */
 //    boolean exists(SearchService.KeyValue... ids);
-
-    /**
-     * Get resource.
-     *
-     * @param id          Service ID
-     * @param catalogueId Catalogue ID
-     * @return {@link Resource}
-     */
-    Resource getResource(String id, String catalogueId);
 
 //    /**
 //     * Get a list of Service Bundles of a specific Provider of the EOSC Catalogue
@@ -139,23 +124,6 @@ public interface ServiceService extends ResourceCatalogueGenericService<ServiceB
 //     * @return {@link List}&lt;{@link ServiceBundle}&gt;
 //     */
 //    List<ServiceBundle> getInactiveResources(String providerId);
-
-    /**
-     * Get an EOSC Provider's Service Template, if exists, else return null
-     *
-     * @param providerId Provider ID
-     * @param auth       Authentication
-     * @return {@link Bundle}
-     */
-    Bundle getServiceTemplate(String providerId, Authentication auth);
-
-    /**
-     * Send email notifications to all Providers with outdated Services
-     *
-     * @param resourceId Service ID
-     * @param auth       Authentication
-     */
-    void sendEmailNotificationToProviderForOutdatedService(String resourceId, Authentication auth);
 
 //    /**
 //     * Change the Provider of the specific Service

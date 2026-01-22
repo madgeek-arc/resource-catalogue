@@ -98,7 +98,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
     @Operation(summary = "Get a list of Providers based on a list of filters.")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", nullable = true)))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "all")
     public ResponseEntity<Paging<?>> getAll(@Parameter(hidden = true)
                                             @RequestParam MultiValueMap<String, Object> params,
@@ -113,7 +113,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
     @BrowseParameters
     @BrowseCatalogue
     @Parameters({
-            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", nullable = true))),
+            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true))),
             @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean")))
     })
     @GetMapping(path = "bundle/all")
@@ -127,6 +127,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
         return ResponseEntity.ok(paging);
     }
 
+    //TODO: remove, this Controller should be only for default catalogue. Ask front
     @Operation(summary = "Returns a list of Providers providing a Catalogue ID.")
     @BrowseParameters
     @GetMapping(path = "byCatalogue/{id}")
@@ -145,7 +146,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
     }
 
     @Operation(summary = "Returns all Provider's of a User.")
-    @GetMapping(path = "getMyProviders")
+    @GetMapping(path = "getMy")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ProviderBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
                                                       @Parameter(hidden = true) Authentication auth) {
@@ -216,7 +217,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
                                                        @RequestParam(required = false) String comment,
                                                        @Parameter(hidden = true) Authentication auth) {
         ProviderBundle bundle = service.update(provider, comment, auth);
-        logger.info("Updated the Provider id '{}'", provider.getId());
+        logger.info("Updated the ProviderBundle id '{}'", provider.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 

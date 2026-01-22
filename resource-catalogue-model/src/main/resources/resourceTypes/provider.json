@@ -26,14 +26,7 @@
       "label": "Description",
       "multivalued": false,
       "name": "description",
-      "path": "$.service.description",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Website",
-      "multivalued": false,
-      "name": "website",
-      "path": "$.provider.website",
+      "path": "$.provider.description",
       "type": "java.lang.String"
     },
     {

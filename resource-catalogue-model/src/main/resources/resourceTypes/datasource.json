@@ -16,6 +16,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.datasource.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Service Name",
       "multivalued": false,
       "name": "name",
@@ -372,7 +379,8 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "services",
+    "datasources",
+    "eoscServices",
     "eoscResources"
   ],
   "name": "datasource",

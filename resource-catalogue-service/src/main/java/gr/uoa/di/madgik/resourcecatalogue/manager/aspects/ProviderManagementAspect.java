@@ -45,61 +45,34 @@ public class ProviderManagementAspect {
 
     private final ProviderService providerService;
     private final ServiceService serviceService;
-//    private final TrainingResourceService trainingResourceService;
-//    private final DeployableServiceService deployableServiceService;
-//    private final InteroperabilityRecordService interoperabilityRecordService;
-//    private final ResourceInteroperabilityRecordService rirService;
+    private final DatasourceService datasourceService;
+    private final AdapterService adapterService;
     private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceManager;
-//    private final PublicDatasourceService publicDatasourceManager;
-//    private final PublicTrainingResourceService publicTrainingResourceManager;
-//    private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
-//    private final PublicConfigurationTemplateService publicConfigurationTemplateManager;
-//    private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager;
-//    private final EmailService emailService;
+    private final PublicDatasourceService publicDatasourceService;
+//    private final PublicAdapterService publicAdapterService;
     private final SecurityService securityService;
-//    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
-//    private final PublicAdapterService publicAdapterManager;
-//    private final PublicDeployableServiceService publicDeployableServiceManager;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
     public ProviderManagementAspect(ProviderService providerService,
                                     ServiceService serviceService,
-//                                    TrainingResourceService trainingResourceService,
-//                                    DeployableServiceService deployableServiceService,
-//                                    InteroperabilityRecordService interoperabilityRecordService,
-//                                    ResourceInteroperabilityRecordService rirService,
+                                    DatasourceService datasourceService,
+                                    AdapterService adapterService,
                                     PublicProviderService publicProviderService,
                                     PublicServiceService publicServiceManager,
-//                                    PublicDatasourceService publicDatasourceManager,
-//                                    PublicTrainingResourceService publicTrainingResourceManager,
-//                                    PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
-//                                    PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
-//                                    PublicConfigurationTemplateService publicConfigurationTemplateManager,
-//                                    PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceManager,
-//                                    PublicAdapterService publicAdapterManager,
-//                                    PublicDeployableServiceService publicDeployableServiceManager,
-//                                    EmailService emailService,
+                                    PublicDatasourceService publicDatasourceService,
+//                                    PublicAdapterService publicAdapterService,
                                     SecurityService securityService) {
         this.providerService = providerService;
         this.serviceService = serviceService;
-//        this.trainingResourceService = trainingResourceService;
-//        this.deployableServiceService = deployableServiceService;
-//        this.interoperabilityRecordService = interoperabilityRecordService;
-//        this.rirService = rirService;
+        this.datasourceService = datasourceService;
+        this.adapterService = adapterService;
         this.publicProviderService = publicProviderService;
         this.publicServiceManager = publicServiceManager;
-//        this.publicDatasourceManager = publicDatasourceManager;
-//        this.publicTrainingResourceManager = publicTrainingResourceManager;
-//        this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
-//        this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
-//        this.publicConfigurationTemplateManager = publicConfigurationTemplateManager;
-//        this.publicConfigurationTemplateInstanceManager = publicConfigurationTemplateInstanceManager;
-//        this.publicAdapterManager = publicAdapterManager;
-//        this.publicDeployableServiceManager = publicDeployableServiceManager;
-//        this.emailService = emailService;
+        this.publicDatasourceService = publicDatasourceService;
+//        this.publicAdapterService = publicAdapterService;
         this.securityService = securityService;
     }
 

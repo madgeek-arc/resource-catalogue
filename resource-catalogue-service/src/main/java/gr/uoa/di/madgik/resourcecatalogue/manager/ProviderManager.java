@@ -23,7 +23,10 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
@@ -298,7 +301,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 //        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
         createMapValuesForHLE(providers, "provider", mapValuesList);
         for (ProviderBundle providerBundle : providers) {
-            services.addAll(serviceService.getAllServicesOfAProvider(providerBundle.getId(),
+            services.addAll(serviceService.getAllEOSCServicesOfAProvider(providerBundle.getId(),
                     providerBundle.getCatalogueId(), maxQuantity, auth).getResults());
 //            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
 //                    providerBundle.getId(), auth).getResults());
@@ -352,10 +355,10 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         mapValuesList.add(mapValues);
     }
 
-    private List<String> extractEmails(ProviderBundle providerBundle) {
+    private List<String> extractEmails(ProviderBundle bundle) {
         List<String> emails = new ArrayList<>();
 
-        Object usersObj = providerBundle.getProvider().get("users"); //TODO: how to enforce that users will be always in the model
+        Object usersObj = bundle.getProvider().get("users"); //TODO: how to enforce that users will be always in the model
         if (usersObj instanceof Collection<?>) {
             for (Object obj : (Collection<?>) usersObj) {
                 if (obj instanceof User user) {

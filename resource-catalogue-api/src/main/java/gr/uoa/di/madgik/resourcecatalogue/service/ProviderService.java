@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
@@ -25,7 +26,8 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 import java.util.Map;
 
-public interface ProviderService extends ResourceCatalogueGenericService<ProviderBundle> {
+public interface ProviderService extends ResourceCatalogueGenericService<ProviderBundle>,
+        DraftService<ProviderBundle>, TermsService {
 
     /**
      * Send email to Portal Admins requesting a Provider's deletion
@@ -58,22 +60,4 @@ public interface ProviderService extends ResourceCatalogueGenericService<Provide
      * @return {@link Map<>}
      */
     Map<String, List<Value>> getProviderIdToNameMap(String catalogueId);
-
-    //TODO: do we need isDraft param for terms?
-    /**
-     * Has an Authenticated User accepted the Terms & Conditions
-     *
-     * @param id   Provider ID
-     * @param auth Authentication
-     * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
-     */
-    boolean hasAdminAcceptedTerms(String id, Authentication auth);
-
-    /**
-     * Update a resource's list of Users that has accepted the Terms & Conditions
-     *
-     * @param id   Provider ID
-     * @param auth Authentication
-     */
-    void adminAcceptedTerms(String id, Authentication auth);
 }

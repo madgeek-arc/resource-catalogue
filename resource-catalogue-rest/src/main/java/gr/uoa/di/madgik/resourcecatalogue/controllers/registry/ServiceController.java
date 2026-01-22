@@ -100,7 +100,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Operation(summary = "Get a list of Services based on a list of filters.")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", nullable = true)))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "all")
     public ResponseEntity<Paging<?>> getAll(@Parameter(hidden = true)
                                             @RequestParam MultiValueMap<String, Object> params,
@@ -117,7 +117,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @BrowseParameters
     @BrowseCatalogue
     @Parameters({
-            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", nullable = true))),
+            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true))),
             @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean")))
     })
     @GetMapping(path = "bundle/all")
@@ -136,7 +136,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceAdmin")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "adminPage/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true)
@@ -147,6 +147,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
         return ResponseEntity.ok(paging);
     }
 
+    //TODO: remove, this Controller should be only for default catalogue. Ask front
     @Tag(name = "ServiceRead")
     @Operation(summary = "Returns a list of Services providing a Catalogue ID.")
     @BrowseParameters
@@ -167,7 +168,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 
     @Tag(name = "ServiceRead")
     @Operation(summary = "Returns all Services's of a User.")
-    @GetMapping(path = "getMyServices")
+    @GetMapping(path = "getMy")
     public ResponseEntity<List<ServiceBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
                                                      @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
@@ -242,7 +243,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                                       @RequestParam(required = false) String comment,
                                                       @Parameter(hidden = true) Authentication auth) {
         ServiceBundle bundle = service.update(serviceBundle, comment, auth);
-        logger.info("Updated the Service id '{}'", bundle.getId());
+        logger.info("Updated the ServiceBundle id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -367,7 +368,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        return new ResponseEntity<>(service.getAllServicesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK);
+        return new ResponseEntity<>(service.getAllEOSCServicesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceRead")
@@ -408,7 +409,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                                                   @PathVariable String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        service.sendEmailNotificationToProviderForOutdatedService(id, auth);
+        service.sendEmailNotificationToProviderForOutdatedEOSCService(id, auth);
     }
 
     //FIXME
