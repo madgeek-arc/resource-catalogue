@@ -111,7 +111,7 @@ public class DefaultFacetLabelService implements FacetLabelService {
         // TODO: get all final providers (after deduplication process)
         List<ProviderBundle> allProviders = providerService.getAll(ff, null).getResults();
         Map<String, String> providerNames = new TreeMap<>();
-        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), p.getProvider().getName()));
+        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), (String) p.getProvider().get("name")));
 
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 

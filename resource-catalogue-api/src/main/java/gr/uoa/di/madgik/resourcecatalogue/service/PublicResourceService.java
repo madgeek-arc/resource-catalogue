@@ -16,24 +16,33 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
-
-public interface ContactInformationService {
+public interface PublicResourceService<T> {
 
     /**
-     * Get a list of Catalogues and Providers in which the User is Admin
+     * Return a Public resource
      *
-     * @param authentication Authentication
+     * @param id          resource ID
+     * @param catalogueId catalogue ID
+     * @return {@link T}
      */
-    List<String> getMy(Authentication authentication);
+    T get(String id, String catalogueId);
 
     /**
-     * Update the Provider's list of ContactTransferInfo
+     * Create Public resource
      *
-     * @param acceptedTransfer boolean True/False
-     * @param authentication   Authentication
+     * @param resource Resource
+     * @param auth   Authentication
+     * @return {@link T}
      */
-    void updateContactInfoTransfer(boolean acceptedTransfer, Authentication authentication);
+    T createPublicResource(T resource, Authentication auth);
+
+    /**
+     * Update all the resource-ID-related fields of a resource to their public values
+     *
+     * @param resource Resource
+     */
+    void updateIdsToPublic(T resource);
 }

@@ -16,7 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CSVService;
 
 import java.time.LocalDate;
@@ -29,38 +32,31 @@ import java.util.*;
 public class CSVManager implements CSVService {
 
     public String listProvidersToCSV(List<ProviderBundle> list) {
-        List<Provider> providers = new ArrayList<>();
-        for (ProviderBundle providerBundle : list) {
-            providers.add(providerBundle.getProvider());
-        }
-        providers.sort(Comparator.comparing(Provider::getId));
-
+        list.sort(Comparator.comparing(ProviderBundle::getId));
         StringBuilder csv = new StringBuilder();
-        csv.append("id,name\n"); // CSV header
-
-        for (Provider provider : providers) {
-            csv.append(formatCSVField(provider.getId())).append(",");
-            csv.append(formatCSVField(provider.getName())).append("\n");
+        csv.append("id,name\n");
+        for (ProviderBundle bundle : list) {
+            String id = bundle.getId();
+            Object nameObj = bundle.getProvider().get("name");
+            String name = nameObj != null ? nameObj.toString() : "";
+            csv.append(formatCSVField(id)).append(",");
+            csv.append(formatCSVField(name)).append("\n");
         }
-
         return csv.toString();
     }
 
+
     public String listServicesToCSV(List<ServiceBundle> list) {
-        List<Service> services = new ArrayList<>();
-        for (ServiceBundle serviceBundle : list) {
-            services.add(serviceBundle.getService());
-        }
-        services.sort(Comparator.comparing(Service::getId));
-
+        list.sort(Comparator.comparing(ServiceBundle::getId));
         StringBuilder csv = new StringBuilder();
-        csv.append("id,name\n"); // CSV header
-
-        for (Service service : services) {
-            csv.append(formatCSVField(service.getId())).append(",");
-            csv.append(formatCSVField(service.getName())).append("\n");
+        csv.append("id,name\n");
+        for (ServiceBundle bundle : list) {
+            String id = bundle.getId();
+            Object nameObj = bundle.getService().get("name");
+            String name = nameObj != null ? nameObj.toString() : "";
+            csv.append(formatCSVField(id)).append(",");
+            csv.append(formatCSVField(name)).append("\n");
         }
-
         return csv.toString();
     }
 
@@ -99,20 +95,22 @@ public class CSVManager implements CSVService {
     }
 
     public String computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
-                                                                     List<ProviderBundle> providers,
-                                                                     List<ServiceBundle> services) {
+                                                                       List<ProviderBundle> providers,
+                                                                       List<ServiceBundle> services) {
         Map<String, String> providerIdToCountry = new TreeMap<>();
         Map<String, String> providerIdToName = new TreeMap<>();
         Map<String, Integer> providerToServiceCountApprovedBeforeTimestamp = new TreeMap<>();
         List<String> providerOfServicesWithMalformedLoggingInfo = new ArrayList<>();
         for (ProviderBundle provider : providers) {
-            providerIdToName.put(provider.getId(), provider.getProvider().getName());
-            providerIdToCountry.put(provider.getId(), provider.getProvider().getLocation().getCountry());
+            Object nameObj = provider.getProvider().get("name");
+            providerIdToName.put(provider.getId(), nameObj != null ? nameObj.toString() : "");
+            Object countryObj = provider.getProvider().get("country");
+            providerIdToCountry.put(provider.getId(), countryObj != null ? countryObj.toString() : "");
         }
         for (ServiceBundle service : services) {
             boolean approvedFound = false;
             boolean rejectedFound = false;
-            String resourceOrganisation = service.getService().getResourceOrganisation();
+            String resourceOrganisation = (String) service.getService().get("serviceOwner");
             List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
             for (LoggingInfo loggingInfo : loggingInfoList) {
                 try {
@@ -153,8 +151,8 @@ public class CSVManager implements CSVService {
     }
 
     private String listNumberOfServicesPerProviderCountryToCSV(Map<String, String> providerIdToCountry,
-                                                             Map<String, String> providerIdToName,
-                                                             Map<String, Integer> providerToServiceCountApprovedBeforeTimestamp) {
+                                                               Map<String, String> providerIdToName,
+                                                               Map<String, Integer> providerToServiceCountApprovedBeforeTimestamp) {
         // Sort the entries by country
         List<Map.Entry<String, Integer>> sortedEntries = providerToServiceCountApprovedBeforeTimestamp.entrySet().stream()
                 .sorted((entry1, entry2) -> {

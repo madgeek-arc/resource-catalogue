@@ -9,10 +9,38 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Provider Name",
       "multivalued": false,
       "name": "name",
       "path": "$.provider.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Description",
+      "multivalued": false,
+      "name": "description",
+      "path": "$.service.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Website",
+      "multivalued": false,
+      "name": "website",
+      "path": "$.provider.website",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.provider.alternativePIDs[*].pid",
       "type": "java.lang.String"
     },
     {
@@ -27,6 +55,13 @@
       "multivalued": false,
       "name": "abbreviation",
       "path": "$.provider.abbreviation",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Country",
+      "multivalued": false,
+      "name": "country",
+      "path": "$.provider.country",
       "type": "java.lang.String"
     },
     {
@@ -51,24 +86,24 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Alternative Identifier Value",
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "path": "$.provider.alternativeIdentifiers[*].value",
+      "label": "Logo",
+      "multivalued": false,
+      "name": "logo",
+      "path": "$.provider.logo",
       "type": "java.lang.String"
     },
     {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.provider.catalogueId",
+      "label": "Multimedia",
+      "multivalued": true,
+      "name": "multimedia",
+      "path": "$.provider.multimedia[*].multimediaURL",
       "type": "java.lang.String"
     },
     {
       "label": "Scientific Domain",
       "multivalued": true,
       "name": "scientific_domains",
-      "path": "$.provider.scientificDomains[*]",
+      "path": "$.provider.scientificDomains[*].scientificDomain",
       "type": "java.lang.String"
     },
     {
@@ -79,41 +114,6 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Meril Scientific Domain",
-      "multivalued": true,
-      "name": "meril_scientific_domains",
-      "path": "$.provider.merilScientificDomains[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Meril Scientific Subdomain",
-      "multivalued": true,
-      "name": "meril_scientific_subdomains",
-      "path": "$.provider.merilScientificDomains[*].merilScientificSubdomain",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Structure Type",
-      "multivalued": true,
-      "name": "structure_types",
-      "path": "$.provider.structureTypes[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Affiliation",
-      "multivalued": true,
-      "name": "affiliations",
-      "path": "$.provider.affiliations[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Network",
-      "multivalued": true,
-      "name": "networks",
-      "path": "$.provider.networks[*]",
-      "type": "java.lang.String"
-    },
-    {
       "label": "Tag",
       "multivalued": true,
       "name": "tags",
@@ -121,42 +121,14 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Esfri Domain",
-      "multivalued": true,
-      "name": "esfri_domains",
-      "path": "$.provider.esfriDomains[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Life Cycle Status",
+      "label": "Contact",
       "multivalued": false,
-      "name": "life_cycle_status",
-      "path": "$.provider.lifeCycleStatus",
+      "name": "contact",
+      "path": "$.provider.mainContact.email",
       "type": "java.lang.String"
     },
     {
-      "label": "Esfri Type",
-      "multivalued": false,
-      "name": "esfri_type",
-      "path": "$.provider.esfriType",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Area of Activity",
-      "multivalued": true,
-      "name": "areas_of_activity",
-      "path": "$.provider.areasOfActivity[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Societal Grand Challenge",
-      "multivalued": true,
-      "name": "societal_grand_challenges",
-      "path": "$.provider.societalGrandChallenges[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": null,
+      "label": "User",
       "multivalued": true,
       "name": "users",
       "path": "$.provider.users[*].email",
@@ -322,15 +294,15 @@
     {
       "label": null,
       "multivalued": false,
-      "name": "templateStatus",
-      "path": "$.templateStatus",
+      "name": "audit_state",
+      "path": "$.auditState",
       "type": "java.lang.String"
     },
     {
       "label": null,
       "multivalued": false,
-      "name": "audit_state",
-      "path": "$.auditState",
+      "name": "templateStatus",
+      "path": "$.templateStatus",
       "type": "java.lang.String"
     }
   ],

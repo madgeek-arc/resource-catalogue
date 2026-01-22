@@ -65,6 +65,6 @@ public interface CSVService {
      * @return The CSV as String.
      */
     String computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
-                                                              List<ProviderBundle> providers,
-                                                              List<ServiceBundle> services) throws IOException;
+                                                                List<ProviderBundle> providers,
+                                                                List<ServiceBundle> services) throws IOException;
 }

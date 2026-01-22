@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 //TODO: decouple from LOT1 - tool
+//TODO: remove test related resource types
 public enum ResourceTypes {
     ADAPTER,
     CONFIGURATION_TEMPLATE,
@@ -27,8 +28,10 @@ public enum ResourceTypes {
     INTEROPERABILITY_RECORD,
     MONITORING,
     PROVIDER,
+    PROVIDERTEST,
     RESOURCE_INTEROPERABILITY_RECORD,
     SERVICE,
+    SERVICETEST,
     TOOL,
     TRAINING_RESOURCE,
     VOCABULARY_CURATION;

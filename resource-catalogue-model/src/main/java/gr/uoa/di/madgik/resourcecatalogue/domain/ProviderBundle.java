@@ -16,28 +16,18 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.LinkedHashMap;
 
-public class ProviderBundle extends Bundle<Provider> {
+public class ProviderBundle extends Bundle {
 
-//    @VocabularyValidation(type = Vocabulary.Type.TEMPLATE_STATE)
     private String templateStatus;
 
-    private List<ContactInfoTransfer> transferContactInformation;
-
-    public ProviderBundle() {
-        // no arg constructor
+    public LinkedHashMap<String, Object> getProvider() {
+        return this.getPayload();
     }
 
-    public ProviderBundle(Provider provider) {
-        this.setProvider(provider);
-        this.setMetadata(null);
-    }
-
-    public ProviderBundle(Provider provider, Metadata metadata) {
-        this.setProvider(provider);
-        this.setMetadata(metadata);
+    public void setProvider(LinkedHashMap<String, Object> payload) {
+        this.setPayload(payload);
     }
 
     @Override
@@ -50,41 +40,11 @@ public class ProviderBundle extends Bundle<Provider> {
         super.setId(id);
     }
 
-    public Provider getProvider() {
-        return this.getPayload();
-    }
-
-    public void setProvider(Provider provider) {
-        this.setPayload(provider);
-    }
-
     public String getTemplateStatus() {
         return templateStatus;
     }
 
     public void setTemplateStatus(String templateStatus) {
         this.templateStatus = templateStatus;
-    }
-
-    public List<ContactInfoTransfer> getTransferContactInformation() {
-        return transferContactInformation;
-    }
-
-    public void setTransferContactInformation(List<ContactInfoTransfer> transferContactInformation) {
-        this.transferContactInformation = transferContactInformation;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        ProviderBundle that = (ProviderBundle) o;
-        return Objects.equals(templateStatus, that.templateStatus) && Objects.equals(transferContactInformation, that.transferContactInformation);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), templateStatus, transferContactInformation);
     }
 }

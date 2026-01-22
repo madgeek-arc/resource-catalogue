@@ -258,8 +258,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<String> providerNames = new ArrayList<>();
         for (ProviderBundle providerBundle : allActiveAndApprovedProviders) {
-            if (providerBundle.getProvider().isLegalEntity()) {
-                providerNames.add(providerBundle.getProvider().getName());
+            if ((boolean) providerBundle.getProvider().get("legalEntity")) {
+                providerNames.add((String) providerBundle.getProvider().get("name"));
             }
         }
         for (Iterator<String> it = providerNames.iterator(); it.hasNext(); ) {

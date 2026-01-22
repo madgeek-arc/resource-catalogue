@@ -5,13 +5,13 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.NewBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TestService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -19,32 +19,26 @@ import org.springframework.security.core.Authentication;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //TODO: resource-specific method -> inside corresponding manager/service
 //TODO: true universal method (all resources will use it) -> inside here (generic)
 //TODO: some but not all resources need a method -> create a new interface with default implementation
 
-@org.springframework.stereotype.Service("testManager")
-public abstract class TestManager<T extends NewBundle> implements TestService<T> {
+@org.springframework.stereotype.Service("resourceCatalogueGenericManager")
+public abstract class ResourceCatalogueGenericManager<T extends Bundle> implements ResourceCatalogueGenericService<T> {
 
     private final GenericResourceService genericResourceService;
     private final SecurityService securityService;
-    private final CatalogueService catalogueService;
 
-    private static final Logger logger = LoggerFactory.getLogger(TestManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceCatalogueGenericManager.class);
 
     protected abstract String getResourceTypeName();
 
-    public TestManager(GenericResourceService genericResourceService,
-                       SecurityService securityService,
-                       CatalogueService catalogueService) {
+    public ResourceCatalogueGenericManager(GenericResourceService genericResourceService,
+                                           SecurityService securityService) {
         this.genericResourceService = genericResourceService;
         this.securityService = securityService;
-        this.catalogueService = catalogueService;
     }
 
     //TODO: we don't need this
@@ -78,6 +72,17 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     }
 
     @Override
+    public T getOrElseReturnNull(String id) {
+        T bundle;
+        try {
+            bundle = get(id);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
+        return bundle;
+    }
+
+    @Override
     public Browsing<T> getAll(FacetFilter ff, Authentication auth) {
         ff.setResourceType(getResourceTypeName());
         boolean authenticated = auth != null && auth.isAuthenticated();
@@ -86,7 +91,8 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
                 return getAll(ff);
             }
             if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
-                ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
+                //TODO: this works only for old Catalogues, Providers. How to proceed
+//                ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
                 return getAll(ff);
             }
         }
@@ -102,16 +108,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     }
 
     @Override
-    public Browsing<T> getMy(FacetFilter ff, Authentication auth) {
-        ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(10000);
-        ff.addFilter("published", false);
-        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
-        ff.addOrderBy("name", "asc");
-        return genericResourceService.getResults(ff);
-    }
-
-    @Override
     public T add(T bundle, Authentication auth) {
         return genericResourceService.add(getResourceTypeName(), bundle);
     }
@@ -122,7 +118,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
             return bundle;
         }
         bundle.markUpdate(auth, null); //TODO: make sure all resources will use this
-        validate(bundle);
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -135,12 +130,17 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
         return !bundle.equals(existing);
     }
 
+    public T validate(T bundle) {
+        logger.debug("Validating resource '{}' with id: '{}'", getResourceTypeName(), bundle.getId());
+        return genericResourceService.validate(getResourceTypeName(), bundle);
+    }
+
     @Override
     public T audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
         T existing = get(id, catalogueId);
         existing.markAudit(comment, actionType, auth);
 
-        // send notification emails to Provider Admins
+        //TODO: cannot be here if "users" && other resources have different providerId field name (eg. serviceOwner)
 //        mailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
 
         logger.info("Audited '{}' with ID '{}' [actionType: {}]", getResourceTypeName(), existing.getId(), actionType);
@@ -151,6 +151,22 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
             throw new RuntimeException(e);
         }
         return existing;
+    }
+
+    @Override
+    public T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
+        T bundle = get(id, catalogueId);
+//        commonMethods.suspensionValidation(bundle, catalogueId, providerId, suspend, auth); //FIXME
+
+        logger.info("{} resource '{}' with id: '{}'", suspend ? "Suspending" : "Unsuspending",
+                getResourceTypeName(), bundle.getId());
+        bundle.markSuspend(suspend, auth);
+
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -227,12 +243,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     }
 
     @Override
-    public T validate(T bundle) {
-        logger.debug("Validating resource '{}' with id: '{}'", getResourceTypeName(), bundle.getId());
-        return genericResourceService.validate(getResourceTypeName(), bundle);
-    }
-
-    @Override
     public Resource getResource(String id) {
         return null;
     }
@@ -250,12 +260,6 @@ public abstract class TestManager<T extends NewBundle> implements TestService<T>
     @Override
     public boolean exists(String id) {
         return false;
-    }
-
-    //TODO: move to PublicController
-    @Override
-    public T createPublicResource(T bundle, Authentication auth) {
-        return null;
     }
     //endregion
 }

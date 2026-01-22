@@ -94,6 +94,9 @@
     "latestUpdateInfo" : {
       "$ref" : "#/$defs/LoggingInfo"
     },
+    "legacy" : {
+      "type" : "boolean"
+    },
     "loggingInfo" : {
       "type" : "array",
       "items" : {

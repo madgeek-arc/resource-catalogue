@@ -29,7 +29,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +47,9 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceManager.class);
 
-    @Lazy
-    @Autowired
-    private FieldValidator fieldValidator;
+//    @Lazy
+//    @Autowired
+//    private FieldValidator fieldValidator;
 
     @Lazy
     @Autowired
@@ -207,11 +206,12 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     @Override
     public T validate(T t) {
         logger.debug("Validating Resource {} using FieldValidator", t);
-        try {
-            fieldValidator.validate(t);
-        } catch (IllegalAccessException e) {
-            logger.error("", e);
-        }
+        //FIXME
+//        try {
+//            fieldValidator.validate(t);
+//        } catch (IllegalAccessException e) {
+//            logger.error("", e);
+//        }
         return t;
     }
 

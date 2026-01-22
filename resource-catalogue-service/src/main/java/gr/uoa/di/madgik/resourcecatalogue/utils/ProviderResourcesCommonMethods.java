@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -29,9 +28,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class ProviderResourcesCommonMethods {
@@ -41,113 +40,60 @@ public class ProviderResourcesCommonMethods {
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    private final CatalogueService catalogueService;
     private final ProviderService providerService;
-    private final DatasourceService datasourceService;
-    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
 
-    public ProviderResourcesCommonMethods(@Lazy CatalogueService catalogueService,
-                                          @Lazy ProviderService providerService,
-                                          @Lazy DatasourceService datasourceService,
-                                          @Lazy ResourceInteroperabilityRecordService
-                                                  resourceInteroperabilityRecordService,
+    public ProviderResourcesCommonMethods(@Lazy ProviderService providerService,
                                           @Lazy VocabularyService vocabularyService,
                                           @Lazy IdCreator idCreator) {
-        this.catalogueService = catalogueService;
         this.providerService = providerService;
-        this.datasourceService = datasourceService;
-        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
     }
 
-    public void checkCatalogueIdConsistency(Object o, String catalogueId) {
-        if (!catalogueService.exists(catalogueId)) {
-            throw new ResourceNotFoundException(catalogueId, "Catalogue");
-        }
-        if (o != null) {
-            if (o instanceof ProviderBundle) {
-                if (((ProviderBundle) o).getPayload().getCatalogueId() == null || ((ProviderBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Provider's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((ProviderBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Provider's 'catalogueId' don't match");
-                    }
-                }
-                if (!catalogueService.get(catalogueId).getStatus().equals("approved")) {
-                    throw new ResourceException(String.format("The Catalogue '%s' is not yet approved", catalogueId),
-                            HttpStatus.CONFLICT);
-                }
-            }
-            if (o instanceof ServiceBundle) {
-                if (((ServiceBundle) o).getPayload().getCatalogueId() == null || ((ServiceBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Service's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((ServiceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Service's 'catalogueId' don't match");
-                    }
-                }
-            }
-            if (o instanceof TrainingResourceBundle) {
-                if (((TrainingResourceBundle) o).getPayload().getCatalogueId() == null ||
-                        ((TrainingResourceBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Training Resource's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((TrainingResourceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Training Resource's 'catalogueId' don't match");
-                    }
-                }
-            }
-            if (o instanceof DeployableServiceBundle) {
-                if (((DeployableServiceBundle) o).getPayload().getCatalogueId() == null ||
-                        ((DeployableServiceBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Deployable Service's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((DeployableServiceBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Deployable Service's 'catalogueId' don't match");
-                    }
-                }
-            }
-            if (o instanceof InteroperabilityRecordBundle) {
-                if (((InteroperabilityRecordBundle) o).getPayload().getCatalogueId() == null ||
-                        ((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().isEmpty()) {
-                    throw new ValidationException("Interoperability Record's 'catalogueId' cannot be null or empty");
-                } else {
-                    if (!((InteroperabilityRecordBundle) o).getPayload().getCatalogueId().equals(catalogueId)) {
-                        throw new ValidationException("Parameter 'catalogueId' and Interoperability Record's 'catalogueId' don't match");
-                    }
-                }
-            }
-        }
-    }
+    //FIXME
+//    public void validateCatalogueId(String catalogueId) {
+//        //TODO: we set it so this should never been thrown
+//        if (!StringUtils.hasText(catalogueId)) {
+//            throw new ResourceException("catalogueId must not be blank", HttpStatus.BAD_REQUEST);
+//        }
+//        if (!catalogueService.exists(catalogueId)) {
+//            throw new ResourceException(String.format("The Catalogue '%s' does not exist", catalogueId),
+//                    HttpStatus.CONFLICT);
+//        }
+//        if (!catalogueService.get(catalogueId).getStatus().equals("approved")) {
+//            throw new ResourceException(String.format("The Catalogue '%s' is not yet approved", catalogueId),
+//                    HttpStatus.CONFLICT);
+//        }
+//    }
 
     //TODO: move to Resource Catalogue specific validation file
-    public void suspensionValidation(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
-        if (bundle.getMetadata().isPublished()) {
-            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
-        }
+    //FIXME
+//    public void suspensionValidation(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
+//        if (bundle.getMetadata().isPublished()) {
+//            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
+//        }
+//
+//        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
+//        if (bundle instanceof ProviderBundle) {
+//            if (catalogueBundle.isSuspended() && !suspend) {
+//                throw new ResourceException("You cannot unsuspend a Provider when its Catalogue is suspended",
+//                        HttpStatus.CONFLICT);
+//            }
+//        } else {
+//            if (providerId != null && !providerId.isEmpty()) {
+//                ProviderBundle providerBundle = providerService.get(providerId, catalogueId);
+//                if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
+//                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
+//                            HttpStatus.CONFLICT);
+//                }
+//            }
+//        }
+//    }
 
-        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
-        if (bundle instanceof ProviderBundle) {
-            if (catalogueBundle.isSuspended() && !suspend) {
-                throw new ResourceException("You cannot unsuspend a Provider when its Catalogue is suspended",
-                        HttpStatus.CONFLICT);
-            }
-        } else {
-            if (providerId != null && !providerId.isEmpty()) {
-                ProviderBundle providerBundle = providerService.get(providerId, auth);
-                if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
-                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
-                            HttpStatus.CONFLICT);
-                }
-            }
-        }
-    }
 
-
-    public List<LoggingInfo> returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(Bundle<?> bundle, Authentication auth) {
+    public List<LoggingInfo> returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(Bundle bundle, Authentication auth) {
         List<LoggingInfo> loggingInfoList = new ArrayList<>();
         if (bundle.getLoggingInfo() != null && !bundle.getLoggingInfo().isEmpty()) {
             loggingInfoList = bundle.getLoggingInfo();
@@ -166,14 +112,13 @@ public class ProviderResourcesCommonMethods {
         return LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), type, actionType, comment);
     }
 
-    public void createIdentifiers(Bundle<?> bundle, String resourceType, boolean external) {
+    public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();
+        identifiers.setPid(idCreator.generate(resourceType));
         if (external) {
             identifiers.setOriginalId(bundle.getId());
-            identifiers.setPid(idCreator.generate(resourceType));
         } else {
-            identifiers.setOriginalId(bundle.getId());
-            identifiers.setPid(bundle.getId());
+            identifiers.setOriginalId(identifiers.getPid() + "00");
         }
         bundle.setIdentifiers(identifiers);
     }
@@ -187,29 +132,18 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void deleteResourceRelatedServiceSubprofiles(String serviceId, String catalogueId) {
-        DatasourceBundle datasourceBundle = datasourceService.get(serviceId, catalogueId);
-        if (datasourceBundle != null) {
-            try {
-                logger.info("Deleting Datasource of Service with id: '{}'", serviceId);
-                datasourceService.delete(datasourceBundle);
-            } catch (ResourceNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    public void deleteResourceInteroperabilityRecords(String resourceId, String resourceType) {
-        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId);
-        if (resourceInteroperabilityRecordBundle != null) {
-            try {
-                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
-                resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
-            } catch (ResourceNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-    }
+    //FIXME
+//    public void deleteResourceInteroperabilityRecords(String resourceId, String resourceType) {
+//        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId);
+//        if (resourceInteroperabilityRecordBundle != null) {
+//            try {
+//                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
+//                resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
+//            } catch (ResourceNotFoundException e) {
+//                logger.error(e.getMessage(), e);
+//            }
+//        }
+//    }
 
     public LoggingInfo setLatestLoggingInfo(List<LoggingInfo> loggingInfoList, String loggingInfoType) {
         loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());

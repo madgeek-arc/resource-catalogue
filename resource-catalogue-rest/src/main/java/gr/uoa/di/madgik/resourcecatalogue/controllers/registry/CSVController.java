@@ -18,12 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CSVService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -48,7 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 
 @Hidden
 @Profile("beyond")
@@ -58,20 +54,22 @@ import java.util.Objects;
 public class CSVController {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVController.class);
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService service;
     private final ProviderService providerService;
     private final VocabularyService vocabularyService;
     private final CSVService csvService;
+    private final ServiceService serviceService;
 
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    CSVController(ServiceBundleService service, ProviderService provider,
-                  VocabularyService vocabulary, CSVService csvService) {
-        this.serviceBundleService = service;
+    CSVController(ServiceService service, ProviderService provider,
+                  VocabularyService vocabulary, CSVService csvService, ServiceService serviceService) {
+        this.service = service;
         this.providerService = provider;
         this.vocabularyService = vocabulary;
         this.csvService = csvService;
+        this.serviceService = serviceService;
     }
 
     @Hidden
@@ -95,7 +93,7 @@ public class CSVController {
     public ResponseEntity<String> servicesToCSV(@RequestParam(required = false) Boolean published,
                                                 @Parameter(hidden = true) Authentication auth,
                                                 HttpServletResponse response) {
-        Paging<ServiceBundle> serviceBundles = serviceBundleService.getAll(createFacetFilter(published), auth);
+        Paging<ServiceBundle> serviceBundles = serviceService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listServicesToCSV(serviceBundles.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
         logger.info("Downloaded Services CSV list");
@@ -126,7 +124,7 @@ public class CSVController {
                                                         HttpServletResponse response) throws IOException {
         long timestamp = csvService.generateTimestampFromDate(date);
         List<ProviderBundle> providers = providerService.getAll(createFacetFilter(false), auth).getResults();
-        List<ServiceBundle> services = serviceBundleService.getAll(createFacetFilter(false), auth).getResults();
+        List<ServiceBundle> services = serviceService.getAll(createFacetFilter(false), auth).getResults();
         String csv = csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services);
 
         // Set the response headers

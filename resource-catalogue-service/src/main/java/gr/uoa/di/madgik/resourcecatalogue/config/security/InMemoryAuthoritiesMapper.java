@@ -20,11 +20,9 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.dynamicproperties.PropertyChangeEvent;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
-import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
-import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import jakarta.annotation.PostConstruct;
@@ -42,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
@@ -54,7 +53,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     private final ProviderService providerService;
 
-    private final CatalogueService catalogueService;
+//    private final CatalogueService catalogueService;
     private final SecurityService securityService;
     private final CatalogueProperties catalogueProperties;
 
@@ -64,11 +63,11 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                      CatalogueProperties catalogueProperties,
                                      ProviderService manager,
-                                     CatalogueService catalogueService,
+//                                     CatalogueService catalogueService,
                                      SecurityService securityService) {
         this.catalogueProperties = catalogueProperties;
         this.providerService = manager;
-        this.catalogueService = catalogueService;
+//        this.catalogueService = catalogueService;
         this.securityService = securityService;
         this.maxQuantity = maxQuantity;
         if (catalogueProperties.getAdmins().isEmpty()) {
@@ -126,22 +125,23 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
         List<ProviderBundle> providers = new ArrayList<>();
         try {
-            providers.addAll(providerService.getAll(ff, securityService.getAdminAccess()).getResults());
+            providers.addAll(providerService.getAll(ff).getResults());
         } catch (Exception e) {
             logger.warn("There are no Provider entries in DB");
         }
 
-        List<CatalogueBundle> catalogues = new ArrayList<>();
-        ff.getFilter().remove("published");
-        try {
-            catalogues.addAll(catalogueService.getAll(ff, securityService.getAdminAccess()).getResults());
-        } catch (Exception e) {
-            logger.warn("There are no Catalogue entries in DB");
-        }
+        //FIXME
+//        List<CatalogueBundle> catalogues = new ArrayList<>();
+//        ff.getFilter().remove("published");
+//        try {
+//            catalogues.addAll(catalogueService.getAll(ff, securityService.getAdminAccess()).getResults());
+//        } catch (Exception e) {
+//            logger.warn("There are no Catalogue entries in DB");
+//        }
 
         lock.lock();
-        providerUsers = getProviderUserEmails(providers);
-        catalogueUsers = getCatalogueUserEmails(catalogues);
+//        providerUsers = getProviderUserEmails(providers); //FIXME
+//        catalogueUsers = getCatalogueUserEmails(catalogues); //FIXME
         lock.unlock();
         logger.debug("Update Authorities took {} ms", (System.nanoTime() - time) / 1000000);
     }
@@ -179,28 +179,44 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     }
 
     private Set<String> getProviderUserEmails(List<ProviderBundle> providerBundles) {
-        return providerBundles
-                .stream()
-                .flatMap(p -> (p.getProvider().getUsers() != null ? p.getProvider().getUsers() : new ArrayList<User>())
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .map(User::getEmail)
-                        .filter(Objects::nonNull)
-                        .map(String::toLowerCase))
-                .filter(u -> u != null && !Objects.equals("", u))
+        return providerBundles.stream()
+                .flatMap(pb -> {
+                    Object usersObj = pb.getProvider().get("users");
+                    if (!(usersObj instanceof List<?> users)) {
+                        return Stream.empty();
+                    }
+                    return users.stream();
+                })
+                .filter(obj -> obj instanceof Map<?, ?>)
+                .map(obj -> mapToUser((Map<?, ?>) obj))
+                .map(User::getEmail)
+                .filter(email -> email != null && !email.isBlank())
+                .map(String::toLowerCase)
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> getCatalogueUserEmails(List<CatalogueBundle> catalogueBundles) {
-        return catalogueBundles
-                .stream()
-                .flatMap(p -> (p.getCatalogue().getUsers() != null ? p.getCatalogue().getUsers() : new ArrayList<User>())
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .map(User::getEmail)
-                        .map(String::toLowerCase))
-                .collect(Collectors.toSet());
+
+    //TODO: make global
+    private User mapToUser(Map<?, ?> userMap) {
+        User user = new User();
+        user.setId((String) userMap.get("id"));
+        user.setName((String) userMap.get("name"));
+        user.setSurname((String) userMap.get("surname"));
+        user.setEmail((String) userMap.get("email"));
+        return user;
     }
+
+      //FIXME
+//    private Set<String> getCatalogueUserEmails(List<CatalogueBundle> catalogueBundles) {
+//        return catalogueBundles
+//                .stream()
+//                .flatMap(p -> (p.getCatalogue().getUsers() != null ? p.getCatalogue().getUsers() : new ArrayList<User>())
+//                        .stream()
+//                        .filter(Objects::nonNull)
+//                        .map(User::getEmail)
+//                        .map(String::toLowerCase))
+//                .collect(Collectors.toSet());
+//    }
 
     private void mergeRoles(Map<String, Set<SimpleGrantedAuthority>> roles, Map<String, SimpleGrantedAuthority> newRoles) {
         for (Map.Entry<String, SimpleGrantedAuthority> role : newRoles.entrySet()) {

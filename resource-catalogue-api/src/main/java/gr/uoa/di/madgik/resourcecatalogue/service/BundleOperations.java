@@ -17,15 +17,15 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import org.springframework.security.core.Authentication;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public interface BundleOperations<T extends Bundle<?>> {
+public interface BundleOperations<T extends Bundle> {
 
     /**
      * Verify (approve/reject) a resource.
@@ -36,7 +36,7 @@ public interface BundleOperations<T extends Bundle<?>> {
      * @param auth   Authentication
      * @return {@link T}
      */
-    T verify(String id, String status, Boolean active, Authentication auth);
+    T setStatus(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Activate/Deactivate a resource
@@ -46,30 +46,7 @@ public interface BundleOperations<T extends Bundle<?>> {
      * @param auth   Authentication
      * @return {@link T}
      */
-    T publish(String id, Boolean active, Authentication auth);
-
-    /**
-     * Has an Authenticated User accepted the Terms & Conditions
-     *
-     * @param id             resource ID
-     * @param isDraft        boolean
-     * @param authentication Authentication
-     * @return <code>True</code> if Authenticated User has accepted Terms; <code>False</code> otherwise.
-     */
-    default boolean hasAdminAcceptedTerms(String id, boolean isDraft, Authentication authentication) {
-        return false;
-    }
-
-    /**
-     * Update a resource's list of Users that has accepted the Terms & Conditions
-     *
-     * @param id             resource ID
-     * @param isDraft        boolean
-     * @param authentication Authentication
-     */
-    default void adminAcceptedTerms(String id, boolean isDraft, Authentication authentication) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
+    T setActive(String id, Boolean active, Authentication auth);
 
     /**
      * Suspend the resource
@@ -80,7 +57,7 @@ public interface BundleOperations<T extends Bundle<?>> {
      * @param auth        Authentication
      * @return {@link T}
      */
-    T suspend(String id, String catalogueId, boolean suspend, Authentication auth);
+    T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth);
 
     /**
      * Audit the resource.

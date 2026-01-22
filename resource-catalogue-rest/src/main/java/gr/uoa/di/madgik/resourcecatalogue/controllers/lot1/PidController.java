@@ -47,7 +47,7 @@ public class PidController {
     @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
-        Bundle<?> bundle = pidService.get(prefix, suffix);
+        Bundle bundle = pidService.get(prefix, suffix);
         if (bundle != null) {
             return new ResponseEntity<>(bundle.getPayload(), HttpStatus.OK);
         }
@@ -59,7 +59,7 @@ public class PidController {
     public ResponseEntity<?> register(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                       @Parameter(description = "A list of resolve endpoints") @RequestParam(value = "resolveEndpoints", required = false) List<String> resolveEndpoints) {
-        Bundle<?> bundle = pidService.get(prefix, suffix);
+        Bundle bundle = pidService.get(prefix, suffix);
         if (bundle != null) {
             pidService.register(bundle.getId(), resolveEndpoints);
             return new ResponseEntity<>(null, HttpStatus.OK);
@@ -74,7 +74,7 @@ public class PidController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
-        Bundle<?> bundle = pidService.get(prefix, suffix);
+        Bundle bundle = pidService.get(prefix, suffix);
         if (bundle != null) {
             pidService.delete(bundle.getId());
             return new ResponseEntity<>(null, HttpStatus.OK);

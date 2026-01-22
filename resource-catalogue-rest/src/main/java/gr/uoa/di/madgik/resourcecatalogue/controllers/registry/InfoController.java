@@ -18,10 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,12 +43,12 @@ import java.util.Map;
 @Tag(name = "info", description = "Information about various resources in the Catalogue")
 public class InfoController {
 
-    private final ServiceBundleService serviceBundleService;
+    private final ServiceService serviceService;
     private final ProviderService providerService;
     private final SecurityService securityService;
 
-    InfoController(ServiceBundleService service, ProviderService provider, SecurityService securityService) {
-        this.serviceBundleService = service;
+    InfoController(ServiceService service, ProviderService provider, SecurityService securityService) {
+        this.serviceService = service;
         this.providerService = provider;
         this.securityService = securityService;
     }
@@ -65,7 +64,7 @@ public class InfoController {
         ff.addFilter("published", false);
         Authentication authentication = securityService.getAdminAccess();
         numberOfResources.put("providers", providerService.getAll(ff, authentication).getTotal());
-        numberOfResources.put("services", serviceBundleService.getAll(ff, authentication).getTotal());
+        numberOfResources.put("services", serviceService.getAll(ff, authentication).getTotal());
         return ResponseEntity.ok(numberOfResources);
     }
 
