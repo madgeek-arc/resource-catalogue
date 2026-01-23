@@ -43,7 +43,7 @@ import java.util.Map;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(path = "public provider", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public provider")
 public class PublicProviderController {
 

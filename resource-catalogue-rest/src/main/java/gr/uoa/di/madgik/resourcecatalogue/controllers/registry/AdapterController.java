@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -24,9 +23,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -45,7 +42,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 @Profile("beyond")
 @RestController
@@ -55,7 +53,6 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
 
     private static final Logger logger = LoggerFactory.getLogger(AdapterController.class);
 
-    private final GenericResourceService genericResourceService;
 
     @Value("${auditing.interval:6}")
     private int auditingInterval;
@@ -63,10 +60,8 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public AdapterController(AdapterService adapterService,
-                             GenericResourceService genericResourceService) {
+    public AdapterController(AdapterService adapterService) {
         super(adapterService, "Adapter");
-        this.genericResourceService = genericResourceService;
     }
 
     //region generic
@@ -82,9 +77,9 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<AdapterBundle> getAdapterBundle(@PathVariable String prefix,
-                                                          @PathVariable String suffix,
-                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<AdapterBundle> getBundle(@PathVariable String prefix,
+                                                   @PathVariable String suffix,
+                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         AdapterBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
@@ -102,7 +97,6 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         Paging<AdapterBundle> paging = service.getAll(ff, auth);
-        logger.info("service");
         return ResponseEntity.ok(paging.map(AdapterBundle::getAdapter));
     }
 
@@ -123,13 +117,25 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
         return ResponseEntity.ok(paging);
     }
 
-    @Operation(summary = "Returns all Adapter's of a User.")
+    @Operation(summary = "Returns all Adapter of a User.")
     @GetMapping(path = "getMy")
     public ResponseEntity<List<AdapterBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
                                                      @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", draft);
         return new ResponseEntity<>(service.getMy(ff, auth).getResults(), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get a random Paging of Adapters")
+    @Parameters({
+            @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
+    })
+    @GetMapping(path = "random")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<AdapterBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
+                                                           @Parameter(hidden = true) Authentication auth) {
+        Paging<AdapterBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+        return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 
     @Operation(summary = "Adds a new Adapter.")
@@ -281,95 +287,6 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @PutMapping(path = "adminAcceptedTerms")
     public void adminAcceptedTerms(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
         service.adminAcceptedTerms(id, auth);
-    }
-
-    // front-end use
-    @Hidden
-    @GetMapping(path = {"linkedResourceServiceMapDetails"})
-    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue>>>
-    linkedResourceServiceMapDetails(@RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
-        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue>> ret = new HashMap<>();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> allResources = new ArrayList<>();
-        // fetch catalogueId related non-public Resources
-
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> catalogueRelatedServices = genericResourceService
-                .getResults(createFacetFilter(catalogueId, false, "approved",
-                        "service")).getResults()
-                .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
-                        (String) c.getService().get("name"), "Service"))
-                .toList();
-        // fetch non-catalogueId related public Resources
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> publicServices = genericResourceService
-                .getResults(createFacetFilter(catalogueId, true, "approved",
-                        "service")).getResults()
-                .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .filter(c -> !c.getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
-                        (String) c.getService().get("name"), "Service"))
-                .toList();
-
-        allResources.addAll(catalogueRelatedServices);
-        allResources.addAll(publicServices);
-
-        //sort
-        allResources.sort(Comparator.comparing(gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue::getName, String.CASE_INSENSITIVE_ORDER));
-
-        ret.put("SERVICES_VOC", allResources);
-
-        return ResponseEntity.ok(ret);
-    }
-
-    //FIXME
-//    @Hidden
-//    @GetMapping(path = {"linkedResourceGuidelineMapDetails"})
-//    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue>>>
-//    linkedResourceGuidelineMapDetails(@RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
-//        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue>> ret = new HashMap<>();
-//        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> allResources = new ArrayList<>();
-//        // fetch catalogueId related non-public Resources
-//
-//        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> catalogueRelatedGuidelines = genericResourceService
-//                .getResults(createFacetFilter(catalogueId, false, "approved",
-//                        "interoperability_record")).getResults()
-//                .stream().map(guidelineBundle -> (InteroperabilityRecordBundle) guidelineBundle)
-//                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
-//                        c.getInteroperabilityRecord().getTitle(), "Guideline"))
-//                .toList();
-//        // fetch non-catalogueId related public Resources
-//        List<gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue> publicGuidelines = genericResourceService
-//                .getResults(createFacetFilter(catalogueId, true, "approved",
-//                        "interoperability_record")).getResults()
-//                .stream().map(guidelineBundle -> (InteroperabilityRecordBundle) guidelineBundle)
-//                .filter(c -> !c.getInteroperabilityRecord().getCatalogueId().equals(catalogueId))
-//                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue(c.getId(),
-//                        c.getInteroperabilityRecord().getTitle(), "Guideline"))
-//                .toList();
-//
-//        allResources.addAll(catalogueRelatedGuidelines);
-//        allResources.addAll(publicGuidelines);
-//
-//        //sort
-//        allResources.sort(Comparator.comparing(gr.uoa.di.madgik.resourcecatalogue.dto.ParentValue::getName, String.CASE_INSENSITIVE_ORDER));
-//
-//        ret.put("GUIDELINES_VOC", allResources);
-//
-//        return ResponseEntity.ok(ret);
-//    }
-
-    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String status, String resourceType) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("status", status);
-        ff.addFilter("active", true);
-        if (isPublic) {
-            ff.addFilter("published", true);
-        } else {
-            ff.addFilter("catalogue_id", catalogueId);
-            ff.addFilter("published", false);
-        }
-        ff.setResourceType(resourceType);
-        return ff;
     }
     //endregion
 

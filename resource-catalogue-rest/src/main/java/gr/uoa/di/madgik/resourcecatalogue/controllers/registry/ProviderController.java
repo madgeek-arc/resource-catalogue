@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 
-@Profile("crud")
+@Profile("beyond")
 @RestController
 @RequestMapping(path = "provider", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "provider")
@@ -72,8 +72,8 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
     //region generic
     @Operation(summary = "Returns the Provider with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') || " +
-            "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix) || " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix) or " +
             "@securityService.isApprovedProvider(#prefix, #suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
@@ -145,7 +145,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
         return ResponseEntity.ok(paging);
     }
 
-    @Operation(summary = "Returns all Provider's of a User.")
+    @Operation(summary = "Returns all Providers of a User.")
     @GetMapping(path = "getMy")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ProviderBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
@@ -367,15 +367,6 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
 //        NewProviderBundle bundle = migrationService.changeProviderCatalogue(providerId, catalogueId, newCatalogueId, auth);
 //        return ResponseEntity.ok(bundle);
         return null;
-    }
-
-    // front-end use (Provider form)
-    @Hidden
-    @GetMapping(path = {"providerIdToNameMap"})
-    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> getProviderIdToNameMap(@RequestParam String catalogueId) {
-        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret =
-                service.getProviderIdToNameMap(catalogueId);
-        return ResponseEntity.ok(ret);
     }
     //endregion
 

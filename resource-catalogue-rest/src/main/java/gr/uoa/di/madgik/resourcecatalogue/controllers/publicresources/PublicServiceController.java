@@ -27,7 +27,7 @@ import java.util.Map;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(path = "public service", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public service")
 public class PublicServiceController {
 

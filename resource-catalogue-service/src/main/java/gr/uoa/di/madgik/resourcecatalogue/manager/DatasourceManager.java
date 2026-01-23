@@ -241,8 +241,8 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     //region EOSC Service-specific
     @Override
-    public Paging<DatasourceBundle> getAllEOSCServicesOfAProvider(String providerId, String catalogueId,
-                                                                  int quantity, Authentication auth) {
+    public Paging<DatasourceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
+                                                                   int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("service_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
@@ -253,7 +253,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         return getAll(ff, auth);
     }
 
-    public void sendEmailNotificationToProviderForOutdatedEOSCService(String id, Authentication auth) {
+    public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         DatasourceBundle datasource = get(id);
         ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
                 datasource.getCatalogueId());
@@ -299,7 +299,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     @Override
-    public Bundle getServiceTemplate(String providerId, Authentication auth) {
+    public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("service_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);

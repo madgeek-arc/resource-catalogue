@@ -288,7 +288,7 @@ public class CatalogueController {
 
     @BrowseParameters
     @Operation(description = "Get a list of all Providers in the specific Catalogue.")
-    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "{catalogueId}/provider/all")
     public ResponseEntity<Paging<?>> getAllCatalogueProviders(@Parameter(hidden = true)
                                                               @RequestParam MultiValueMap<String, Object> params,
@@ -665,7 +665,7 @@ public class CatalogueController {
 
     @BrowseParameters
     @Operation(description = "Get a list of all Adapters in the specific Catalogue.")
-    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "{catalogueId}/adapter/all")
     public ResponseEntity<Paging<?>> getAllCatalogueAdapters(@Parameter(hidden = true)
                                                              @RequestParam MultiValueMap<String, Object> params,

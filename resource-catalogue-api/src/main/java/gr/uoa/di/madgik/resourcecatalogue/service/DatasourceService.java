@@ -16,13 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import org.springframework.security.core.Authentication;
 
 public interface DatasourceService extends ResourceCatalogueGenericService<DatasourceBundle>,
-        EOSCServiceService<DatasourceBundle>, DraftService<DatasourceBundle> {
+        EOSCResourceService<DatasourceBundle>, TemplateOnboardingService, DraftService<DatasourceBundle> {
 
 //    /**
 //     * Get the Datasource sub-profile of the specific Service of the specific Catalogue

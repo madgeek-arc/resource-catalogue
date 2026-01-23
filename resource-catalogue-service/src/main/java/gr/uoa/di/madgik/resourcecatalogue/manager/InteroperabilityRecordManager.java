@@ -41,8 +41,8 @@
 //import java.util.List;
 //
 //@org.springframework.stereotype.Service("interoperabilityRecordManager")
-//public class InteroperabilityRecordManager extends ResourceCatalogueManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
-//
+//public class InteroperabilityRecordManager extends ResourceCatalogueGenericManager<InteroperabilityRecordBundle> implements InteroperabilityRecordService {
+
 //    private static final Logger logger = LoggerFactory.getLogger(InteroperabilityRecordManager.class);
 //    private final ProviderService providerService;
 //    private final IdCreator idCreator;
