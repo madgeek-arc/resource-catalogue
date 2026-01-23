@@ -195,7 +195,7 @@
 //        return ResponseEntity.ok(trainingResourceService.getByIds(auth, ids));
 //    }
 //
-//    @GetMapping(path = "getMyTrainingResources", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    public ResponseEntity<List<TrainingResourceBundle>> getMyTrainingResources(@Parameter(hidden = true) Authentication auth) {
 //        return new ResponseEntity<>(trainingResourceService.getMy(null, auth).getResults(), HttpStatus.OK);
 //    }
@@ -236,6 +236,7 @@
 //        return ResponseEntity.ok(paging);
 //    }
 //
+      //TODO: remove, this Controller should be only for default catalogue. Ask front
 //    @BrowseParameters
 //    @GetMapping(path = "byCatalogue/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")

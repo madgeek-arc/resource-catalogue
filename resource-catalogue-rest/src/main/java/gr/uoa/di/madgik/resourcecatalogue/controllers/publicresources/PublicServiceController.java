@@ -58,6 +58,7 @@ public class PublicServiceController {
                 "The specific Service does not consist a Public entity"));
     }
 
+    //TODO: change path -> notify cyf
     @GetMapping(path = "public/service/infraService/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
@@ -73,7 +74,7 @@ public class PublicServiceController {
     @Operation(description = "Get a list of all Public Services in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/service/all")
     public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
@@ -84,9 +85,10 @@ public class PublicServiceController {
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
+    //TODO: change path -> notify cyf
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/service/adminPage/all") //TODO: rename this ugliness - SOS external teams use it SOS
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)

@@ -69,11 +69,11 @@ public class PostProcessingAspect {
             notifyProviderAdminsForProviderDeletionAspect(bundle);
         });
         aspectRegistry.put("AfterServiceUpdateEmails", obj -> {
-            if (!(obj instanceof ServiceBundle bundle)) {
+            if (!(obj instanceof ServiceBundle) && !(obj instanceof DatasourceBundle)) {
                 logger.debug("Skipping AfterServiceUpdateEmails – object is {}", obj.getClass());
                 return;
             }
-            notifyPortalAdminsForInvalidServiceUpdateAspect(bundle);
+            notifyPortalAdminsForInvalidResourceUpdateAspect((Bundle) obj);
         });
     }
 
@@ -225,7 +225,7 @@ public class PostProcessingAspect {
 //        emailService.notifyProviderAdminsForProviderDeletion(bundle); //TODO: fix & enable
     }
 
-    private void notifyPortalAdminsForInvalidServiceUpdateAspect(ServiceBundle bundle) {
+    private void notifyPortalAdminsForInvalidResourceUpdateAspect(Bundle bundle) {
         if (bundle.getLatestAuditInfo() != null && bundle.getLatestUpdateInfo() != null) {
             long latestAudit = Long.parseLong(bundle.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(bundle.getLatestUpdateInfo().getDate());

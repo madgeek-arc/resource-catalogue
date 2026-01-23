@@ -25,7 +25,10 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -66,7 +69,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           SecurityService securityService,
                           VocabularyService vocabularyService,
                           ProviderResourcesCommonMethods commonMethods,
-                          SynchronizerService<Service> synchronizerService,
 //                          @Qualifier("serviceValidator") Validator serviceValidator,
                           FacetLabelService facetLabelService,
                           GenericResourceService genericResourceService,
@@ -150,7 +152,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
         try {
             return genericResourceService.update(getResourceTypeName(), service.getId(), service);
-//            synchronizerService.syncUpdate(service.getService()); // TODO: remove this?
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -240,10 +241,10 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
     //endregion
 
-    //region Service-specific
+    //region EOSC Service-specific
     @Override
-    public Paging<ServiceBundle> getAllServicesOfAProvider(String providerId, String catalogueId,
-                                                           int quantity, Authentication auth) {
+    public Paging<ServiceBundle> getAllEOSCServicesOfAProvider(String providerId, String catalogueId,
+                                                               int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("service_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
@@ -254,7 +255,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         return getAll(ff, auth);
     }
 
-    public void sendEmailNotificationToProviderForOutdatedService(String id, Authentication auth) {
+    public void sendEmailNotificationToProviderForOutdatedEOSCService(String id, Authentication auth) {
         ServiceBundle service = get(id);
         ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
@@ -377,73 +378,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         }
         return null;
     }
-
-    //TODO: find usages or delete
-//    @Override
-//    protected Browsing<ServiceBundle> getResults(FacetFilter filter) {
-//        Browsing<ServiceBundle> browsing;
-//        filter.setResourceType(getResourceTypeName());
-//        browsing = super.getResults(filter);
-//
-//        browsing.setFacets(createCorrectFacets(browsing.getFacets(), filter));
-//        return browsing;
-//    }
-//
-    //TODO: find usages or delete
-//    public List<Facet> createCorrectFacets(List<Facet> serviceFacets, FacetFilter ff) {
-//        ff.setQuantity(0);
-//
-//        Map<String, List<Object>> allFilters = ff.getFilterLists();
-//
-//        List<String> reverseOrderedKeys = new LinkedList<>(allFilters.keySet());
-//        Collections.reverse(reverseOrderedKeys);
-//
-//        for (String filterKey : reverseOrderedKeys) {
-//            Map<String, List<Object>> someFilters = new LinkedHashMap<>(allFilters);
-//
-//            // if last filter is "active" continue to next iteration
-//            if ("active".equals(filterKey)) {
-//                continue;
-//            }
-//            someFilters.remove(filterKey);
-//
-//            FacetFilter facetFilter = FacetFilter.from(someFilters);
-//            facetFilter.setResourceType(getResourceTypeName());
-//            facetFilter.setBrowseBy(Collections.singletonList(filterKey));
-//            List<Facet> facetsCategory = getResults(facetFilter).getFacets(); // CORRECT FACETS ?
-//
-//            for (Facet facet : serviceFacets) {
-//                if (facet.getField().equals(filterKey)) {
-//                    for (Facet facetCategory : facetsCategory) {
-//                        if (facetCategory.getField().equals(facet.getField())) {
-//                            serviceFacets.set(serviceFacets.indexOf(facet), facetCategory);
-//                            break;
-//                        }
-//                    }
-//                    break;
-//                }
-//            }
-//            break;
-//        }
-//
-//        return removeEmptyFacets(serviceFacets);
-//    }
-//
-//    private List<Facet> removeEmptyFacets(List<Facet> facetList) {
-//        return facetList.stream().filter(facet -> !facet.getValues().isEmpty()).toList();
-//    }
-
-
-//    private void updateFacetFilterConsideringTheAuthorization(FacetFilter filter, Authentication auth) {
-//        // if user is Unauthorized, return active ONLY
-//        if (auth == null || !auth.isAuthenticated() || (
-//                !securityService.hasRole(auth, "ROLE_PROVIDER") &&
-//                        !securityService.hasRole(auth, "ROLE_EPOT") &&
-//                        !securityService.hasRole(auth, "ROLE_ADMIN"))) {
-//            filter.addFilter("active", true);
-//            filter.addFilter("published", false);
-//        }
-//    }
     //endregion
 
     //region Drafts

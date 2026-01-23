@@ -19,7 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import org.springframework.security.core.Authentication;
 
-public interface DraftTestResourceService<T extends Bundle> {
+public interface DraftService<T extends Bundle> {
 
     /**
      * Adds a new Draft resource

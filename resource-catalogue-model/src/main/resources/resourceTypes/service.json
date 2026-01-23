@@ -16,6 +16,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.service.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Service Name",
       "multivalued": false,
       "name": "name",
@@ -338,6 +345,7 @@
   "aliases": [
     "resourceTypes",
     "services",
+    "eoscServices",
     "eoscResources"
   ],
   "name": "service",

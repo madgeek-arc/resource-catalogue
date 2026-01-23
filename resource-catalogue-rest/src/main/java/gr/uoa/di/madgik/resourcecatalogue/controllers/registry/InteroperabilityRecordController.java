@@ -168,7 +168,7 @@
 //    }
 //
 //    @Tag(name = "InteroperabilityRecordRead")
-//    @GetMapping(path = "getMyInteroperabilityRecords", produces = {MediaType.APPLICATION_JSON_VALUE})
+//    @GetMapping(path = "getMy", produces = {MediaType.APPLICATION_JSON_VALUE})
 //    public ResponseEntity<List<InteroperabilityRecordBundle>> getMyInteroperabilityRecords(@Parameter(hidden = true) Authentication auth) {
 //        return new ResponseEntity<>(interoperabilityRecordService.getMy(null, auth).getResults(), HttpStatus.OK);
 //    }
