@@ -19,12 +19,12 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 
 public interface InteroperabilityRecordService extends ResourceCatalogueGenericService<InteroperabilityRecordBundle>,
-        EOSCResourceService<InteroperabilityRecordBundle>, TemplateOnboardingService, DraftService<InteroperabilityRecordBundle> {
+        EOSCResourceService<InteroperabilityRecordBundle>, DraftService<InteroperabilityRecordBundle> {
 
-//    /**
-//     * Get the EOSC Monitoring Guideline
-//     *
-//      * @return {@link InteroperabilityRecordBundle}
-//     */
-//    InteroperabilityRecordBundle getEOSCMonitoringGuideline();
+    /**
+     * Get the EOSC Monitoring Guideline
+     *
+      * @return {@link InteroperabilityRecordBundle}
+     */
+    InteroperabilityRecordBundle getEOSCMonitoringGuideline();
 }

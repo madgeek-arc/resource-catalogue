@@ -239,7 +239,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
     //endregion
 
-    //region EOSC Service-specific
+    //region EOSC Resource-specific
     @Override
     public Paging<DatasourceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                    int quantity, Authentication auth) {

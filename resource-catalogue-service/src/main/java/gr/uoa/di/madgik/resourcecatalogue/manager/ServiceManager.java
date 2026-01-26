@@ -48,7 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-@org.springframework.stereotype.Service
+@org.springframework.stereotype.Service("serviceManager")
 public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundle> implements ServiceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
@@ -244,7 +244,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
     //endregion
 
-    //region EOSC Service-specific
+    //region EOSC Resource-specific
     @Override
     public Paging<ServiceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                 int quantity, Authentication auth) {
@@ -360,7 +360,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
-
                 })
                 .filter(Objects::nonNull)
                 .toList();

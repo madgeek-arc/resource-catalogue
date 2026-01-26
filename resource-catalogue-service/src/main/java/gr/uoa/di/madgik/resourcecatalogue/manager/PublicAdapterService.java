@@ -18,8 +18,12 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
+import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -31,14 +35,20 @@ import java.util.Map;
 public class PublicAdapterService extends AbstractPublicResourceManager<AdapterBundle> {
 
     private final ServiceService serviceService;
+    private final DatasourceService datasourceService;
+    private final InteroperabilityRecordService guidelineService;
 
     public PublicAdapterService(GenericResourceService genericResourceService,
                                 JmsService jmsService,
                                 PidIssuer pidIssuer,
                                 FacetLabelService facetLabelService,
-                                ServiceService serviceService) {
+                                ServiceService serviceService,
+                                DatasourceService datasourceService,
+                                InteroperabilityRecordService guidelineService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
         this.serviceService = serviceService;
+        this.datasourceService = datasourceService;
+        this.guidelineService = guidelineService;
     }
 
     @Override
@@ -46,31 +56,42 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
         return "adapter";
     }
 
+    //TODO: test me
+    @SuppressWarnings("unchecked")
     public void updateIdsToPublic(AdapterBundle adapter) {
-        Object linkedResourceObj = adapter.getAdapter().get("linkedResource");
-        if (!(linkedResourceObj instanceof Map<?, ?> linkedResource)) {
+        Map<String, Object> adapterMap = adapter.getAdapter();
+        if (adapterMap == null) {
+            return;
+        }
+        Object linkedResourceObj = adapterMap.get("linkedResource");
+        if (!(linkedResourceObj instanceof Map)) {
             return;
         }
 
-        String linkedResourceType = (String) linkedResource.get("type");
-        String linkedResourceId = (String) linkedResource.get("id");
-        if (linkedResourceType == null || linkedResourceId == null) {
+        Map<String, Object> linkedResource = (Map<String, Object>) linkedResourceObj;
+        Object typeObj = linkedResource.get("type");
+        Object idObj = linkedResource.get("id");
+        if (!(typeObj instanceof String) || !(idObj instanceof String)) {
             return;
         }
+        String type = (String) typeObj;
+        String id = (String) idObj;
 
         String publicId;
-        if ("service".equalsIgnoreCase(linkedResourceType)) {
-            ServiceBundle service = serviceService.get(linkedResourceId, adapter.getCatalogueId());
-            publicId = service.getIdentifiers().getPid();
-        } else if ("datasource".equalsIgnoreCase(linkedResourceType)) {
-            //FIXME
-//            InteroperabilityRecordBundle guideline = interoperabilityRecordService.get(linkedResourceId, adapter.getCatalogueId());
-//            publicId = guideline.getIdentifiers().getPid();
-        } else {
-            return;
+        switch (type.toLowerCase()) {
+            case "service" -> {
+                ServiceBundle service = serviceService.get(id, adapter.getCatalogueId());
+                publicId = service.getIdentifiers().getPid();
+            }
+            case "datasource" -> {
+                DatasourceBundle datasource = datasourceService.get(id, adapter.getCatalogueId());
+                publicId = datasource.getIdentifiers().getPid();
+            }
+            default -> {
+                InteroperabilityRecordBundle guideline = guidelineService.get(id, adapter.getCatalogueId());
+                publicId = guideline.getIdentifiers().getPid();
+            }
         }
-
-//        linkedResource.put("id", publicId); //FIXME
+        linkedResource.put("id", publicId);
     }
-
 }
