@@ -16,10 +16,31 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Provider ID",
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.interoperabilityRecord.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Interoperability Record Name",
       "multivalued": false,
-      "name": "provider_id",
-      "path": "$.interoperabilityRecord.providerId",
+      "name": "name",
+      "path": "$.interoperabilityRecord.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Description",
+      "multivalued": false,
+      "name": "description",
+      "path": "$.interoperabilityRecord.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.interoperabilityRecord.alternativePIDs[*].pid",
       "type": "java.lang.String"
     },
     {
@@ -30,17 +51,17 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Title",
+      "label": "Type",
       "multivalued": false,
-      "name": "title",
-      "path": "$.interoperabilityRecord.title",
+      "name": "entity_type",
+      "path": "$.interoperabilityRecord.type",
       "type": "java.lang.String"
     },
     {
-      "label": "Alternative Identifier Value",
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "path": "$.interoperabilityRecord.alternativeIdentifiers[*].value",
+      "label": "Service Owner",
+      "multivalued": false,
+      "name": "service_owner",
+      "path": "$.interoperabilityRecord.serviceOwner",
       "type": "java.lang.String"
     },
     {
@@ -211,7 +232,7 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "guidelines"
+    "eoscResources"
   ],
   "name": "interoperability_record",
   "payloadType": "json",

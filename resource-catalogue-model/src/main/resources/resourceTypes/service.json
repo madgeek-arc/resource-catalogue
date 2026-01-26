@@ -37,13 +37,6 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Webpage",
-      "multivalued": false,
-      "name": "webpage",
-      "path": "$.service.webpage",
-      "type": "java.lang.String"
-    },
-    {
       "label": "Alternative PIDs",
       "multivalued": true,
       "name": "alternative_pids",
@@ -76,6 +69,13 @@
       "multivalued": true,
       "name": "service_providers",
       "path": "$.service.serviceProviders[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Webpage",
+      "multivalued": false,
+      "name": "webpage",
+      "path": "$.service.webpage",
       "type": "java.lang.String"
     },
     {
@@ -344,7 +344,6 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "services",
     "eoscServices",
     "eoscResources"
   ],

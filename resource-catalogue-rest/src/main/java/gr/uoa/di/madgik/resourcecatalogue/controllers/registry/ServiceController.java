@@ -187,7 +187,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Operation(summary = "Adds a new Service.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #service, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #serviceMap, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                  @Parameter(hidden = true) Authentication auth) {
         ServiceBundle bundle = new ServiceBundle();

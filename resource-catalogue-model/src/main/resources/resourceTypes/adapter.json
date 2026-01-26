@@ -51,6 +51,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Type",
+      "multivalued": false,
+      "name": "entity_type",
+      "path": "$.datasource.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Service Owner",
+      "multivalued": false,
+      "name": "service_owner",
+      "path": "$.datasource.serviceOwner",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Linked Resource ID",
       "multivalued": false,
       "name": "linked_resource_id",
@@ -295,7 +309,6 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "adapters",
     "eoscResources"
   ],
   "name": "adapter",
