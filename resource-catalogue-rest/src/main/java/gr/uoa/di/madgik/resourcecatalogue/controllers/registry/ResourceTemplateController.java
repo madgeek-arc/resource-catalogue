@@ -17,9 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.TemplateOnboardingService;
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
@@ -29,27 +28,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Objects;
+
 @Hidden
 @Profile("beyond")
 @RestController
-@RequestMapping({"resourceTemplateBundles"})
+@RequestMapping(path = "resourceTemplate", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "resource template", description = "Operations for Provider Templates")
-public class ResourceTemplateBundleController {
+public class ResourceTemplateController {
 
-    private final ServiceService serviceService;
+    private final List<TemplateOnboardingService> onboardingServices;
 
-    public ResourceTemplateBundleController(ServiceService serviceService) {
-        this.serviceService = serviceService;
+    public ResourceTemplateController(List<TemplateOnboardingService> onboardingServices) {
+        this.onboardingServices = onboardingServices;
     }
 
-    // Get the Provider's Template (status = "pending" or "rejected")
-    @GetMapping(path = {"templates"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Bundle getProviderTemplate(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
-        Bundle template = serviceService.getServiceTemplate(id, auth);
-        //FIXME
-//        if (template == null) {
-//            template = trainingResourceService.getResourceTemplate(id, auth);
-//        }
-        return template;
+    @GetMapping("templates")
+    public Bundle getProviderTemplate(@RequestParam String id, Authentication auth) {
+        return onboardingServices.stream()
+                .map(s -> s.getTemplate(id, auth))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 }

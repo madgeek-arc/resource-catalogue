@@ -43,7 +43,7 @@ import java.util.Map;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(path = "public provider", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public provider")
 public class PublicProviderController {
 
@@ -105,7 +105,7 @@ public class PublicProviderController {
     @GetMapping(path = "public/provider/bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                   @RequestParam MultiValueMap<String, Object> params) {
+                                                                @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", true);
         ff.addFilter("active", true);

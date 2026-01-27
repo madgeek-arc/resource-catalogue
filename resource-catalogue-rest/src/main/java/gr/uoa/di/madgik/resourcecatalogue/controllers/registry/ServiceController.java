@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -26,7 +25,6 @@ import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -45,7 +43,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Profile("beyond")
@@ -56,26 +55,22 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
 
-    private final GenericResourceService genericResourceService;
-
     @Value("${auditing.interval:6}")
     private int auditingInterval;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    ServiceController(ServiceService serviceService,
-                      GenericResourceService genericResourceService) {
+    ServiceController(ServiceService serviceService) {
         super(serviceService, "Service");
-        this.genericResourceService = genericResourceService;
     }
 
     //region generic
     @Tag(name = "ServiceRead")
     @Operation(summary = "Returns the Service with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') || " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) || " +
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
             "@securityService.serviceIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
@@ -109,7 +104,6 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         Paging<ServiceBundle> paging = service.getAll(ff, auth);
-        logger.info("service");
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
@@ -167,7 +161,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     }
 
     @Tag(name = "ServiceRead")
-    @Operation(summary = "Returns all Services's of a User.")
+    @Operation(summary = "Returns all Services of a User.")
     @GetMapping(path = "getMy")
     public ResponseEntity<List<ServiceBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
                                                      @Parameter(hidden = true) Authentication auth) {
@@ -193,7 +187,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Operation(summary = "Adds a new Service.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #service, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #serviceMap, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                  @Parameter(hidden = true) Authentication auth) {
         ServiceBundle bundle = new ServiceBundle();
@@ -345,8 +339,8 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceRead")
     @Operation(summary = "Get a list of Services based on a set of ids.")
     @GetMapping(path = "ids")
-    public ResponseEntity<List<LinkedHashMap<String, Object>>> getSomeServices(@RequestParam("ids") String[] ids,
-                                                                               @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<List<LinkedHashMap<String, Object>>> getSome(@RequestParam("ids") String[] ids,
+                                                                       @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(service.getByIds(auth, ids)
                 .stream()
                 .map(ServiceBundle::getService)
@@ -357,26 +351,26 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @BrowseParameters
     @GetMapping(path = "byProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
-    public ResponseEntity<Paging<ServiceBundle>> getServicesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
-                                                                       @PathVariable String prefix,
-                                                                       @PathVariable String suffix,
-                                                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Paging<ServiceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
+                                                               @PathVariable String prefix,
+                                                               @PathVariable String suffix,
+                                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                               @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("service_owner", id);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        return new ResponseEntity<>(service.getAllEOSCServicesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK);
+        return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK);
     }
 
     @Tag(name = "ServiceRead")
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "inactive/all")
-    public ResponseEntity<Paging<?>> getInactiveServices(@Parameter(hidden = true)
-                                                         @RequestParam MultiValueMap<String, Object> params) {
+    public ResponseEntity<Paging<?>> getInactive(@Parameter(hidden = true)
+                                                 @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -409,7 +403,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                                                   @PathVariable String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        service.sendEmailNotificationToProviderForOutdatedEOSCService(id, auth);
+        service.sendEmailNotificationToProviderForOutdatedEOSCResource(id, auth);
     }
 
     //FIXME
@@ -422,66 +416,6 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 //                               @Parameter(hidden = true) Authentication authentication) {
 //        service.changeProvider(resourceId, newProvider, comment, authentication);
 //    }
-
-    //TODO: populate with Datasources and move somewhere else
-    // front-end use (Service/Datasource/TR forms)
-    @Tag(name = "ServiceRead")
-    @Hidden
-    @GetMapping(path = {"resourceIdToNameMap"})
-    public ResponseEntity<Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>>> resourceIdToNameMap(@RequestParam String catalogueId) {
-        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = new ArrayList<>();
-        // fetch catalogueId related non-public Resources
-
-        //FIXME
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedServices = genericResourceService
-                .getResults(createFacetFilter(catalogueId, false, "service")).getResults()
-                .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), (String) c.getService().get("name")))
-                .toList();
-//        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedTrainingResources = genericResourceService
-//                .getResults(createFacetFilter(catalogueId, false, "training_resource")).getResults()
-//                .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
-//                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
-//                .toList();
-//        // fetch non-catalogueId related public Resources
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicServices = genericResourceService
-                .getResults(createFacetFilter(catalogueId, true, "service")).getResults()
-                .stream().map(serviceBundle -> (ServiceBundle) serviceBundle)
-                .filter(c -> !c.getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), (String) c.getService().get("name")))
-                .toList();
-//        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicTrainingResources = genericResourceService
-//                .getResults(createFacetFilter(catalogueId, true, "training_resource")).getResults()
-//                .stream().map(trainingResourceBundle -> (TrainingResourceBundle) trainingResourceBundle)
-//                .filter(c -> !c.getTrainingResource().getCatalogueId().equals(catalogueId))
-//                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(c.getId(), c.getTrainingResource().getTitle()))
-//                .toList();
-
-        allResources.addAll(catalogueRelatedServices);
-//        allResources.addAll(catalogueRelatedTrainingResources);
-        allResources.addAll(publicServices);
-//        allResources.addAll(publicTrainingResources);
-        ret.put("RESOURCES_VOC", allResources);
-
-        return ResponseEntity.ok(ret);
-    }
-
-    //FIXME: FacetFilters reset after each search.
-    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        ff.addFilter("status", "approved");
-        ff.addFilter("active", true);
-        if (isPublic) {
-            ff.addFilter("published", true);
-        } else {
-            ff.addFilter("catalogue_id", catalogueId);
-            ff.addFilter("published", false);
-        }
-        ff.setResourceType(resourceType);
-        return ff;
-    }
     //endregion
 
     //region Drafts

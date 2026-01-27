@@ -48,7 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-@org.springframework.stereotype.Service
+@org.springframework.stereotype.Service("serviceManager")
 public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundle> implements ServiceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
@@ -241,10 +241,10 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
     //endregion
 
-    //region EOSC Service-specific
+    //region EOSC Resource-specific
     @Override
-    public Paging<ServiceBundle> getAllEOSCServicesOfAProvider(String providerId, String catalogueId,
-                                                               int quantity, Authentication auth) {
+    public Paging<ServiceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
+                                                                int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("service_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
@@ -255,7 +255,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         return getAll(ff, auth);
     }
 
-    public void sendEmailNotificationToProviderForOutdatedEOSCService(String id, Authentication auth) {
+    public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         ServiceBundle service = get(id);
         ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
                 service.getCatalogueId());
@@ -357,7 +357,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
-
                 })
                 .filter(Objects::nonNull)
                 .toList();
@@ -365,7 +364,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     @Override
-    public Bundle getServiceTemplate(String providerId, Authentication auth) {
+    public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("service_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);

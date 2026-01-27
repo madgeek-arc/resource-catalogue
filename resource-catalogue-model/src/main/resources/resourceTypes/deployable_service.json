@@ -9,10 +9,59 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Name",
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.deployableService.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Deployable Service Name",
       "multivalued": false,
       "name": "name",
       "path": "$.deployableService.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Description",
+      "multivalued": false,
+      "name": "description",
+      "path": "$.deployableService.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.deployableService.alternativePIDs[*].pid",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.deployableService.node",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Type",
+      "multivalued": false,
+      "name": "entity_type",
+      "path": "$.deployableService.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Service Owner",
+      "multivalued": false,
+      "name": "service_owner",
+      "path": "$.deployableService.serviceOwner",
       "type": "java.lang.String"
     },
     {
@@ -23,24 +72,17 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Resource Organisation",
+      "label": "Tagline",
       "multivalued": false,
-      "name": "resource_organisation",
-      "path": "$.deployableService.resourceOrganisation",
+      "name": "tagline",
+      "path": "$.deployableService.tagline",
       "type": "java.lang.String"
     },
     {
-      "label": "Catalogue ID",
+      "label": "Logo",
       "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.deployableService.catalogueId",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Node",
-      "multivalued": false,
-      "name": "node",
-      "path": "$.deployableService.node",
+      "name": "logo",
+      "path": "$.service.logo",
       "type": "java.lang.String"
     },
     {
@@ -58,24 +100,31 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Description",
-      "multivalued": false,
-      "name": "description",
-      "path": "$.deployableService.description",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Tagline",
-      "multivalued": false,
-      "name": "tagline",
-      "path": "$.deployableService.tagline",
-      "type": "java.lang.String"
-    },
-    {
       "label": "Tag",
       "multivalued": true,
       "name": "tags",
       "path": "$.deployableService.tags[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Version",
+      "multivalued": false,
+      "name": "version",
+      "path": "$.deployableService.version",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Last Update",
+      "multivalued": false,
+      "name": "last_update",
+      "path": "$.deployableService.lastUpdate",
+      "type": "java.util.Date"
+    },
+    {
+      "label": "Software License",
+      "multivalued": false,
+      "name": "software_license",
+      "path": "$.deployableService.softwareLicense",
       "type": "java.lang.String"
     },
     {
@@ -238,7 +287,7 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "services"
+    "eoscResources"
   ],
   "name": "deployable_service",
   "payloadType": "json",

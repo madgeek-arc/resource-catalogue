@@ -16,15 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
-import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ProviderService extends ResourceCatalogueGenericService<ProviderBundle>,
         DraftService<ProviderBundle>, TermsService {
@@ -53,11 +50,4 @@ public interface ProviderService extends ResourceCatalogueGenericService<Provide
      * @return {@link List}&lt;{@link MapValues}&lt;{@link CatalogueValue}&gt;&gt;
      */
     List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
-
-    /**
-     *
-     * @param catalogueId catalogue ID
-     * @return {@link Map<>}
-     */
-    Map<String, List<Value>> getProviderIdToNameMap(String catalogueId);
 }

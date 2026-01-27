@@ -43,7 +43,7 @@ import java.util.Map;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(path = "public datasource", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public datasource")
 public class PublicDatasourceController {
 
@@ -74,8 +74,8 @@ public class PublicDatasourceController {
 
     //TODO: change path -> notify cyf
     @GetMapping(path = "public/datasource/datasourceBundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
-            "or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,

@@ -128,8 +128,8 @@
 //
 //    @Operation(summary = "Create a new Configuration Template Instance.")
 //    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
-//            "or @securityService.isResourceAdmin(#auth,#configurationTemplateInstance.resourceId)")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+//            "@securityService.isResourceAdmin(#auth,#configurationTemplateInstance.resourceId)")
 //    public ResponseEntity<ConfigurationTemplateInstance> add(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
 //                                                             @Parameter(hidden = true) Authentication auth) {
 //        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle =
@@ -151,8 +151,8 @@
 //
 //    @Operation(summary = "Updates the Configuration Template Instance with the given id.")
 //    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
-//            "or @securityService.isResourceAdmin(#auth,#configurationTemplateInstance.resourceId)")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+//            "@securityService.isResourceAdmin(#auth,#configurationTemplateInstance.resourceId)")
 //    public ResponseEntity<ConfigurationTemplateInstance> update(@RequestBody ConfigurationTemplateInstance configurationTemplateInstance,
 //                                                                @Parameter(hidden = true) Authentication auth) {
 //        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = ctiService.get(configurationTemplateInstance.getId(), null, false);

@@ -20,5 +20,4 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 
 public interface AdapterService extends ResourceCatalogueGenericService<AdapterBundle>,
         DraftService<AdapterBundle>, TermsService {
-
 }

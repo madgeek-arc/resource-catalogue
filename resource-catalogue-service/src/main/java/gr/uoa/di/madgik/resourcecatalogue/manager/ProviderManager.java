@@ -301,7 +301,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 //        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
         createMapValuesForHLE(providers, "provider", mapValuesList);
         for (ProviderBundle providerBundle : providers) {
-            services.addAll(serviceService.getAllEOSCServicesOfAProvider(providerBundle.getId(),
+            services.addAll(serviceService.getAllEOSCResourcesOfAProvider(providerBundle.getId(),
                     providerBundle.getCatalogueId(), maxQuantity, auth).getResults());
 //            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
 //                    providerBundle.getId(), auth).getResults());
@@ -367,48 +367,6 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
             }
         }
         return emails;
-    }
-
-    public Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> getProviderIdToNameMap(String catalogueId) {
-        Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> ret = new HashMap<>();
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allProviders = new ArrayList<>();
-        // fetch catalogueId related non-public Providers
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> catalogueRelatedProviders = getAll(createFacetFilter(catalogueId, false))
-                .getResults()
-                .stream()
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
-                        c.getProvider().get("id").toString(), c.getProvider().get("name").toString())
-                )
-                .toList();
-        // fetch non-catalogueId related public Providers
-        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> publicProviders = getAll(createFacetFilter(catalogueId, true)).getResults()
-                .stream()
-                .filter(c -> !c.getCatalogueId().equals(catalogueId))
-                .map(c -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
-                        c.getId(), c.getProvider().get("name").toString())
-                )
-                .toList();
-
-        allProviders.addAll(catalogueRelatedProviders);
-        allProviders.addAll(publicProviders);
-        ret.put("PROVIDERS_VOC", allProviders);
-        return ret;
-    }
-
-    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("status", "approved");
-        ff.addFilter("active", true);
-        ff.addFilter("draft", false);
-        if (isPublic) {
-            ff.addFilter("published", true);
-        } else {
-            ff.addFilter("catalogue_id", catalogueId);
-            ff.addFilter("published", false);
-        }
-        return ff;
     }
     //endregion
 

@@ -30,6 +30,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OpenAIREDatasourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,6 +51,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
@@ -61,6 +63,9 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     private final GenericResourceService genericResourceService;
     private final OpenAIREDatasourceService openAIREDatasourceService;
+
+    @Value("${auditing.interval:6}")
+    private int auditingInterval;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -83,6 +88,16 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
         String id = prefix + "/" + suffix;
         DatasourceBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle.getDatasource(), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/bundle/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<DatasourceBundle> getBundle(@PathVariable String prefix,
+                                                      @PathVariable String suffix,
+                                                      @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        DatasourceBundle bundle = service.get(id, catalogueId);
+        return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
     @Operation(summary = "Get a list of Datasources based on a list of filters.")
@@ -113,6 +128,27 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
         ff.addFilter("published", false);
         Paging<DatasourceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
+    }
+
+    @Operation(summary = "Returns all Datasources of a User.")
+    @GetMapping(path = "getMy")
+    public ResponseEntity<List<DatasourceBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
+                                                        @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("draft", draft);
+        return new ResponseEntity<>(service.getMy(ff, auth).getResults(), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get a random Paging of Datasources")
+    @Parameters({
+            @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
+    })
+    @GetMapping(path = "random")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<DatasourceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
+                                                              @Parameter(hidden = true) Authentication auth) {
+        Paging<DatasourceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+        return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 
     @Operation(summary = "Adds a new Datasource.")
@@ -256,25 +292,24 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     }
 
     //region Datasource-specific
-    //FIXME
-//    @Operation(summary = "Get a list of Datasources based on a set of ids.")
-//    @GetMapping(path = "ids")
-//    public ResponseEntity<List<LinkedHashMap<String, Object>>> getSomeDatasources(@RequestParam("ids") String[] ids,
-//                                                                               @Parameter(hidden = true) Authentication auth) {
-//        return ResponseEntity.ok(service.getByIds(auth, ids)
-//                .stream()
-//                .map(ServiceBundle::getService)
-//                .collect(Collectors.toList()));
-//    }
+    @Operation(summary = "Get a list of Datasources based on a set of ids.")
+    @GetMapping(path = "ids")
+    public ResponseEntity<List<LinkedHashMap<String, Object>>> getSome(@RequestParam("ids") String[] ids,
+                                                                       @Parameter(hidden = true) Authentication auth) {
+        return ResponseEntity.ok(service.getByIds(auth, ids)
+                .stream()
+                .map(DatasourceBundle::getDatasource)
+                .collect(Collectors.toList()));
+    }
 
     @BrowseParameters
     @GetMapping(path = "byProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
-    public ResponseEntity<Paging<DatasourceBundle>> getDatasourcesByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
-                                                                             @PathVariable String prefix,
-                                                                             @PathVariable String suffix,
-                                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Paging<DatasourceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
+                                                                  @PathVariable String prefix,
+                                                                  @PathVariable String suffix,
+                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("service_owner", id);
@@ -288,8 +323,8 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "inactive/all")
-    public ResponseEntity<Paging<?>> getInactiveDatasources(@Parameter(hidden = true)
-                                                            @RequestParam MultiValueMap<String, Object> params) {
+    public ResponseEntity<Paging<?>> getInactive(@Parameter(hidden = true)
+                                                 @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
