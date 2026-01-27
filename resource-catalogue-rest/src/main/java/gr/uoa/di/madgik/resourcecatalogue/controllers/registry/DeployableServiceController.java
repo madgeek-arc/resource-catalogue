@@ -303,7 +303,7 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
                                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("service_owner", id);
+        ff.addFilter("owner", id);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -365,7 +365,7 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
                                                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("service_owner", id);
+        ff.addFilter("owner", id);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);

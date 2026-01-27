@@ -49,12 +49,12 @@ public class PublicServiceService extends AbstractPublicResourceManager<ServiceB
 
     @Override
     public void updateIdsToPublic(ServiceBundle service) {
-        // Service Owner
+        // Owner
         ProviderBundle provider = providerService.get(
-                (String) service.getService().get("serviceOwner"),
+                (String) service.getService().get("owner"),
                 service.getCatalogueId()
         );
-        service.getService().put("serviceOwner", provider.getIdentifiers().getPid());
+        service.getService().put("owner", provider.getIdentifiers().getPid());
 
         // Service Providers
         Object providersObj = service.getService().get("serviceProviders");

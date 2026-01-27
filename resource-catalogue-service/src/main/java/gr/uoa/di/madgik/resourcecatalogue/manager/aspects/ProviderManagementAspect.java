@@ -92,7 +92,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setStatus(..))",
             returning = "service")
     public void updatePublicProviderTemplateStatus(final ServiceBundle service) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
                 service.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
@@ -102,7 +102,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.setStatus(..))",
             returning = "datasource")
     public void updatePublicProviderTemplateStatus(final DatasourceBundle datasource) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
                 datasource.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
@@ -112,7 +112,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.setStatus(..))",
             returning = "deployableService")
     public void updatePublicProviderTemplateStatus(final DeployableServiceBundle deployableService) {
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
@@ -131,7 +131,7 @@ public class ProviderManagementAspect {
     public void updateServiceStatus(ServiceBundle service) {
         if (service.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+                ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
                         service.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     serviceService.setStatus(service.getId(), "pending", false, securityService.getAdminAccess());
@@ -155,7 +155,7 @@ public class ProviderManagementAspect {
     public void updateDatasourceStatus(DatasourceBundle datasource) {
         if (datasource.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
+                ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
                         datasource.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     datasourceService.setStatus(datasource.getId(), "pending", false, securityService.getAdminAccess());
@@ -179,7 +179,7 @@ public class ProviderManagementAspect {
     public void updateDeployableServiceStatus(DeployableServiceBundle bundle) {
         if (bundle.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) bundle.getDeployableService().get("serviceOwner"),
+                ProviderBundle provider = providerService.get((String) bundle.getDeployableService().get("owner"),
                         bundle.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     deployableServiceService.setStatus(bundle.getId(), "pending", false, securityService.getAdminAccess());
@@ -206,7 +206,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setStatus(..))",
             returning = "service")
     public void providerRegistrationEmails(final ServiceBundle service) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
                 service.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -215,7 +215,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.setStatus(..))",
             returning = "datasource")
     public void providerRegistrationEmails(final DatasourceBundle datasource) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
                 datasource.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -224,7 +224,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.setStatus(..))",
             returning = "deployableService")
     public void providerRegistrationEmails(final DeployableServiceBundle deployableService) {
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME

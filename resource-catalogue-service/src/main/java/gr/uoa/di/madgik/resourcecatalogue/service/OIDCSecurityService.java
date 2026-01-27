@@ -210,7 +210,7 @@ public class OIDCSecurityService implements SecurityService {
         String providerId;
         Bundle bundle = determineResourceType(resourceId);
         providerId = switch (bundle) {
-            case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("serviceOwner");
+            case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("owner");
             //FIXME
 //            case TrainingResourceBundle trainingResourceBundle ->
 //                    trainingResourceBundle.getTrainingResource().getResourceOrganisation();
@@ -269,7 +269,7 @@ public class OIDCSecurityService implements SecurityService {
     //FIXME - how to get catalogueId
     @Override
     public boolean providerCanAddResources(Authentication auth, LinkedHashMap<String, Object> service, String catalogueId) {
-        String providerId = (String) service.get("serviceOwner");
+        String providerId = (String) service.get("owner");
         if (catalogueId == null || catalogueId.isEmpty()) {
             catalogueId = this.catalogueId;
         }

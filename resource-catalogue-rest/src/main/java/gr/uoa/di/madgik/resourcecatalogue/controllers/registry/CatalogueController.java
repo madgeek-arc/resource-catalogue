@@ -437,7 +437,7 @@ public class CatalogueController {
         ff.setResourceType("service");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("service_owner", providerId);
+        ff.addFilter("owner", providerId);
         Paging<ServiceBundle> paging = serviceService.getAll(ff);
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
@@ -456,7 +456,7 @@ public class CatalogueController {
         ff.setResourceType("service");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("service_owner", providerId);
+        ff.addFilter("owner", providerId);
         Paging<ServiceBundle> paging = serviceService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
@@ -555,7 +555,7 @@ public class CatalogueController {
         ff.setResourceType("datasource");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("service_owner", providerId);
+        ff.addFilter("owner", providerId);
         Paging<DatasourceBundle> paging = datasourceService.getAll(ff);
         return ResponseEntity.ok(paging.map(DatasourceBundle::getDatasource));
     }
@@ -574,7 +574,7 @@ public class CatalogueController {
         ff.setResourceType("datasource");
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("service_owner", providerId);
+        ff.addFilter("owner", providerId);
         Paging<DatasourceBundle> paging = datasourceService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
