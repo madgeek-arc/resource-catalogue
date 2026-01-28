@@ -92,6 +92,28 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return new ResponseEntity<>(vocabularyService.getByType(type), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get vocabularies by type")
+    @GetMapping(path = "types/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Vocabulary>> getByTypeV2(@PathVariable(value = "type") String type) {
+        if (type != null && type.equals("test")) { // TODO: Delete this
+            return ResponseEntity.ok(List.of(
+                    new Vocabulary(
+                            "test",
+                            "Test Vocabulary",
+                            "This vocabulary is fake and exists only for testing purposes.",
+                            null, "test", null))
+            );
+        }
+        return new ResponseEntity<>(vocabularyService.getByType(Vocabulary.Type.fromString(type)), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get vocabularies by id")
+    @GetMapping(path = "types/{type}/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Vocabulary> getByTypeAndId(@PathVariable(value = "type") String type,
+                                                     @PathVariable(value = "id") String id) {
+        return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
+    }
+
 
     /**
      * Secured methods
