@@ -140,7 +140,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         T existing = get(id, catalogueId);
         existing.markAudit(comment, actionType, auth);
 
-        //TODO: cannot be here if "users" && other resources have different providerId field name (eg. serviceOwner)
+        //TODO: cannot be here if "users" && other resources have different providerId field name (eg. owner)
 //        mailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
 
         logger.info("Audited '{}' with ID '{}' [actionType: {}]", getResourceTypeName(), existing.getId(), actionType);

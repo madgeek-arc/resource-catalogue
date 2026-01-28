@@ -58,10 +58,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Service Owner",
+      "label": "Owner",
       "multivalued": false,
-      "name": "service_owner",
-      "path": "$.deployableService.serviceOwner",
+      "name": "owner",
+      "path": "$.deployableService.owner",
       "type": "java.lang.String"
     },
     {

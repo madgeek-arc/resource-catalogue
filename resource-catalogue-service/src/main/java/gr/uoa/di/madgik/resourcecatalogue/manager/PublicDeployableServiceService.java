@@ -46,11 +46,11 @@ public class PublicDeployableServiceService extends AbstractPublicResourceManage
 
     @Override
     public void updateIdsToPublic(DeployableServiceBundle deployableService) {
-        // Service Owner
+        // Owner
         ProviderBundle provider = providerService.get(
-                (String) deployableService.getDeployableService().get("serviceOwner"),
+                (String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId()
         );
-        deployableService.getDeployableService().put("serviceOwner", provider.getIdentifiers().getPid());
+        deployableService.getDeployableService().put("owner", provider.getIdentifiers().getPid());
     }
 }

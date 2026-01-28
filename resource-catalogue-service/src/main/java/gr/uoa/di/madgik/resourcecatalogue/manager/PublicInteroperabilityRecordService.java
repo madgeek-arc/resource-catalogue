@@ -46,11 +46,11 @@ public class PublicInteroperabilityRecordService extends AbstractPublicResourceM
 
     @Override
     public void updateIdsToPublic(InteroperabilityRecordBundle guideline) {
-        // Service Owner
+        // Owner
         ProviderBundle provider = providerService.get(
-                (String) guideline.getInteroperabilityRecord().get("serviceOwner"),
+                (String) guideline.getInteroperabilityRecord().get("owner"),
                 guideline.getCatalogueId()
         );
-        guideline.getInteroperabilityRecord().put("serviceOwner", provider.getIdentifiers().getPid());
+        guideline.getInteroperabilityRecord().put("owner", provider.getIdentifiers().getPid());
     }
 }

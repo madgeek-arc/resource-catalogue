@@ -9,17 +9,17 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Resource ID",
       "multivalued": false,
       "name": "resource_id",
       "path": "$.resourceInteroperabilityRecord.resourceId",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.resourceInteroperabilityRecord.catalogueId",
       "type": "java.lang.String"
     },
     {

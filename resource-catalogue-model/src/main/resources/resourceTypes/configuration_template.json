@@ -9,17 +9,17 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Interoperability Record ID",
       "multivalued": false,
       "name": "interoperability_record_id",
       "path": "$.configurationTemplate.interoperabilityRecordId",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.configurationTemplate.catalogueId",
       "type": "java.lang.String"
     },
     {
@@ -104,10 +104,10 @@
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
-  "name": "configuration_template",
   "aliases": [
     "resourceTypes"
   ],
+  "name": "configuration_template",
   "payloadType": "json",
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle"

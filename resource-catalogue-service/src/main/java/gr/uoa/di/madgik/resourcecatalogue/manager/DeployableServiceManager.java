@@ -84,7 +84,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
     //region generic
     @Override
     public DeployableServiceBundle add(DeployableServiceBundle deployableService, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId());
         onboard(deployableService, provider, auth);
         onboardingValidation(provider);
@@ -96,7 +96,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
         String catalogueId = deployableService.getCatalogueId();
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             if (provider.getTemplateStatus().equals("approved template")) {
-                deployableService.markOnboard(vocabularyService.get("approved").getId(), false, auth, null);
+                deployableService.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
                 deployableService.setActive(true);
             } else {
                 deployableService.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
@@ -117,7 +117,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
         if (!provider.getStatus().equals("approved")) {
-            throw new ResourceException(String.format("The Provider '%s' you provided as a Service Owner " +
+            throw new ResourceException(String.format("The Provider '%s' you provided as a Owner " +
                     "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
         }
         if (provider.getTemplateStatus().equals("pending template")) {
@@ -148,7 +148,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
     }
 
     private void checkAndResetDeployableServiceOnboarding(DeployableServiceBundle deployableService, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (deployableService.getStatus().equals(vocabularyService.get("rejected").getId())) {
@@ -188,7 +188,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
     }
 
     private void updateProviderTemplateStatus(DeployableServiceBundle deployableService, String status, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId());
         switch (status) {
             case "pending":
@@ -210,7 +210,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
     public DeployableServiceBundle setActive(String id, Boolean active, Authentication auth) {
         DeployableServiceBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getDeployableService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) existing.getDeployableService().get("owner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Deployable Service, as its Provider is inactive", HttpStatus.CONFLICT);
@@ -234,7 +234,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
     public Paging<DeployableServiceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                           int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("service_owner", providerId);
+        ff.addFilter("owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -245,7 +245,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         DeployableServiceBundle deployableService = get(id);
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
@@ -264,7 +264,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
         filter.setResourceType(getResourceTypeName());
         filter.setQuantity(maxQuantity);
         filter.addFilter("published", false);
-        filter.addFilter("service_owner", providers.stream().map(ProviderBundle::getId).toList());
+        filter.addFilter("owner", providers.stream().map(ProviderBundle::getId).toList());
         ff.addOrderBy("name", "asc");
         return genericResourceService.getResults(ff);
     }
@@ -290,7 +290,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("service_owner", providerId);
+        ff.addFilter("owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<DeployableServiceBundle> allProviderDeployableServices = getAll(ff, auth).getResults();
@@ -333,7 +333,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
 
     @Override
     public DeployableServiceBundle finalizeDraft(DeployableServiceBundle deployableService, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId());
         if (provider.getTemplateStatus().equals("approved template")) {
             deployableService.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);

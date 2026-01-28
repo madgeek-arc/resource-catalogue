@@ -110,7 +110,7 @@ public class CSVManager implements CSVService {
         for (ServiceBundle service : services) {
             boolean approvedFound = false;
             boolean rejectedFound = false;
-            String resourceOrganisation = (String) service.getService().get("serviceOwner");
+            String resourceOrganisation = (String) service.getService().get("owner");
             List<LoggingInfo> loggingInfoList = service.getLoggingInfo();
             for (LoggingInfo loggingInfo : loggingInfoList) {
                 try {

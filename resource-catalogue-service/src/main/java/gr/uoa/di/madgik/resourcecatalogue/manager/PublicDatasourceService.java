@@ -49,12 +49,12 @@ public class PublicDatasourceService extends AbstractPublicResourceManager<Datas
 
     @Override
     public void updateIdsToPublic(DatasourceBundle datasource) {
-        // Service Owner
+        // Owner
         ProviderBundle provider = providerService.get(
-                (String) datasource.getDatasource().get("serviceOwner"),
+                (String) datasource.getDatasource().get("owner"),
                 datasource.getCatalogueId()
         );
-        datasource.getDatasource().put("serviceOwner", provider.getIdentifiers().getPid());
+        datasource.getDatasource().put("owner", provider.getIdentifiers().getPid());
 
         // Service Providers
         Object providersObj = datasource.getDatasource().get("serviceProviders");

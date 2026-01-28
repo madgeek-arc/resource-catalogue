@@ -24,6 +24,7 @@
 //import gr.uoa.di.madgik.registry.exception.ResourceException;
 //import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 //import gr.uoa.di.madgik.resourcecatalogue.service.*;
+//import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 //import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 //import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 //import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -37,8 +38,7 @@
 //import java.util.*;
 //
 //@org.springframework.stereotype.Service("configurationTemplateManager")
-//public class ConfigurationTemplateManager extends ResourceCatalogueManager<ConfigurationTemplateBundle>
-//        implements ConfigurationTemplateService {
+//public abstract class ConfigurationTemplateManager implements ConfigurationTemplateService {
 //
 //    private static final Logger logger = LogManager.getLogger(ConfigurationTemplateManager.class);
 //    private final IdCreator idCreator;
@@ -46,69 +46,45 @@
 //    private final ProviderService providerService;
 //    private final InteroperabilityRecordService interoperabilityRecordService;
 //    private final GenericResourceService genericResourceService;
+//    private final VocabularyService vocabularyService;
 //
 //    @Value("${catalogue.id}")
 //    private String catalogueId;
 //
 //    public ConfigurationTemplateManager(IdCreator idCreator, ProviderResourcesCommonMethods commonMethods,
 //                                        ProviderService providerService, InteroperabilityRecordService interoperabilityRecordService,
-//                                        GenericResourceService genericResourceService) {
-//        super(ConfigurationTemplateBundle.class);
+//                                        GenericResourceService genericResourceService, VocabularyService vocabularyService) {
 //        this.idCreator = idCreator;
 //        this.commonMethods = commonMethods;
 //        this.providerService = providerService;
 //        this.interoperabilityRecordService = interoperabilityRecordService;
+//        this.vocabularyService = vocabularyService;
 //        this.genericResourceService = genericResourceService;
 //    }
 //
-//    @Override
 //    public String getResourceTypeName() {
 //        return "configuration_template";
 //    }
 //
 //    @Override
-//    public ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, Authentication auth) {
-//        return add(bundle, bundle.getConfigurationTemplate().getCatalogueId(), auth);
-//    }
-//
-//    @Override
-//    public ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth) {
+//    public ConfigurationTemplateBundle add(ConfigurationTemplateBundle ct, Authentication auth) {
 //        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(
-//                bundle.getConfigurationTemplate().getInteroperabilityRecordId(), catalogueId, false);
-//        if (!interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId().equals(catalogueId)) {
-//            throw new ValidationException(String.format("There is no Interoperability Record with ID %s in the %s Catalogue.",
-//                    interoperabilityRecordBundle.getId(), catalogueId));
-//        }
-//
-//        bundle.setId(idCreator.generate(getResourceTypeName()));
-////        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
-//
-//        ProviderBundle providerBundle = providerService.get(interoperabilityRecordBundle.getInteroperabilityRecord().getProviderId(),
-//                interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-//        // check if Provider is approved
+//                (String) ct.getConfigurationTemplate().get("interoperabilityRecordId"), catalogueId);
+//        ProviderBundle providerBundle = providerService.get(
+//                (String) interoperabilityRecordBundle.getInteroperabilityRecord().get("owner"),
+//                interoperabilityRecordBundle.getCatalogueId());
 //        if (!providerBundle.getStatus().equals("approved")) {
 //            throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",
 //                    providerBundle.getId()), HttpStatus.CONFLICT);
 //        }
-//        validate(bundle);
 //
-//        if (bundle.getMetadata() == null) {
-//            bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth)));
-//        }
-//        // loggingInfo
-//        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-//        bundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
-//        bundle.setActive(true);
-//        LoggingInfo loggingInfoApproved = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-//                LoggingInfo.ActionType.APPROVED.getKey());
-//        loggingInfoList.add(loggingInfoApproved);
-//        bundle.setLatestOnboardingInfo(loggingInfoApproved);
-//        bundle.setLoggingInfo(loggingInfoList);
-//
-//        super.add(bundle, auth);
-//        logger.info("Added a new Configuration Template with id '{}' and title '{}'", bundle.getId(),
-//                bundle.getConfigurationTemplate().getName());
-//        return bundle;
+//        ct.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+//        ct.setActive(true);
+//        ct.setCatalogueId(this.catalogueId);
+//        commonMethods.createIdentifiers(ct, getResourceTypeName(), false);
+//        ct.setId(ct.getIdentifiers().getOriginalId());
+//        ConfigurationTemplateBundle ret = genericResourceService.add(getResourceTypeName(), ct);
+//        return ret;
 //    }
 //
 //    @Override

@@ -84,7 +84,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     //region generic
     @Override
     public InteroperabilityRecordBundle add(InteroperabilityRecordBundle guideline, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("owner"),
                 guideline.getCatalogueId());
         onboard(guideline, provider, auth);
         blockNamingAsEOSCMonitoringGuideline((String) guideline.getInteroperabilityRecord().get("name"));
@@ -99,7 +99,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
                 guideline.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
                 guideline.setActive(true);
             } else {
-                throw new ResourceException(String.format("The Provider '%s' you provided as a Service Owner " +
+                throw new ResourceException(String.format("The Provider '%s' you provided as a Owner " +
                         "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
             }
             guideline.setCatalogueId(this.catalogueId);
@@ -159,7 +159,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     public InteroperabilityRecordBundle setActive(String id, Boolean active, Authentication auth) {
         InteroperabilityRecordBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getInteroperabilityRecord().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) existing.getInteroperabilityRecord().get("owner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Interoperability Record, as its Provider is inactive",
@@ -185,7 +185,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     public Paging<InteroperabilityRecordBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                                int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("service_owner", providerId);
+        ff.addFilter("owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -196,7 +196,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         InteroperabilityRecordBundle guideline = get(id);
-        ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("owner"),
                 guideline.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Interoperability Records", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
@@ -215,7 +215,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         filter.setResourceType(getResourceTypeName());
         filter.setQuantity(maxQuantity);
         filter.addFilter("published", false);
-        filter.addFilter("service_owner", providers.stream().map(ProviderBundle::getId).toList());
+        filter.addFilter("owner", providers.stream().map(ProviderBundle::getId).toList());
         ff.addOrderBy("name", "asc");
         return genericResourceService.getResults(ff);
     }
@@ -290,7 +290,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     @Override
     public InteroperabilityRecordBundle finalizeDraft(InteroperabilityRecordBundle guideline, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("serviceOwner"),
+        ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("owner"),
                 guideline.getCatalogueId());
         if (provider.getTemplateStatus().equals("approved template")) {
             guideline.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
