@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.domain;
+package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
 
 import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
 import gr.uoa.di.madgik.resourcecatalogue.annotation.VocabularyValidation;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Catalogue;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Map;
