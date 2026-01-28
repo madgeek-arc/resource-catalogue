@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
