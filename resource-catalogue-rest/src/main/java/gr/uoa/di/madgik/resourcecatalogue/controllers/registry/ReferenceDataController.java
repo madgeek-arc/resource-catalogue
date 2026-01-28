@@ -75,6 +75,39 @@ public class ReferenceDataController<T extends Bundle> {
         return Map.of(resourceType + "_voc", allResources);
     }
 
+    //TODO: transition to this
+//    @Hidden
+//    @GetMapping(path = "idToNameMap")
+//    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> idToNameMap(@RequestParam String catalogueId,
+//                                                                          @RequestParam List<String> resourceTypes) {
+//        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = new ArrayList<>();
+//
+//        for (String resourceType : resourceTypes) {
+//            List<Bundle> bundles = Stream.concat(
+//                    genericResourceService.getResults(createFacetFilter(catalogueId, false, resourceType))
+//                            .getResults()
+//                            .stream()
+//                            .filter(c -> c instanceof Bundle)
+//                            .map(c -> (Bundle) c),
+//                    genericResourceService.getResults(createFacetFilter(catalogueId, true, resourceType))
+//                            .getResults()
+//                            .stream()
+//                            .filter(c -> c instanceof Bundle)
+//                            .map(c -> (Bundle) c)
+//                            .filter(b -> !b.getCatalogueId().equals(catalogueId))
+//            ).toList();
+//
+//            allResources = bundles.stream()
+//                    .map(b -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
+//                            b.getId(),
+//                            b.getPayload().get("name").toString()
+//                    ))
+//                    .toList();
+//        }
+//
+//        return allResources;
+//    }
+
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
