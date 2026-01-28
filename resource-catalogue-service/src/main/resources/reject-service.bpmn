@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_06ssl7g" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.41.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
+  <bpmn:process id="reject-service" name="Reject Service" isExecutable="true">
+    <bpmn:extensionElements>
+      <zeebe:versionTag value="1" />
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0eqhnba</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_0k7km6s" name="Get Service By Id" zeebe:modelerTemplate="get-resource-template" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="get-resource" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=id" target="id" />
+          <zeebe:output source="=resource" target="resource" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="resourceType" value="service" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0eqhnba</bpmn:incoming>
+      <bpmn:outgoing>Flow_1lj2ebh</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0eqhnba" sourceRef="StartEvent_1" targetRef="Activity_0k7km6s" />
+    <bpmn:sequenceFlow id="Flow_1lj2ebh" sourceRef="Activity_0k7km6s" targetRef="Activity_0ltovo2" />
+    <bpmn:serviceTask id="Activity_0ltovo2" name="Set Rejected" zeebe:modelerTemplate="set-status-template" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="set-status" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=id" target="id" />
+          <zeebe:input source="=resource" target="bundle" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="status" value="rejected provider" />
+          <zeebe:header key="active" value="true" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1lj2ebh</bpmn:incoming>
+      <bpmn:outgoing>Flow_0r5eoxw</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_038uhm1">
+      <bpmn:incoming>Flow_0r5eoxw</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0r5eoxw" sourceRef="Activity_0ltovo2" targetRef="Event_038uhm1" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="reject-service">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0gk7aqt_di" bpmnElement="Activity_0k7km6s">
+        <dc:Bounds x="280" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1cuetsh_di" bpmnElement="Activity_0ltovo2">
+        <dc:Bounds x="450" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_038uhm1_di" bpmnElement="Event_038uhm1">
+        <dc:Bounds x="622" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0eqhnba_di" bpmnElement="Flow_0eqhnba">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="280" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1lj2ebh_di" bpmnElement="Flow_1lj2ebh">
+        <di:waypoint x="380" y="120" />
+        <di:waypoint x="450" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0r5eoxw_di" bpmnElement="Flow_0r5eoxw">
+        <di:waypoint x="550" y="120" />
+        <di:waypoint x="622" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

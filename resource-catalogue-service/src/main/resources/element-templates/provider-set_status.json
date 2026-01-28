@@ -1,0 +1,45 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+  "name": "Set Provider Status",
+  "id": "provider-set-status-template",
+  "description": "Sets the provider status in your catalogue via the provider-set-status worker.",
+  "version": 1,
+  "appliesTo": ["bpmn:Task"],
+  "elementType": {
+    "value": "bpmn:ServiceTask"
+  },
+  "groups": [
+    { "id": "exec", "label": "Execution" },
+    { "id": "io",   "label": "Inputs" }
+  ],
+  "properties": [
+    {
+      "label": "Job Type",
+      "type": "Hidden",
+      "value": "provider-set-status",
+      "binding": { "type": "zeebe:taskDefinition:type" },
+      "group": "exec"
+    },
+    {
+      "label": "Status",
+      "type": "Dropdown",
+      "choices": [
+        { "name": "PENDING",  "value": "pending" },
+        { "name": "APPROVED", "value": "approved" },
+        { "name": "REJECTED", "value": "rejected" }
+      ],
+      "binding": { "type": "zeebe:taskHeader", "key": "status" },
+      "constraints": { "notEmpty": true },
+      "group": "exec"
+    },
+    {
+      "label": "Provider Id",
+      "type": "String",
+      "binding": { "type": "zeebe:input", "name": "providerId" },
+      "constraints": { "notEmpty": true },
+      "feel": "required",
+      "value": "=providerId",
+      "group": "io"
+    }
+  ]
+}

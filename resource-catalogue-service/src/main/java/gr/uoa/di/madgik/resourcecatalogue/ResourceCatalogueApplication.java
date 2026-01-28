@@ -16,10 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue;
 
+import io.camunda.client.annotation.Deployment;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@Deployment(resources = { "classpath:*.bpmn" })
 public class ResourceCatalogueApplication {
 
     public static void main(String[] args) {

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+  "name": "Get Resource",
+  "id": "get-resource-template",
+  "description": "Fetches a resource from the DB.",
+  "version": 1,
+  "appliesTo": ["bpmn:Task"],
+  "elementType": {
+    "value": "bpmn:ServiceTask"
+  },
+  "groups": [
+    { "id": "exec", "label": "Execution" },
+    { "id": "io",   "label": "Inputs" }
+  ],
+  "properties": [
+    {
+      "label": "Job Type",
+      "type": "Hidden",
+      "value": "get-resource",
+      "binding": { "type": "zeebe:taskDefinition:type" },
+      "group": "exec"
+    },
+    {
+      "label": "Resource Type",
+      "type": "Dropdown",
+      "choices": [
+        { "name": "Adapter", "value": "adapter" },
+        { "name": "Catalogue", "value": "catalogue" },
+        { "name": "Configuration Template", "value": "configuration_template" },
+        { "name": "Configuration Template Instance", "value": "configuration_template_instance" },
+        { "name": "Datasource", "value": "datasource" },
+        { "name": "Deployable Service", "value": "deployable_service" },
+        { "name": "Helpdesk", "value": "helpdesk" },
+        { "name": "Interoperability Record", "value": "interoperability_record" },
+        { "name": "Monitoring", "value": "monitoring" },
+        { "name": "Provider", "value": "provider" },
+        { "name": "Resource Interoperability_record", "value": "resource_interoperability_record" },
+        { "name": "Service", "value": "service" },
+        { "name": "Training Resource", "value": "training_resource" },
+        { "name": "Vocabulary", "value": "vocabulary" }
+      ],
+      "binding": { "type": "zeebe:taskHeader", "key": "resourceType" },
+      "constraints": { "notEmpty": true },
+      "group": "exec"
+    },
+    {
+      "label": "Id (input)",
+      "type": "String",
+      "feel": "required",
+      "binding": { "type": "zeebe:input", "name": "id" },
+      "constraints": { "notEmpty": true },
+      "description": "Expression or value that resolves to the resource ID"
+    },
+    {
+      "label": "Resource (output variable)",
+      "type": "String",
+      "binding": { "type": "zeebe:output", "source": "=resource" },
+      "value": "resource",
+      "description": "Process variable name that will hold the fetched resource",
+      "constraints": { "notEmpty": true }
+    }
+  ]
+}

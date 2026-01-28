@@ -1,0 +1,65 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+  "name": "Set Resource Status",
+  "id": "set-status-template",
+  "description": "Sets the resource status in your catalogue via the set-status worker.",
+  "version": 1,
+  "appliesTo": ["bpmn:Task"],
+  "elementType": {
+    "value": "bpmn:ServiceTask"
+  },
+  "groups": [
+    { "id": "exec", "label": "Execution" },
+    { "id": "io",   "label": "Inputs" }
+  ],
+  "properties": [
+    {
+      "label": "Job Type",
+      "type": "Hidden",
+      "value": "set-status",
+      "binding": { "type": "zeebe:taskDefinition:type" },
+      "group": "exec"
+    },
+    {
+      "label": "Status",
+      "type": "Dropdown",
+      "choices": [
+        { "name": "PENDING",  "value": "pending" },
+        { "name": "APPROVED", "value": "approved" },
+        { "name": "REJECTED", "value": "rejected" }
+      ],
+      "binding": { "type": "zeebe:taskHeader", "key": "status" },
+      "constraints": { "notEmpty": true },
+      "group": "exec"
+    },
+    {
+      "label": "Active",
+      "type": "Dropdown",
+      "choices": [
+        { "name": "TRUE",  "value": "true" },
+        { "name": "FALSE", "value": "false" }
+      ],
+      "binding": { "type": "zeebe:taskHeader", "key": "active" },
+      "constraints": { "notEmpty": true },
+      "group": "exec"
+    },
+    {
+      "label": "Id",
+      "type": "String",
+      "binding": { "type": "zeebe:input", "name": "id" },
+      "constraints": { "notEmpty": true },
+      "feel": "required",
+      "value": "=id",
+      "group": "io"
+    },
+    {
+      "label": "Resource",
+      "type": "String",
+      "binding": { "type": "zeebe:input", "name": "bundle" },
+      "constraints": { "notEmpty": true },
+      "feel": "required",
+      "value": "=resource",
+      "group": "io"
+    }
+  ]
+}
