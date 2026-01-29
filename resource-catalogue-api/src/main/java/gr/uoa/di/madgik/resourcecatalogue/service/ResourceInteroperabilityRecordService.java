@@ -21,7 +21,8 @@ import org.springframework.security.core.Authentication;
 
 import java.util.LinkedHashMap;
 
-public interface ResourceInteroperabilityRecordService {
+public interface ResourceInteroperabilityRecordService
+        extends ResourceCatalogueGenericService<ResourceInteroperabilityRecordBundle> {
 
     /**
      * Add a new ResourceInteroperabilityRecord Bundle, related to the specific resource type

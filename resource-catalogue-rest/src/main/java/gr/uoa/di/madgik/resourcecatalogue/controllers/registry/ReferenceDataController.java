@@ -28,9 +28,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
+
+//TODO: To Be Deleted -> use ResourceCatalogueGenericController
 
 @Profile("beyond")
 @RestController
@@ -49,8 +51,8 @@ public class ReferenceDataController<T extends Bundle> {
 
     @Hidden
     @GetMapping(path = "idToNameMap")
-    public Map<String, List<gr.uoa.di.madgik.resourcecatalogue.dto.Value>> idToNameMap(@RequestParam String catalogueId,
-                                                                                       @RequestParam String resourceType) {
+    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> idToNameMap(@RequestParam String catalogueId,
+                                                                          @RequestParam String resourceType) {
         List<Bundle> bundles = Stream.concat(
                 genericResourceService.getResults(createFacetFilter(catalogueId, false, resourceType))
                         .getResults()
@@ -72,41 +74,8 @@ public class ReferenceDataController<T extends Bundle> {
                 ))
                 .toList();
 
-        return Map.of(resourceType + "_voc", allResources);
+        return allResources;
     }
-
-    //TODO: transition to this
-//    @Hidden
-//    @GetMapping(path = "idToNameMap")
-//    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> idToNameMap(@RequestParam String catalogueId,
-//                                                                          @RequestParam List<String> resourceTypes) {
-//        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = new ArrayList<>();
-//
-//        for (String resourceType : resourceTypes) {
-//            List<Bundle> bundles = Stream.concat(
-//                    genericResourceService.getResults(createFacetFilter(catalogueId, false, resourceType))
-//                            .getResults()
-//                            .stream()
-//                            .filter(c -> c instanceof Bundle)
-//                            .map(c -> (Bundle) c),
-//                    genericResourceService.getResults(createFacetFilter(catalogueId, true, resourceType))
-//                            .getResults()
-//                            .stream()
-//                            .filter(c -> c instanceof Bundle)
-//                            .map(c -> (Bundle) c)
-//                            .filter(b -> !b.getCatalogueId().equals(catalogueId))
-//            ).toList();
-//
-//            allResources = bundles.stream()
-//                    .map(b -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
-//                            b.getId(),
-//                            b.getPayload().get("name").toString()
-//                    ))
-//                    .toList();
-//        }
-//
-//        return allResources;
-//    }
 
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
         FacetFilter ff = new FacetFilter();
