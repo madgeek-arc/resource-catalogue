@@ -33,7 +33,7 @@ import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderCascadeLifecycleService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderCascadeLifecycleManager;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-//TODO: REMOVE ANY LOGIC THAT RELATES WITH MODEL'S FIELDS (eg. name, users, HLE)
 @org.springframework.stereotype.Service("providerManager")
 public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBundle>
         implements ProviderService {
@@ -64,7 +63,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
     private final SecurityService securityService;
-    private final ProviderCascadeLifecycleService cascadeLifecycleService;
+    private final ProviderCascadeLifecycleManager cascadeLifecycleService;
 
     public ProviderManager(GenericResourceService genericResourceService,
                            VocabularyService vocabularyService,
@@ -72,7 +71,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
                            IdCreator idCreator,
                            ProviderResourcesCommonMethods commonMethods,
                            SecurityService securityService,
-                           ProviderCascadeLifecycleService cascadeLifecycleService) {
+                           ProviderCascadeLifecycleManager cascadeLifecycleService) {
         super(genericResourceService, securityService);
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
@@ -152,7 +151,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         }
 
         logger.info("Deleting Provider: {} and all its Resources", bundle.getId());
-//        cascadeLifecycleService.deleteAllRelatedResources(bundle, auth); //FIXME
+        cascadeLifecycleService.deleteAllRelatedResources(bundle, auth);
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
 
@@ -184,7 +183,6 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         }
 
         existing.markActive(active, auth);
-//        activateProviderResources(existingProvider.getId(), active, auth); //FIXME
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -195,11 +193,12 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     @Override
     public ProviderBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         ProviderBundle bundle = get(id, catalogueId);
-//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend, auth); //FIXME
+        //TODO: enable and fix if Catalogues return to their original state
+//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend);
 
         logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
         bundle.markSuspend(suspend, auth);
-//        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth); //FIXME
+        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
 
         try {
             return genericResourceService.update(getResourceTypeName(), id, bundle);
@@ -358,7 +357,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     private List<String> extractEmails(ProviderBundle bundle) {
         List<String> emails = new ArrayList<>();
 
-        Object usersObj = bundle.getProvider().get("users"); //TODO: how to enforce that users will be always in the model
+        Object usersObj = bundle.getProvider().get("users");
         if (usersObj instanceof Collection<?>) {
             for (Object obj : (Collection<?>) usersObj) {
                 if (obj instanceof User user) {

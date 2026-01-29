@@ -115,7 +115,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     }
 
     private void onboardingValidation(TrainingResourceBundle trainingResource, ProviderBundle provider) {
-//        relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource); //FIXME
+        relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource);
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
         if (!provider.getStatus().equals("approved")) {
@@ -137,7 +137,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
             return trainingResource;
         }
         trainingResource.markUpdate(auth, comment);
-//        relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource); //FIXME
+        relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource);
         checkAndResetServiceOnboarding(trainingResource, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
@@ -168,7 +168,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     @Transactional
     public void delete(TrainingResourceBundle bundle) {
         commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
-//        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName()); //FIXME
+        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
         logger.info("Deleting Training Resource: {} and all its Resource Interoperability Records", bundle.getId()); //TODO: can TRs be connected to IGs?
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }

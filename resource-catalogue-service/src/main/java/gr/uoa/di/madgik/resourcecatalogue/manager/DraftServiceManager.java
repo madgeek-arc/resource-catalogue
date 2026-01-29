@@ -33,7 +33,8 @@
 //
 //import java.util.ArrayList;
 //import java.util.List;
-//
+
+//TODO: TO BE DELETED
 //@Service("draftServiceManager")
 //public class DraftServiceManager extends ResourceCatalogueManager<ServiceBundle> implements DraftResourceService<ServiceBundle> {
 //

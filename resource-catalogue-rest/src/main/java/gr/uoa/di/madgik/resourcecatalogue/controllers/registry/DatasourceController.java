@@ -82,6 +82,9 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     //TODO: pre-auth?
     @Operation(summary = "Returns the Datasource with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
+            "@securityService.datasourceIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -316,8 +319,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-//        return new ResponseEntity<>(service.getAllDatasourcesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK); //FIXME
-        return null;
+        return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK);
     }
 
     @BrowseParameters

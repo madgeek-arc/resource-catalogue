@@ -34,6 +34,7 @@
 //import java.util.List;
 //
 //
+ //TODO: TO BE DELETED
 //@Component
 //public abstract class DraftableResourceManager<T extends Bundle<?>> extends ResourceManager<T> implements ResourceService<T>, DraftResourceService<T> {
 //

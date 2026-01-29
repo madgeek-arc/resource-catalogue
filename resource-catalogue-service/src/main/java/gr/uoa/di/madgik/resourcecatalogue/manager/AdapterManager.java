@@ -159,7 +159,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     @Override
     public AdapterBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         AdapterBundle bundle = get(id, catalogueId);
-//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend, auth); //FIXME
+        commonMethods.suspensionValidation(bundle, catalogueId, id, suspend);
 
         logger.info("Suspending Adapter: {} and all its Resources", bundle.getId());
         bundle.markSuspend(suspend, auth);
@@ -204,7 +204,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private List<String> extractEmails(AdapterBundle bundle) {
         List<String> emails = new ArrayList<>();
 
-        Object usersObj = bundle.getAdapter().get("users"); //TODO: how to enforce that users will be always in the model
+        Object usersObj = bundle.getAdapter().get("users");
         if (usersObj instanceof Collection<?>) {
             for (Object obj : (Collection<?>) usersObj) {
                 if (obj instanceof User user) {

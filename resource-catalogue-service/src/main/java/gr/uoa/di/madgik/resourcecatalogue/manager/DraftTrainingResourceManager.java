@@ -33,7 +33,8 @@
 //
 //import java.util.ArrayList;
 //import java.util.List;
-//
+
+//TODO: TO BE DELETED
 //@Service("draftTrainingResourceManager")
 //public class DraftTrainingResourceManager extends ResourceCatalogueManager<TrainingResourceBundle> implements DraftResourceService<TrainingResourceBundle> {
 //

@@ -65,7 +65,6 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     }
 
     //region generic
-    //TODO: Do we need authorization?
     @Operation(summary = "Returns the Adapter with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
     public ResponseEntity<?> get(@PathVariable String prefix,

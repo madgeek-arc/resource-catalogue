@@ -36,6 +36,7 @@ public class OIDCSecurityService implements SecurityService {
 //    private final CatalogueService catalogueService;
     private final ProviderService providerService;
     private final ServiceService serviceService;
+    private final DatasourceService datasourceService;
 //    private final TrainingResourceService trainingResourceService;
 //    private final InteroperabilityRecordService interoperabilityRecordService;
 //    private final DeployableServiceService deployableServiceService;
@@ -51,6 +52,7 @@ public class OIDCSecurityService implements SecurityService {
     public OIDCSecurityService(/*@Lazy CatalogueService catalogueService,*/
                                @Lazy ProviderService providerService,
                                @Lazy ServiceService serviceService,
+                               @Lazy DatasourceService datasourceService,
 //                               @Lazy TrainingResourceService trainingResourceService,
 //                               @Lazy InteroperabilityRecordService interoperabilityRecordService,
 //                               @Lazy DeployableServiceService deployableServiceService,
@@ -59,6 +61,7 @@ public class OIDCSecurityService implements SecurityService {
 //        this.catalogueService = catalogueService;
         this.providerService = providerService;
         this.serviceService = serviceService;
+        this.datasourceService = datasourceService;
 //        this.trainingResourceService = trainingResourceService;
 //        this.interoperabilityRecordService = interoperabilityRecordService;
 //        this.deployableServiceService = deployableServiceService;
@@ -372,6 +375,12 @@ public class OIDCSecurityService implements SecurityService {
     public boolean serviceIsActive(String id, String catalogueId) {
         ServiceBundle serviceBundle = serviceService.get(id, catalogueId);
         return serviceBundle.isActive();
+    }
+
+    @Override
+    public boolean datasourceIsActive(String id, String catalogueId) {
+        DatasourceBundle datasourceBundle = datasourceService.get(id, catalogueId);
+        return datasourceBundle.isActive();
     }
 
     //FIXME

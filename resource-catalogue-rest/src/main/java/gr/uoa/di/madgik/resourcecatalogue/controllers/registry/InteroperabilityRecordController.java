@@ -24,7 +24,9 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -33,6 +35,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,6 +45,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,14 +60,18 @@ public class InteroperabilityRecordController
 
     private static final Logger logger = LoggerFactory.getLogger(InteroperabilityRecordController.class);
 
+    private final ResourceInteroperabilityRecordService rirService;
+
     @org.springframework.beans.factory.annotation.Value("${auditing.interval:6}")
     private int auditingInterval;
 
     @org.springframework.beans.factory.annotation.Value("${catalogue.id}")
     private String catalogueId;
 
-    InteroperabilityRecordController(InteroperabilityRecordService interoperabilityRecordService) {
+    InteroperabilityRecordController(InteroperabilityRecordService interoperabilityRecordService,
+                                     @Lazy ResourceInteroperabilityRecordService rirService) {
         super(interoperabilityRecordService, "Interoperability Record");
+        this.rirService = rirService;
     }
 
     //region generic
@@ -355,25 +364,30 @@ public class InteroperabilityRecordController
         service.sendEmailNotificationToProviderForOutdatedEOSCResource(id, auth);
     }
 
-    //FIXME
-//    @Tag(name = "InteroperabilityRecordRead")
-//    @Operation(summary = "Returns the Related Resources of a specific Interoperability Record given its id.")
-//    @GetMapping(path = {"relatedResources/{prefix}/{suffix}"})
-//    public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String prefix,
-//                                                                     @PathVariable String suffix) {
-//        String id = prefix + "/" + suffix;
-//        List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
-//        FacetFilter ff = new FacetFilter();
-//        ff.setQuantity(10000);
-//        ff.addFilter("published", false);
-//        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords = resourceInteroperabilityRecordService.getAll(ff, null).getResults();
-//        for (ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle : allResourceInteroperabilityRecords) {
-//            if (resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds().contains(id)) {
-//                allInteroperabilityRecordRelatedResources.add(resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getResourceId());
-//            }
-//        }
-//        return allInteroperabilityRecordRelatedResources;
-//    }
+    @Tag(name = "InteroperabilityRecordRead")
+    @Operation(summary = "Returns the Related Resources of a specific Interoperability Record given its id.")
+    @GetMapping(path = {"relatedResources/{prefix}/{suffix}"})
+    public List<String> getAllInteroperabilityRecordRelatedResources(@PathVariable String prefix,
+                                                                     @PathVariable String suffix) {
+        String id = prefix + "/" + suffix;
+        List<String> allInteroperabilityRecordRelatedResources = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(10000);
+        ff.addFilter("published", false);
+        List<ResourceInteroperabilityRecordBundle> allResourceInteroperabilityRecords =
+                rirService.getAll(ff, null).getResults();
+        for (ResourceInteroperabilityRecordBundle bundle : allResourceInteroperabilityRecords) {
+            Object idsObj = bundle.getResourceInteroperabilityRecord().get("interoperabilityRecordIds");
+            if (idsObj instanceof Collection<?>) {
+                if (((Collection<?>) idsObj).contains(id)) {
+                    allInteroperabilityRecordRelatedResources.add(
+                            (String) bundle.getResourceInteroperabilityRecord().get("resourceId")
+                    );
+                }
+            }
+        }
+        return allInteroperabilityRecordRelatedResources;
+    }
     //endregion
 
     //region Draft
