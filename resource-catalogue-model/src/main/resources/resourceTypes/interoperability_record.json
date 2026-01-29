@@ -12,7 +12,7 @@
       "label": "Catalogue ID",
       "multivalued": false,
       "name": "catalogue_id",
-      "path": "$.interoperabilityRecord.catalogueId",
+      "path": "$.catalogueId",
       "type": "java.lang.String"
     },
     {

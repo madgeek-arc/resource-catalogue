@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.domain;
+package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
+
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 
 import java.util.LinkedHashMap;
 

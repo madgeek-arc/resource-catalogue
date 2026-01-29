@@ -91,16 +91,6 @@ public class Metadata {
         return ret;
     }
 
-    public static Metadata createMetadata(String registeredBy, String originalId, String source, List<String> terms) {
-        Metadata metadata = new Metadata();
-        metadata.setRegisteredBy(registeredBy);
-        metadata.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(registeredBy);
-        metadata.setModifiedAt(metadata.getRegisteredAt());
-        metadata.setTerms(terms);
-        return metadata;
-    }
-
     public static List<String> adminAcceptedTerms(String userEmail) {
         List<String> acceptedList = new ArrayList<>();
         acceptedList.add(userEmail);

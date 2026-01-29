@@ -17,10 +17,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplate;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import org.springframework.util.MultiValueMap;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +30,12 @@ public interface ConfigurationTemplateService extends ResourceCatalogueGenericSe
     /**
      * Return all Configuration Templates under a specific Interoperability Record ID
      *
-     * @param allRequestParams         search parameters
+     * @param params                   search parameters
      * @param interoperabilityRecordId Interoperability Record ID
      * @return {@link Paging<ConfigurationTemplate>}
      */
-    Paging<ConfigurationTemplate> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> allRequestParams,
-                                                                   String interoperabilityRecordId);
+    Paging<LinkedHashMap<String, Object>> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
+                                                                           String interoperabilityRecordId);
 
     /**
      * Return a mapping of Interoperability Record ID to Configuration Template list.

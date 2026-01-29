@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.domain;
+package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
 
 
 import org.json.simple.JSONObject;
