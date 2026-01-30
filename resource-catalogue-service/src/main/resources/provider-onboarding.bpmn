@@ -20,7 +20,7 @@
           <zeebe:input source="=providerId" target="providerId" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
-          <zeebe:header key="status" value="pending provider" />
+          <zeebe:header key="status" value="pending" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_07azb67</bpmn:incoming>
@@ -41,7 +41,7 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0pjxq7p" sourceRef="Activity_1ewiokm" targetRef="Gateway_1cobda0" />
     <bpmn:sequenceFlow id="Flow_0r3bpfb" sourceRef="Gateway_1cobda0" targetRef="Activity_0rw2hqm">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=catalogue.status = "APPROVED"</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=catalogue.status = "approved"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="Activity_0rw2hqm" name="Set Status APPROVED" zeebe:modelerTemplate="provider-set-status-template" zeebe:modelerTemplateVersion="1">
       <bpmn:extensionElements>
@@ -50,7 +50,7 @@
           <zeebe:input source="=providerId" target="providerId" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
-          <zeebe:header key="status" value="approved provider" />
+          <zeebe:header key="status" value="approved" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0r3bpfb</bpmn:incoming>
@@ -58,7 +58,7 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_021h8ae" sourceRef="Activity_0rw2hqm" targetRef="EndEvent_ProviderOnboarding" />
     <bpmn:sequenceFlow id="Flow_04zkmmi" sourceRef="Gateway_1cobda0" targetRef="Activity_0ckopps">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=catalogue.status != "APPROVED"</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=catalogue.status != "approved"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="Activity_0ckopps" name="Throw Error">
       <bpmn:extensionElements>
