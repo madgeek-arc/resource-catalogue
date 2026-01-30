@@ -17,6 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import org.springframework.security.core.Authentication;
 
 public interface PublicResourceService<T> {
@@ -31,10 +33,17 @@ public interface PublicResourceService<T> {
     T get(String id, String catalogueId);
 
     /**
+     *
+     * @param ff FacetFilter
+     * @return {@link Browsing<T>}
+     */
+    Browsing<T> getAll(FacetFilter ff);
+
+    /**
      * Create Public resource
      *
      * @param resource Resource
-     * @param auth   Authentication
+     * @param auth     Authentication
      * @return {@link T}
      */
     T createPublicResource(T resource, Authentication auth);

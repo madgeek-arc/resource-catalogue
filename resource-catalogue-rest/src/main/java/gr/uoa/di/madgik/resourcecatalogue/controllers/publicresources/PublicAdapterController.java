@@ -21,7 +21,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,13 +46,10 @@ import java.util.Map;
 @Tag(name = "public adapter")
 public class PublicAdapterController {
 
-    private final AdapterService service;
-    private final PublicResourceService<AdapterBundle> publicService;
+    private final PublicResourceService<AdapterBundle> service;
 
-    public PublicAdapterController(AdapterService service,
-                                   PublicResourceService<AdapterBundle> publicService) {
+    public PublicAdapterController(PublicResourceService<AdapterBundle> service) {
         this.service = service;
-        this.publicService = publicService;
     }
 
     @Operation(description = "Returns the Public ADapter with the given id.")
@@ -64,12 +60,12 @@ public class PublicAdapterController {
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        AdapterBundle bundle = (AdapterBundle) publicService.get(id, catalogueId);
+        AdapterBundle bundle = (AdapterBundle) service.get(id, catalogueId);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getAdapter(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Adapter does not consist a Public entity"));
+                "The specific Adapter is not active"));
 
     }
 
@@ -81,7 +77,7 @@ public class PublicAdapterController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        AdapterBundle bundle = publicService.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -93,7 +89,6 @@ public class PublicAdapterController {
     public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<AdapterBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging.map(AdapterBundle::getAdapter));
@@ -107,7 +102,6 @@ public class PublicAdapterController {
     public ResponseEntity<Paging<AdapterBundle>> getAllBundles(@Parameter(hidden = true)
                                                                @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<AdapterBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
@@ -118,6 +112,6 @@ public class PublicAdapterController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<AdapterBundle> createPublicAdapter(@RequestBody AdapterBundle bundle,
                                                              @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(publicService.createPublicResource(bundle, auth));
+        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }

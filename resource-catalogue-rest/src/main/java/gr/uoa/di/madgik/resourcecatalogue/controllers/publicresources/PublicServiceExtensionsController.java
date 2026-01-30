@@ -79,7 +79,7 @@
 //            return new ResponseEntity<>(bundle.getHelpdesk(), HttpStatus.OK);
 //        }
 //        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-//                "The specific Helpdesk does not consist a Public entity"));
+//                "The specific Helpdesk is not active"));
 //    }
 //
 //    @GetMapping(path = "public/helpdesk/helpdeskBundle/{prefix}/{suffix}",
@@ -97,7 +97,7 @@
 //            return new ResponseEntity<>(bundle, HttpStatus.OK);
 //        }
 //        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-//                "The specific Helpdesk Bundle does not consist a Public entity"));
+//                "The specific Helpdesk Bundle is not active"));
 //    }
 //
 //    @Operation(description = "Get a list of all Public Helpdesks in the Catalogue, based on a set of filters.")
@@ -145,7 +145,7 @@
 //            return new ResponseEntity<>(bundle.getMonitoring(), HttpStatus.OK);
 //        }
 //        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-//                "The specific Monitoring does not consist a Public entity"));
+//                "The specific Monitoring is not active"));
 //    }
 //
 //    @GetMapping(path = "public/monitoring/monitoringBundle/{prefix}/{suffix}",
@@ -163,7 +163,7 @@
 //            return new ResponseEntity<>(bundle, HttpStatus.OK);
 //        }
 //        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-//                "The specific Monitoring Bundle does not consist a Public entity"));
+//                "The specific Monitoring Bundle is not active"));
 //    }
 //
 //    @Operation(description = "Get a list of all Public Monitorings in the Catalogue, based on a set of filters.")

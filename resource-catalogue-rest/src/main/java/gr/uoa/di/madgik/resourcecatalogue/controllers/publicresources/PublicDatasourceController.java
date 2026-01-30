@@ -21,7 +21,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,13 +46,10 @@ import java.util.Map;
 @Tag(name = "public datasource")
 public class PublicDatasourceController {
 
-    private final DatasourceService service;
-    private final PublicResourceService<DatasourceBundle> publicService;
+    private final PublicResourceService<DatasourceBundle> service;
 
-    public PublicDatasourceController(DatasourceService service,
-                                      PublicResourceService<DatasourceBundle> publicService) {
+    public PublicDatasourceController(PublicResourceService<DatasourceBundle> service) {
         this.service = service;
-        this.publicService = publicService;
     }
 
     //TODO: add pre-authorize?
@@ -64,12 +60,12 @@ public class PublicDatasourceController {
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = publicService.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id, catalogueId);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getDatasource(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Datasource does not consist a Public entity"));
+                "The specific Datasource is not active"));
     }
 
     //TODO: change path -> notify cyf
@@ -81,7 +77,7 @@ public class PublicDatasourceController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = publicService.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -93,7 +89,6 @@ public class PublicDatasourceController {
     public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<DatasourceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging.map(DatasourceBundle::getDatasource));
@@ -108,7 +103,6 @@ public class PublicDatasourceController {
     public ResponseEntity<Paging<DatasourceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<DatasourceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
@@ -119,6 +113,6 @@ public class PublicDatasourceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DatasourceBundle> createPublicService(@RequestBody DatasourceBundle bundle,
                                                                 @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(publicService.createPublicResource(bundle, auth));
+        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }

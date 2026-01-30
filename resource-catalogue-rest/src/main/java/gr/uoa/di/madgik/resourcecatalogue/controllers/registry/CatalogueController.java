@@ -131,7 +131,7 @@ public class CatalogueController {
 //
 //    @BrowseParameters
 //    @Operation(summary = "Get a list of all Catalogues in the Portal.")
-//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+//    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
 //    @GetMapping(path = "all")
 //    public ResponseEntity<Paging<Catalogue>> getAllCatalogues(@Parameter(hidden = true)
 //                                                              @RequestParam MultiValueMap<String, Object> params,
@@ -193,7 +193,7 @@ public class CatalogueController {
 //    @Hidden
 //    @BrowseParameters
 //    @Operation(summary = "Get a list of all Catalogues Bundles in the Portal.")
-//    @Parameter(name = "suspended", description = "Suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
+//    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false")))
 //    @GetMapping(path = "bundle/all")
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
 //    public ResponseEntity<Paging<CatalogueBundle>> getAllCatalogueBundles(@Parameter(hidden = true)

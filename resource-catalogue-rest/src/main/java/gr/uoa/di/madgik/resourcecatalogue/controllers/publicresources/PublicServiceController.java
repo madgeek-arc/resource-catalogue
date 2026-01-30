@@ -6,7 +6,6 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,13 +30,10 @@ import java.util.Map;
 @Tag(name = "public service")
 public class PublicServiceController {
 
-    private final ServiceService service;
-    private final PublicResourceService<ServiceBundle> publicService;
+    private final PublicResourceService<ServiceBundle> service;
 
-    public PublicServiceController(ServiceService service,
-                                   PublicResourceService<ServiceBundle> publicService) {
+    public PublicServiceController(PublicResourceService<ServiceBundle> service) {
         this.service = service;
-        this.publicService = publicService;
     }
 
     @Operation(description = "Returns the Public Service with the given id.")
@@ -50,12 +46,12 @@ public class PublicServiceController {
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = publicService.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id, catalogueId);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Service does not consist a Public entity"));
+                "The specific Service is not active"));
     }
 
     //TODO: change path -> notify cyf
@@ -67,7 +63,7 @@ public class PublicServiceController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = publicService.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -79,7 +75,6 @@ public class PublicServiceController {
     public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<ServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
@@ -89,12 +84,11 @@ public class PublicServiceController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/service/adminPage/all") //TODO: rename this ugliness - SOS external teams use it SOS
+    @GetMapping(path = "public/service/adminPage/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                  @RequestParam MultiValueMap<String, Object> params) {
+                                                               @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<ServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
@@ -105,6 +99,6 @@ public class PublicServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ServiceBundle> createPublicService(@RequestBody ServiceBundle bundle,
                                                              @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(publicService.createPublicResource(bundle, auth));
+        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }

@@ -21,7 +21,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.DeployableServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,13 +46,10 @@ import java.util.Map;
 @Tag(name = "public deployable service")
 public class PublicDeployableServiceController {
 
-    private final DeployableServiceService service;
-    private final PublicResourceService<DeployableServiceBundle> publicService;
+    private final PublicResourceService<DeployableServiceBundle> service;
 
-    public PublicDeployableServiceController(DeployableServiceService service,
-                                             PublicResourceService<DeployableServiceBundle> publicService) {
+    public PublicDeployableServiceController(PublicResourceService<DeployableServiceBundle> service) {
         this.service = service;
-        this.publicService = publicService;
     }
 
     @Operation(description = "Returns the Public Deployable Service with the given id.")
@@ -66,12 +62,12 @@ public class PublicDeployableServiceController {
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = publicService.get(id, catalogueId);
+        DeployableServiceBundle bundle = service.get(id, catalogueId);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getDeployableService(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Deployable Service does not consist a Public entity"));
+                "The specific Deployable Service is not active"));
     }
 
     @GetMapping(path = "public/deployableService/bundle/{prefix}/{suffix}")
@@ -82,7 +78,7 @@ public class PublicDeployableServiceController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = publicService.get(id, catalogueId);
+        DeployableServiceBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -94,7 +90,6 @@ public class PublicDeployableServiceController {
     public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<DeployableServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging.map(DeployableServiceBundle::getDeployableService));
@@ -108,7 +103,6 @@ public class PublicDeployableServiceController {
     public ResponseEntity<Paging<DeployableServiceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                          @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<DeployableServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
@@ -119,6 +113,6 @@ public class PublicDeployableServiceController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DeployableServiceBundle> createPublicDeployableService(@RequestBody DeployableServiceBundle bundle,
                                                                                  @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(publicService.createPublicResource(bundle, auth));
+        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }
