@@ -30,6 +30,7 @@ import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +57,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private final IdCreator idCreator;
     private final SecurityService securityService;
     private final GenericResourceService genericResourceService;
+    private final RelationshipValidator relationshipValidator;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -68,7 +70,8 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                              OpenAIREDatasourceManager openAIREDatasourceManager,
                              IdCreator idCreator,
                              GenericResourceService genericResourceService,
-                             SecurityService securityService) {
+                             SecurityService securityService,
+                             RelationshipValidator relationshipValidator) {
         super(genericResourceService, securityService);
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;
@@ -77,6 +80,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.genericResourceService = genericResourceService;
+        this.relationshipValidator = relationshipValidator;
     }
 
     @Override
@@ -117,7 +121,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     private void onboardingValidation(DatasourceBundle datasource, ProviderBundle provider) {
-//        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
+        relationshipValidator.checkRelatedResourceIDsConsistency(datasource);
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
@@ -141,7 +145,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
             return datasource;
         }
         datasource.markUpdate(auth, comment);
-//        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
+        relationshipValidator.checkRelatedResourceIDsConsistency(datasource);
         checkAndResetDatasourceOnboarding(datasource, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
@@ -173,7 +177,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     @Transactional
     public void delete(DatasourceBundle bundle) {
         commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
-//        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName()); //FIXME
+        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
         logger.info("Deleting Datasource: {} and all its Resource Interoperability Records", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }

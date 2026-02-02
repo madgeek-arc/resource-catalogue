@@ -34,7 +34,7 @@
 //import java.util.ArrayList;
 //import java.util.List;
 //
- //TODO: DELETE
+//TODO: TO BE DELETED
 //@Service("draftProviderManager")
 //public class DraftProviderManager extends ResourceCatalogueManager<ProviderBundle> implements DraftResourceService<ProviderBundle> {
 //

@@ -16,7 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
 
@@ -127,6 +130,13 @@ public interface SecurityService {
      * @return True if service is active
      */
     boolean serviceIsActive(String id, String catalogueId);
+
+    /**
+     * @param id          datasource id
+     * @param catalogueId catalogue id
+     * @return True if datasource is active
+     */
+    boolean datasourceIsActive(String id, String catalogueId);
 
     /**
      * @param id          deployable service id

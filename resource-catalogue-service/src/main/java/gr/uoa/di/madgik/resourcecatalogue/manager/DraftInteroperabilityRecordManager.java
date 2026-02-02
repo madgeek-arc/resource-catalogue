@@ -34,7 +34,8 @@
 //
 //import java.util.ArrayList;
 //import java.util.List;
-//
+
+//TODO: TO BE DELETED
 //@Service("draftInteroperabilityRecordManager")
 //public class DraftInteroperabilityRecordManager extends ResourceCatalogueManager<InteroperabilityRecordBundle> implements DraftResourceService<InteroperabilityRecordBundle> {
 //

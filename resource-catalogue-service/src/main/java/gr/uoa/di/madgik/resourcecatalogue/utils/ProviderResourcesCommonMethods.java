@@ -19,8 +19,10 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
+import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +30,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -43,13 +44,16 @@ public class ProviderResourcesCommonMethods {
     private final ProviderService providerService;
     private final VocabularyService vocabularyService;
     private final IdCreator idCreator;
+    private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
 
     public ProviderResourcesCommonMethods(@Lazy ProviderService providerService,
                                           @Lazy VocabularyService vocabularyService,
-                                          @Lazy IdCreator idCreator) {
+                                          @Lazy IdCreator idCreator,
+                                          @Lazy ResourceInteroperabilityRecordService resourceInteroperabilityRecordService) {
         this.providerService = providerService;
         this.vocabularyService = vocabularyService;
         this.idCreator = idCreator;
+        this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }
 
     //FIXME
@@ -68,13 +72,17 @@ public class ProviderResourcesCommonMethods {
 //        }
 //    }
 
-    //TODO: move to Resource Catalogue specific validation file
-    //FIXME
-//    public void suspensionValidation(Bundle<?> bundle, String catalogueId, String providerId, boolean suspend, Authentication auth) {
-//        if (bundle.getMetadata().isPublished()) {
-//            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
-//        }
-//
+    public void suspensionValidation(Bundle bundle, String catalogueId, String providerId, boolean suspend) {
+        if (bundle.getMetadata().isPublished()) {
+            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
+        }
+        ProviderBundle providerBundle = providerService.get(providerId, catalogueId);
+        if (providerBundle.isSuspended() && !suspend) {
+            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
+                    HttpStatus.CONFLICT);
+        }
+
+        //TODO: enable if Catalogues return.
 //        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
 //        if (bundle instanceof ProviderBundle) {
 //            if (catalogueBundle.isSuspended() && !suspend) {
@@ -90,26 +98,6 @@ public class ProviderResourcesCommonMethods {
 //                }
 //            }
 //        }
-//    }
-
-
-    public List<LoggingInfo> returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(Bundle bundle, Authentication auth) {
-        List<LoggingInfo> loggingInfoList = new ArrayList<>();
-        if (bundle.getLoggingInfo() != null && !bundle.getLoggingInfo().isEmpty()) {
-            loggingInfoList = bundle.getLoggingInfo();
-        } else {
-            loggingInfoList.add(createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                    LoggingInfo.ActionType.REGISTERED.getKey()));
-        }
-        return loggingInfoList;
-    }
-
-    public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType) {
-        return createLoggingInfo(auth, type, actionType, null);
-    }
-
-    public LoggingInfo createLoggingInfo(Authentication auth, String type, String actionType, String comment) {
-        return LoggingInfo.createLoggingInfoEntry(UserInfo.of(auth), type, actionType, comment);
     }
 
     public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
@@ -132,69 +120,18 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    //FIXME
-//    public void deleteResourceInteroperabilityRecords(String resourceId, String resourceType) {
-//        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = resourceInteroperabilityRecordService.getWithResourceId(resourceId);
-//        if (resourceInteroperabilityRecordBundle != null) {
-//            try {
-//                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
-//                resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
-//            } catch (ResourceNotFoundException e) {
-//                logger.error(e.getMessage(), e);
-//            }
-//        }
-//    }
-
-    public LoggingInfo setLatestLoggingInfo(List<LoggingInfo> loggingInfoList, String loggingInfoType) {
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-        for (LoggingInfo loggingInfo : loggingInfoList) {
-            if (loggingInfo.getType().equals(loggingInfoType)) {
-                return loggingInfo;
+    public void deleteResourceInteroperabilityRecords(String resourceId, String resourceType) {
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle =
+                resourceInteroperabilityRecordService.getByResourceId(resourceId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
+                resourceInteroperabilityRecordService.delete(resourceInteroperabilityRecordBundle);
+            } catch (ResourceNotFoundException e) {
+                logger.error(e.getMessage(), e);
             }
         }
-        return null;
     }
-
-//    public String determineAuditState(List<LoggingInfo> loggingInfoList) {
-//        List<LoggingInfo> sorted = new ArrayList<>(loggingInfoList);
-//        sorted.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-//        boolean hasBeenAudited = false;
-//        boolean hasBeenUpdatedAfterAudit = false;
-//        String auditActionType = "";
-//        int auditIndex = -1;
-//        for (LoggingInfo loggingInfo : sorted) {
-//            auditIndex++;
-//            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
-//                hasBeenAudited = true;
-//                auditActionType = loggingInfo.getActionType();
-//                break;
-//            }
-//        }
-//        // update after audit
-//        if (hasBeenAudited) {
-//            for (int i = 0; i < auditIndex; i++) {
-//                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())) {
-//                    hasBeenUpdatedAfterAudit = true;
-//                    break;
-//                }
-//            }
-//        }
-//
-//        String auditState;
-//        if (!hasBeenAudited) {
-//            auditState = Auditable.NOT_AUDITED;
-//        } else if (!hasBeenUpdatedAfterAudit) {
-//            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
-//                    Auditable.INVALID_AND_NOT_UPDATED :
-//                    Auditable.VALID;
-//        } else {
-//            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
-//                    Auditable.INVALID_AND_UPDATED :
-//                    Auditable.VALID;
-//        }
-//
-//        return auditState;
-//    }
 
     public void addAuthenticatedUser(Object object, Authentication auth) {
         User authUser = User.of(auth);

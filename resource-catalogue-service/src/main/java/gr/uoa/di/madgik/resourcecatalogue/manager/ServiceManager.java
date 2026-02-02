@@ -58,6 +58,8 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
+    private final RelationshipValidator relationshipValidator;
+    private final ModelService modelService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -72,13 +74,16 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 //                          @Qualifier("serviceValidator") Validator serviceValidator,
                           FacetLabelService facetLabelService,
                           GenericResourceService genericResourceService,
-                          @Lazy RelationshipValidator relationshipValidator, ModelService modelService) {
+                          @Lazy RelationshipValidator relationshipValidator,
+                          ModelService modelService) {
         super(genericResourceService, securityService);
         this.providerService = providerService; // for providers
         this.idCreator = idCreator;
         this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
+        this.modelService = modelService;
+        this.relationshipValidator = relationshipValidator;
     }
 
     @Override
@@ -119,7 +124,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     private void onboardingValidation(ServiceBundle service, ProviderBundle provider) {
-//        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
+        relationshipValidator.checkRelatedResourceIDsConsistency(service);
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
@@ -143,7 +148,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
             return service;
         }
         service.markUpdate(auth, comment);
-//        relationshipValidator.checkRelatedResourceIDsConsistency(service); //FIXME
+        relationshipValidator.checkRelatedResourceIDsConsistency(service);
         checkAndResetServiceOnboarding(service, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
@@ -175,7 +180,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     @Transactional
     public void delete(ServiceBundle bundle) {
         commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
-//        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName()); //FIXME
+        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
         logger.info("Deleting Service: {} and all its Resource Interoperability Records", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }

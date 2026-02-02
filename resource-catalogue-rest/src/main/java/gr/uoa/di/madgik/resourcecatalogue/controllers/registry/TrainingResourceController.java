@@ -107,7 +107,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @BrowseCatalogue
     @Parameters({
             @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true))),
-            @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean")))
+            @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
     @GetMapping(path = "adminPage/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")

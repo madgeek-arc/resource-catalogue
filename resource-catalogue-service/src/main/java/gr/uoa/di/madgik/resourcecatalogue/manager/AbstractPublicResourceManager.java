@@ -54,12 +54,13 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
                 new SearchService.KeyValue("published", "true"));
     }
 
-    public Browsing<T> getAll(FacetFilter facetFilter, Authentication authentication) {
-        Browsing<T> browsing = genericResourceService.getResults(facetFilter);
+    public Browsing<T> getAll(FacetFilter ff) {
+        ff.setResourceType(getResourceTypeName());
+        Browsing<T> browsing = genericResourceService.getResults(ff);
         //TODO: test if we need this
-//        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
-//            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
-//        }
+        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
+            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+        }
         return browsing;
     }
 

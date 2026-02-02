@@ -21,7 +21,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,13 +46,10 @@ import java.util.Map;
 @Tag(name = "public provider")
 public class PublicProviderController {
 
-    private final ProviderService service;
-    private final PublicResourceService<ProviderBundle> publicService;
+    private final PublicResourceService<ProviderBundle> service;
 
-    public PublicProviderController(ProviderService service,
-                                    PublicResourceService<ProviderBundle> publicService) {
+    public PublicProviderController(PublicResourceService<ProviderBundle> service) {
         this.service = service;
-        this.publicService = publicService;
     }
 
     @Operation(description = "Returns the Public Provider with the given id.")
@@ -64,12 +60,12 @@ public class PublicProviderController {
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle bundle = (ProviderBundle) publicService.get(id, catalogueId);
+        ProviderBundle bundle = service.get(id, catalogueId);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Provider does not consist a Public entity"));
+                "The specific Provider is not active"));
 
     }
 
@@ -81,7 +77,7 @@ public class PublicProviderController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle bundle = publicService.get(id, catalogueId);
+        ProviderBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -93,7 +89,6 @@ public class PublicProviderController {
     public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<ProviderBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging.map(ProviderBundle::getProvider));
@@ -107,7 +102,6 @@ public class PublicProviderController {
     public ResponseEntity<Paging<ProviderBundle>> getAllBundles(@Parameter(hidden = true)
                                                                 @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
         ff.addFilter("active", true);
         Paging<ProviderBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
@@ -118,6 +112,6 @@ public class PublicProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> createPublicProvider(@RequestBody ProviderBundle bundle,
                                                                @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(publicService.createPublicResource(bundle, auth));
+        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }
