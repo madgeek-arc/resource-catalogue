@@ -72,15 +72,15 @@ public class ProviderResourcesCommonMethods {
 //        }
 //    }
 
-    public void suspensionValidation(Bundle bundle, String catalogueId, String providerId, boolean suspend) {
-        if (bundle.getMetadata().isPublished()) {
-            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
-        }
-        ProviderBundle providerBundle = providerService.get(providerId, catalogueId);
-        if (providerBundle.isSuspended() && !suspend) {
-            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
-                    HttpStatus.CONFLICT);
-        }
+//    public void suspensionValidation(Bundle bundle, String catalogueId, String providerId, boolean suspend) {
+//        if (bundle.getMetadata().isPublished()) {
+//            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
+//        }
+//        ProviderBundle providerBundle = providerService.get(providerId, catalogueId);
+//        if (providerBundle.isSuspended() && !suspend) {
+//            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
+//                    HttpStatus.CONFLICT);
+//        }
 
         //TODO: enable if Catalogues return.
 //        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
@@ -98,7 +98,7 @@ public class ProviderResourcesCommonMethods {
 //                }
 //            }
 //        }
-    }
+//    }
 
     public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();

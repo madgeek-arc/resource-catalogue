@@ -3,7 +3,6 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import org.springframework.security.core.Authentication;
 
 public interface TermsService {
-    //TODO: do we need isDraft param for terms?
     /**
      * Has an Authenticated User accepted the Terms & Conditions
      *

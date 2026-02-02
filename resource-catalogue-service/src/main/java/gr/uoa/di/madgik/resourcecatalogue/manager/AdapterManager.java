@@ -159,7 +159,6 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     @Override
     public AdapterBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         AdapterBundle bundle = get(id, catalogueId);
-        commonMethods.suspensionValidation(bundle, catalogueId, id, suspend);
 
         logger.info("Suspending Adapter: {} and all its Resources", bundle.getId());
         bundle.markSuspend(suspend, auth);
