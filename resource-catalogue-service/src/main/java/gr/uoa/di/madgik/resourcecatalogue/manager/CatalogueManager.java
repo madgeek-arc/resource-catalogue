@@ -89,7 +89,8 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
 
     @Override
     public CatalogueBundle get(String id) {
-        CatalogueBundle catalogue = super.get(id);
+//        CatalogueBundle catalogue = super.get(id);
+        CatalogueBundle catalogue = genericResourceService.get(getResourceTypeName(), id);
         //FIXME: never reaches here
         if (catalogue == null) {
             throw new ResourceNotFoundException(id, "Catalogue");

@@ -16,14 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
-import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,6 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -56,6 +55,10 @@ public class CatalogueController {
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final AdapterService adapterService;
+    private final CatalogueService catalogueManager;
+
+    @Autowired
+    GenericResourceService genericResourceService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -63,11 +66,13 @@ public class CatalogueController {
     CatalogueController(ProviderService providerService,
                         ServiceService serviceService,
                         DatasourceService datasourceService,
-                        AdapterService adapterService) {
+                        AdapterService adapterService,
+                        CatalogueService catalogueManager) {
         this.providerService = providerService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.adapterService = adapterService;
+        this.catalogueManager = catalogueManager;
     }
 
     //region Catalogue
@@ -79,15 +84,17 @@ public class CatalogueController {
 //        return new ResponseEntity<>(catalogue, HttpStatus.OK);
 //    }
 //
-//    @Operation(summary = "Creates a new Catalogue.")
-//    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+    @Operation(summary = "Creates a new Catalogue.")
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_USER')")
-//    public ResponseEntity<Catalogue> addCatalogue(@RequestBody Catalogue catalogue,
-//                                                  @Parameter(hidden = true) Authentication auth) {
-//        CatalogueBundle catalogueBundle = catalogueManager.add(new CatalogueBundle(catalogue), auth);
+    public ResponseEntity<?> addCatalogue(@RequestBody LinkedHashMap catalogue,
+                                                  @Parameter(hidden = true) Authentication auth) {
+        CatalogueBundle catalogueBundle = new CatalogueBundle();
+        catalogueBundle.setCatalogue(catalogue);
+        catalogueBundle = genericResourceService.add("catalogue", catalogueBundle);
 //        logger.info("Added the Catalogue with name '{}' and id '{}'", catalogue.getName(), catalogue.getId());
-//        return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.CREATED);
-//    }
+        return new ResponseEntity<>(catalogueBundle.getCatalogue(), HttpStatus.CREATED);
+    }
 //
 //    @Hidden
 //    @Operation(summary = "Creates a new Catalogue Bundle.")
