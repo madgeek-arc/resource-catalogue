@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +52,7 @@ public class ReferenceDataController<T extends Bundle> {
 
     @Hidden
     @GetMapping(path = "idToNameMap")
-    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> idToNameMap(@RequestParam String catalogueId,
+    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> idToNameMap(@RequestParam (defaultValue = "${catalogue.id}") String catalogueId,
                                                                           @RequestParam String resourceType) {
         List<Bundle> bundles = Stream.concat(
                 genericResourceService.getResults(createFacetFilter(catalogueId, false, resourceType))
