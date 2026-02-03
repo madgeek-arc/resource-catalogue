@@ -1,8 +1,8 @@
 {
   "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
-  "name": "Set Resource Status",
-  "id": "set-status-template",
-  "description": "Sets the resource status in your catalogue via the set-status worker.",
+  "name": "Persist Resource's Status",
+  "id": "persist-status-template",
+  "description": "Updates and persists the resource status in your catalogue via the resource-status.persist worker.",
   "version": 1,
   "appliesTo": ["bpmn:Task"],
   "elementType": {
@@ -16,7 +16,7 @@
     {
       "label": "Job Type",
       "type": "Hidden",
-      "value": "set-status",
+      "value": "resource-status.persist",
       "binding": { "type": "zeebe:taskDefinition:type" },
       "group": "exec"
     },

@@ -7,7 +7,7 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0eqhnba</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Activity_0k7km6s" name="Get Service By Id" zeebe:modelerTemplate="get-resource-template" zeebe:modelerTemplateVersion="1">
+    <bpmn:serviceTask id="Activity_0k7km6s" name="Get Resource By Id" zeebe:modelerTemplate="get-resource-template" zeebe:modelerTemplateVersion="1">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="get-resource" />
         <zeebe:ioMapping>
@@ -15,7 +15,8 @@
           <zeebe:output source="=resource" target="resource" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
-          <zeebe:header key="resourceType" value="service" />
+          <zeebe:header key="resourceName" value="resource" />
+          <zeebe:header key="resourceType" value="catalogue" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0eqhnba</bpmn:incoming>
@@ -25,14 +26,15 @@
     <bpmn:sequenceFlow id="Flow_1lj2ebh" sourceRef="Activity_0k7km6s" targetRef="Activity_0ltovo2" />
     <bpmn:serviceTask id="Activity_0ltovo2" name="Set Rejected" zeebe:modelerTemplate="set-status-template" zeebe:modelerTemplateVersion="1">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="set-status" />
+        <zeebe:taskDefinition type="resource-status.apply" />
         <zeebe:ioMapping>
-          <zeebe:input source="=id" target="id" />
-          <zeebe:input source="=resource" target="bundle" />
+          <zeebe:input source="=resource" target="resource" />
+          <zeebe:output source="=resource" target="resource" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
-          <zeebe:header key="status" value="rejected provider" />
           <zeebe:header key="active" value="true" />
+          <zeebe:header key="resourceName" value="resource" />
+          <zeebe:header key="status" value="rejected" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1lj2ebh</bpmn:incoming>
@@ -58,6 +60,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_038uhm1_di" bpmnElement="Event_038uhm1">
         <dc:Bounds x="622" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="615" y="145" width="50" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0eqhnba_di" bpmnElement="Flow_0eqhnba">
         <di:waypoint x="218" y="120" />

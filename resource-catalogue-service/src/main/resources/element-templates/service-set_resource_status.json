@@ -1,23 +1,30 @@
 {
   "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
-  "name": "Set Provider Status",
-  "id": "provider-set-status-template",
-  "description": "Sets the provider status in your catalogue via the provider-set-status worker.",
+  "name": "Set Status",
+  "id": "set-status-template",
+  "description": "Sets the provider status in your catalog via the resource-status.apply worker.",
   "version": 1,
   "appliesTo": ["bpmn:Task"],
   "elementType": {
     "value": "bpmn:ServiceTask"
   },
   "groups": [
-    { "id": "exec", "label": "Execution" },
-    { "id": "io",   "label": "Inputs" }
+    { "id": "exec", "label": "Execution" }
   ],
   "properties": [
     {
       "label": "Job Type",
       "type": "Hidden",
-      "value": "provider-set-status",
+      "value": "resource-status.apply",
       "binding": { "type": "zeebe:taskDefinition:type" },
+      "group": "exec"
+    },
+    {
+      "label": "Resource name variable",
+      "type": "String",
+      "value": "resource",
+      "binding": { "type": "zeebe:taskHeader", "key": "resourceName" },
+      "constraints": { "notEmpty": true },
       "group": "exec"
     },
     {
@@ -33,13 +40,12 @@
       "group": "exec"
     },
     {
-      "label": "Provider Id",
+      "label": "Resource (output variable)",
       "type": "String",
-      "binding": { "type": "zeebe:input", "name": "providerId" },
-      "constraints": { "notEmpty": true },
-      "feel": "required",
-      "value": "=providerId",
-      "group": "io"
+      "binding": { "type": "zeebe:output", "source": "=resource" },
+      "value": "resource",
+      "description": "Process variable name that will hold the fetched resource",
+      "constraints": { "notEmpty": true }
     }
   ]
 }
