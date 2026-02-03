@@ -29,6 +29,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -102,14 +103,15 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     private void onboard(ProviderBundle bundle, Authentication auth) {
         String catalogueId = bundle.getCatalogueId();
+        UserInfo user = UserInfo.of(auth);
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            bundle.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             bundle.setCatalogueId(this.catalogueId);
             bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
             commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
             bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
-            bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
             idCreator.validateId(bundle.getId());
@@ -128,7 +130,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(auth, comment);
+        bundle.markUpdate(UserInfo.of(auth), comment);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
@@ -163,7 +165,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         ProviderBundle existing = get(id);
-        existing.markOnboard(status, active, auth, null);
+        existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         logger.info("Verifying Provider: {}", existing);
         try {
@@ -182,7 +184,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
             throw new ValidationException("You cannot activate this Provider, because it is not yet approved.");
         }
 
-        existing.markActive(active, auth);
+        existing.markActive(active, UserInfo.of(auth));
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -384,7 +386,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     @Override
     public ProviderBundle updateDraft(ProviderBundle bundle, Authentication auth) {
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
         try {
             ProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
@@ -400,7 +402,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     @Override
     public ProviderBundle finalizeDraft(ProviderBundle bundle, Authentication auth) {
-        bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+        bundle.markOnboard(vocabularyService.get("pending").getId(), false, UserInfo.of(auth), null);
         bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
 
         bundle = update(bundle, auth);

@@ -27,6 +27,7 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -96,7 +97,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         String catalogueId = guideline.getCatalogueId();
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             if (provider.getStatus().equals("approved")) {
-                guideline.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+                guideline.markOnboard(vocabularyService.get("pending").getId(), false, UserInfo.of(auth), null);
                 guideline.setActive(true);
             } else {
                 throw new ResourceException(String.format("The Provider '%s' you provided as a Owner " +
@@ -106,7 +107,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
             commonMethods.createIdentifiers(guideline, getResourceTypeName(), false);
             guideline.setId(guideline.getIdentifiers().getOriginalId());
         } else {
-            guideline.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            guideline.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(guideline.getId());
             commonMethods.createIdentifiers(guideline, getResourceTypeName(), true);
@@ -121,7 +122,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         if (guideline.equals(existing)) {
             return guideline;
         }
-        guideline.markUpdate(auth, comment);
+        guideline.markUpdate(UserInfo.of(auth), comment);
 
         blockNamingAsEOSCMonitoringGuideline((String) guideline.getInteroperabilityRecord().get("name"));
         try {
@@ -145,7 +146,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         InteroperabilityRecordBundle existing = get(id);
-        existing.markOnboard(status, active, auth, null);
+        existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         logger.info("Verifying Interoperability Record: {}", existing);
         try {
@@ -170,7 +171,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
             throw new ValidationException("You cannot activate this Interoperability Record, because it is not yet approved.");
         }
 
-        existing.markActive(active, auth);
+        existing.markActive(active, UserInfo.of(auth));
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -273,7 +274,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     @Override
     public InteroperabilityRecordBundle updateDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
         try {
             InteroperabilityRecordBundle ret = genericResourceService.update(getResourceTypeName(),
                     bundle.getId(), bundle, false);
@@ -292,10 +293,11 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     public InteroperabilityRecordBundle finalizeDraft(InteroperabilityRecordBundle guideline, Authentication auth) {
         ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("owner"),
                 guideline.getCatalogueId());
+        UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {
-            guideline.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            guideline.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
         } else {
-            guideline.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            guideline.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
         }
         guideline = update(guideline, auth);
 

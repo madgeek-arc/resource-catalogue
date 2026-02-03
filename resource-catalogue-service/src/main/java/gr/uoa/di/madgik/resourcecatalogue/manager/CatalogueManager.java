@@ -27,6 +27,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -184,7 +185,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
             return catalogueBundle;
         }
 
-        catalogueBundle.markUpdate(auth, comment);
+        catalogueBundle.markUpdate(UserInfo.of(auth), comment);
 
         logger.debug("Updating Catalogue: {}", catalogueBundle);
 
@@ -351,7 +352,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
         }
         logger.trace("verifyCatalogue with id: '{}' | status: '{}' | active: '{}'", id, status, active);
         CatalogueBundle existingCatalogue = get(id);
-        existingCatalogue.markOnboard(status, active, auth, null);
+        existingCatalogue.markOnboard(status, active, UserInfo.of(auth), null);
 
         logger.info("Verifying Catalogue: {}", existingCatalogue);
         return super.update(existingCatalogue, auth);
@@ -365,7 +366,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
             throw new ResourceException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]",
                     existingCatalogue.getStatus()), HttpStatus.CONFLICT);
         }
-        existingCatalogue.markActive(active, auth);
+        existingCatalogue.markActive(active, UserInfo.of(auth));
         return super.update(existingCatalogue, auth);
     }
 

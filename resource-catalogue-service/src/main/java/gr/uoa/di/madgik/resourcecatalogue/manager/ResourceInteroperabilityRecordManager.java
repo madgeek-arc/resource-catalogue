@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
@@ -97,7 +98,7 @@ public class ResourceInteroperabilityRecordManager implements ResourceInteropera
         validate(bundle, resourceType);
         relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
 
-        bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+        bundle.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         bundle.setActive(true);
         bundle.setCatalogueId(this.catalogueId);
         commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
@@ -113,7 +114,7 @@ public class ResourceInteroperabilityRecordManager implements ResourceInteropera
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(auth, comment);
+        bundle.markUpdate(UserInfo.of(auth), comment);
         relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
 
         try {

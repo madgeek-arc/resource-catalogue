@@ -29,6 +29,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
@@ -104,18 +105,19 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     private void onboard(ServiceBundle service, ProviderBundle provider, Authentication auth) {
         String catalogueId = service.getCatalogueId();
+        UserInfo user = UserInfo.of(auth);
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             if (provider.getTemplateStatus().equals("approved template")) {
-                service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+                service.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
                 service.setActive(true);
             } else {
-                service.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+                service.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             }
             service.setCatalogueId(this.catalogueId);
             commonMethods.createIdentifiers(service, getResourceTypeName(), false);
             service.setId(service.getIdentifiers().getOriginalId());
         } else {
-            service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            service.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(service.getId());
             commonMethods.createIdentifiers(service, getResourceTypeName(), true);
@@ -147,7 +149,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         if (service.equals(existing)) {
             return service;
         }
-        service.markUpdate(auth, comment);
+        service.markUpdate(UserInfo.of(auth), comment);
         relationshipValidator.checkRelatedResourceIDsConsistency(service);
         checkAndResetServiceOnboarding(service, auth);
 
@@ -192,7 +194,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         ServiceBundle existing = get(id);
-        existing.markOnboard(status, active, auth, null);
+        existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         updateProviderTemplateStatus(existing, status, auth);
 
@@ -237,7 +239,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
             throw new ValidationException("You cannot activate this Service, because it is not yet approved.");
         }
 
-        existing.markActive(active, auth);
+        existing.markActive(active, UserInfo.of(auth));
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -398,7 +400,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     @Override
     public ServiceBundle updateDraft(ServiceBundle bundle, Authentication auth) {
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
         try {
             ServiceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
@@ -416,10 +418,11 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     public ServiceBundle finalizeDraft(ServiceBundle service, Authentication auth) {
         ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
                 service.getCatalogueId());
+        UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {
-            service.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            service.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
         } else {
-            service.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            service.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
         }
         service = update(service, auth);
 

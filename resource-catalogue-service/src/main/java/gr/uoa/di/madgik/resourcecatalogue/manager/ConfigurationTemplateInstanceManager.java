@@ -27,6 +27,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -81,7 +82,7 @@ public class ConfigurationTemplateInstanceManager implements ConfigurationTempla
         checkResourceIdAndConfigurationTemplateIdConsistency(cti, auth);
         validateInstanceAgainstTemplate(cti);
 
-        cti.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+        cti.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         cti.setActive(true);
         cti.setCatalogueId(this.catalogueId);
         commonMethods.createIdentifiers(cti, getResourceTypeName(), false);
@@ -97,7 +98,7 @@ public class ConfigurationTemplateInstanceManager implements ConfigurationTempla
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
 
         // block user from updating resourceId
         if (!bundle.getConfigurationTemplateInstance().get("resourceId").equals(existing.getConfigurationTemplateInstance().get("resourceId")) &&

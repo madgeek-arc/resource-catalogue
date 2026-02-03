@@ -56,9 +56,8 @@ public class Bundle {
     public Bundle() {
     }
 
-    public void markOnboard(String status, boolean active, Authentication auth, String comment) {
+    public void markOnboard(String status, boolean active, UserInfo user, String comment) {
         if (!Objects.equals(status, this.status)) { // status changed
-            UserInfo user = UserInfo.of(auth);
             this.setStatus(status);
 
             this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
@@ -95,11 +94,10 @@ public class Bundle {
                 this.getLoggingInfo().add(onboardingInfo);
             }
         }
-        markActive(active, auth);
+        markActive(active, user);
     }
 
-    public void markUpdate(Authentication auth, String comment) {
-        UserInfo user = UserInfo.of(auth);
+    public void markUpdate(UserInfo user, String comment) {
         this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
         LoggingInfo updateInfo;
         updateInfo = LoggingInfo.createLoggingInfoEntry(
@@ -113,9 +111,8 @@ public class Bundle {
         this.determineAuditState();
     }
 
-    public void markActive(boolean active, Authentication auth) {
+    public void markActive(boolean active, UserInfo user) {
         if (active != this.active) {
-            UserInfo user = UserInfo.of(auth);
             this.setActive(active);
             this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
 
@@ -126,7 +123,7 @@ public class Bundle {
             }
             try {
                 info = LoggingInfo.createLoggingInfoEntry(
-                        UserInfo.of(auth),
+                        user,
                         LoggingInfo.Types.UPDATE.getKey(),
                         type.getKey(),
                         null

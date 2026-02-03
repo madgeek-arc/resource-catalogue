@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -95,18 +96,19 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     private void onboard(TrainingResourceBundle trainingResource, ProviderBundle provider, Authentication auth) {
         String catalogueId = trainingResource.getCatalogueId();
+        UserInfo user = UserInfo.of(auth);
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             if (provider.getTemplateStatus().equals("approved template")) {
-                trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+                trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
                 trainingResource.setActive(true);
             } else {
-                trainingResource.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+                trainingResource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             }
             trainingResource.setCatalogueId(this.catalogueId);
             commonMethods.createIdentifiers(trainingResource, getResourceTypeName(), false);
             trainingResource.setId(trainingResource.getIdentifiers().getOriginalId());
         } else {
-            trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(trainingResource.getId());
             commonMethods.createIdentifiers(trainingResource, getResourceTypeName(), true);
@@ -136,7 +138,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         if (trainingResource.equals(existing)) {
             return trainingResource;
         }
-        trainingResource.markUpdate(auth, comment);
+        trainingResource.markUpdate(UserInfo.of(auth), comment);
         relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource);
         checkAndResetServiceOnboarding(trainingResource, auth);
 
@@ -180,7 +182,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         TrainingResourceBundle existing = get(id);
-        existing.markOnboard(status, active, auth, null);
+        existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         updateProviderTemplateStatus(existing, status, auth);
 
@@ -225,7 +227,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
             throw new ValidationException("You cannot activate this Training Resource, because it is not yet approved.");
         }
 
-        existing.markActive(active, auth);
+        existing.markActive(active, UserInfo.of(auth));
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -322,7 +324,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     @Override
     public TrainingResourceBundle updateDraft(TrainingResourceBundle bundle, Authentication auth) {
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
         try {
             TrainingResourceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
@@ -340,10 +342,11 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     public TrainingResourceBundle finalizeDraft(TrainingResourceBundle trainingResource, Authentication auth) {
         ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
                 trainingResource.getCatalogueId());
+        UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {
-            trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
         } else {
-            trainingResource.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            trainingResource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
         }
         trainingResource = update(trainingResource, auth);
 

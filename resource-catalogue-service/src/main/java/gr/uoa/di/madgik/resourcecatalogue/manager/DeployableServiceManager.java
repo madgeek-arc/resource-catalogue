@@ -28,6 +28,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -94,18 +95,19 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
 
     private void onboard(DeployableServiceBundle deployableService, ProviderBundle provider, Authentication auth) {
         String catalogueId = deployableService.getCatalogueId();
+        UserInfo user = UserInfo.of(auth);
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             if (provider.getTemplateStatus().equals("approved template")) {
-                deployableService.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+                deployableService.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
                 deployableService.setActive(true);
             } else {
-                deployableService.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+                deployableService.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             }
             deployableService.setCatalogueId(this.catalogueId);
             commonMethods.createIdentifiers(deployableService, getResourceTypeName(), false);
             deployableService.setId(deployableService.getIdentifiers().getOriginalId());
         } else {
-            deployableService.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            deployableService.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(deployableService.getId());
             commonMethods.createIdentifiers(deployableService, getResourceTypeName(), true);
@@ -134,7 +136,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
         if (deployableService.equals(existing)) {
             return deployableService;
         }
-        deployableService.markUpdate(auth, comment);
+        deployableService.markUpdate(UserInfo.of(auth), comment);
         checkAndResetDeployableServiceOnboarding(deployableService, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
@@ -175,7 +177,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         DeployableServiceBundle existing = get(id);
-        existing.markOnboard(status, active, auth, null);
+        existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         updateProviderTemplateStatus(existing, status, auth);
 
@@ -220,7 +222,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
             throw new ValidationException("You cannot activate this Deployable Service, because it is not yet approved.");
         }
 
-        existing.markActive(active, auth);
+        existing.markActive(active, UserInfo.of(auth));
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -317,7 +319,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
 
     @Override
     public DeployableServiceBundle updateDraft(DeployableServiceBundle bundle, Authentication auth) {
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
         try {
             DeployableServiceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
@@ -335,10 +337,11 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
     public DeployableServiceBundle finalizeDraft(DeployableServiceBundle deployableService, Authentication auth) {
         ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
                 deployableService.getCatalogueId());
+        UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {
-            deployableService.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            deployableService.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
         } else {
-            deployableService.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            deployableService.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
         }
         deployableService = update(deployableService, auth);
 

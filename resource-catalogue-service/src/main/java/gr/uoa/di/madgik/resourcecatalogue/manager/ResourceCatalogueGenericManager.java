@@ -11,6 +11,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import org.slf4j.Logger;
@@ -122,7 +123,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         if (!hasChanged(bundle)) {
             return bundle;
         }
-        bundle.markUpdate(auth, null); //TODO: make sure all resources will use this
+        bundle.markUpdate(UserInfo.of(auth), null); //TODO: make sure all resources will use this
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {

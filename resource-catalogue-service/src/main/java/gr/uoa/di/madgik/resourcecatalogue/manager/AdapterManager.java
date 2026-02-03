@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -103,7 +104,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(auth, comment);
+        bundle.markUpdate(UserInfo.of(auth), comment);
 
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
@@ -129,7 +130,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         AdapterBundle existing = get(id);
-        existing.markOnboard(status, active, auth, null);
+        existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         logger.info("Verifying Adapter: {}", existing);
         try {
@@ -148,7 +149,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
             throw new ValidationException("You cannot activate this Adapter, because it is not yet approved.");
         }
 
-        existing.markActive(active, auth);
+        existing.markActive(active, UserInfo.of(auth));
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -239,10 +240,11 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     }
 
     private void determineOnboard(AdapterBundle bundle, Authentication auth) {
+        UserInfo user = UserInfo.of(auth);
         if (securityService.hasPortalAdminRole(auth) || securityService.hasRole(auth, "ROLE_PROVIDER")) {
-            bundle.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
         } else if (securityService.hasRole(auth, "ROLE_USER")) {
-            bundle.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            bundle.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
         } else {
             throw new AccessDeniedException("You do not have permission to perform this action");
         }
@@ -264,7 +266,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
 
     @Override
     public AdapterBundle updateDraft(AdapterBundle bundle, Authentication auth) {
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
         try {
             AdapterBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;

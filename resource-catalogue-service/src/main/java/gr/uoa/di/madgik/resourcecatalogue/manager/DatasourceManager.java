@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -101,18 +102,19 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     private void onboard(DatasourceBundle datasource, ProviderBundle provider, Authentication auth) {
         String catalogueId = datasource.getCatalogueId();
+        UserInfo user = UserInfo.of(auth);
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
             if (provider.getTemplateStatus().equals("approved template")) {
-                datasource.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+                datasource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
                 datasource.setActive(true);
             } else {
-                datasource.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+                datasource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             }
             datasource.setCatalogueId(this.catalogueId);
             commonMethods.createIdentifiers(datasource, getResourceTypeName(), false);
             datasource.setId(datasource.getIdentifiers().getOriginalId());
         } else {
-            datasource.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            datasource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(datasource.getId());
             commonMethods.createIdentifiers(datasource, getResourceTypeName(), true);
@@ -144,7 +146,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         if (datasource.equals(existing)) {
             return datasource;
         }
-        datasource.markUpdate(auth, comment);
+        datasource.markUpdate(UserInfo.of(auth), comment);
         relationshipValidator.checkRelatedResourceIDsConsistency(datasource);
         checkAndResetDatasourceOnboarding(datasource, auth);
 
@@ -189,7 +191,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
         DatasourceBundle existing = get(id);
-        existing.markOnboard(status, active, auth, null);
+        existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         updateProviderTemplateStatus(existing, status, auth);
 
@@ -234,7 +236,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
             throw new ValidationException("You cannot activate this Datasource, because it is not yet approved.");
         }
 
-        existing.markActive(active, auth);
+        existing.markActive(active, UserInfo.of(auth));
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -361,7 +363,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     @Override
     public DatasourceBundle updateDraft(DatasourceBundle bundle, Authentication auth) {
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
         try {
             DatasourceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
@@ -379,10 +381,11 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     public DatasourceBundle finalizeDraft(DatasourceBundle datasource, Authentication auth) {
         ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
                 datasource.getCatalogueId());
+        UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {
-            datasource.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+            datasource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
         } else {
-            datasource.markOnboard(vocabularyService.get("pending").getId(), false, auth, null);
+            datasource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
         }
         datasource = update(datasource, auth);
 

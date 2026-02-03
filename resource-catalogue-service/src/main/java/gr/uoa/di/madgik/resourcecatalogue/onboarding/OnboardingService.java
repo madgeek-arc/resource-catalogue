@@ -64,7 +64,6 @@ public class OnboardingService {
         var active = Boolean.parseBoolean(headers.getOrDefault("active", "true"));
         var resourceType = "provider";
         logger.info("Running task 'set-status' for '{}' with id '{}' | status: {}", resourceType, bundle.getId(), status);
-        bundle.markOnboard(status, active, SecurityContextHolder.getContext().getAuthentication(), null);
         var ret = genericResourceService.update(resourceType, bundle.getId(), bundle);
         vars.put("bundle", ret);
         return Map.of("bundle", ret);

@@ -27,6 +27,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
@@ -80,7 +81,7 @@ public class ConfigurationTemplateManager implements ConfigurationTemplateServic
                     providerBundle.getId()), HttpStatus.CONFLICT);
         }
 
-        ct.markOnboard(vocabularyService.get("approved").getId(), true, auth, null);
+        ct.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         ct.setActive(true);
         ct.setCatalogueId(this.catalogueId);
         commonMethods.createIdentifiers(ct, getResourceTypeName(), false);
@@ -96,7 +97,7 @@ public class ConfigurationTemplateManager implements ConfigurationTemplateServic
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(auth, null);
+        bundle.markUpdate(UserInfo.of(auth), null);
 
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
