@@ -8,18 +8,23 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
+import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 //TODO: resource-specific method -> inside corresponding manager/service
 //TODO: true universal method (all resources will use it) -> inside here (generic)
@@ -140,9 +145,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         T existing = get(id, catalogueId);
         existing.markAudit(comment, actionType, auth);
 
-        //TODO: cannot be here if "users" && other resources have different providerId field name (eg. owner)
 //        mailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
-
         logger.info("Audited '{}' with ID '{}' [actionType: {}]", getResourceTypeName(), existing.getId(), actionType);
 
         try {
@@ -156,7 +159,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         T bundle = get(id, catalogueId);
-//        commonMethods.suspensionValidation(bundle, catalogueId, providerId, suspend, auth); //FIXME
+        String owner = (String) bundle.getPayload().get("owner");
+        suspensionValidation(bundle, catalogueId, owner, suspend);
 
         logger.info("{} resource '{}' with id: '{}'", suspend ? "Suspending" : "Unsuspending",
                 getResourceTypeName(), bundle.getId());
@@ -167,6 +171,35 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    //TODO: delete catalogueId if not used
+    private void suspensionValidation(Bundle bundle, String catalogueId, String owner, boolean suspend) {
+        if (bundle.getMetadata().isPublished()) {
+            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
+        }
+        ProviderBundle providerBundle = genericResourceService.get("provider", owner);
+        if (providerBundle.isSuspended() && !suspend) {
+            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
+                    HttpStatus.CONFLICT);
+        }
+
+        //TODO: enable if Catalogues return.
+//        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
+//        if (bundle instanceof ProviderBundle) {
+//            if (catalogueBundle.isSuspended() && !suspend) {
+//                throw new ResourceException("You cannot unsuspend a Provider when its Catalogue is suspended",
+//                        HttpStatus.CONFLICT);
+//            }
+//        } else {
+//            if (providerId != null && !providerId.isEmpty()) {
+//                ProviderBundle providerBundle = providerService.get(providerId, catalogueId);
+//                if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
+//                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
+//                            HttpStatus.CONFLICT);
+//                }
+//            }
+//        }
     }
 
     @Override

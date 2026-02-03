@@ -140,7 +140,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 //        }
 
         lock.lock();
-//        providerUsers = getProviderUserEmails(providers); //FIXME
+        providerUsers = getProviderUserEmails(providers);
 //        catalogueUsers = getCatalogueUserEmails(catalogues); //FIXME
         lock.unlock();
         logger.debug("Update Authorities took {} ms", (System.nanoTime() - time) / 1000000);

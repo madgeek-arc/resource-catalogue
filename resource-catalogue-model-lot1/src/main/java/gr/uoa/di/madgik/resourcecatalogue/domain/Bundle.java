@@ -243,7 +243,6 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.auditState = auditState;
     }
 
-    //TODO: test if we need to set draft = false
     public void markDraft(Authentication auth, String comment) {
         UserInfo user = UserInfo.of(auth);
 
