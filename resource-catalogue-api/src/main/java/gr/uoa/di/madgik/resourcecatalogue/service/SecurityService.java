@@ -16,9 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecord;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
@@ -87,27 +84,6 @@ public interface SecurityService {
      * @return True if provider where the service is registered is active and approved
      */
     boolean providerCanAddResources(Authentication auth, LinkedHashMap<String, Object> service, String catalogueId);
-
-    /**
-     * @param auth             Authentication
-     * @param trainingResource Training Resource
-     * @return True if provider where the training resource is registered is active and approved
-     */
-    boolean providerCanAddResources(Authentication auth, TrainingResource trainingResource);
-
-    /**
-     * @param auth              Authentication
-     * @param deployableService Deployable Service
-     * @return True if provider where the deployable service is registered is active and approved
-     */
-    boolean providerCanAddResources(Authentication auth, DeployableService deployableService);
-
-    /**
-     * @param auth                   Authentication
-     * @param interoperabilityRecord Interoperability Record
-     * @return True if provider where the interoperability record is registered is active and approved
-     */
-    boolean providerCanAddResources(Authentication auth, InteroperabilityRecord interoperabilityRecord);
 
     /**
      * @param auth       Authentication

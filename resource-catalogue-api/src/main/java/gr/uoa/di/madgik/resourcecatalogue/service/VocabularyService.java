@@ -51,6 +51,13 @@ public interface VocabularyService extends ResourceService<Vocabulary> {
     Vocabulary getParent(String id);
 
     /**
+     *
+     * @param parentId Parent Vocabulary ID
+     * @return {@link List<Vocabulary>}
+     */
+    List<Vocabulary> getChildren(String parentId);
+
+    /**
      * Get all Vocabularies by type in a Map.
      *
      * @return {@link Map}&lt;{@link Vocabulary.Type}, {@link List}&lt;{@link Vocabulary}&gt;&gt;
