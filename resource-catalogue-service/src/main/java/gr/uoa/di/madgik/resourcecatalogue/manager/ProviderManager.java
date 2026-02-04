@@ -31,9 +31,8 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
-import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingService;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderCascadeLifecycleManager;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -65,7 +64,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     private final ProviderResourcesCommonMethods commonMethods;
     private final SecurityService securityService;
     private final ProviderCascadeLifecycleManager cascadeLifecycleService;
-    private final OnboardingService<ProviderBundle> onboardingService;
+    private final WorkflowService<ProviderBundle> workflowService;
 
 
     public ProviderManager(GenericResourceService genericResourceService,
@@ -75,7 +74,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
                            ProviderResourcesCommonMethods commonMethods,
                            SecurityService securityService,
                            ProviderCascadeLifecycleManager cascadeLifecycleService,
-                           OnboardingService<ProviderBundle> onboardingService) {
+                           WorkflowService<ProviderBundle> workflowService) {
         super(genericResourceService, securityService, vocabularyService);
         this.genericResourceService = genericResourceService;
         this.serviceService = serviceService;
@@ -83,7 +82,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         this.commonMethods = commonMethods;
         this.securityService = securityService;
         this.cascadeLifecycleService = cascadeLifecycleService;
-        this.onboardingService = onboardingService;
+        this.workflowService = workflowService;
     }
 
     @Override
@@ -95,7 +94,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     @Override
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 //        onboard(bundle, auth);
-        bundle = onboardingService.onboard(getResourceTypeName(), bundle, auth);
+        bundle = workflowService.onboard(getResourceTypeName(), bundle, auth);
         createIdentifiers(bundle);
         ProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
 

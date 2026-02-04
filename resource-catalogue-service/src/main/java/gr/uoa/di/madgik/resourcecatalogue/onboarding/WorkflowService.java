@@ -21,19 +21,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class OnboardingService <T extends Bundle> {
+public class WorkflowService<T extends Bundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(OnboardingService.class);
+    private static final Logger logger = LoggerFactory.getLogger(WorkflowService.class);
 
     private final CatalogueService catalogueService;
     private final GenericResourceService genericResourceService;
     private final ObjectMapper mapper;
     private final CamundaClient client;
 
-    public OnboardingService(CatalogueService catalogueService,
-                             GenericResourceService genericResourceService,
-                             ObjectMapper objectMapper,
-                             CamundaClient client) {
+    public WorkflowService(CatalogueService catalogueService,
+                           GenericResourceService genericResourceService,
+                           ObjectMapper objectMapper,
+                           CamundaClient client) {
         this.catalogueService = catalogueService;
         this.genericResourceService = genericResourceService;
         this.mapper = objectMapper;
@@ -43,10 +43,8 @@ public class OnboardingService <T extends Bundle> {
     public T onboard(String resourceType, T bundle, Authentication authentication) {
         String bpmnProcess = getBpmnProcess(resourceType);
         Map<String, Object> vars = new HashMap<>();
-        Class<T> clazz = (Class<T>) bundle.getClass();
-        vars.put("resource", toMap(bundle));
-        vars.put("user", UserInfo.of(authentication));
-        vars.put("class", clazz);
+        putResourceBundle(vars, bundle);
+        putUserInfo(vars, UserInfo.of(authentication));
         var key = client.newCreateInstanceCommand()
                 .bpmnProcessId(bpmnProcess)
                 .latestVersion()
@@ -55,7 +53,7 @@ public class OnboardingService <T extends Bundle> {
                 .requestTimeout(java.time.Duration.ofSeconds(120))
                 .send()
                 .join();
-        bundle = toBundle((Map<String, Object>) key.getVariablesAsMap().get("resource"), clazz);
+        bundle = getResourceBundle(key.getVariablesAsMap());
         return bundle;
     }
 
@@ -74,8 +72,8 @@ public class OnboardingService <T extends Bundle> {
         String status = headers.get("status");
         String active = headers.get("active");
 
-        T bundle = getResource(vars);
-        UserInfo user = toUser((Map<String, Object>) vars.get("user"));
+        T bundle = getResourceBundle(vars);
+        UserInfo user = getUserInfo(vars);
         bundle.markOnboard(status, active.equalsIgnoreCase("true"), user, "change status job");
 
         logger.info("Running task 'resource-status.apply' for {} with id '{}' | status: {}", resourceName, bundle.getId(), status);
@@ -84,8 +82,8 @@ public class OnboardingService <T extends Bundle> {
     }
 
     @JobWorker(type = "get-resource", autoComplete = true)
-    public Map<String, Object> getResource(@VariablesAsType Map<String, Object> vars,
-                                 @CustomHeaders Map<String, String> headers) {
+    public Map<String, Object> getResourceBundle(@VariablesAsType Map<String, Object> vars,
+                                                 @CustomHeaders Map<String, String> headers) {
         String id = (String) vars.get("id");
         String resourceType = headers.getOrDefault("resourceType", "resourceTypes");
         String resourceName = headers.getOrDefault("resourceName", "resource");
@@ -99,7 +97,7 @@ public class OnboardingService <T extends Bundle> {
                                  @CustomHeaders Map<String, String> headers) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
         String resourceType = headers.getOrDefault("resourceType", "resourceTypes");
         String resourceName = headers.getOrDefault("resourceName", "resource");
-        T resource = toBundle((Map<String,Object>) vars.get(resourceName));
+        T resource = getResourceBundle(vars, resourceName);
         logger.info("Saving resource with resourceType '{}' and id '{}'", resourceType, resource.getId());
         T bundle = genericResourceService.update(resourceType, resource.getId(), resource);
         return Map.of(resourceName, bundle);
@@ -116,34 +114,44 @@ public class OnboardingService <T extends Bundle> {
         return vars;
     }
 
-    public UserInfo toUser(Map<String, Object> user) {
-        return mapper.convertValue(user, UserInfo.class);
+    public T getResourceBundle(Map<String, Object> vars) {
+        return getResourceBundle(vars, "resource");
     }
 
-    public T getResource(Map<String, Object> vars) {
-        Map<String, Object> resource = (Map<String, Object>) vars.get("resource");
-        Class<T> clazz = mapper.convertValue(vars.get("class"), new TypeReference<>() {});
-        T bundle = mapper.convertValue(resource, clazz);
+    public void putResourceBundle(Map<String, Object> vars, T bundle) {
+        putResourceBundle(vars, bundle, "resource");
+    }
+
+    public T getResourceBundle(Map<String, Object> vars, String resourceName) {
+        String classKey = resourceName + "_class";
+        Map<String, Object> resource = (Map<String, Object>) vars.get(resourceName);
+        T bundle;
+        if (vars.containsKey(classKey)) {
+            Class<T> clazz = mapper.convertValue(vars.get(classKey), new TypeReference<>() {});
+            bundle = mapper.convertValue(resource, clazz);
+        } else {
+            bundle = mapper.convertValue(resource, new TypeReference<>() {});
+        }
         // Adds the payload (because Jackson is set to ignore it)
         bundle.setPayload(mapper.convertValue(resource.get("payload"), new TypeReference<>() {}));
         return bundle;
     }
 
-    public T toBundle(Map<String, Object> resource) {
-        T bundle = mapper.convertValue(resource, new TypeReference<>() {});
-        // Adds the payload (because Jackson is set to ignore it)
-        bundle.setPayload(mapper.convertValue(resource.get("payload"), new TypeReference<>() {}));
-        return bundle;
+    public void putResourceBundle(Map<String, Object> vars, T bundle, String resourceName) {
+        Class<T> clazz = (Class<T>) bundle.getClass();
+        vars.put(resourceName + "_class", clazz);
+        vars.put(resourceName, toMap(bundle));
     }
 
-    public T toBundle(Map<String, Object> resource, Class<T> clazz) {
-        T bundle = mapper.convertValue(resource, clazz);
-        // Adds the payload (because Jackson is set to ignore it)
-        bundle.setPayload(mapper.convertValue(resource.get("payload"), new TypeReference<>() {}));
-        return bundle;
+    public UserInfo getUserInfo(Map<String, Object> vars) {
+        return mapper.convertValue(vars.get("user"), UserInfo.class);
     }
 
-    public Map<String, Object> toMap(T resource) {
+    public void putUserInfo(Map<String, Object> vars, UserInfo user) {
+        vars.put("user", user);
+    }
+
+    private Map<String, Object> toMap(T resource) {
         T bundle = mapper.convertValue(resource, new TypeReference<>() {});
         bundle.setPayload(resource.getPayload());
         Map<String, Object> vars = mapper.convertValue(bundle, new TypeReference<Map<String, Object>>() {});
