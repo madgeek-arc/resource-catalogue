@@ -141,7 +141,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     @Override
     @Transactional
-    @TriggersAspects({"AfterServiceUpdateEmails"})
+//    @TriggersAspects({"AfterServiceUpdateEmails"})
     public ServiceBundle update(ServiceBundle service, String comment, Authentication auth) {
         ServiceBundle existing = get(service.getId(), service.getCatalogueId());
         // check if there are actual changes in the Service

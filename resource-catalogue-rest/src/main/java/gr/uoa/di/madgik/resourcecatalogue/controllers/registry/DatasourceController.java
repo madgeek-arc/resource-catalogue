@@ -478,13 +478,12 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource['id'])")
-    public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> datasource,
+    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> datasource,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) datasource.get("id");
         DatasourceBundle bundle = service.get(id, catalogueId);
         bundle.setDatasource(datasource);
 
-        service.updateDraft(bundle, auth);
         logger.info("Finalizing Draft Datasource with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
 

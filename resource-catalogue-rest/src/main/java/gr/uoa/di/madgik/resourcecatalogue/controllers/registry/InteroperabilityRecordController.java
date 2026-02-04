@@ -459,13 +459,12 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordWrite")
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #guideline['id'])")
-    public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> guideline,
+    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> guideline,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) guideline.get("id");
         InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
         bundle.setInteroperabilityRecord(guideline);
 
-        service.updateDraft(bundle, auth);
         logger.info("Finalizing Draft Interoperability Record with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
 

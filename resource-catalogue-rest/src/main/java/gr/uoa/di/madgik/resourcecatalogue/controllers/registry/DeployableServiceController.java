@@ -406,13 +406,12 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
 
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableService['id'])")
-    public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> deployableService,
+    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> deployableService,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) deployableService.get("id");
         DeployableServiceBundle bundle = service.get(id, catalogueId);
         bundle.setDeployableService(deployableService);
 
-        service.updateDraft(bundle, auth);
         logger.info("Finalizing Draft Deployable Service with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
 
