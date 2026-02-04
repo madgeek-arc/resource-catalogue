@@ -104,13 +104,13 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
                         "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
             }
             guideline.setCatalogueId(this.catalogueId);
-            commonMethods.createIdentifiers(guideline, getResourceTypeName(), false);
+            this.createIdentifiers(guideline, getResourceTypeName(), false);
             guideline.setId(guideline.getIdentifiers().getOriginalId());
         } else {
             guideline.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(guideline.getId());
-            commonMethods.createIdentifiers(guideline, getResourceTypeName(), true);
+            this.createIdentifiers(guideline, getResourceTypeName(), true);
         }
         guideline.setAuditState(Auditable.NOT_AUDITED);
     }
@@ -265,7 +265,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     public InteroperabilityRecordBundle addDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
         InteroperabilityRecordBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);

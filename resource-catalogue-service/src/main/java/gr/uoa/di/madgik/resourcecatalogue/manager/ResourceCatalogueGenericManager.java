@@ -9,13 +9,16 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -38,6 +41,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     protected final GenericResourceService genericResourceService;
     protected final SecurityService securityService;
+    @Autowired
+    private IdCreator idCreator;
 
     protected abstract String getResourceTypeName();
 
@@ -45,6 +50,17 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                                            SecurityService securityService) {
         this.genericResourceService = genericResourceService;
         this.securityService = securityService;
+    }
+
+    public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
+        Identifiers identifiers = new Identifiers();
+        identifiers.setPid(idCreator.generate(resourceType));
+        if (external) {
+            identifiers.setOriginalId(bundle.getId());
+        } else {
+            identifiers.setOriginalId(identifiers.getPid() + "00");
+        }
+        bundle.setIdentifiers(identifiers);
     }
 
     //TODO: we don't need this

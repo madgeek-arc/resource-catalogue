@@ -91,7 +91,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private void onboard(AdapterBundle bundle, Authentication auth) {
         bundle.setCatalogueId(this.catalogueId);
         determineOnboard(bundle, auth);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
         commonMethods.addAuthenticatedUser(bundle.getAdapter(), auth);
         bundle.setAuditState(Auditable.NOT_AUDITED);
@@ -256,7 +256,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     public AdapterBundle addDraft(AdapterBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
         commonMethods.addAuthenticatedUser(bundle.getAdapter(), auth);
 

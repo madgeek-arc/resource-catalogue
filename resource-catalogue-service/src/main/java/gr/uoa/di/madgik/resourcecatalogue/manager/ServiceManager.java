@@ -114,13 +114,13 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                 service.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             }
             service.setCatalogueId(this.catalogueId);
-            commonMethods.createIdentifiers(service, getResourceTypeName(), false);
+            this.createIdentifiers(service, getResourceTypeName(), false);
             service.setId(service.getIdentifiers().getOriginalId());
         } else {
             service.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(service.getId());
-            commonMethods.createIdentifiers(service, getResourceTypeName(), true);
+            this.createIdentifiers(service, getResourceTypeName(), true);
         }
         service.setAuditState(Auditable.NOT_AUDITED);
     }
@@ -391,7 +391,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     public ServiceBundle addDraft(ServiceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
         ServiceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);

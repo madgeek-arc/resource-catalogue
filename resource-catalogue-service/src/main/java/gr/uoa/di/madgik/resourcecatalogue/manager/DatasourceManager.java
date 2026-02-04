@@ -111,13 +111,13 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                 datasource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             }
             datasource.setCatalogueId(this.catalogueId);
-            commonMethods.createIdentifiers(datasource, getResourceTypeName(), false);
+            this.createIdentifiers(datasource, getResourceTypeName(), false);
             datasource.setId(datasource.getIdentifiers().getOriginalId());
         } else {
             datasource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(datasource.getId());
-            commonMethods.createIdentifiers(datasource, getResourceTypeName(), true);
+            this.createIdentifiers(datasource, getResourceTypeName(), true);
         }
         datasource.setAuditState(Auditable.NOT_AUDITED);
     }
@@ -354,7 +354,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     public DatasourceBundle addDraft(DatasourceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
         DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);

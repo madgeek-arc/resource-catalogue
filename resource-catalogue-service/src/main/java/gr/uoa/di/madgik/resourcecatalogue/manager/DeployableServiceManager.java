@@ -104,13 +104,13 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
                 deployableService.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             }
             deployableService.setCatalogueId(this.catalogueId);
-            commonMethods.createIdentifiers(deployableService, getResourceTypeName(), false);
+            this.createIdentifiers(deployableService, getResourceTypeName(), false);
             deployableService.setId(deployableService.getIdentifiers().getOriginalId());
         } else {
             deployableService.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(deployableService.getId());
-            commonMethods.createIdentifiers(deployableService, getResourceTypeName(), true);
+            this.createIdentifiers(deployableService, getResourceTypeName(), true);
         }
         deployableService.setAuditState(Auditable.NOT_AUDITED);
     }
@@ -310,7 +310,7 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
     public DeployableServiceBundle addDraft(DeployableServiceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
         DeployableServiceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);

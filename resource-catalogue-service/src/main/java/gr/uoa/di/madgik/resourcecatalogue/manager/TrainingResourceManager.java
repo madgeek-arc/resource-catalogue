@@ -105,13 +105,13 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
                 trainingResource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
             }
             trainingResource.setCatalogueId(this.catalogueId);
-            commonMethods.createIdentifiers(trainingResource, getResourceTypeName(), false);
+            this.createIdentifiers(trainingResource, getResourceTypeName(), false);
             trainingResource.setId(trainingResource.getIdentifiers().getOriginalId());
         } else {
             trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
             idCreator.validateId(trainingResource.getId());
-            commonMethods.createIdentifiers(trainingResource, getResourceTypeName(), true);
+            this.createIdentifiers(trainingResource, getResourceTypeName(), true);
         }
         trainingResource.setAuditState(Auditable.NOT_AUDITED);
     }
@@ -315,7 +315,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     public TrainingResourceBundle addDraft(TrainingResourceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
         TrainingResourceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
