@@ -42,75 +42,14 @@ public class ProviderResourcesCommonMethods {
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    private final ProviderService providerService;
     private final VocabularyService vocabularyService;
-    private final IdCreator idCreator;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
 
-    public ProviderResourcesCommonMethods(@Lazy ProviderService providerService,
-                                          @Lazy VocabularyService vocabularyService,
-                                          @Lazy IdCreator idCreator,
+    public ProviderResourcesCommonMethods(@Lazy VocabularyService vocabularyService,
                                           @Lazy ResourceInteroperabilityRecordService resourceInteroperabilityRecordService) {
-        this.providerService = providerService;
         this.vocabularyService = vocabularyService;
-        this.idCreator = idCreator;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
     }
-
-    //FIXME
-//    public void validateCatalogueId(String catalogueId) {
-//        //TODO: we set it so this should never been thrown
-//        if (!StringUtils.hasText(catalogueId)) {
-//            throw new ResourceException("catalogueId must not be blank", HttpStatus.BAD_REQUEST);
-//        }
-//        if (!catalogueService.exists(catalogueId)) {
-//            throw new ResourceException(String.format("The Catalogue '%s' does not exist", catalogueId),
-//                    HttpStatus.CONFLICT);
-//        }
-//        if (!catalogueService.get(catalogueId).getStatus().equals("approved")) {
-//            throw new ResourceException(String.format("The Catalogue '%s' is not yet approved", catalogueId),
-//                    HttpStatus.CONFLICT);
-//        }
-//    }
-
-//    public void suspensionValidation(Bundle bundle, String catalogueId, String providerId, boolean suspend) {
-//        if (bundle.getMetadata().isPublished()) {
-//            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
-//        }
-//        ProviderBundle providerBundle = providerService.get(providerId, catalogueId);
-//        if (providerBundle.isSuspended() && !suspend) {
-//            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
-//                    HttpStatus.CONFLICT);
-//        }
-
-        //TODO: enable if Catalogues return.
-//        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
-//        if (bundle instanceof ProviderBundle) {
-//            if (catalogueBundle.isSuspended() && !suspend) {
-//                throw new ResourceException("You cannot unsuspend a Provider when its Catalogue is suspended",
-//                        HttpStatus.CONFLICT);
-//            }
-//        } else {
-//            if (providerId != null && !providerId.isEmpty()) {
-//                ProviderBundle providerBundle = providerService.get(providerId, catalogueId);
-//                if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
-//                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
-//                            HttpStatus.CONFLICT);
-//                }
-//            }
-//        }
-//    }
-//
-//    public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
-//        Identifiers identifiers = new Identifiers();
-//        identifiers.setPid(idCreator.generate(resourceType));
-//        if (external) {
-//            identifiers.setOriginalId(bundle.getId());
-//        } else {
-//            identifiers.setOriginalId(identifiers.getPid() + "00");
-//        }
-//        bundle.setIdentifiers(identifiers);
-//    }
 
     public void blockResourceDeletion(String status, boolean isPublished) {
         if (status.equals(vocabularyService.get("pending").getId())) {
