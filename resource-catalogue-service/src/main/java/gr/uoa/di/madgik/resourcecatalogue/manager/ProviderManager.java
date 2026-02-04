@@ -31,6 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
@@ -65,6 +66,8 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     private final ProviderResourcesCommonMethods commonMethods;
     private final SecurityService securityService;
     private final ProviderCascadeLifecycleManager cascadeLifecycleService;
+    private final OnboardingService<ProviderBundle> onboardingService;
+
 
     public ProviderManager(GenericResourceService genericResourceService,
                            VocabularyService vocabularyService,
@@ -72,7 +75,8 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
                            IdCreator idCreator,
                            ProviderResourcesCommonMethods commonMethods,
                            SecurityService securityService,
-                           ProviderCascadeLifecycleManager cascadeLifecycleService) {
+                           ProviderCascadeLifecycleManager cascadeLifecycleService,
+                           OnboardingService<ProviderBundle> onboardingService) {
         super(genericResourceService, securityService);
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
@@ -81,6 +85,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         this.commonMethods = commonMethods;
         this.securityService = securityService;
         this.cascadeLifecycleService = cascadeLifecycleService;
+        this.onboardingService = onboardingService;
     }
 
     @Override
@@ -91,7 +96,9 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     //region generic
     @Override
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
-        onboard(bundle, auth);
+//        onboard(bundle, auth);
+        bundle = onboardingService.onboard(getResourceTypeName(), bundle, auth);
+        createIdentifiers(bundle);
         ProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
@@ -101,25 +108,15 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         return ret;
     }
 
-    private void onboard(ProviderBundle bundle, Authentication auth) {
+    private void createIdentifiers(ProviderBundle bundle) {
         String catalogueId = bundle.getCatalogueId();
-        UserInfo user = UserInfo.of(auth);
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            bundle.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-            bundle.setCatalogueId(this.catalogueId);
-            bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
-            commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+            this.createIdentifiers(bundle, getResourceTypeName(), false);
             bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
-            bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-//            commonMethods.validateCatalogueId(catalogueId); //FIXME
-            bundle.setTemplateStatus(vocabularyService.get("approved template").getId());
             idCreator.validateId(bundle.getId());
-            commonMethods.createIdentifiers(bundle, getResourceTypeName(), true);
+            this.createIdentifiers(bundle, getResourceTypeName(), true);
         }
-
-        commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
-        bundle.setAuditState(Auditable.NOT_AUDITED);
     }
 
     @Override
@@ -376,7 +373,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     public ProviderBundle addDraft(ProviderBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
         bundle.setCatalogueId(catalogueId);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
         commonMethods.addAuthenticatedUser(bundle.getProvider(), auth);
 
