@@ -20,6 +20,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -36,6 +37,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+
 //TODO: create different files for different aspect functionality
 
 @Profile("beyond")
@@ -48,14 +51,20 @@ public class ProviderManagementAspect {
     private final ProviderService providerService;
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
+    private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService guidelineService;
     private final DeployableServiceService deployableServiceService;
+    private final ResourceInteroperabilityRecordService rirService;
+    private final ConfigurationTemplateInstanceService ctiService;
     private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceService;
     private final PublicDatasourceService publicDatasourceService;
-    private final PublicAdapterService publicAdapterService;
+    private final PublicTrainingResourceService publicTrainingResourceService;
     private final PublicInteroperabilityRecordService publicGuidelineService;
     private final PublicDeployableServiceService publicDeployableServiceService;
+    private final PublicAdapterService publicAdapterService;
+    private final PublicResourceInteroperabilityRecordService publicRIRService;
+    private final PublicConfigurationTemplateInstanceService publicCTIService;
     private final SecurityService securityService;
 
     @Value("${catalogue.id}")
@@ -64,26 +73,38 @@ public class ProviderManagementAspect {
     public ProviderManagementAspect(ProviderService providerService,
                                     ServiceService serviceService,
                                     DatasourceService datasourceService,
+                                    TrainingResourceService trainingResourceService,
                                     InteroperabilityRecordService guidelineService,
                                     DeployableServiceService deployableServiceService,
+                                    ResourceInteroperabilityRecordService rirService,
+                                    ConfigurationTemplateInstanceService ctiService,
                                     PublicProviderService publicProviderService,
                                     PublicServiceService publicServiceService,
                                     PublicDatasourceService publicDatasourceService,
-                                    PublicAdapterService publicAdapterService,
+                                    PublicTrainingResourceService publicTrainingResourceService,
                                     PublicInteroperabilityRecordService publicGuidelineService,
                                     PublicDeployableServiceService publicDeployableServiceService,
+                                    PublicAdapterService publicAdapterService,
+                                    PublicResourceInteroperabilityRecordService publicRIRService,
+                                    PublicConfigurationTemplateInstanceService publicCTIService,
                                     SecurityService securityService) {
         this.providerService = providerService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
+        this.trainingResourceService = trainingResourceService;
         this.guidelineService = guidelineService;
         this.deployableServiceService = deployableServiceService;
+        this.rirService = rirService;
+        this.ctiService = ctiService;
         this.publicProviderService = publicProviderService;
         this.publicServiceService = publicServiceService;
         this.publicDatasourceService = publicDatasourceService;
+        this.publicTrainingResourceService = publicTrainingResourceService;
         this.publicAdapterService = publicAdapterService;
         this.publicGuidelineService = publicGuidelineService;
         this.publicDeployableServiceService = publicDeployableServiceService;
+        this.publicRIRService = publicRIRService;
+        this.publicCTIService = publicCTIService;
         this.securityService = securityService;
     }
 
@@ -104,6 +125,16 @@ public class ProviderManagementAspect {
     public void updatePublicProviderTemplateStatus(final DatasourceBundle datasource) {
         ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
                 datasource.getCatalogueId());
+        publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
+        publicProviderService.update(provider);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setStatus(..))",
+            returning = "trainingResource")
+    public void updatePublicProviderTemplateStatus(final TrainingResourceBundle trainingResource) {
+        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
+                trainingResource.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
     }
@@ -166,6 +197,30 @@ public class ProviderManagementAspect {
         }
     }
 
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.finalizeDraft(..)) " +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..))",
+            returning = "bundle")
+    public void updateTrainingResourceState(final TrainingResourceBundle bundle) {
+        logger.trace("Updating Provider States");
+        updateTrainingResourceStatus(bundle);
+    }
+
+    @Async
+    public void updateTrainingResourceStatus(TrainingResourceBundle training) {
+        if (training.getCatalogueId().equals(catalogueId)) {
+            try {
+                ProviderBundle provider = providerService.get((String) training.getTrainingResource().get("owner"),
+                        training.getCatalogueId());
+                if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
+                    trainingResourceService.setStatus(training.getId(), "pending", false, securityService.getAdminAccess());
+                }
+            } catch (RuntimeException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.finalizeDraft(..)) " +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.update(..))",
@@ -217,6 +272,15 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(final DatasourceBundle datasource) {
         ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
                 datasource.getCatalogueId());
+        logger.trace("Sending Registration emails");
+//        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
+    }
+
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setStatus(..))",
+            returning = "training")
+    public void providerRegistrationEmails(final TrainingResourceBundle training) {
+        ProviderBundle provider = providerService.get((String) training.getTrainingResource().get("owner"),
+                training.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
     }
@@ -279,7 +343,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.delete(..))")
     public void deletePublicProvider(JoinPoint joinPoint) {
         ProviderBundle bundle = (ProviderBundle) joinPoint.getArgs()[0];
-        publicProviderService.delete(bundle);
+        try {
+            publicProviderService.delete(bundle);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -333,7 +400,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.delete(..))")
     public void deletePublicService(JoinPoint joinPoint) {
         ServiceBundle service = (ServiceBundle) joinPoint.getArgs()[0];
-        publicServiceService.delete(service);
+        try {
+            publicServiceService.delete(service);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -387,33 +457,37 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.delete(..))")
     public void deletePublicDatasource(JoinPoint joinPoint) {
         DatasourceBundle datasource = (DatasourceBundle) joinPoint.getArgs()[0];
-        publicDatasourceService.delete(datasource);
+        try {
+            publicDatasourceService.delete(datasource);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
-    //region Public Adapter
+    //region Public Training Resource
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setStatus(..))",
-            returning = "adapter")
-    public void addPublicAdapter(final AdapterBundle adapter) {
-        if (adapter.getStatus().equals("approved") && adapter.isActive()) {
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setStatus(..))",
+            returning = "training")
+    public void addPublicTrainingResource(final TrainingResourceBundle training) {
+        if (training.getStatus().equals("approved") && training.isActive()) {
             try {
-                publicAdapterService.get(adapter.getIdentifiers().getPid(), adapter.getCatalogueId());
-            } catch (ResourceException | ResourceNotFoundException e) {
-                publicAdapterService.add(ObjectUtils.clone(adapter));
+                publicTrainingResourceService.get(training.getIdentifiers().getPid(), training.getCatalogueId());
+            } catch (ResourceException e) {
+                publicTrainingResourceService.add(ObjectUtils.clone(training));
             }
         }
     }
 
-    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..)) && args(adapter,..)")
-    public Object updatePublicResource(ProceedingJoinPoint pjp, AdapterBundle adapter) {
-        AdapterBundle init = ObjectUtils.clone(adapter);
-        AdapterBundle ret = null;
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..)) " +
+            "&& args(training,..)")
+    public Object updatePublicTrainingResource(ProceedingJoinPoint pjp, TrainingResourceBundle training) {
+        TrainingResourceBundle init = ObjectUtils.clone(training);
+        TrainingResourceBundle ret = null;
         try {
-            ret = (AdapterBundle) pjp.proceed();
+            ret = (TrainingResourceBundle) pjp.proceed();
             if (!ret.equals(init)) {
-                publicAdapterService.update(ObjectUtils.clone(ret));
+                publicTrainingResourceService.update(ObjectUtils.clone(ret));
             }
         } catch (ResourceException | ResourceNotFoundException ignore) {
         } catch (Throwable e) {
@@ -423,23 +497,26 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setActive(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setStatus(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.audit(..))",
-            returning = "adapter")
-    public void updatePublicAdapter(final AdapterBundle adapter) {
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setActive(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setStatus(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.audit(..))",
+            returning = "training")
+    public void updatePublicTrainingResource(final TrainingResourceBundle training) {
         try {
-            publicAdapterService.update(ObjectUtils.clone(adapter));
+            publicTrainingResourceService.update(ObjectUtils.clone(training));
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
     @Async
-    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.delete(..))")
-    public void deletePublicAdapter(JoinPoint joinPoint) {
-        AdapterBundle adapter = (AdapterBundle) joinPoint.getArgs()[0];
-        publicAdapterService.delete(adapter);
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.delete(..))")
+    public void deletePublicTrainingResource(JoinPoint joinPoint) {
+        TrainingResourceBundle training = (TrainingResourceBundle) joinPoint.getArgs()[0];
+        try {
+            publicTrainingResourceService.delete(training);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -492,7 +569,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.delete(..))")
     public void deletePublicGuideline(JoinPoint joinPoint) {
         InteroperabilityRecordBundle guideline = (InteroperabilityRecordBundle) joinPoint.getArgs()[0];
-        publicGuidelineService.delete(guideline);
+        try {
+            publicGuidelineService.delete(guideline);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -545,19 +625,150 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.delete(..))")
     public void deletePublicDeployableService(JoinPoint joinPoint) {
         DeployableServiceBundle deployableService = (DeployableServiceBundle) joinPoint.getArgs()[0];
-        publicDeployableServiceService.delete(deployableService);
+        try {
+            publicDeployableServiceService.delete(deployableService);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftTrainingResourceManager.transformToNonDraft(..)) " +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..))",
-//            returning = "trainingResourceBundle")
-//    public void updateProviderState(final TrainingResourceBundle trainingResourceBundle) {
-//        logger.trace("Updating Provider States");
-//        updateTrainingResourceProviderStates(trainingResourceBundle);
-//    }
+    //region Public Adapter
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setStatus(..))",
+            returning = "adapter")
+    public void addPublicAdapter(final AdapterBundle adapter) {
+        if (adapter.getStatus().equals("approved") && adapter.isActive()) {
+            try {
+                publicAdapterService.get(adapter.getIdentifiers().getPid(), adapter.getCatalogueId());
+            } catch (ResourceException | ResourceNotFoundException e) {
+                publicAdapterService.add(ObjectUtils.clone(adapter));
+            }
+        }
+    }
 
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..)) && args(adapter,..)")
+    public Object updatePublicAdapter(ProceedingJoinPoint pjp, AdapterBundle adapter) {
+        AdapterBundle init = ObjectUtils.clone(adapter);
+        AdapterBundle ret = null;
+        try {
+            ret = (AdapterBundle) pjp.proceed();
+            if (!ret.equals(init)) {
+                publicAdapterService.update(ObjectUtils.clone(ret));
+            }
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+        return ret;
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setActive(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setStatus(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.audit(..))",
+            returning = "adapter")
+    public void updatePublicAdapter(final AdapterBundle adapter) {
+        try {
+            publicAdapterService.update(ObjectUtils.clone(adapter));
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.delete(..))")
+    public void deletePublicAdapter(JoinPoint joinPoint) {
+        AdapterBundle adapter = (AdapterBundle) joinPoint.getArgs()[0];
+        try {
+            publicAdapterService.delete(adapter);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+    //endregion
+
+    //region Public RIR
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.add(..))",
+            returning = "rir")
+    public void addPublicRIR(final ResourceInteroperabilityRecordBundle rir) {
+        try {
+            publicRIRService.get(rir.getIdentifiers().getPid(), rir.getCatalogueId());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            publicRIRService.add(ObjectUtils.clone(rir));
+        }
+    }
+
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.update(..)) " +
+            "&& args(rir,..)")
+    public Object updatePublicRIR(ProceedingJoinPoint pjp, ResourceInteroperabilityRecordBundle rir) {
+        ResourceInteroperabilityRecordBundle init = ObjectUtils.clone(rir);
+        ResourceInteroperabilityRecordBundle ret = null;
+        try {
+            ret = (ResourceInteroperabilityRecordBundle) pjp.proceed();
+            if (!ret.equals(init)) {
+                publicRIRService.update(ObjectUtils.clone(ret));
+            }
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+        return ret;
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.delete(..))")
+    public void deletePublicRIR(JoinPoint joinPoint) {
+        ResourceInteroperabilityRecordBundle rir = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
+        try {
+            publicRIRService.delete(rir);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+    //endregion
+
+    //region Public CTI
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.add(..))",
+            returning = "cti")
+    public void addPublicCTI(final ConfigurationTemplateInstanceBundle cti) {
+        try {
+            publicCTIService.get(cti.getIdentifiers().getPid(), cti.getCatalogueId());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            publicCTIService.add(ObjectUtils.clone(cti));
+        }
+    }
+
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.update(..)) " +
+            "&& args(cti,..)")
+    public Object updatePublicCTI(ProceedingJoinPoint pjp, ConfigurationTemplateInstanceBundle cti) {
+        ConfigurationTemplateInstanceBundle init = ObjectUtils.clone(cti);
+        ConfigurationTemplateInstanceBundle ret = null;
+        try {
+            ret = (ConfigurationTemplateInstanceBundle) pjp.proceed();
+            if (!ret.equals(init)) {
+                publicCTIService.update(ObjectUtils.clone(ret));
+            }
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+        return ret;
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.delete(..))")
+    public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
+        ConfigurationTemplateInstanceBundle cti = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
+        try {
+            publicCTIService.delete(cti);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+    //endregion
+
+
+    //FIXME
 //    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..)) " +
 //            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.add(..))",
 //            returning = "catalogueBundle")
@@ -566,306 +777,55 @@ public class ProviderManagementAspect {
 //        emailService.sendOnboardingEmailsToCatalogueAdmins(catalogueBundle);
 //    }
 
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
-//            returning = "trainingResourceBundle")
-//    public void providerRegistrationEmails(final TrainingResourceBundle trainingResourceBundle) {
-//        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
-//                trainingResourceBundle.getTrainingResource().getCatalogueId(), false);
-//        logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "trainingResourceManager");
-//    }
+    //region extras
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setStatus(..))",
+            returning = "service")
+    public void assignEoscMonitoringGuidelineToService(final ServiceBundle service) {
+        if (service.getStatus().equals("approved")) {
+            ResourceInteroperabilityRecordBundle rir = new ResourceInteroperabilityRecordBundle();
+            rir.setCatalogueId(service.getCatalogueId());
+            rir.getResourceInteroperabilityRecord().put("node", service.getService().get("node"));
+            rir.getResourceInteroperabilityRecord().put("resourceId", service.getId());
 
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
-//            returning = "trainingResourceBundle")
-//    public void updatePublicProviderTemplateStatus(final TrainingResourceBundle trainingResourceBundle) {
-//        ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
-//                trainingResourceBundle.getTrainingResource().getCatalogueId(), false);
-//        publicProviderService.get(providerBundle.getIdentifiers().getPid(), providerBundle.getProvider().getCatalogueId(), true);
-//        publicProviderService.update(providerBundle, null);
-//    }
+            InteroperabilityRecordBundle guideline;
+            try {
+                guideline = guidelineService.getEOSCMonitoringGuideline();
+            } catch (Exception e) { //TODO: probably needs ResourceException
+                logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for Service: {}",
+                        service.getId());
+                return;
+            }
 
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DraftTrainingResourceManager.transformToNonDraft(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.changeProvider(..))",
-//            returning = "trainingResourceBundle")
-//    public void addResourceAsPublic(final TrainingResourceBundle trainingResourceBundle) {
-//        if (trainingResourceBundle.getStatus().equals("approved") && trainingResourceBundle.isActive()) {
-//            try {
-//                publicTrainingResourceManager.get(trainingResourceBundle.getIdentifiers().getPid(),
-//                        trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
-//            } catch (ResourceException e) {
-//                publicTrainingResourceManager.add(ObjectUtils.clone(trainingResourceBundle), null);
-//            }
-//        }
-//    }
+            rir.getResourceInteroperabilityRecord().put("interoperabilityRecordIds", Collections.singletonList(guideline.getId()));
+            rirService.add(rir, "service", securityService.getAdminAccess());
+        }
+    }
 
-//    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..)) " +
-//            "&& args(trainingResourceBundle,..)")
-//    public Object updatePublicResource(ProceedingJoinPoint pjp, TrainingResourceBundle trainingResourceBundle) {
-//        TrainingResourceBundle init = ObjectUtils.clone(trainingResourceBundle);
-//        TrainingResourceBundle ret = null;
-//        try {
-//            ret = (TrainingResourceBundle) pjp.proceed();
-//            if (!ret.equals(init)) {
-//                publicTrainingResourceManager.update(ObjectUtils.clone(ret), null);
-//            }
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        } catch (Throwable e) {
-//            throw new RuntimeException(e);
-//        }
-//        return ret;
-//    }
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.setStatus(..))",
+            returning = "datasource")
+    public void assignEoscMonitoringGuidelineToDatasource(final DatasourceBundle datasource) {
+        if (datasource.getStatus().equals("approved")) {
+            ResourceInteroperabilityRecordBundle rir = new ResourceInteroperabilityRecordBundle();
+            rir.setCatalogueId(datasource.getCatalogueId());
+            rir.getResourceInteroperabilityRecord().put("node", datasource.getDatasource().get("node"));
+            rir.getResourceInteroperabilityRecord().put("resourceId", datasource.getId());
 
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.publish(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.suspend(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.audit(..))",
-//            returning = "trainingResourceBundle")
-//    public void updatePublicResource(final TrainingResourceBundle trainingResourceBundle) {
-//        try {
-//            publicTrainingResourceManager.update(ObjectUtils.clone(trainingResourceBundle), null);
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        }
-//    }
+            InteroperabilityRecordBundle guideline;
+            try {
+                guideline = guidelineService.getEOSCMonitoringGuideline();
+            } catch (Exception e) { //TODO: probably needs ResourceException
+                logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for Datasource: {}",
+                        datasource.getId());
+                return;
+            }
 
-//    @Async
-//    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.delete(..))")
-//    public void deletePublicTrainingResource(JoinPoint joinPoint) {
-//        TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) joinPoint.getArgs()[0];
-//        publicTrainingResourceManager.delete(trainingResourceBundle);
-//    }
-
-//    @Async
-//    public void updateTrainingResourceProviderStates(TrainingResourceBundle trainingResourceBundle) {
-//        if (trainingResourceBundle.getTrainingResource().getCatalogueId().equals(catalogueId)) {
-//            try {
-//                ProviderBundle providerBundle = providerService.get(trainingResourceBundle.getTrainingResource().getResourceOrganisation(),
-//                        trainingResourceBundle.getTrainingResource().getCatalogueId(), false);
-//                if (providerBundle.getTemplateStatus().equals("no template status") || providerBundle.getTemplateStatus().equals("rejected template")) {
-//                    logger.debug("Updating state of Provider with id '{}' : '{}' --> to '{}'",
-//                            trainingResourceBundle.getTrainingResource().getResourceOrganisation(), providerBundle.getTemplateStatus(), "pending template");
-//                    trainingResourceService.verify(trainingResourceBundle.getTrainingResource().getId(), "pending", false, securityService.getAdminAccess());
-//                }
-//            } catch (RuntimeException e) {
-//                logger.error(e.getMessage(), e);
-//            }
-//        }
-//    }
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.add(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
-//            returning = "datasourceBundle")
-//    public void addDatasourceAsPublic(final DatasourceBundle datasourceBundle) {
-//        if (datasourceBundle.getStatus().equals("approved") && datasourceBundle.isActive()) {
-//            try {
-//                publicDatasourceManager.get(datasourceBundle.getIdentifiers().getPid(),
-//                        datasourceBundle.getDatasource().getCatalogueId(), true);
-//            } catch (ResourceException e) {
-//                publicDatasourceManager.add(ObjectUtils.clone(datasourceBundle), null);
-//            }
-//        }
-//    }
-
-//    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.update(..)) " +
-//            "&& args(datasourceBundle,..)")
-//    public Object updatePublicResource(ProceedingJoinPoint pjp, DatasourceBundle datasourceBundle) {
-//        DatasourceBundle init = ObjectUtils.clone(datasourceBundle);
-//        DatasourceBundle ret = null;
-//        try {
-//            ret = (DatasourceBundle) pjp.proceed();
-//            if (!ret.equals(init)) {
-//                publicDatasourceManager.update(ObjectUtils.clone(ret), null);
-//            }
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        } catch (Throwable e) {
-//            throw new RuntimeException(e);
-//        }
-//        return ret;
-//    }
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
-//            returning = "datasourceBundle")
-//    public void updatePublicDatasource(final DatasourceBundle datasourceBundle) {
-//        try {
-//            publicDatasourceManager.update(ObjectUtils.clone(datasourceBundle), null);
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        }
-//    }
-
-//    @Async
-//    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.delete(..))")
-//    public void deletePublicDatasource(JoinPoint joinPoint) {
-//        DatasourceBundle datasourceBundle = (DatasourceBundle) joinPoint.getArgs()[0];
-//        publicDatasourceManager.delete(datasourceBundle);
-//    }
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.add(..))",
-//            returning = "resourceInteroperabilityRecordBundle")
-//    public void addResourceInteroperabilityRecordAsPublic(final ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-//        // TODO: check Resource states (publish if only approved/active)
-//        try {
-//            publicResourceInteroperabilityRecordManager.get(
-//                    resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
-//                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), true);
-//        } catch (ResourceException e) {
-//            publicResourceInteroperabilityRecordManager.add(ObjectUtils.clone(resourceInteroperabilityRecordBundle), null);
-//        }
-//    }
-
-//    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.update(..)) " +
-//            "&& args(resourceInteroperabilityRecordBundle,..)")
-//    public Object updatePublicResource(ProceedingJoinPoint pjp, ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-//        ResourceInteroperabilityRecordBundle init = ObjectUtils.clone(resourceInteroperabilityRecordBundle);
-//        ResourceInteroperabilityRecordBundle ret = null;
-//        try {
-//            ret = (ResourceInteroperabilityRecordBundle) pjp.proceed();
-//            if (!ret.equals(init)) {
-//                publicResourceInteroperabilityRecordManager.update(ObjectUtils.clone(ret), null);
-//            }
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        } catch (Throwable e) {
-//            throw new RuntimeException(e);
-//        }
-//        return ret;
-//    }
-
-//    @Async
-//    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.delete(..))")
-//    public void deletePublicResourceInteroperabilityRecord(JoinPoint joinPoint) {
-//        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
-//        publicResourceInteroperabilityRecordManager.delete(resourceInteroperabilityRecordBundle);
-//    }
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.add(..))",
-//            returning = "configurationTemplateBundle")
-//    public void addConfigurationTemplateAsPublic(final ConfigurationTemplateBundle configurationTemplateBundle) {
-//        try {
-//            //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-//            publicConfigurationTemplateManager.get(configurationTemplateBundle.getIdentifiers().getPid(),
-//                    configurationTemplateBundle.getConfigurationTemplate().getCatalogueId(), true);
-//        } catch (ResourceException | ResourceNotFoundException e) {
-//            publicConfigurationTemplateManager.add(ObjectUtils.clone(configurationTemplateBundle), null);
-//        }
-//    }
-
-//    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.update(..)) " +
-//            "&& args(configurationTemplateBundle,..)")
-//    public Object updatePublicResource(ProceedingJoinPoint pjp, ConfigurationTemplateBundle configurationTemplateBundle) {
-//        ConfigurationTemplateBundle init = ObjectUtils.clone(configurationTemplateBundle);
-//        ConfigurationTemplateBundle ret = null;
-//        try {
-//            ret = (ConfigurationTemplateBundle) pjp.proceed();
-//            if (!ret.equals(init)) {
-//                publicConfigurationTemplateManager.update(ObjectUtils.clone(ret), null);
-//            }
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        } catch (Throwable e) {
-//            throw new RuntimeException(e);
-//        }
-//        return ret;
-//    }
-
-//    @Async
-//    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.delete(..))")
-//    public void deletePublicConfigurationTemplate(JoinPoint joinPoint) {
-//        ConfigurationTemplateBundle configurationTemplateBundle = (ConfigurationTemplateBundle) joinPoint.getArgs()[0];
-//        publicConfigurationTemplateManager.delete(configurationTemplateBundle);
-//    }
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.add(..))",
-//            returning = "configurationTemplateInstanceBundle")
-//    public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-//        try {
-//            //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-//            publicConfigurationTemplateInstanceManager.get(configurationTemplateInstanceBundle.getIdentifiers().getPid(),
-//                    configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
-//        } catch (ResourceException | ResourceNotFoundException e) {
-//            publicConfigurationTemplateInstanceManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
-//        }
-//    }
-
-//    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.update(..)) " +
-//            "&& args(configurationTemplateInstanceBundle,..)")
-//    public Object updatePublicResource(ProceedingJoinPoint pjp, ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-//        ConfigurationTemplateInstanceBundle init = ObjectUtils.clone(configurationTemplateInstanceBundle);
-//        ConfigurationTemplateInstanceBundle ret = null;
-//        try {
-//            ret = (ConfigurationTemplateInstanceBundle) pjp.proceed();
-//            if (!ret.equals(init)) {
-//                publicConfigurationTemplateInstanceManager.update(ObjectUtils.clone(ret), null);
-//            }
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        } catch (Throwable e) {
-//            throw new RuntimeException(e);
-//        }
-//        return ret;
-//    }
-
-//    @Async
-//    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.delete(..))")
-//    public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
-//        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
-//        publicConfigurationTemplateInstanceManager.delete(configurationTemplateInstanceBundle);
-//    }
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.add(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setStatus(..))",
-//            returning = "service")
-//    public void assignEoscMonitoringGuidelineToService(final ServiceBundle service) {
-//        if (service.getStatus().equals("approved")) {
-//            ResourceInteroperabilityRecord rir = new ResourceInteroperabilityRecord();
-//            rir.setCatalogueId(service.getCatalogueId());
-//            rir.setNode((String) service.getService().get("node"));
-//            rir.setResourceId(service.getId());
-//
-//            InteroperabilityRecordBundle guideline;
-//            try {
-//                guideline = interoperabilityRecordService.getEOSCMonitoringGuideline();
-//            } catch (CatalogueResourceNotFoundException e) { //TODO: probably needs ResourceException
-//                logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for service: {}",
-//                        service.getId());
-//                return;
-//            }
-//
-//            rir.setInteroperabilityRecordIds(Collections.singletonList(guideline.getId()));
-//            rirService.add(new ResourceInteroperabilityRecordBundle(rir),
-//                    "service", securityService.getAdminAccess());
-//        }
-//    }
-//
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.add(..))" +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.setStatus(..))",
-//            returning = "datasource")
-//    public void assignEoscMonitoringGuidelineToService(final DatasourceBundle datasource) {
-//        if (datasource.getStatus().equals("approved")) {
-//            ResourceInteroperabilityRecord rir = new ResourceInteroperabilityRecord();
-//            rir.setCatalogueId(datasource.getCatalogueId());
-//            rir.setNode((String) datasource.getDatasource().get("node"));
-//            rir.setResourceId(datasource.getId());
-//
-//            InteroperabilityRecordBundle guideline;
-//            try {
-//                guideline = interoperabilityRecordService.getEOSCMonitoringGuideline();
-//            } catch (CatalogueResourceNotFoundException e) { //TODO: probably needs ResourceException
-//                logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for service: {}",
-//                        service.getId());
-//                return;
-//            }
-//
-//            rir.setInteroperabilityRecordIds(Collections.singletonList(guideline.getId()));
-//            rirService.add(new ResourceInteroperabilityRecordBundle(rir),
-//                    "service", securityService.getAdminAccess());
-//        }
-//    }
+            rir.getResourceInteroperabilityRecord().put("interoperabilityRecordIds", Collections.singletonList(guideline.getId()));
+            rirService.add(rir, "service", securityService.getAdminAccess());
+        }
+    }
+    //endregion
 }

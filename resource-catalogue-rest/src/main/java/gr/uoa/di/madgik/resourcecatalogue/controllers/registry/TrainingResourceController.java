@@ -404,13 +404,12 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
 
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResource['id'])")
-    public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> trainingResource,
+    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) trainingResource.get("id");
         TrainingResourceBundle bundle = service.get(id, catalogueId);
         bundle.settTrainingResource(trainingResource);
 
-        service.updateDraft(bundle, auth);
         logger.info("Finalizing Draft Training Resource with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
 

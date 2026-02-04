@@ -343,7 +343,6 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
         AdapterBundle bundle = service.get(id, catalogueId);
         bundle.setAdapter(adapter);
 
-        service.updateDraft(bundle, auth);
         logger.info("Finalizing Draft Adapter with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
 

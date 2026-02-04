@@ -120,7 +120,8 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     }
 
     @Override
-    @TriggersAspects({"HostingLegalEntityVocabularyUpdate", "AfterProviderUpdateEmails"})
+//    @TriggersAspects({"HostingLegalEntityVocabularyUpdate", "AfterProviderUpdateEmails"})
+    @TriggersAspects({"HostingLegalEntityVocabularyUpdate"})
     public ProviderBundle update(ProviderBundle bundle, String comment, Authentication auth) {
         ProviderBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Provider
@@ -141,7 +142,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     @Override
     @Transactional // if deleteAllRelatedResources() fails, this should also fail
-    @TriggersAspects({"AfterProviderDeletionEmails"})
+//    @TriggersAspects({"AfterProviderDeletionEmails"})
     public void delete(ProviderBundle bundle) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // block Public Provider deletion

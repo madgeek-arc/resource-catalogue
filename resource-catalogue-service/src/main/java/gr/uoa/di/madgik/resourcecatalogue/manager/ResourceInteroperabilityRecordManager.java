@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
@@ -50,8 +51,8 @@ public class ResourceInteroperabilityRecordManager implements ResourceInteropera
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
-//    private final ConfigurationTemplateService ctService;
-//    private final ConfigurationTemplateInstanceService ctiService;
+    private final ConfigurationTemplateService ctService;
+    private final ConfigurationTemplateInstanceService ctiService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -62,9 +63,9 @@ public class ResourceInteroperabilityRecordManager implements ResourceInteropera
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
                                                  IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator,
                                                  GenericResourceService genericResourceService,
-                                                 VocabularyService vocabularyService) {
-//                                                 ConfigurationTemplateService ctService,
-//                                                 ConfigurationTemplateInstanceService ctiService) {
+                                                 VocabularyService vocabularyService,
+                                                 ConfigurationTemplateService ctService,
+                                                 ConfigurationTemplateInstanceService ctiService) {
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
@@ -72,8 +73,8 @@ public class ResourceInteroperabilityRecordManager implements ResourceInteropera
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
-//        this.ctService = ctService;
-//        this.ctiService = ctiService;
+        this.ctService = ctService;
+        this.ctiService = ctiService;
     }
 
     public String getResourceTypeName() {
@@ -210,29 +211,28 @@ public class ResourceInteroperabilityRecordManager implements ResourceInteropera
         deleteCTI(resourceId, missingGuidelineIds);
     }
 
-    //FIXME
     private void deleteCTI(String resourceId, Set<String> guidelineIds) {
-//        for (String guidelineId : guidelineIds) {
-//            List<ConfigurationTemplate> ctList = ctService.getAllByInteroperabilityRecordId(null,
-//                    guidelineId).getResults();
-//            if (ctList == null || ctList.isEmpty()) {
-//                continue;
-//            }
-//            for (ConfigurationTemplate ct : ctList) {
-//                ConfigurationTemplateInstance cti = ctiService.getByResourceAndConfigurationTemplateId(resourceId ,ct.getId());
-//                if (cti != null) {
-//                    try {
-//                        ConfigurationTemplateInstanceBundle ctiBundle = ctiService.get(cti.getId());
-//                        if (ctiBundle != null) {
-//                            logger.info("Deleting CTI with id '{}'", cti.getId());
-//                            ctiService.delete(ctiBundle);
-//                        }
-//                    } catch (Exception e) {
-//                        logger.info("Failed to delete CTI for ID {}: {}", cti.getId(), e.getMessage());
-//                    }
-//                }
-//            }
-//        }
+        for (String guidelineId : guidelineIds) {
+            List<LinkedHashMap<String, Object>> ctList = ctService.getAllByInteroperabilityRecordId(null,
+                    guidelineId).getResults();
+            if (ctList == null || ctList.isEmpty()) {
+                continue;
+            }
+            for (LinkedHashMap<String, Object> ct : ctList) {
+                LinkedHashMap<String, Object> cti = ctiService.getByResourceAndConfigurationTemplateId(resourceId, (String) ct.get("id"));
+                if (cti != null) {
+                    try {
+                        ConfigurationTemplateInstanceBundle ctiBundle = ctiService.get((String) cti.get("id"));
+                        if (ctiBundle != null) {
+                            logger.info("Deleting CTI with id '{}'", cti.get("id"));
+                            ctiService.delete(ctiBundle);
+                        }
+                    } catch (Exception e) {
+                        logger.info("Failed to delete CTI for ID {}: {}", cti.get("id"), e.getMessage());
+                    }
+                }
+            }
+        }
     }
 
     //region Not-Needed

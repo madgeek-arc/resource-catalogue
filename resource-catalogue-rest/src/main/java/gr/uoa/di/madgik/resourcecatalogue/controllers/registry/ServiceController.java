@@ -487,13 +487,12 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceWrite")
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceMap['id'])")
-    public ResponseEntity<?> transformService(@RequestBody LinkedHashMap<String, Object> serviceMap,
+    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) serviceMap.get("id");
         ServiceBundle bundle = service.get(id, catalogueId);
         bundle.setService(serviceMap);
 
-        service.updateDraft(bundle, auth);
         logger.info("Finalizing Draft Service with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
 

@@ -114,6 +114,11 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get vocabulary children given the vocabulary parent")
+    @GetMapping(path = "/getChildren/{parentId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Vocabulary>> getChildren(@PathVariable String parentId) {
+        return new ResponseEntity<>(vocabularyService.getChildren(parentId), HttpStatus.OK);
+    }
 
     /**
      * Secured methods

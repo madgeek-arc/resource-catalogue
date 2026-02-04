@@ -424,7 +424,6 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
         ProviderBundle bundle = service.get(id, catalogueId);
         bundle.setProvider(provider);
 
-        service.updateDraft(bundle, auth);
         logger.info("Finalizing Draft Provider with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
 

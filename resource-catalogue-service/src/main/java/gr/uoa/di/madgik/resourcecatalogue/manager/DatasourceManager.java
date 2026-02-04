@@ -139,7 +139,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     @Override
     @Transactional
-    @TriggersAspects({"AfterServiceUpdateEmails"})
+//    @TriggersAspects({"AfterServiceUpdateEmails"})
     public DatasourceBundle update(DatasourceBundle datasource, String comment, Authentication auth) {
         DatasourceBundle existing = get(datasource.getId(), datasource.getCatalogueId());
         // check if there are actual changes in the Service

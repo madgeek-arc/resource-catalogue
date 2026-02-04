@@ -90,6 +90,25 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
+    public List<Vocabulary> getChildren(String parentId) {
+        List<Vocabulary> children = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(maxQuantity);
+
+        List<Vocabulary> allVocs = getAll(ff).getResults();
+        for (Vocabulary vocabulary : allVocs) {
+            if (parentId.equals(vocabulary.getParentId())) {
+                children.add(vocabulary);
+            }
+        }
+
+        children.sort(Comparator.comparing(Vocabulary::getName));
+        return children;
+    }
+
+
+    @Override
     public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
         return super.getAll(ff, auth);
     }
