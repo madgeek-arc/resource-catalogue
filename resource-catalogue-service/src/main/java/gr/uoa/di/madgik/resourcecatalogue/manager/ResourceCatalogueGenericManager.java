@@ -8,17 +8,17 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
+import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -41,15 +41,23 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     protected final GenericResourceService genericResourceService;
     protected final SecurityService securityService;
+    protected final VocabularyService vocabularyService;
+
     @Autowired
-    private IdCreator idCreator;
+    protected IdCreator idCreator;
+    @Value("${catalogue.id}")
+    protected String catalogueId;
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
 
     protected abstract String getResourceTypeName();
 
     public ResourceCatalogueGenericManager(GenericResourceService genericResourceService,
-                                           SecurityService securityService) {
+                                           SecurityService securityService,
+                                           VocabularyService vocabularyService) {
         this.genericResourceService = genericResourceService;
         this.securityService = securityService;
+        this.vocabularyService = vocabularyService;
     }
 
     public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
@@ -61,6 +69,29 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             identifiers.setOriginalId(identifiers.getPid() + "00");
         }
         bundle.setIdentifiers(identifiers);
+    }
+
+    // TODO: transfer to bpmn
+    protected void onboard(Bundle bundle, ProviderBundle provider, Authentication auth) {
+        String catalogueId = bundle.getCatalogueId();
+        UserInfo user = UserInfo.of(auth);
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
+            if (provider.getTemplateStatus().equals("approved template")) {
+                bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
+                bundle.setActive(true);
+            } else {
+                bundle.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
+            }
+            bundle.setCatalogueId(this.catalogueId);
+            this.createIdentifiers(bundle, getResourceTypeName(), false);
+            bundle.setId(bundle.getIdentifiers().getOriginalId());
+        } else {
+            bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
+//            commonMethods.validateCatalogueId(catalogueId); //FIXME
+            idCreator.validateId(bundle.getId());
+            this.createIdentifiers(bundle, getResourceTypeName(), true);
+        }
+        bundle.setAuditState(Auditable.NOT_AUDITED);
     }
 
     //TODO: we don't need this

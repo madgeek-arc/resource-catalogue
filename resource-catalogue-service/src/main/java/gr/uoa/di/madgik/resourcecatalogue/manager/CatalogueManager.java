@@ -51,9 +51,6 @@ import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils
 public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueBundle> implements CatalogueService {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogueManager.class);
-    private final SecurityService securityService;
-    private final VocabularyService vocabularyService;
-    private final IdCreator idCreator;
     private final ProviderService providerService;
     private final ServiceService serviceService;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -72,10 +69,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
                             @Lazy ProviderResourcesCommonMethods commonMethods,
 //                            EmailService emailService,
                             GenericResourceService genericResourceService) {
-        super(genericResourceService, securityService);
-        this.securityService = securityService;
-        this.vocabularyService = vocabularyService;
-        this.idCreator = idCreator;
+        super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService;
         this.serviceService = serviceService;
         this.commonMethods = commonMethods;

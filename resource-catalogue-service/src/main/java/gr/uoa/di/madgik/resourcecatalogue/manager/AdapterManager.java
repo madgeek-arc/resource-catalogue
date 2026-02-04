@@ -47,10 +47,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
 
     private static final Logger logger = LoggerFactory.getLogger(AdapterManager.class);
     private final OIDCSecurityService securityService;
-    private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final IdCreator idCreator;
-    private final ServiceService serviceService;
     private final ProviderService providerService;
     private final GenericResourceService genericResourceService;
 
@@ -62,15 +59,13 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     public AdapterManager(OIDCSecurityService securityService,
                           VocabularyService vocabularyService,
                           ProviderResourcesCommonMethods commonMethods,
-                          IdCreator idCreator, ServiceService serviceService,
+                          IdCreator idCreator,
+                          ServiceService serviceService,
                           ProviderService providerService,
                           GenericResourceService genericResourceService) {
-        super(genericResourceService, securityService);
+        super(genericResourceService, securityService, vocabularyService);
         this.securityService = securityService;
-        this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
-        this.idCreator = idCreator;
-        this.serviceService = serviceService;
         this.providerService = providerService;
         this.genericResourceService = genericResourceService;
     }

@@ -52,11 +52,8 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
 
     private final ProviderService providerService;
-    private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
-    private final IdCreator idCreator;
-    private final SecurityService securityService;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
 
@@ -73,13 +70,10 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                              GenericResourceService genericResourceService,
                              SecurityService securityService,
                              RelationshipValidator relationshipValidator) {
-        super(genericResourceService, securityService);
+        super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService;
-        this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
-        this.idCreator = idCreator;
-        this.securityService = securityService;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
     }
@@ -98,28 +92,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         onboardingValidation(datasource, provider);
         DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), datasource);
         return ret;
-    }
-
-    private void onboard(DatasourceBundle datasource, ProviderBundle provider, Authentication auth) {
-        String catalogueId = datasource.getCatalogueId();
-        UserInfo user = UserInfo.of(auth);
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            if (provider.getTemplateStatus().equals("approved template")) {
-                datasource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-                datasource.setActive(true);
-            } else {
-                datasource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-            }
-            datasource.setCatalogueId(this.catalogueId);
-            this.createIdentifiers(datasource, getResourceTypeName(), false);
-            datasource.setId(datasource.getIdentifiers().getOriginalId());
-        } else {
-            datasource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-//            commonMethods.validateCatalogueId(catalogueId); //FIXME
-            idCreator.validateId(datasource.getId());
-            this.createIdentifiers(datasource, getResourceTypeName(), true);
-        }
-        datasource.setAuditState(Auditable.NOT_AUDITED);
     }
 
     private void onboardingValidation(DatasourceBundle datasource, ProviderBundle provider) {

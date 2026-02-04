@@ -60,7 +60,6 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     protected int maxQuantity;
 
     private final GenericResourceService genericResourceService;
-    private final VocabularyService vocabularyService;
     private final ServiceService serviceService;
     private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
@@ -77,9 +76,8 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
                            SecurityService securityService,
                            ProviderCascadeLifecycleManager cascadeLifecycleService,
                            OnboardingService<ProviderBundle> onboardingService) {
-        super(genericResourceService, securityService);
+        super(genericResourceService, securityService, vocabularyService);
         this.genericResourceService = genericResourceService;
-        this.vocabularyService = vocabularyService;
         this.serviceService = serviceService;
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;

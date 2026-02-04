@@ -53,8 +53,6 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
 
     private final ProviderService providerService;
     private final IdCreator idCreator;
-    private final SecurityService securityService;
-    private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
 
@@ -68,11 +66,9 @@ public class DeployableServiceManager extends ResourceCatalogueGenericManager<De
                                     @Lazy VocabularyService vocabularyService,
                                     @Lazy ProviderResourcesCommonMethods commonMethods,
                                     GenericResourceService genericResourceService) {
-        super(genericResourceService, securityService);
+        super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService;
         this.idCreator = idCreator;
-        this.securityService = securityService;
-        this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
     }

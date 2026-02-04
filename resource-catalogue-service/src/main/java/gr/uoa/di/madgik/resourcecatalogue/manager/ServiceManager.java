@@ -55,8 +55,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
     private final ProviderService providerService;
-    private final IdCreator idCreator;
-    private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
@@ -77,10 +75,8 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           GenericResourceService genericResourceService,
                           @Lazy RelationshipValidator relationshipValidator,
                           ModelService modelService) {
-        super(genericResourceService, securityService);
+        super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService; // for providers
-        this.idCreator = idCreator;
-        this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.modelService = modelService;
@@ -101,28 +97,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         onboardingValidation(service, provider);
         ServiceBundle ret = genericResourceService.add(getResourceTypeName(), service);
         return ret;
-    }
-
-    private void onboard(ServiceBundle service, ProviderBundle provider, Authentication auth) {
-        String catalogueId = service.getCatalogueId();
-        UserInfo user = UserInfo.of(auth);
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            if (provider.getTemplateStatus().equals("approved template")) {
-                service.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-                service.setActive(true);
-            } else {
-                service.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-            }
-            service.setCatalogueId(this.catalogueId);
-            this.createIdentifiers(service, getResourceTypeName(), false);
-            service.setId(service.getIdentifiers().getOriginalId());
-        } else {
-            service.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-//            commonMethods.validateCatalogueId(catalogueId); //FIXME
-            idCreator.validateId(service.getId());
-            this.createIdentifiers(service, getResourceTypeName(), true);
-        }
-        service.setAuditState(Auditable.NOT_AUDITED);
     }
 
     private void onboardingValidation(ServiceBundle service, ProviderBundle provider) {

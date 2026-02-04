@@ -49,30 +49,20 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     private static final Logger logger = LoggerFactory.getLogger(TrainingResourceManager.class);
 
     private final ProviderService providerService;
-    private final IdCreator idCreator;
-    private final SecurityService securityService;
-    private final VocabularyService vocabularyService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public TrainingResourceManager(ProviderService providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
-                                   @Lazy VocabularyService vocabularyService,
+                                   VocabularyService vocabularyService,
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    @Lazy ProviderResourcesCommonMethods commonMethods,
                                    @Lazy RelationshipValidator relationshipValidator,
                                    GenericResourceService genericResourceService) {
-        super(genericResourceService, securityService);
+        super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService;
         this.idCreator = idCreator;
-        this.securityService = securityService;
-        this.vocabularyService = vocabularyService;
         this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
@@ -92,28 +82,6 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         onboardingValidation(trainingResource, provider);
         TrainingResourceBundle ret = genericResourceService.add(getResourceTypeName(), trainingResource);
         return ret;
-    }
-
-    private void onboard(TrainingResourceBundle trainingResource, ProviderBundle provider, Authentication auth) {
-        String catalogueId = trainingResource.getCatalogueId();
-        UserInfo user = UserInfo.of(auth);
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            if (provider.getTemplateStatus().equals("approved template")) {
-                trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-                trainingResource.setActive(true);
-            } else {
-                trainingResource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-            }
-            trainingResource.setCatalogueId(this.catalogueId);
-            this.createIdentifiers(trainingResource, getResourceTypeName(), false);
-            trainingResource.setId(trainingResource.getIdentifiers().getOriginalId());
-        } else {
-            trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-//            commonMethods.validateCatalogueId(catalogueId); //FIXME
-            idCreator.validateId(trainingResource.getId());
-            this.createIdentifiers(trainingResource, getResourceTypeName(), true);
-        }
-        trainingResource.setAuditState(Auditable.NOT_AUDITED);
     }
 
     private void onboardingValidation(TrainingResourceBundle trainingResource, ProviderBundle provider) {
