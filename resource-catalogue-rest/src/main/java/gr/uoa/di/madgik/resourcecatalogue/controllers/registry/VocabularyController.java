@@ -16,6 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
@@ -30,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -70,22 +73,26 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
     }
 
+    @Deprecated
     @GetMapping(path = "vocabularyTree/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
     }
 
+    @Deprecated
     @GetMapping(path = "vocabularyMap", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Vocabulary>> getVocabularyMap() {
         return new ResponseEntity<>(vocabularyService.getVocabulariesMap(), HttpStatus.OK);
     }
 
+    @Deprecated
     @Operation(summary = "Get a Map of vocabulary types and their respective entries")
     @GetMapping(path = "/byType", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<Vocabulary.Type, List<Vocabulary>>> getAllVocabulariesByType() {
         return new ResponseEntity<>(vocabularyService.getAllVocabulariesByType(), HttpStatus.OK);
     }
 
+    @Deprecated
     @Operation(summary = "Get vocabularies by type")
     @GetMapping(path = "/byType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Vocabulary>> getByType(@PathVariable(value = "type") Vocabulary.Type type) {
@@ -94,17 +101,14 @@ public class VocabularyController extends ResourceController<Vocabulary> {
 
     @Operation(summary = "Get vocabularies by type")
     @GetMapping(path = "types/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<Vocabulary>> getByTypeV2(@PathVariable(value = "type") String type) {
-        if (type != null && type.equals("test")) { // TODO: Delete this
-            return ResponseEntity.ok(List.of(
-                    new Vocabulary(
-                            "test",
-                            "Test Vocabulary",
-                            "This vocabulary is fake and exists only for testing purposes.",
-                            null, "test", null))
-            );
-        }
-        return new ResponseEntity<>(vocabularyService.getByType(Vocabulary.Type.fromString(type)), HttpStatus.OK);
+    public ResponseEntity<List<Vocabulary>> getByTypeV2(@PathVariable(value = "type") String type,
+                                                        @RequestParam(required = false) String parent_id,
+                                                        @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+        FacetFilter filter = FacetFilter.from(allRequestParams);
+        filter.addFilter("type", type);
+        filter.setQuantity(10000);
+        Browsing<Vocabulary> vocs = vocabularyService.getAll(filter);
+        return new ResponseEntity<>(vocs.getResults(), HttpStatus.OK);
     }
 
     @Operation(summary = "Get vocabularies by id")
