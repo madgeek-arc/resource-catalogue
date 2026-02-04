@@ -81,7 +81,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         T ret;
         logger.info("{} '{}' is being published with id '{}'", t.getClass().getSimpleName(), lowerLevelId, t.getId());
         ret = genericResourceService.add(getResourceTypeName(), t);
-        jmsService.convertAndSendTopic("provider.create", t);
+        jmsService.convertAndSendTopic(getResourceTypeName() + ".create", t);
         return ret;
     }
 
@@ -101,7 +101,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-        jmsService.convertAndSendTopic("provider.update", t);
+        jmsService.convertAndSendTopic(getResourceTypeName() + ".update", t);
         return ret;
     }
 
@@ -110,7 +110,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
             T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
             logger.info("Deleting public {} with id '{}'", published.getClass().getSimpleName(), published.getId());
             genericResourceService.delete(getResourceTypeName(), published.getId());
-            jmsService.convertAndSendTopic("provider.delete", published);
+            jmsService.convertAndSendTopic(getResourceTypeName() + ".delete", published);
         } catch (CatalogueResourceNotFoundException ignore) {
         }
     }
