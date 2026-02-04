@@ -20,6 +20,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -54,6 +55,7 @@ public class ProviderManagementAspect {
     private final InteroperabilityRecordService guidelineService;
     private final DeployableServiceService deployableServiceService;
     private final ResourceInteroperabilityRecordService rirService;
+    private final ConfigurationTemplateInstanceService ctiService;
     private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceService;
     private final PublicDatasourceService publicDatasourceService;
@@ -61,6 +63,8 @@ public class ProviderManagementAspect {
     private final PublicInteroperabilityRecordService publicGuidelineService;
     private final PublicDeployableServiceService publicDeployableServiceService;
     private final PublicAdapterService publicAdapterService;
+    private final PublicResourceInteroperabilityRecordService publicRIRService;
+    private final PublicConfigurationTemplateInstanceService publicCTIService;
     private final SecurityService securityService;
 
     @Value("${catalogue.id}")
@@ -73,6 +77,7 @@ public class ProviderManagementAspect {
                                     InteroperabilityRecordService guidelineService,
                                     DeployableServiceService deployableServiceService,
                                     ResourceInteroperabilityRecordService rirService,
+                                    ConfigurationTemplateInstanceService ctiService,
                                     PublicProviderService publicProviderService,
                                     PublicServiceService publicServiceService,
                                     PublicDatasourceService publicDatasourceService,
@@ -80,6 +85,8 @@ public class ProviderManagementAspect {
                                     PublicInteroperabilityRecordService publicGuidelineService,
                                     PublicDeployableServiceService publicDeployableServiceService,
                                     PublicAdapterService publicAdapterService,
+                                    PublicResourceInteroperabilityRecordService publicRIRService,
+                                    PublicConfigurationTemplateInstanceService publicCTIService,
                                     SecurityService securityService) {
         this.providerService = providerService;
         this.serviceService = serviceService;
@@ -88,6 +95,7 @@ public class ProviderManagementAspect {
         this.guidelineService = guidelineService;
         this.deployableServiceService = deployableServiceService;
         this.rirService = rirService;
+        this.ctiService = ctiService;
         this.publicProviderService = publicProviderService;
         this.publicServiceService = publicServiceService;
         this.publicDatasourceService = publicDatasourceService;
@@ -95,6 +103,8 @@ public class ProviderManagementAspect {
         this.publicAdapterService = publicAdapterService;
         this.publicGuidelineService = publicGuidelineService;
         this.publicDeployableServiceService = publicDeployableServiceService;
+        this.publicRIRService = publicRIRService;
+        this.publicCTIService = publicCTIService;
         this.securityService = securityService;
     }
 
@@ -333,7 +343,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.delete(..))")
     public void deletePublicProvider(JoinPoint joinPoint) {
         ProviderBundle bundle = (ProviderBundle) joinPoint.getArgs()[0];
-        publicProviderService.delete(bundle);
+        try {
+            publicProviderService.delete(bundle);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -387,7 +400,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.delete(..))")
     public void deletePublicService(JoinPoint joinPoint) {
         ServiceBundle service = (ServiceBundle) joinPoint.getArgs()[0];
-        publicServiceService.delete(service);
+        try {
+            publicServiceService.delete(service);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -441,7 +457,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.delete(..))")
     public void deletePublicDatasource(JoinPoint joinPoint) {
         DatasourceBundle datasource = (DatasourceBundle) joinPoint.getArgs()[0];
-        publicDatasourceService.delete(datasource);
+        try {
+            publicDatasourceService.delete(datasource);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -494,7 +513,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.delete(..))")
     public void deletePublicTrainingResource(JoinPoint joinPoint) {
         TrainingResourceBundle training = (TrainingResourceBundle) joinPoint.getArgs()[0];
-        publicTrainingResourceService.delete(training);
+        try {
+            publicTrainingResourceService.delete(training);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -547,7 +569,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.delete(..))")
     public void deletePublicGuideline(JoinPoint joinPoint) {
         InteroperabilityRecordBundle guideline = (InteroperabilityRecordBundle) joinPoint.getArgs()[0];
-        publicGuidelineService.delete(guideline);
+        try {
+            publicGuidelineService.delete(guideline);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -600,7 +625,10 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.delete(..))")
     public void deletePublicDeployableService(JoinPoint joinPoint) {
         DeployableServiceBundle deployableService = (DeployableServiceBundle) joinPoint.getArgs()[0];
-        publicDeployableServiceService.delete(deployableService);
+        try {
+            publicDeployableServiceService.delete(deployableService);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
@@ -652,130 +680,101 @@ public class ProviderManagementAspect {
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.delete(..))")
     public void deletePublicAdapter(JoinPoint joinPoint) {
         AdapterBundle adapter = (AdapterBundle) joinPoint.getArgs()[0];
-        publicAdapterService.delete(adapter);
+        try {
+            publicAdapterService.delete(adapter);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+    //endregion
+
+    //region Public RIR
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.add(..))",
+            returning = "rir")
+    public void addPublicRIR(final ResourceInteroperabilityRecordBundle rir) {
+        try {
+            publicRIRService.get(rir.getIdentifiers().getPid(), rir.getCatalogueId());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            publicRIRService.add(ObjectUtils.clone(rir));
+        }
+    }
+
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.update(..)) " +
+            "&& args(rir,..)")
+    public Object updatePublicRIR(ProceedingJoinPoint pjp, ResourceInteroperabilityRecordBundle rir) {
+        ResourceInteroperabilityRecordBundle init = ObjectUtils.clone(rir);
+        ResourceInteroperabilityRecordBundle ret = null;
+        try {
+            ret = (ResourceInteroperabilityRecordBundle) pjp.proceed();
+            if (!ret.equals(init)) {
+                publicRIRService.update(ObjectUtils.clone(ret));
+            }
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+        return ret;
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.delete(..))")
+    public void deletePublicRIR(JoinPoint joinPoint) {
+        ResourceInteroperabilityRecordBundle rir = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
+        try {
+            publicRIRService.delete(rir);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+    //endregion
+
+    //region Public CTI
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.add(..))",
+            returning = "cti")
+    public void addPublicCTI(final ConfigurationTemplateInstanceBundle cti) {
+        try {
+            publicCTIService.get(cti.getIdentifiers().getPid(), cti.getCatalogueId());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            publicCTIService.add(ObjectUtils.clone(cti));
+        }
+    }
+
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.update(..)) " +
+            "&& args(cti,..)")
+    public Object updatePublicCTI(ProceedingJoinPoint pjp, ConfigurationTemplateInstanceBundle cti) {
+        ConfigurationTemplateInstanceBundle init = ObjectUtils.clone(cti);
+        ConfigurationTemplateInstanceBundle ret = null;
+        try {
+            ret = (ConfigurationTemplateInstanceBundle) pjp.proceed();
+            if (!ret.equals(init)) {
+                publicCTIService.update(ObjectUtils.clone(ret));
+            }
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+        return ret;
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.delete(..))")
+    public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
+        ConfigurationTemplateInstanceBundle cti = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
+        try {
+            publicCTIService.delete(cti);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
     }
     //endregion
 
 
+    //FIXME
 //    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..)) " +
 //            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.add(..))",
 //            returning = "catalogueBundle")
 //    public void catalogueRegistrationEmails(final CatalogueBundle catalogueBundle) {
 //        logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToCatalogueAdmins(catalogueBundle);
-//    }
-
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.add(..))",
-//            returning = "resourceInteroperabilityRecordBundle")
-//    public void addResourceInteroperabilityRecordAsPublic(final ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-//        // TODO: check Resource states (publish if only approved/active)
-//        try {
-//            publicResourceInteroperabilityRecordManager.get(
-//                    resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
-//                    resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), true);
-//        } catch (ResourceException e) {
-//            publicResourceInteroperabilityRecordManager.add(ObjectUtils.clone(resourceInteroperabilityRecordBundle), null);
-//        }
-//    }
-
-//    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.update(..)) " +
-//            "&& args(resourceInteroperabilityRecordBundle,..)")
-//    public Object updatePublicResource(ProceedingJoinPoint pjp, ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-//        ResourceInteroperabilityRecordBundle init = ObjectUtils.clone(resourceInteroperabilityRecordBundle);
-//        ResourceInteroperabilityRecordBundle ret = null;
-//        try {
-//            ret = (ResourceInteroperabilityRecordBundle) pjp.proceed();
-//            if (!ret.equals(init)) {
-//                publicResourceInteroperabilityRecordManager.update(ObjectUtils.clone(ret), null);
-//            }
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        } catch (Throwable e) {
-//            throw new RuntimeException(e);
-//        }
-//        return ret;
-//    }
-
-//    @Async
-//    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.delete(..))")
-//    public void deletePublicResourceInteroperabilityRecord(JoinPoint joinPoint) {
-//        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
-//        publicResourceInteroperabilityRecordManager.delete(resourceInteroperabilityRecordBundle);
-//    }
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.add(..))",
-//            returning = "configurationTemplateBundle")
-//    public void addConfigurationTemplateAsPublic(final ConfigurationTemplateBundle configurationTemplateBundle) {
-//        try {
-//            //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-//            publicConfigurationTemplateManager.get(configurationTemplateBundle.getIdentifiers().getPid(),
-//                    configurationTemplateBundle.getConfigurationTemplate().getCatalogueId(), true);
-//        } catch (ResourceException | ResourceNotFoundException e) {
-//            publicConfigurationTemplateManager.add(ObjectUtils.clone(configurationTemplateBundle), null);
-//        }
-//    }
-
-//    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.update(..)) " +
-//            "&& args(configurationTemplateBundle,..)")
-//    public Object updatePublicResource(ProceedingJoinPoint pjp, ConfigurationTemplateBundle configurationTemplateBundle) {
-//        ConfigurationTemplateBundle init = ObjectUtils.clone(configurationTemplateBundle);
-//        ConfigurationTemplateBundle ret = null;
-//        try {
-//            ret = (ConfigurationTemplateBundle) pjp.proceed();
-//            if (!ret.equals(init)) {
-//                publicConfigurationTemplateManager.update(ObjectUtils.clone(ret), null);
-//            }
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        } catch (Throwable e) {
-//            throw new RuntimeException(e);
-//        }
-//        return ret;
-//    }
-
-//    @Async
-//    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.delete(..))")
-//    public void deletePublicConfigurationTemplate(JoinPoint joinPoint) {
-//        ConfigurationTemplateBundle configurationTemplateBundle = (ConfigurationTemplateBundle) joinPoint.getArgs()[0];
-//        publicConfigurationTemplateManager.delete(configurationTemplateBundle);
-//    }
-
-//    @Async
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.add(..))",
-//            returning = "configurationTemplateInstanceBundle")
-//    public void addConfigurationTemplateInstanceAsPublic(final ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-//        try {
-//            //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
-//            publicConfigurationTemplateInstanceManager.get(configurationTemplateInstanceBundle.getIdentifiers().getPid(),
-//                    configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
-//        } catch (ResourceException | ResourceNotFoundException e) {
-//            publicConfigurationTemplateInstanceManager.add(ObjectUtils.clone(configurationTemplateInstanceBundle), null);
-//        }
-//    }
-
-//    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.update(..)) " +
-//            "&& args(configurationTemplateInstanceBundle,..)")
-//    public Object updatePublicResource(ProceedingJoinPoint pjp, ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-//        ConfigurationTemplateInstanceBundle init = ObjectUtils.clone(configurationTemplateInstanceBundle);
-//        ConfigurationTemplateInstanceBundle ret = null;
-//        try {
-//            ret = (ConfigurationTemplateInstanceBundle) pjp.proceed();
-//            if (!ret.equals(init)) {
-//                publicConfigurationTemplateInstanceManager.update(ObjectUtils.clone(ret), null);
-//            }
-//        } catch (ResourceException | ResourceNotFoundException ignore) {
-//        } catch (Throwable e) {
-//            throw new RuntimeException(e);
-//        }
-//        return ret;
-//    }
-
-//    @Async
-//    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.delete(..))")
-//    public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
-//        ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
-//        publicConfigurationTemplateInstanceManager.delete(configurationTemplateInstanceBundle);
 //    }
 
     //region extras
