@@ -1,7 +1,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 public interface ResourceCatalogueGenericService<T extends Bundle>
         extends BundleOperations<T>, ResourceService<T>, DraftService<T> {
@@ -23,4 +26,6 @@ public interface ResourceCatalogueGenericService<T extends Bundle>
      * @return {@link T}
      */
     T getOrElseReturnNull(String id);
+
+    List<Value> listResources(String catalogueId);
 }

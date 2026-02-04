@@ -25,10 +25,8 @@ import org.springframework.security.core.Authentication;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 //TODO: resource-specific method -> inside corresponding manager/service
 //TODO: true universal method (all resources will use it) -> inside here (generic)
@@ -133,6 +131,48 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             return null;
         }
         return bundle;
+    }
+
+    @Override
+    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) {
+        List<Bundle> bundles = Stream.concat(
+                this.getAll(createFacetFilter(catalogueId, false, getResourceTypeName()))
+                        .getResults()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(c -> (Bundle) c),
+                this.getAll(createFacetFilter(catalogueId, true, getResourceTypeName()))
+                        .getResults()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(c -> (Bundle) c)
+                        .filter(b -> !b.getCatalogueId().equals(catalogueId))
+        ).toList();
+
+        List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = bundles.stream()
+                .map(b -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
+                        b.getId(),
+                        b.getPayload().get("name").toString()
+                ))
+                .toList();
+
+        return allResources;
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        ff.addFilter("status", "approved");
+        ff.addFilter("active", true);
+        ff.addFilter("draft", false);
+        if (isPublic) {
+            ff.addFilter("published", true);
+        } else {
+            ff.addFilter("catalogue_id", catalogueId);
+            ff.addFilter("published", false);
+        }
+        ff.setResourceType(resourceType);
+        return ff;
     }
 
     @Override

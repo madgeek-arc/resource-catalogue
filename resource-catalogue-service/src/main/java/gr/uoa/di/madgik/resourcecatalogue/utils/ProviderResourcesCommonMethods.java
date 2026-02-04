@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Deprecated
 @Component
 public class ProviderResourcesCommonMethods {
 
@@ -99,17 +100,17 @@ public class ProviderResourcesCommonMethods {
 //            }
 //        }
 //    }
-
-    public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
-        Identifiers identifiers = new Identifiers();
-        identifiers.setPid(idCreator.generate(resourceType));
-        if (external) {
-            identifiers.setOriginalId(bundle.getId());
-        } else {
-            identifiers.setOriginalId(identifiers.getPid() + "00");
-        }
-        bundle.setIdentifiers(identifiers);
-    }
+//
+//    public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
+//        Identifiers identifiers = new Identifiers();
+//        identifiers.setPid(idCreator.generate(resourceType));
+//        if (external) {
+//            identifiers.setOriginalId(bundle.getId());
+//        } else {
+//            identifiers.setOriginalId(identifiers.getPid() + "00");
+//        }
+//        bundle.setIdentifiers(identifiers);
+//    }
 
     public void blockResourceDeletion(String status, boolean isPublished) {
         if (status.equals(vocabularyService.get("pending").getId())) {

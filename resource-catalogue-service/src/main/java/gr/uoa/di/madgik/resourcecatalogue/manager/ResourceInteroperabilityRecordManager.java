@@ -41,7 +41,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
-public class ResourceInteroperabilityRecordManager implements ResourceInteroperabilityRecordService {
+public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGenericManager<ResourceInteroperabilityRecordBundle> implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
     private final ServiceService serviceService;
@@ -66,6 +66,7 @@ public class ResourceInteroperabilityRecordManager implements ResourceInteropera
                                                  VocabularyService vocabularyService,
                                                  ConfigurationTemplateService ctService,
                                                  ConfigurationTemplateInstanceService ctiService) {
+        super(genericResourceService, securityService, vocabularyService);
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
@@ -102,7 +103,7 @@ public class ResourceInteroperabilityRecordManager implements ResourceInteropera
         bundle.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         bundle.setActive(true);
         bundle.setCatalogueId(this.catalogueId);
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
         ResourceInteroperabilityRecordBundle ret = genericResourceService.add(getResourceTypeName(), bundle);

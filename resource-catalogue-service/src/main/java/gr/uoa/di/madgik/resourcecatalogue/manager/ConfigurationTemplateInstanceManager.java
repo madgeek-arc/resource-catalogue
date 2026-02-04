@@ -40,7 +40,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @org.springframework.stereotype.Service("configurationTemplateInstanceManager")
-public class ConfigurationTemplateInstanceManager implements ConfigurationTemplateInstanceService {
+public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGenericManager<ConfigurationTemplateInstanceBundle> implements ConfigurationTemplateInstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceManager.class);
     private final ConfigurationTemplateInstanceService service;
@@ -63,6 +63,7 @@ public class ConfigurationTemplateInstanceManager implements ConfigurationTempla
                                                 ProviderResourcesCommonMethods commonMethods,
                                                 GenericResourceService genericResourceService,
                                                 VocabularyService vocabularyService) {
+        super(genericResourceService, securityService, vocabularyService);
         this.service = service;
         this.configService = configService;
         this.rirService = rirService;
@@ -85,7 +86,7 @@ public class ConfigurationTemplateInstanceManager implements ConfigurationTempla
         cti.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         cti.setActive(true);
         cti.setCatalogueId(this.catalogueId);
-        commonMethods.createIdentifiers(cti, getResourceTypeName(), false);
+        this.createIdentifiers(cti, getResourceTypeName(), false);
         cti.setId(cti.getIdentifiers().getOriginalId());
         ConfigurationTemplateInstanceBundle ret = genericResourceService.add(getResourceTypeName(), cti);
         return ret;

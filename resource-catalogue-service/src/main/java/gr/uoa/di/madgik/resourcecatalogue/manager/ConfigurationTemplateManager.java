@@ -41,10 +41,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
-public class ConfigurationTemplateManager implements ConfigurationTemplateService {
+public class ConfigurationTemplateManager extends ResourceCatalogueGenericManager<ConfigurationTemplateBundle> implements ConfigurationTemplateService {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateManager.class);
-    private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
     private final ProviderService providerService;
     private final InteroperabilityRecordService interoperabilityRecordService;
@@ -54,10 +53,14 @@ public class ConfigurationTemplateManager implements ConfigurationTemplateServic
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ConfigurationTemplateManager(IdCreator idCreator, ProviderResourcesCommonMethods commonMethods,
-                                        ProviderService providerService, InteroperabilityRecordService interoperabilityRecordService,
-                                        GenericResourceService genericResourceService, VocabularyService vocabularyService) {
-        this.idCreator = idCreator;
+    public ConfigurationTemplateManager(IdCreator idCreator,
+                                        ProviderResourcesCommonMethods commonMethods,
+                                        ProviderService providerService,
+                                        InteroperabilityRecordService interoperabilityRecordService,
+                                        SecurityService securityService,
+                                        GenericResourceService genericResourceService,
+                                        VocabularyService vocabularyService) {
+        super(genericResourceService, securityService, vocabularyService);
         this.commonMethods = commonMethods;
         this.providerService = providerService;
         this.interoperabilityRecordService = interoperabilityRecordService;
@@ -84,7 +87,7 @@ public class ConfigurationTemplateManager implements ConfigurationTemplateServic
         ct.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         ct.setActive(true);
         ct.setCatalogueId(this.catalogueId);
-        commonMethods.createIdentifiers(ct, getResourceTypeName(), false);
+        this.createIdentifiers(ct, getResourceTypeName(), false);
         ct.setId(ct.getIdentifiers().getOriginalId());
         ConfigurationTemplateBundle ret = genericResourceService.add(getResourceTypeName(), ct);
         return ret;
