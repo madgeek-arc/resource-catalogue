@@ -100,8 +100,8 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     @Override
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
 //        onboard(bundle, auth);
-        bundle = workflowService.onboard(getResourceTypeName(), bundle, auth);
         createIdentifiers(bundle);
+        bundle = workflowService.onboard(getResourceTypeName(), bundle, auth);
         ProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
