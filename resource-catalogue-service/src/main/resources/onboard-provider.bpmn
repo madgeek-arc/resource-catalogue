@@ -17,7 +17,8 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=resource.catalogueId != null</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_07azb67" name="catalogueId is null" sourceRef="Gateway_0ux95fk" targetRef="Activity_1otm8rv">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=resource.catalogueId = null or resource.catalogueId = "" or resource.catalogueId = "eosc"</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=resource.catalogueId = null or resource.catalogueId = "" or
+resource.catalogueId = "eosc"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:exclusiveGateway id="Gateway_1cobda0" name="Check if Catalogue is Approved">
       <bpmn:extensionElements />
@@ -116,7 +117,7 @@
         <zeebe:ioMapping>
           <zeebe:input source="=resource" target="resource" />
           <zeebe:input source="templateStatus" target="key" />
-          <zeebe:input source="pending template" target="value" />
+          <zeebe:input source="no template status" target="value" />
           <zeebe:output source="=resource" target="resource" />
         </zeebe:ioMapping>
         <zeebe:script expression="=context put(resource, key, value)" resultVariable="resource" />
@@ -140,6 +141,11 @@
     </bpmn:scriptTask>
     <bpmn:sequenceFlow id="Flow_17iczd4" sourceRef="Activity_1lr0vvx" targetRef="Activity_07f9m3j" />
     <bpmn:endEvent id="Event_0uivhin">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=resource" target="resource" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_1osl97h</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1osl97h" sourceRef="Activity_07f9m3j" targetRef="Event_0uivhin" />

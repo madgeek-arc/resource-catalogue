@@ -71,10 +71,11 @@ public class WorkflowService<T extends Bundle> {
         String resourceName = headers.getOrDefault("resourceName", "resource");
         String status = headers.get("status");
         String active = headers.get("active");
+        String comment = headers.getOrDefault("comment", "");
 
         T bundle = getResourceBundle(vars);
         UserInfo user = getUserInfo(vars);
-        bundle.markOnboard(status, active.equalsIgnoreCase("true"), user, "change status job");
+        bundle.markOnboard(status, active.equalsIgnoreCase("true"), user, comment);
 
         logger.info("Running task 'resource-status.apply' for {} with id '{}' | status: {}", resourceName, bundle.getId(), status);
 
@@ -152,7 +153,8 @@ public class WorkflowService<T extends Bundle> {
     }
 
     private Map<String, Object> toMap(T resource) {
-        T bundle = mapper.convertValue(resource, new TypeReference<>() {});
+        Class<T> clazz = (Class<T>) resource.getClass();
+        T bundle = mapper.convertValue(resource, clazz);
         bundle.setPayload(resource.getPayload());
         Map<String, Object> vars = mapper.convertValue(bundle, new TypeReference<Map<String, Object>>() {});
 
