@@ -212,12 +212,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     @Override
     public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
-        ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("published", false);
-        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
-        ff.addOrderBy("name", "asc");
-        return genericResourceService.getResults(ff);
+        return getMyProvidersOrAdapters(ff, auth, getResourceTypeName());
     }
     //endregion
 

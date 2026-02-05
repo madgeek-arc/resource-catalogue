@@ -1,7 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -27,5 +29,26 @@ public interface ResourceCatalogueGenericService<T extends Bundle>
      */
     T getOrElseReturnNull(String id);
 
+    /**
+     *
+     * @param catalogueId Catalogue ID
+     * @return {@link List<Value>}
+     */
     List<Value> listResources(String catalogueId);
+
+    /**
+     *
+     * @param ff   FacetFilter
+     * @param auth Authentication
+     * @return {@link Browsing<T>}
+     */
+    Browsing<T> getMyProvidersOrAdapters(FacetFilter ff, Authentication auth, String resourceType);
+
+    /**
+     *
+     * @param filter FacetFilter
+     * @param auth   Authentication
+     * @return {@link Browsing<T>}
+     */
+    Browsing<T> getMyResources(FacetFilter filter, Authentication auth);
 }

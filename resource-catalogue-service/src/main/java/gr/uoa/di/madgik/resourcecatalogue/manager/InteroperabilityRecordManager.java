@@ -199,20 +199,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     @Override
     public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("draft", false);
-        List<ProviderBundle> providers = providerService.getMy(ff, auth).getResults();
-
-        if (providers.isEmpty()) {
-            return new Browsing<>();
-        }
-
-        filter.setResourceType(getResourceTypeName());
-        filter.setQuantity(maxQuantity);
-        filter.addFilter("published", false);
-        filter.addFilter("owner", providers.stream().map(ProviderBundle::getId).toList());
-        ff.addOrderBy("name", "asc");
-        return genericResourceService.getResults(ff);
+        return getMyResources(filter, auth);
     }
 
     //FIXME

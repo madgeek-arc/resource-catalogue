@@ -8,13 +8,17 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
+import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +135,33 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             return null;
         }
         return bundle;
+    }
+
+    @Override
+    public Browsing<T> getMyProvidersOrAdapters(FacetFilter ff, Authentication auth, String resourceType) {
+        ff.setResourceType(resourceType);
+        ff.setQuantity(maxQuantity);
+        ff.addFilter("published", false);
+        ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
+        ff.addOrderBy("name", "asc");
+        return genericResourceService.getResults(ff);
+    }
+
+    @Override
+    public Browsing<T> getMyResources(FacetFilter filter, Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("draft", false); // A Draft Provider cannot have resources
+        List<T> providers = getMyProvidersOrAdapters(ff, auth, "provider").getResults();
+        if (providers.isEmpty()) {
+            return new Browsing<>();
+        }
+
+        filter.setResourceType(getResourceTypeName());
+        filter.setQuantity(maxQuantity);
+        filter.addFilter("published", false);
+        filter.addFilter("owner", providers.stream().map(T::getId).toList());
+        filter.addOrderBy("name", "asc");
+        return genericResourceService.getResults(filter);
     }
 
     @Override
