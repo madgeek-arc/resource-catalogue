@@ -135,6 +135,9 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     @Override
     public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) {
+        if (catalogueId == null) {
+            catalogueId = this.catalogueId;
+        }
         List<Bundle> bundles = Stream.concat(
                 this.getAll(createFacetFilter(catalogueId, false, getResourceTypeName()))
                         .getResults()
@@ -146,7 +149,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                         .stream()
                         .filter(Objects::nonNull)
                         .map(c -> (Bundle) c)
-                        .filter(b -> !b.getCatalogueId().equals(catalogueId))
         ).toList();
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = bundles.stream()

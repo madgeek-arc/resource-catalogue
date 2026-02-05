@@ -23,7 +23,7 @@ public abstract class ResourceCatalogueGenericController<T extends Bundle, S ext
     }
 
     @GetMapping(path = "list")
-    public List<Value> listResources(@RequestParam String catalogueId) {
+    public List<Value> listResources(@RequestParam(required = false) String catalogueId) {
         return service.listResources(catalogueId);
     }
 }
