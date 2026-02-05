@@ -339,7 +339,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     }
 
     @Override
-    public CatalogueBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public CatalogueBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));

@@ -144,7 +144,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     }
 
     @Transactional
-    public TrainingResourceBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public TrainingResourceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));

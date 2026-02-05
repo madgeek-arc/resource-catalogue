@@ -36,7 +36,7 @@ public interface BundleOperations<T extends Bundle> {
      * @param auth   Authentication
      * @return {@link T}
      */
-    T setStatus(String id, String status, Boolean active, Authentication auth);
+    T verify(String id, String status, Boolean active, Authentication auth);
 
     /**
      * Activate/Deactivate a resource

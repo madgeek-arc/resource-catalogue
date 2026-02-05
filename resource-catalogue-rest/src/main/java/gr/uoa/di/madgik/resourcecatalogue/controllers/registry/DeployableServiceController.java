@@ -218,7 +218,7 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
                                                              @RequestParam(required = false) String status,
                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.setStatus(id, status, active, auth);
+        DeployableServiceBundle bundle = service.verify(id, status, active, auth);
         logger.info("Verify Deployable Service with id: '{}' | status: '{}' | active: '{}'",
                 bundle.getId(), status, active);
         return new ResponseEntity<>(bundle, HttpStatus.OK);

@@ -230,7 +230,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
                                                       @RequestParam(required = false) String status,
                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle datasource = service.setStatus(id, status, active, auth);
+        DatasourceBundle datasource = service.verify(id, status, active, auth);
         logger.info("Verify Datasource with id: '{}' | status: '{}' | active: '{}'",
                 datasource.getId(), status, active);
         return new ResponseEntity<>(datasource, HttpStatus.OK);

@@ -213,7 +213,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
                                                    @RequestParam(required = false) String status,
                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        AdapterBundle adapter = service.setStatus(id, status, active, auth);
+        AdapterBundle adapter = service.verify(id, status, active, auth);
         logger.info("Verify Adapter with id: '{}' | status: '{}' | active: '{}'",
                 adapter.getId(), status, active);
         return new ResponseEntity<>(adapter, HttpStatus.OK);

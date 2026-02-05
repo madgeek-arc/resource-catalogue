@@ -266,7 +266,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                                    @RequestParam(required = false) String status,
                                                    @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.setStatus(id, status, active, auth);
+        ServiceBundle bundle = service.verify(id, status, active, auth);
         logger.info("Verify Service with id: '{}' | status: '{}' | active: '{}'",
                 bundle.getId(), status, active);
         return new ResponseEntity<>(bundle, HttpStatus.OK);

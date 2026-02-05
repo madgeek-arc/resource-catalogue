@@ -176,7 +176,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     }
 
     @Override
-    public ConfigurationTemplateBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public ConfigurationTemplateBundle verify(String id, String status, Boolean active, Authentication auth) {
         return null;
     }
 

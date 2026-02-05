@@ -250,7 +250,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     }
 
     @Override
-    public ConfigurationTemplateInstanceBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public ConfigurationTemplateInstanceBundle verify(String id, String status, Boolean active, Authentication auth) {
         return null;
     }
 

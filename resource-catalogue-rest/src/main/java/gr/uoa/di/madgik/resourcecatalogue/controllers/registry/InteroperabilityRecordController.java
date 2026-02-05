@@ -241,7 +241,7 @@ public class InteroperabilityRecordController
                                                                   @RequestParam(required = false) String status,
                                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.setStatus(id, status, active, auth);
+        InteroperabilityRecordBundle bundle = service.verify(id, status, active, auth);
         logger.info("Verify Interoperability Record with id: '{}' | status: '{}' | active: '{}'",
                 bundle.getId(), status, active);
         return new ResponseEntity<>(bundle, HttpStatus.OK);

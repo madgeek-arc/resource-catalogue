@@ -160,7 +160,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     @Override
     @TriggersAspects({"HostingLegalEntityVocabularyUpdate"})
-    public ProviderBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public ProviderBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
@@ -385,9 +385,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     @Override
     public ProviderBundle finalizeDraft(ProviderBundle bundle, Authentication auth) {
-        bundle.markOnboard(vocabularyService.get("pending").getId(), false, UserInfo.of(auth), null);
-        bundle.setTemplateStatus(vocabularyService.get("no template status").getId());
-
+        workflowService.onboard(getResourceTypeName(), bundle, auth);
         bundle = update(bundle, auth);
 
 //        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME

@@ -134,7 +134,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     }
 
     @Transactional
-    public InteroperabilityRecordBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public InteroperabilityRecordBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));

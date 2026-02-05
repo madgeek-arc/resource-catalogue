@@ -268,7 +268,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     }
 
     @Override
-    public ResourceInteroperabilityRecordBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public ResourceInteroperabilityRecordBundle verify(String id, String status, Boolean active, Authentication auth) {
         return null;
     }
 

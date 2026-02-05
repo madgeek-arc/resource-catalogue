@@ -26,7 +26,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -47,7 +46,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Profile("beyond")
@@ -243,7 +241,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
                                                     @RequestParam(required = false) String status,
                                                     @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle provider = service.setStatus(id, status, active, auth);
+        ProviderBundle provider = service.verify(id, status, active, auth);
         logger.info("Verify Provider with id: '{}' | status: '{}' | active: '{}'",
                 provider.getId(), status, active);
         return new ResponseEntity<>(provider, HttpStatus.OK);

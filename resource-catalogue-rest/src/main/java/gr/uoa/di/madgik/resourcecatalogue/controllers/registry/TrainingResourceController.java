@@ -217,7 +217,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                                             @RequestParam(required = false) String status,
                                                             @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.setStatus(id, status, active, auth);
+        TrainingResourceBundle bundle = service.verify(id, status, active, auth);
         logger.info("Verify Training Resource with id: '{}' | status: '{}' | active: '{}'",
                 bundle.getId(), status, active);
         return new ResponseEntity<>(bundle, HttpStatus.OK);

@@ -157,7 +157,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     @Transactional
-    public DatasourceBundle setStatus(String id, String status, Boolean active, Authentication auth) {
+    public DatasourceBundle verify(String id, String status, Boolean active, Authentication auth) {
         Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
         if (!statusVocabulary.getType().equals("Resource state")) {
             throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
