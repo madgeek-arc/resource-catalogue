@@ -23,10 +23,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
@@ -38,8 +35,10 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderCascadeLifecycleManager;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +64,13 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     private final SecurityService securityService;
     private final ProviderCascadeLifecycleManager cascadeLifecycleService;
     private final WorkflowService<ProviderBundle> workflowService;
+
+    @Autowired
+    @Lazy
+    TrainingResourceService trainingResourceService;
+    @Autowired
+    @Lazy
+    InteroperabilityRecordService interoperabilityRecordService;
 
 
     public ProviderManager(GenericResourceService genericResourceService,
@@ -283,6 +289,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         return null;
     }
 
+    // TODO: get rid of this, replace with resource-specific method
     @Override
     public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
@@ -293,55 +300,36 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         List<MapValues<CatalogueValue>> mapValuesList = new ArrayList<>();
         List<ProviderBundle> providers = getAll(ff, auth).getResults();
         List<ServiceBundle> services = new ArrayList<>();
-//        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
-//        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
+        List<TrainingResourceBundle> trainingResources = new ArrayList<>();
+        List<InteroperabilityRecordBundle> interoperabilityRecords = new ArrayList<>();
         createMapValuesForHLE(providers, "provider", mapValuesList);
         for (ProviderBundle providerBundle : providers) {
             services.addAll(serviceService.getAllEOSCResourcesOfAProvider(providerBundle.getId(),
                     providerBundle.getCatalogueId(), maxQuantity, auth).getResults());
-//            trainingResources.addAll(trainingResourceService.getResourceBundles(providerBundle.getCatalogueId(),
-//                    providerBundle.getId(), auth).getResults());
-//            interoperabilityRecords.addAll(interoperabilityRecordService.getInteroperabilityRecordBundles(
-//                    providerBundle.getCatalogueId(), providerBundle.getId(), auth).getResults());
+            trainingResources.addAll(trainingResourceService.getAllEOSCResourcesOfAProvider(providerBundle.getCatalogueId(),
+                    providerBundle.getId(), maxQuantity, auth).getResults());
+            interoperabilityRecords.addAll(interoperabilityRecordService.getAllEOSCResourcesOfAProvider(
+                    providerBundle.getCatalogueId(), providerBundle.getId(), maxQuantity, auth).getResults());
         }
         createMapValuesForHLE(services, "service", mapValuesList);
-//        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
-//        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
+        createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
+        createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
         return mapValuesList;
     }
 
-    private void createMapValuesForHLE(List<?> resources, String resourceType,
+    private void createMapValuesForHLE(List<? extends Bundle> resources, String resourceType,
                                        List<MapValues<CatalogueValue>> mapValuesList) {
         MapValues<CatalogueValue> mapValues = new MapValues<>();
         mapValues.setKey(resourceType);
         List<CatalogueValue> valueList = new ArrayList<>();
-        for (Object obj : resources) {
+        for (Bundle obj : resources) {
             CatalogueValue value = new CatalogueValue();
             switch (resourceType) {
-                case "provider":
-                    ProviderBundle providerBundle = (ProviderBundle) obj;
-                    value.setId(providerBundle.getId());
-                    value.setName(providerBundle.getProvider().get("name").toString());
-                    value.setCatalogue(providerBundle.getCatalogueId());
+                case "provider", "service", "training_resource", "interoperability_record":
+                    value.setId(obj.getId());
+                    value.setName((String) obj.getPayload().get("name"));
+                    value.setCatalogue(obj.getCatalogueId());
                     break;
-                case "service":
-                    ServiceBundle serviceBundle = (ServiceBundle) obj;
-                    value.setId(serviceBundle.getId());
-                    value.setName((String) serviceBundle.getService().get("name"));
-                    value.setCatalogue(serviceBundle.getCatalogueId());
-                    break;
-//                case "training_resource":
-//                    TrainingResourceBundle trainingResourceBundle = (TrainingResourceBundle) obj;
-//                    value.setId(trainingResourceBundle.getId());
-//                    value.setName(trainingResourceBundle.getTrainingResource().getTitle());
-//                    value.setCatalogue(trainingResourceBundle.getTrainingResource().getCatalogueId());
-//                    break;
-//                case "interoperability_record":
-//                    InteroperabilityRecordBundle interoperabilityRecordBundle = (InteroperabilityRecordBundle) obj;
-//                    value.setId(interoperabilityRecordBundle.getId());
-//                    value.setName(interoperabilityRecordBundle.getInteroperabilityRecord().getTitle());
-//                    value.setCatalogue(interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId());
-//                    break;
                 default:
                     break;
             }
@@ -386,7 +374,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
             ProviderBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
             return ret;
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
