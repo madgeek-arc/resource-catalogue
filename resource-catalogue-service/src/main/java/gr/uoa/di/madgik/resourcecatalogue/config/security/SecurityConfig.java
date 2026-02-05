@@ -136,23 +136,13 @@ public class SecurityConfig {
                     // to one or more GrantedAuthority's and add it to mappedAuthorities
 
                     OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
-
-                    OidcIdToken idToken = oidcUserAuthority.getIdToken();
                     OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
-
-                    if (idToken != null && (catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))
-                            || catalogueProperties.getOnboardingTeam().contains(idToken.getClaims().get("email")))) {
-                        sub = idToken.getClaimAsString("sub");
-                        email = idToken.getClaimAsString("email");
-                    } else if (userInfo != null && (catalogueProperties.getAdmins().contains(userInfo.getEmail())
-                            || catalogueProperties.getOnboardingTeam().contains(userInfo.getEmail()))) {
+                    if (userInfo != null) {
                         sub = userInfo.getSubject();
                         email = userInfo.getEmail();
                     } else {
                         if (((OidcUserAuthority) authority).getAttributes() != null
-                                && ((OidcUserAuthority) authority).getAttributes().containsKey("email")
-                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email"))
-                                || catalogueProperties.getOnboardingTeam().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
+                                && ((OidcUserAuthority) authority).getAttributes().containsKey("email")) {
                             sub = ((OidcUserAuthority) authority).getAttributes().get("sub").toString();
                             email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
                         }
