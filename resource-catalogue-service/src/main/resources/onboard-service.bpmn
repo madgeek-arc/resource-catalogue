@@ -124,19 +124,9 @@
     <bpmn:sequenceFlow id="Flow_00bwlo7" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1y14exa">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=provider.templateStatus = "no template status" or provider.templateStatus = "rejected template"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1f9jhf2" name="Already pending template" sourceRef="Gateway_0a1sz4u" targetRef="Event_05g58hq">
+    <bpmn:sequenceFlow id="Flow_1f9jhf2" name="Already pending template" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1osazbd">
       <bpmn:documentation>The Provider already has a pending resource template.</bpmn:documentation>
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=provider.templateStatus = "pending template"</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:endEvent id="Event_05g58hq">
-      <bpmn:incoming>Flow_1f9jhf2</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:endEvent id="Event_1b1y94f">
-      <bpmn:incoming>Flow_1ff3515</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1ff3515" name="Provider not approved" sourceRef="Gateway_0a1sz4u" targetRef="Event_1b1y94f">
-      <bpmn:documentation>The provider is not approved and cannot accept resources.</bpmn:documentation>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=provider.status != "approved"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1yjo50z" sourceRef="Activity_1y14exa" targetRef="Activity_15om8qj" />
     <bpmn:serviceTask id="Activity_15om8qj" name="Save Provider" zeebe:modelerTemplate="update-resource-template" zeebe:modelerTemplateVersion="1">
@@ -147,6 +137,7 @@
           <zeebe:output source="=resource" target="provider" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
+          <zeebe:header key="resourceName" value="provider" />
           <zeebe:header key="resourceType" value="provider" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
@@ -202,6 +193,28 @@
       <bpmn:incoming>Flow_1b9ungf</bpmn:incoming>
       <bpmn:outgoing>Flow_0sojgzr</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_1b1y94f">
+      <bpmn:incoming>Flow_08sfbvg</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1ff3515" name="Provider not approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1osazbd">
+      <bpmn:documentation>The provider is not approved and cannot accept resources.</bpmn:documentation>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=provider.status != "approved"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_08sfbvg" sourceRef="Activity_1osazbd" targetRef="Event_1b1y94f" />
+    <bpmn:serviceTask id="Activity_1osazbd" name="Delete Service" zeebe:modelerTemplate="delete-resource-template" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="delete-resource" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=resource.id" target="id" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="resourceType" value="service" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1f9jhf2</bpmn:incoming>
+      <bpmn:incoming>Flow_1ff3515</bpmn:incoming>
+      <bpmn:outgoing>Flow_08sfbvg</bpmn:outgoing>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="onboard-service">
@@ -250,12 +263,6 @@
           <dc:Bounds x="810" y="235" width="80" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_05g58hq_di" bpmnElement="Event_05g58hq">
-        <dc:Bounds x="972" y="162" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1b1y94f_di" bpmnElement="Event_1b1y94f">
-        <dc:Bounds x="972" y="92" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0ofhyyt_di" bpmnElement="Activity_15om8qj">
         <dc:Bounds x="1080" y="270" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -270,6 +277,12 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0bcsh1q_di" bpmnElement="Activity_0vagvot">
         <dc:Bounds x="640" y="270" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1b1y94f_di" bpmnElement="Event_1b1y94f">
+        <dc:Bounds x="1142" y="112" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_10j5ctf_di" bpmnElement="Activity_1osazbd">
+        <dc:Bounds x="960" y="90" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_13cl7fo_di" bpmnElement="Flow_13cl7fo">
         <di:waypoint x="350" y="335" />
@@ -328,18 +341,10 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1f9jhf2_di" bpmnElement="Flow_1f9jhf2">
         <di:waypoint x="850" y="285" />
-        <di:waypoint x="850" y="180" />
-        <di:waypoint x="972" y="180" />
+        <di:waypoint x="850" y="150" />
+        <di:waypoint x="960" y="150" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="868" y="146" width="80" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1ff3515_di" bpmnElement="Flow_1ff3515">
-        <di:waypoint x="850" y="285" />
-        <di:waypoint x="850" y="110" />
-        <di:waypoint x="972" y="110" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="878" y="76" width="60" height="27" />
+          <dc:Bounds x="862" y="116" width="80" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1yjo50z_di" bpmnElement="Flow_1yjo50z">
@@ -365,6 +370,18 @@
       <bpmndi:BPMNEdge id="Flow_0duwala_di" bpmnElement="Flow_0duwala">
         <di:waypoint x="1510" y="460" />
         <di:waypoint x="1582" y="460" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ff3515_di" bpmnElement="Flow_1ff3515">
+        <di:waypoint x="850" y="285" />
+        <di:waypoint x="850" y="110" />
+        <di:waypoint x="960" y="110" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="875" y="76" width="60" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08sfbvg_di" bpmnElement="Flow_08sfbvg">
+        <di:waypoint x="1060" y="130" />
+        <di:waypoint x="1142" y="130" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

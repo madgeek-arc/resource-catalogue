@@ -61,6 +61,7 @@ public class WorkflowService<T extends Bundle> {
         // TODO: load bpmn process by resourceType
         return switch (resourceType) {
             case "provider" -> "onboard-provider";
+            case "service" -> "onboard-service";
             default -> "onboard-resource";
         };
     }
@@ -70,14 +71,14 @@ public class WorkflowService<T extends Bundle> {
                                                @CustomHeaders Map<String, String> headers) {
         String resourceName = headers.getOrDefault("resourceName", "resource");
         String status = headers.get("status");
-        String active = headers.get("active");
+        String active = headers.getOrDefault("active", "false");
         String comment = headers.getOrDefault("comment", "");
 
         T bundle = getResourceBundle(vars);
         UserInfo user = getUserInfo(vars);
-        bundle.markOnboard(status, active.equalsIgnoreCase("true"), user, comment);
+        bundle.markOnboard(status, "true".equalsIgnoreCase(active), user, comment);
 
-        logger.info("Running task 'resource-status.apply' for {} with id '{}' | status: {}", resourceName, bundle.getId(), status);
+        logger.info("Running task 'resource-onboard' | resourceType: {}, id: {}, status: {}, active: {}", resourceName, bundle.getId(), status, active);
 
         return Map.of(resourceName, toMap(bundle));
     }
@@ -88,20 +89,35 @@ public class WorkflowService<T extends Bundle> {
         String id = (String) vars.get("id");
         String resourceType = headers.getOrDefault("resourceType", "resourceTypes");
         String resourceName = headers.getOrDefault("resourceName", "resource");
-        logger.info("Reading resource with resourceType '{}' and id '{}'", resourceType, id);
+        logger.info("Running task 'get-resource' | resourceType: {}, id: {}", resourceType, id);
         T bundle = genericResourceService.get(resourceType, id);
-        return Map.of(resourceName, toMap(bundle));
+        putResourceBundle(vars, bundle, resourceName);
+        return vars;
     }
 
-    @JobWorker(type = "save-resource", autoComplete = true)
-    public Map<String, Object> saveResource(@VariablesAsType Map<String, Object> vars,
+    @JobWorker(type = "update-resource", autoComplete = true)
+    public Map<String, Object> updateResource(@VariablesAsType Map<String, Object> vars,
                                  @CustomHeaders Map<String, String> headers) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
         String resourceType = headers.getOrDefault("resourceType", "resourceTypes");
         String resourceName = headers.getOrDefault("resourceName", "resource");
         T resource = getResourceBundle(vars, resourceName);
-        logger.info("Saving resource with resourceType '{}' and id '{}'", resourceType, resource.getId());
+        logger.info("Running task 'update-resource' | resourceType: {}, id: {}", resourceType, resource.getId());
         T bundle = genericResourceService.update(resourceType, resource.getId(), resource);
-        return Map.of(resourceName, bundle);
+        putResourceBundle(vars, bundle, resourceName);
+        return vars;
+    }
+
+    @JobWorker(type = "delete-resource", autoComplete = true)
+    public Map<String, Object> deleteResource(@VariablesAsType Map<String, Object> vars,
+                                 @CustomHeaders Map<String, String> headers) {
+        String id = (String) vars.get("id");
+        String resourceType = headers.getOrDefault("resourceType", "resourceTypes");
+        logger.info("Running task 'delete-resource' | resourceType: {}, id: {}", resourceType, id);
+        T bundle = genericResourceService.get(resourceType, id);
+        if (!bundle.isActive() && bundle.getStatus() == null) {
+            genericResourceService.delete(resourceType, id);
+        }
+        return vars;
     }
 
     @JobWorker(type = "get-catalogue", autoComplete = true)
@@ -156,11 +172,11 @@ public class WorkflowService<T extends Bundle> {
         Class<T> clazz = (Class<T>) resource.getClass();
         T bundle = mapper.convertValue(resource, clazz);
         bundle.setPayload(resource.getPayload());
-        Map<String, Object> vars = mapper.convertValue(bundle, new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> res = mapper.convertValue(bundle, new TypeReference<Map<String, Object>>() {});
 
         // Adds the payload (because Jackson is set to ignore it)
-        vars.put("payload", bundle.getPayload());
+        res.put("payload", bundle.getPayload());
 
-        return vars;
+        return res;
     }
 }

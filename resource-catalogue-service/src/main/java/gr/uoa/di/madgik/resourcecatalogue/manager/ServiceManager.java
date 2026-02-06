@@ -95,10 +95,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     //region generic
     @Override
     public ServiceBundle add(ServiceBundle service, Authentication auth) {
-//        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
-//                service.getCatalogueId());
-//        onboard(service, provider, auth);
-//        onboardingValidation(service, provider);
         ServiceBundle ret = super.add(service, auth);
         ret = workflowService.onboard(getResourceTypeName(), ret, auth);
         return ret;

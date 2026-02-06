@@ -1,8 +1,8 @@
 {
   "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
-  "name": "Update Resource",
-  "id": "update-resource-template",
-  "description": "Updates a resource in the DB.",
+  "name": "Delete Resource",
+  "id": "delete-resource-template",
+  "description": "Deletes a non-public resource from the DB.",
   "version": 1,
   "appliesTo": ["bpmn:Task"],
   "elementType": {
@@ -16,16 +16,8 @@
     {
       "label": "Job Type",
       "type": "Hidden",
-      "value": "update-resource",
+      "value": "delete-resource",
       "binding": { "type": "zeebe:taskDefinition:type" },
-      "group": "exec"
-    },
-    {
-      "label": "Resource Variable Name",
-      "type": "String",
-      "value": "resource",
-      "binding": { "type": "zeebe:taskHeader", "key": "resourceName" },
-      "constraints": { "notEmpty": true },
       "group": "exec"
     },
     {
@@ -52,20 +44,12 @@
       "group": "exec"
     },
     {
-      "label": "Resource (input variable)",
+      "label": "Id (input)",
       "type": "String",
       "feel": "required",
-      "binding": { "type": "zeebe:input", "name": "resourceName" },
+      "binding": { "type": "zeebe:input", "name": "id" },
       "constraints": { "notEmpty": true },
-      "description": "Process variable name that holds the resource"
-    },
-    {
-      "label": "Resource (output variable)",
-      "type": "String",
-      "binding": { "type": "zeebe:output", "source": "=resource" },
-      "value": "resource",
-      "description": "Process variable name that will hold the updated resource",
-      "constraints": { "notEmpty": true }
+      "description": "Expression or value that resolves to the resource ID"
     }
   ]
 }

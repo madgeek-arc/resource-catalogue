@@ -21,6 +21,14 @@
       "group": "exec"
     },
     {
+      "label": "Resource Variable Name",
+      "type": "String",
+      "value": "resource",
+      "binding": { "type": "zeebe:taskHeader", "key": "resourceName" },
+      "constraints": { "notEmpty": true },
+      "group": "exec"
+    },
+    {
       "label": "Resource Type",
       "type": "Dropdown",
       "choices": [
@@ -50,14 +58,6 @@
       "binding": { "type": "zeebe:input", "name": "id" },
       "constraints": { "notEmpty": true },
       "description": "Expression or value that resolves to the resource ID"
-    },
-    {
-      "label": "Resource (output variable)",
-      "type": "String",
-      "binding": { "type": "zeebe:output", "source": "=resource" },
-      "value": "resource",
-      "description": "Process variable name that will hold the fetched resource",
-      "constraints": { "notEmpty": true }
     }
   ]
 }
