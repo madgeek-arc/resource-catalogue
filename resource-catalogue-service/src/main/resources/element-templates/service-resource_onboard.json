@@ -43,7 +43,6 @@
       "label": "Active",
       "type": "Boolean",
       "binding": { "type": "zeebe:taskHeader", "key": "active" },
-      "constraints": { "notEmpty": true },
       "group": "exec"
     },
     {
