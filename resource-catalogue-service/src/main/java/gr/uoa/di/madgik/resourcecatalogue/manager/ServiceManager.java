@@ -31,6 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -59,6 +60,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
     private final ModelService modelService;
+    private final WorkflowService<ServiceBundle> workflowService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -74,13 +76,15 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           FacetLabelService facetLabelService,
                           GenericResourceService genericResourceService,
                           @Lazy RelationshipValidator relationshipValidator,
-                          ModelService modelService) {
+                          ModelService modelService,
+                          WorkflowService<ServiceBundle> workflowService) {
         super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService; // for providers
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.modelService = modelService;
         this.relationshipValidator = relationshipValidator;
+        this.workflowService = workflowService;
     }
 
     @Override
@@ -91,11 +95,12 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     //region generic
     @Override
     public ServiceBundle add(ServiceBundle service, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
-                service.getCatalogueId());
-        onboard(service, provider, auth);
-        onboardingValidation(service, provider);
-        ServiceBundle ret = genericResourceService.add(getResourceTypeName(), service);
+//        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
+//                service.getCatalogueId());
+//        onboard(service, provider, auth);
+//        onboardingValidation(service, provider);
+        ServiceBundle ret = super.add(service, auth);
+        ret = workflowService.onboard(getResourceTypeName(), ret, auth);
         return ret;
     }
 

@@ -8,10 +8,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
@@ -62,6 +59,17 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         this.vocabularyService = vocabularyService;
     }
 
+    public void createIdentifiers(Bundle bundle) {
+        String catalogueId = bundle.getCatalogueId();
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
+            this.createIdentifiers(bundle, getResourceTypeName(), false);
+            bundle.setId(bundle.getIdentifiers().getOriginalId());
+        } else {
+            idCreator.validateId(bundle.getId());
+            this.createIdentifiers(bundle, getResourceTypeName(), true);
+        }
+    }
+
     public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();
         identifiers.setPid(idCreator.generate(resourceType));
@@ -90,7 +98,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         } else {
             bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
 //            commonMethods.validateCatalogueId(catalogueId); //FIXME
-            idCreator.validateId(bundle.getId());
+
             this.createIdentifiers(bundle, getResourceTypeName(), true);
         }
         bundle.setAuditState(Auditable.NOT_AUDITED);
@@ -235,6 +243,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     @Override
     public T add(T bundle, Authentication auth) {
+        createIdentifiers(bundle);
         return genericResourceService.add(getResourceTypeName(), bundle);
     }
 

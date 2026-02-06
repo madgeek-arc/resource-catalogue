@@ -99,7 +99,6 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     //region generic
     @Override
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
-//        onboard(bundle, auth);
         createIdentifiers(bundle);
         bundle = workflowService.onboard(getResourceTypeName(), bundle, auth);
         ProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
@@ -109,17 +108,6 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
 //        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
         return ret;
-    }
-
-    private void createIdentifiers(ProviderBundle bundle) {
-        String catalogueId = bundle.getCatalogueId();
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            this.createIdentifiers(bundle, getResourceTypeName(), false);
-            bundle.setId(bundle.getIdentifiers().getOriginalId());
-        } else {
-            idCreator.validateId(bundle.getId());
-            this.createIdentifiers(bundle, getResourceTypeName(), true);
-        }
     }
 
     @Override
@@ -380,7 +368,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     @Override
     public ProviderBundle finalizeDraft(ProviderBundle bundle, Authentication auth) {
-        workflowService.onboard(getResourceTypeName(), bundle, auth);
+        bundle = workflowService.onboard(getResourceTypeName(), bundle, auth);
         bundle = update(bundle, auth);
 
 //        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
