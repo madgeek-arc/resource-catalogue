@@ -86,6 +86,11 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     //region generic
     @Override
     public DatasourceBundle add(DatasourceBundle datasource, Authentication auth) {
+        // if Datasource has ID -> check if it exists in OpenAIRE Datasource list
+        if (datasource.getId() != null && !datasource.getId().isEmpty()) {
+            checkOpenAIREIDExistence(datasource);
+        }
+
         ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
                 datasource.getCatalogueId());
         onboard(datasource, provider, auth);
@@ -282,7 +287,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private void checkOpenAIREIDExistence(DatasourceBundle datasourceBundle) {
         LinkedHashMap<String, Object> datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
         if (datasource != null) {
-            datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId());
+            datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId()); //TODO: create AlternativeIdentifiers inside Identifiers and move there?
         } else {
             throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an " +
                     "OpenAIRE Datasource", datasourceBundle.getId()));
