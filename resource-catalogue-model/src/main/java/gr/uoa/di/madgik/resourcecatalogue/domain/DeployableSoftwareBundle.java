@@ -18,13 +18,13 @@ package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import java.util.LinkedHashMap;
 
-public class DeployableServiceBundle extends Bundle {
+public class DeployableSoftwareBundle extends Bundle {
 
-    public LinkedHashMap<String, Object> getDeployableService() {
+    public LinkedHashMap<String, Object> getDeployableSoftware() {
         return this.getPayload();
     }
 
-    public void setDeployableService(LinkedHashMap<String, Object> payload) {
+    public void setDeployableSoftware(LinkedHashMap<String, Object> payload) {
         this.setPayload(payload);
     }
 

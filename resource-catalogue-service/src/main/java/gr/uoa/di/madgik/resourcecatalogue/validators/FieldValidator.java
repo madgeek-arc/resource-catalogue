@@ -396,7 +396,7 @@
 //                            || DeployableServiceBundle.class.equals(annotation.idClass()))
 //                            && deployableServiceService.get(o.toString()) == null) {
 //                        throw new ValidationException(
-//                                String.format("Field [%s]: Should contain the ID of an existing Deployable Service",
+//                                String.format("Field [%s]: Should contain the ID of an existing Deployable Software",
 //                                        field.getName()));
 //                    } else if ((Catalogue.class.equals(annotation.idClass())
 //                            || CatalogueBundle.class.equals(annotation.idClass()))

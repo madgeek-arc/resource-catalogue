@@ -56,7 +56,7 @@ catalogue:
           self-signed-cert:
           client-key:
           client-cert:
-    deployable-service:
+    deployable-software:
       resolve-endpoints:
       pid-issuer:
         url:

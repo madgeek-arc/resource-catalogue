@@ -30,7 +30,7 @@ public class DeployableService implements Identifiable {
 
     // Basic Information
     /**
-     * A persistent identifier, a unique reference to the Deployable Service.
+     * A persistent identifier, a unique reference to the Deployable Software.
      */
     @Schema(example = "(required on PUT only)")
     @FieldValidation

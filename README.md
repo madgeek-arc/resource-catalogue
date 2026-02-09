@@ -289,7 +289,7 @@ catalogue.resources.adapter.id-prefix=adapter
 catalogue.resources.configuration-template.id-prefix=configuration_template
 catalogue.resources.configuration-template-instance.id-prefix=configuration_template_instance
 catalogue.resources.datasource.id-prefix=datasource
-catalogue.resources.deployable-service.id-prefix=deployable_service
+catalogue.resources.deployable-software.id-prefix=deployable_software
 catalogue.resources.helpdesk.id-prefix=helpdesk
 catalogue.resources.interoperability-record.id-prefix=interoperability_record
 catalogue.resources.monitoring.id-prefix=monitoring
@@ -401,7 +401,7 @@ catalogue:
           self-signed-cert:
           client-key:
           client-cert:
-    deployable-service:
+    deployable-software:
       resolve-endpoints:
       pid-issuer:
         url:

@@ -482,7 +482,8 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Service for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/service")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #service)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.providerCanAddResources(#auth, #service, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> addCatalogueService(@RequestBody LinkedHashMap<String, Object> service,
                                                  @PathVariable String catalogueId,
                                                  @Parameter(hidden = true) Authentication auth) {
@@ -600,7 +601,8 @@ public class CatalogueController {
 
     @Operation(description = "Creates a new Datasource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/datasource")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #datasource)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.providerCanAddResources(#auth, #datasource, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> addCatalogueDatasource(@RequestBody LinkedHashMap<String, Object> datasource,
                                                     @PathVariable String catalogueId,
                                                     @Parameter(hidden = true) Authentication auth) {
@@ -887,120 +889,120 @@ public class CatalogueController {
 //    }
 //    //endregion
 //
-//    //region Deployable Service
-//    @Operation(description = "Returns the Deployable Service of the specific Catalogue with the given id.")
-//    @GetMapping(path = "{catalogueId}/deployableService/{deployableServiceId}")
-//    public ResponseEntity<?> getCatalogueDeployableService(@PathVariable String catalogueId,
-//                                                           @PathVariable String deployableServiceId) {
-//        return new ResponseEntity<>(deployableServiceService.get(deployableServiceId, catalogueId, false)
-//                .getDeployableService(), HttpStatus.OK);
+//    //region Deployable Software
+//    @Operation(description = "Returns the Deployable Software of the specific Catalogue with the given id.")
+//    @GetMapping(path = "{catalogueId}/deployableSoftware/{deployableSoftwareId}")
+//    public ResponseEntity<?> getCatalogueDeployableSoftware(@PathVariable String catalogueId,
+//                                                           @PathVariable String deployableSoftwareId) {
+//        return new ResponseEntity<>(deployableSoftwareService.get(deployableSoftwareId, catalogueId, false)
+//                .getDeployableSoftware(), HttpStatus.OK);
 //    }
 //
-//    @Operation(description = "Creates a new Deployable Service for the specific Catalogue.")
-//    @PostMapping(path = "{catalogueId}/deployableService")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #deployableService)")
-//    public ResponseEntity<DeployableService> addCatalogueDeployableService(@RequestBody DeployableService deployableService,
+//    @Operation(description = "Creates a new Deployable Software for the specific Catalogue.")
+//    @PostMapping(path = "{catalogueId}/deployableSoftware")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.providerCanAddResources(#auth, #deployableSoftware)")
+//    public ResponseEntity<DeployableSoftware> addCatalogueDeployableSoftware(@RequestBody DeployableSoftware deployableSoftware,
 //                                                                           @PathVariable String catalogueId,
 //                                                                           @Parameter(hidden = true) Authentication auth) {
-//        DeployableServiceBundle ret = this.deployableServiceService.add(new DeployableServiceBundle(deployableService), catalogueId, auth);
-//        logger.info("Added the Deployable Service with name '{}' and id '{}' in the Catalogue '{}'",
-//                deployableService.getName(), deployableService.getId(), catalogueId);
-//        return new ResponseEntity<>(ret.getDeployableService(), HttpStatus.CREATED);
+//        DeployableSoftwareBundle ret = this.deployableSoftwareService.add(new DeployableSoftwareBundle(deployableSoftware), catalogueId, auth);
+//        logger.info("Added the Deployable Software with name '{}' and id '{}' in the Catalogue '{}'",
+//                deployableSoftware.getName(), deployableSoftware.getId(), catalogueId);
+//        return new ResponseEntity<>(ret.getDeployableSoftware(), HttpStatus.CREATED);
 //    }
 //
-//    @Operation(description = "Updates the Deployable Service of the specific Catalogue.")
-//    @PutMapping(path = "{catalogueId}/deployableService")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableService.id)")
-//    public ResponseEntity<DeployableService> updateCatalogueDeployableService(@RequestBody DeployableService deployableService,
+//    @Operation(description = "Updates the Deployable Software of the specific Catalogue.")
+//    @PutMapping(path = "{catalogueId}/deployableSoftware")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableSoftware.id)")
+//    public ResponseEntity<DeployableSoftware> updateCatalogueDeployableSoftware(@RequestBody DeployableSoftware deployableSoftware,
 //                                                                              @PathVariable String catalogueId,
 //                                                                              @RequestParam(required = false) String comment,
 //                                                                              @Parameter(hidden = true) Authentication auth) {
-//        DeployableServiceBundle ret = this.deployableServiceService.update(new DeployableServiceBundle(deployableService),
+//        DeployableSoftwareBundle ret = this.deployableSoftwareService.update(new DeployableSoftwareBundle(deployableSoftware),
 //                catalogueId, comment, auth);
-//        logger.info("Updated the Deployable Service with name '{}' and id '{} of the Catalogue '{}'",
-//                deployableService.getName(), deployableService.getId(), catalogueId);
-//        return new ResponseEntity<>(ret.getDeployableService(), HttpStatus.OK);
+//        logger.info("Updated the Deployable Software with name '{}' and id '{} of the Catalogue '{}'",
+//                deployableSoftware.getName(), deployableSoftware.getId(), catalogueId);
+//        return new ResponseEntity<>(ret.getDeployableSoftware(), HttpStatus.OK);
 //    }
 //
-//    @Operation(description = "Returns the DeployableServiceBundle of the specific Catalogue with the given id.")
-//    @GetMapping(path = "{catalogueId}/deployableService/bundle/{deployableServiceId}")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableServiceId)")
-//    public ResponseEntity<DeployableServiceBundle> getCatalogueDeployableServiceBundle(@PathVariable String catalogueId,
-//                                                                                       @PathVariable String deployableServiceId,
+//    @Operation(description = "Returns the DeployableSoftwareBundle of the specific Catalogue with the given id.")
+//    @GetMapping(path = "{catalogueId}/deployableSoftware/bundle/{deployableSoftwareId}")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableSoftwareId)")
+//    public ResponseEntity<DeployableSoftwareBundle> getCatalogueDeployableSoftwareBundle(@PathVariable String catalogueId,
+//                                                                                       @PathVariable String deployableSoftwareId,
 //                                                                                       @Parameter(hidden = true) Authentication auth) {
-//        return new ResponseEntity<>(deployableServiceService.get(deployableServiceId, catalogueId, false), HttpStatus.OK);
+//        return new ResponseEntity<>(deployableSoftwareService.get(deployableSoftwareId, catalogueId, false), HttpStatus.OK);
 //    }
 //
 //    @Hidden
-//    @GetMapping(path = {"{catalogueId}/deployableService/loggingInfoHistory/{deployableServiceId}"})
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableServiceId)")
-//    public ResponseEntity<List<LoggingInfo>> deployableServiceLoggingInfoHistory(@PathVariable String catalogueId,
-//                                                                                 @PathVariable String deployableServiceId,
+//    @GetMapping(path = {"{catalogueId}/deployableSoftware/loggingInfoHistory/{deployableSoftwareId}"})
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableSoftwareId)")
+//    public ResponseEntity<List<LoggingInfo>> deployableSoftwareLoggingInfoHistory(@PathVariable String catalogueId,
+//                                                                                 @PathVariable String deployableSoftwareId,
 //                                                                                 @Parameter(hidden = true) Authentication auth) {
-//        DeployableServiceBundle bundle = deployableServiceService.get(deployableServiceId, catalogueId, false);
-//        List<LoggingInfo> loggingInfoHistory = deployableServiceService.getLoggingInfoHistory(bundle);
+//        DeployableSoftwareBundle bundle = deployableSoftwareService.get(deployableSoftwareId, catalogueId, false);
+//        List<LoggingInfo> loggingInfoHistory = deployableSoftwareService.getLoggingInfoHistory(bundle);
 //        return ResponseEntity.ok(loggingInfoHistory);
 //    }
 //
-//    @Operation(description = "Get all the Deployable Services of a specific Provider of a specific Catalogue.")
-//    @GetMapping(path = "{catalogueId}/{providerId}/deployableService/all")
-//    public ResponseEntity<Paging<DeployableService>> getProviderDeployableServices(@PathVariable String catalogueId,
+//    @Operation(description = "Get all the Deployable Software of a specific Provider of a specific Catalogue.")
+//    @GetMapping(path = "{catalogueId}/{providerId}/deployableSoftware/all")
+//    public ResponseEntity<Paging<DeployableSoftware>> getProviderDeployableSoftwares(@PathVariable String catalogueId,
 //                                                                                   @PathVariable String providerId,
 //                                                                                   @Parameter(hidden = true)
 //                                                                                   @RequestParam MultiValueMap<String, Object> params) {
 //        FacetFilter ff = FacetFilter.from(params);
-//        ff.setResourceType("deployable_service");
+//        ff.setResourceType("deployable_software");
 //        ff.addFilter("published", false);
 //        ff.addFilter("catalogue_id", catalogueId);
 //        ff.addFilter("resource_organisation", providerId);
-//        Paging<DeployableService> paging = genericResourceService.getResults(ff).map(r -> ((DeployableServiceBundle) r).getPayload());
+//        Paging<DeployableSoftware> paging = genericResourceService.getResults(ff).map(r -> ((DeployableSoftwareBundle) r).getPayload());
 //        return ResponseEntity.ok(paging);
 //    }
 //
 //    @Hidden
-//    @Operation(description = "Get all the Deployable Service Bundles of a specific Provider of a specific Catalogue.")
-//    @GetMapping(path = "{catalogueId}/{providerId}/deployableService/bundle/all")
+//    @Operation(description = "Get all the Deployable Software Bundles of a specific Provider of a specific Catalogue.")
+//    @GetMapping(path = "{catalogueId}/{providerId}/deployableSoftware/bundle/all")
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
-//    public ResponseEntity<Paging<DeployableServiceBundle>> getProviderDeployableServiceBundles(@PathVariable String catalogueId,
+//    public ResponseEntity<Paging<DeployableSoftwareBundle>> getProviderDeployableSoftwareBundles(@PathVariable String catalogueId,
 //                                                                                               @PathVariable String providerId,
 //                                                                                               @Parameter(hidden = true)
 //                                                                                               @RequestParam MultiValueMap<String, Object> params,
 //                                                                                               @Parameter(hidden = true) Authentication auth) {
 //        FacetFilter ff = FacetFilter.from(params);
-//        ff.setResourceType("deployable_service");
+//        ff.setResourceType("deployable_software");
 //        ff.addFilter("published", false);
 //        ff.addFilter("catalogue_id", catalogueId);
 //        ff.addFilter("resource_organisation", providerId);
-//        Paging<DeployableServiceBundle> paging = genericResourceService.getResults(ff).map(r -> ((DeployableServiceBundle) r));
+//        Paging<DeployableSoftwareBundle> paging = genericResourceService.getResults(ff).map(r -> ((DeployableSoftwareBundle) r));
 //        return ResponseEntity.ok(paging);
 //    }
 //
-//    @Operation(description = "Deletes the Deployable Service of the specific Catalogue with the given id.")
-//    @DeleteMapping(path = "{catalogueId}/deployableService/{deployableServiceId}")
+//    @Operation(description = "Deletes the Deployable Software of the specific Catalogue with the given id.")
+//    @DeleteMapping(path = "{catalogueId}/deployableSoftware/{deployableSoftwareId}")
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
-//    public ResponseEntity<DeployableService> deleteCatalogueDeployableService(@PathVariable String catalogueId,
-//                                                                              @PathVariable String deployableServiceId,
+//    public ResponseEntity<DeployableSoftware> deleteCatalogueDeployableSoftware(@PathVariable String catalogueId,
+//                                                                              @PathVariable String deployableSoftwareId,
 //                                                                              @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-//        DeployableServiceBundle deployableServiceBundle = deployableServiceService.get(deployableServiceId, catalogueId, false);
-//        if (deployableServiceBundle == null) {
+//        DeployableSoftwareBundle deployableSoftwareBundle = deployableSoftwareService.get(deployableSoftwareId, catalogueId, false);
+//        if (deployableSoftwareBundle == null) {
 //            return new ResponseEntity<>(HttpStatus.GONE);
 //        }
-//        deployableServiceService.delete(deployableServiceBundle);
-//        logger.info("Deleted the Deployable Service with name '{}' and id '{}'",
-//                deployableServiceBundle.getDeployableService().getName(), deployableServiceBundle.getId());
-//        return new ResponseEntity<>(deployableServiceBundle.getDeployableService(), HttpStatus.OK);
+//        deployableSoftwareService.delete(deployableSoftwareBundle);
+//        logger.info("Deleted the Deployable Software with name '{}' and id '{}'",
+//                deployableSoftwareBundle.getDeployableSoftware().getName(), deployableSoftwareBundle.getId());
+//        return new ResponseEntity<>(deployableSoftwareBundle.getDeployableSoftware(), HttpStatus.OK);
 //    }
 //
 //    @Hidden
-//    @PatchMapping(path = "{catalogueId}/deployableService/auditService/{id}")
+//    @PatchMapping(path = "{catalogueId}/deployableSoftware/auditService/{id}")
 //    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-//    public ResponseEntity<DeployableServiceBundle> auditDeployableService(@PathVariable String id,
+//    public ResponseEntity<DeployableSoftwareBundle> auditDeployableSoftware(@PathVariable String id,
 //                                                                          @PathVariable String catalogueId,
 //                                                                          @RequestParam(required = false) String comment,
 //                                                                          @RequestParam LoggingInfo.ActionType actionType,
 //                                                                          @Parameter(hidden = true) Authentication auth) {
-//        DeployableServiceBundle deployableService = deployableServiceService.audit(id, catalogueId, comment, actionType, auth);
-//        return new ResponseEntity<>(deployableService, HttpStatus.OK);
+//        DeployableSoftwareBundle deployableSoftware = deployableSoftwareService.audit(id, catalogueId, comment, actionType, auth);
+//        return new ResponseEntity<>(deployableSoftware, HttpStatus.OK);
 //    }
 //    //endregion
 //

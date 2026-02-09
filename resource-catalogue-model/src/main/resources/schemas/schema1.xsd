@@ -990,7 +990,7 @@ Criteria for submitting content to the repository as well as product preparation
       
   </xs:complexType>
     
-  <xs:complexType name="deployableService">
+  <xs:complexType name="deployableSoftware">
         
     <xs:sequence>
             
@@ -1021,7 +1021,7 @@ and Resources it enables to access.]]></xs:documentation>
             
       <xs:element minOccurs="0" name="id" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Deployable Service.]]></xs:documentation>
+          <xs:documentation><![CDATA[A persistent identifier, a unique reference to the Deployable Software.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
@@ -1175,7 +1175,7 @@ name and should refer to the main value or purpose of the Resource.]]></xs:docum
       
   </xs:complexType>
     
-  <xs:complexType name="deployableServiceBundle">
+  <xs:complexType name="deployableSoftwareBundle">
         
     <xs:complexContent>
             
@@ -1185,7 +1185,7 @@ name and should refer to the main value or purpose of the Resource.]]></xs:docum
                     
           <xs:element minOccurs="0" name="auditState" type="xs:string"/>
                     
-          <xs:element minOccurs="0" name="deployableService" type="deployableService"/>
+          <xs:element minOccurs="0" name="deployableSoftware" type="deployableSoftware"/>
                     
           <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
