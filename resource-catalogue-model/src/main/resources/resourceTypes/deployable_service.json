@@ -58,10 +58,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Owner",
+      "label": "Resource Owner",
       "multivalued": false,
-      "name": "owner",
-      "path": "$.deployableService.owner",
+      "name": "resource_owner",
+      "path": "$.deployableService.resourceOwner",
       "type": "java.lang.String"
     },
     {
@@ -107,9 +107,9 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Version",
+      "label": "Deployable Service Version",
       "multivalued": false,
-      "name": "version",
+      "name": "deployable_service_version",
       "path": "$.deployableService.version",
       "type": "java.lang.String"
     },
