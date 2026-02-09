@@ -58,10 +58,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Owner",
+      "label": "Resource Owner",
       "multivalued": false,
-      "name": "owner",
-      "path": "$.interoperabilityRecord.owner",
+      "name": "resource_owner",
+      "path": "$.interoperabilityRecord.resourceOwner",
       "type": "java.lang.String"
     },
     {

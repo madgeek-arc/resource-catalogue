@@ -183,7 +183,7 @@
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="get-resource" />
         <zeebe:ioMapping>
-          <zeebe:input source="=resource.payload.owner" target="id" />
+          <zeebe:input source="=resource.payload.resourceOwner" target="id" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="resourceName" value="provider" />

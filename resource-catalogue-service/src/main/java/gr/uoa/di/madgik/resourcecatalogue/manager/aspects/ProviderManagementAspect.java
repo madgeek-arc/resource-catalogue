@@ -113,7 +113,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "service")
     public void updatePublicProviderTemplateStatus(final ServiceBundle service) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
+        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
@@ -123,7 +123,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
             returning = "datasource")
     public void updatePublicProviderTemplateStatus(final DatasourceBundle datasource) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
@@ -133,7 +133,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
             returning = "trainingResource")
     public void updatePublicProviderTemplateStatus(final TrainingResourceBundle trainingResource) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
+        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
@@ -143,7 +143,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.verify(..))",
             returning = "deployableService")
     public void updatePublicProviderTemplateStatus(final DeployableServiceBundle deployableService) {
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("resourceOwner"),
                 deployableService.getCatalogueId());
         publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicProviderService.update(provider);
@@ -162,7 +162,7 @@ public class ProviderManagementAspect {
     public void updateServiceStatus(ServiceBundle service) {
         if (service.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
+                ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
                         service.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     serviceService.verify(service.getId(), "pending", false, securityService.getAdminAccess());
@@ -186,7 +186,7 @@ public class ProviderManagementAspect {
     public void updateDatasourceStatus(DatasourceBundle datasource) {
         if (datasource.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
+                ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
                         datasource.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     datasourceService.verify(datasource.getId(), "pending", false, securityService.getAdminAccess());
@@ -210,7 +210,7 @@ public class ProviderManagementAspect {
     public void updateTrainingResourceStatus(TrainingResourceBundle training) {
         if (training.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) training.getTrainingResource().get("owner"),
+                ProviderBundle provider = providerService.get((String) training.getTrainingResource().get("resourceOwner"),
                         training.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     trainingResourceService.verify(training.getId(), "pending", false, securityService.getAdminAccess());
@@ -234,7 +234,7 @@ public class ProviderManagementAspect {
     public void updateDeployableServiceStatus(DeployableServiceBundle bundle) {
         if (bundle.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) bundle.getDeployableService().get("owner"),
+                ProviderBundle provider = providerService.get((String) bundle.getDeployableService().get("resourceOwner"),
                         bundle.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     deployableServiceService.verify(bundle.getId(), "pending", false, securityService.getAdminAccess());
@@ -261,7 +261,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "service")
     public void providerRegistrationEmails(final ServiceBundle service) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
+        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -270,7 +270,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
             returning = "datasource")
     public void providerRegistrationEmails(final DatasourceBundle datasource) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("owner"),
+        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -279,7 +279,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
             returning = "training")
     public void providerRegistrationEmails(final TrainingResourceBundle training) {
-        ProviderBundle provider = providerService.get((String) training.getTrainingResource().get("owner"),
+        ProviderBundle provider = providerService.get((String) training.getTrainingResource().get("resourceOwner"),
                 training.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -288,7 +288,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableServiceManager.verify(..))",
             returning = "deployableService")
     public void providerRegistrationEmails(final DeployableServiceBundle deployableService) {
-        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("owner"),
+        ProviderBundle provider = providerService.get((String) deployableService.getDeployableService().get("resourceOwner"),
                 deployableService.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME

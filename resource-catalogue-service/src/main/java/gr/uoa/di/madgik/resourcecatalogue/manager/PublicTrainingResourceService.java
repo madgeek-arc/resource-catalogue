@@ -59,12 +59,12 @@ public class PublicTrainingResourceService extends AbstractPublicResourceManager
 
     @Override
     public void updateIdsToPublic(TrainingResourceBundle bundle) {
-        // Owner
+        // Resource Owner
         ProviderBundle provider = providerService.get(
-                (String) bundle.getTrainingResource().get("owner"),
+                (String) bundle.getTrainingResource().get("resourceOwner"),
                 bundle.getCatalogueId()
         );
-        bundle.getTrainingResource().put("owner", provider.getIdentifiers().getPid());
+        bundle.getTrainingResource().put("resourceOwner", provider.getIdentifiers().getPid());
 
         // EOSC Related Services
         List<String> eoscRelatedServices = new ArrayList<>();

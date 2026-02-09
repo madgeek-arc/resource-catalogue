@@ -213,14 +213,14 @@ public class OIDCSecurityService implements SecurityService {
         String providerId;
         Bundle bundle = determineResourceType(resourceId);
         providerId = switch (bundle) {
-            case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("owner");
-            case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("owner");
+            case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("resourceOwner");
+            case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("resourceOwner");
             case TrainingResourceBundle trainingResourceBundle ->
-                    (String) trainingResourceBundle.getTrainingResource().get("owner");
+                    (String) trainingResourceBundle.getTrainingResource().get("resourceOwner");
             case DeployableServiceBundle deployableServiceBundle ->
-                    (String) deployableServiceBundle.getDeployableService().get("owner");
+                    (String) deployableServiceBundle.getDeployableService().get("resourceOwner");
             case null, default ->
-                    (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("owner");
+                    (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("resourceOwner");
         };
         return providerId;
     }
@@ -288,7 +288,7 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean providerCanAddResources(Authentication auth, LinkedHashMap<String, Object> resource, String catalogueId) {
-        String providerId = (String) resource.get("owner");
+        String providerId = (String) resource.get("resourceOwner");
         if (catalogueId == null || catalogueId.isEmpty()) {
             catalogueId = this.catalogueId;
         }

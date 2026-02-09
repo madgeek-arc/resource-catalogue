@@ -180,7 +180,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
         FacetFilter filter = new FacetFilter();
-        filter.addFilter("owner", id);
+        filter.addFilter("resourceOwner", id);
         Map<String, Integer> providerAddToProject = serviceBundleManager.getAll(filter).getResults()
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
@@ -226,7 +226,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     public Map<String, Integer> providerVisits(String id, Interval by) {
         Map<String, Integer> results = new HashMap<>();
         FacetFilter filter = new FacetFilter();
-        filter.addFilter("owner", id);
+        filter.addFilter("resourceOwner", id);
         for (ServiceBundle service : serviceBundleManager.getAll(filter).getResults()) {
             Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(), by).entrySet();
             for (Map.Entry<String, Integer> entry : entrySet) {
@@ -243,7 +243,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     @Override
     public Map<String, Float> providerVisitation(String id, Interval by) {
         FacetFilter filter = new FacetFilter();
-        filter.addFilter("owner", id);
+        filter.addFilter("resourceOwner", id);
         Map<String, Integer> counts = serviceBundleManager.getAll(filter).getResults().stream().collect(Collectors.toMap(s ->
                         (String) s.getService().get("name"),
                 s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()
@@ -363,7 +363,7 @@ public class ElasticStatisticsManager implements StatisticsService {
         for (ServiceBundle serviceBundle : allServices) {
             Value value = new Value(serviceBundle.getId(), (String) serviceBundle.getService().get("name"));
 
-            Set<String> countries = new HashSet<>(providerCountries.get((String) serviceBundle.getService().get("owner")));
+            Set<String> countries = new HashSet<>(providerCountries.get((String) serviceBundle.getService().get("resourceOwner")));
             for (String country : countries) {
                 if (mapValues.get(country) == null) {
                     continue;
@@ -380,7 +380,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     @Override
     public List<MapValues> mapServicesToVocabulary(String providerId, Vocabulary vocabulary) {
 //        FacetFilter filter = new FacetFilter();
-//        filter.addFilter("owner", providerId);
+//        filter.addFilter("resourceOwner", providerId);
 //        List<LinkedHashMap<String, Object>> bundles = serviceBundleManager.getAll(filter).map(ServiceBundle::getService).getResults();
         throw new UnsupportedOperationException("Not implemented");
     }

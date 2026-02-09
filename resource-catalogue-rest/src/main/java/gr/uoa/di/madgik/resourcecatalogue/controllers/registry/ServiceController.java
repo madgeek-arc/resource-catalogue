@@ -358,7 +358,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                                                @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("owner", id);
+        ff.addFilter("resourceOwner", id);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -442,7 +442,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                                                             @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("owner", id);
+        ff.addFilter("resourceOwner", id);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);

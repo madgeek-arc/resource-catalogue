@@ -77,7 +77,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(
                 (String) ct.getConfigurationTemplate().get("interoperabilityRecordId"), catalogueId);
         ProviderBundle providerBundle = providerService.get(
-                (String) interoperabilityRecordBundle.getInteroperabilityRecord().get("owner"),
+                (String) interoperabilityRecordBundle.getInteroperabilityRecord().get("resourceOwner"),
                 interoperabilityRecordBundle.getCatalogueId());
         if (!providerBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",
