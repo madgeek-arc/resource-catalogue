@@ -63,7 +63,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     private final ProviderResourcesCommonMethods commonMethods;
     private final SecurityService securityService;
     private final ProviderCascadeLifecycleManager cascadeLifecycleService;
-    private final WorkflowService<ProviderBundle> workflowService;
+    private final WorkflowService workflowService;
 
     @Autowired
     @Lazy
@@ -80,7 +80,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
                            ProviderResourcesCommonMethods commonMethods,
                            SecurityService securityService,
                            ProviderCascadeLifecycleManager cascadeLifecycleService,
-                           WorkflowService<ProviderBundle> workflowService) {
+                           WorkflowService workflowService) {
         super(genericResourceService, securityService, vocabularyService);
         this.genericResourceService = genericResourceService;
         this.serviceService = serviceService;
@@ -99,15 +99,23 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     //region generic
     @Override
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
-        createIdentifiers(bundle);
-        bundle = workflowService.onboard(getResourceTypeName(), bundle, auth);
-        ProviderBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
+        ProviderBundle ret = super.add(bundle, auth);
+        onboardingValidation(bundle);
+        try {
+            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
+        } catch (ResourceException e) {
+            genericResourceService.delete(getResourceTypeName(), bundle.getId());
+            throw e;
+        }
+        this.update(ret, auth); // adds logging info - possibly replace with generic update
+        return ret;
+    }
 
+    private void onboardingValidation(ProviderBundle bundle) {
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
 
 //        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
-        return ret;
     }
 
     @Override

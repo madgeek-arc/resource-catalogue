@@ -3,6 +3,7 @@ package gr.uoa.di.madgik.resourcecatalogue.onboarding;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
@@ -11,8 +12,11 @@ import io.camunda.client.CamundaClient;
 import io.camunda.client.annotation.CustomHeaders;
 import io.camunda.client.annotation.JobWorker;
 import io.camunda.client.annotation.VariablesAsType;
+import io.camunda.client.api.response.ProcessInstanceResult;
+import io.camunda.client.exception.BpmnError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class WorkflowService<T extends Bundle> {
+public class WorkflowService {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkflowService.class);
 
@@ -40,9 +44,18 @@ public class WorkflowService<T extends Bundle> {
         this.client = client;
     }
 
-    public T onboard(String resourceType, T bundle, Authentication authentication) {
+    public enum WorkflowStatus {
+        SUCCESS,
+        FAILURE
+    }
+
+    public record WorkflowResult(WorkflowStatus status, Integer code, String message) {
+    }
+
+    public <T extends Bundle> T onboard(String resourceType, T bundle, Authentication authentication) {
         String bpmnProcess = getBpmnProcess(resourceType);
         Map<String, Object> vars = new HashMap<>();
+        vars.put("resourceType", resourceType);
         putResourceBundle(vars, bundle);
         putUserInfo(vars, UserInfo.of(authentication));
         var key = client.newCreateInstanceCommand()
@@ -53,7 +66,12 @@ public class WorkflowService<T extends Bundle> {
                 .requestTimeout(java.time.Duration.ofSeconds(120))
                 .send()
                 .join();
+        WorkflowResult result = getWorkflowResult(key);
+        if (result.status() == WorkflowStatus.FAILURE) {
+            throw new ResourceException(result.message(), HttpStatus.valueOf(result.code()));
+        }
         bundle = getResourceBundle(key.getVariablesAsMap());
+        logger.info("Onboarding for resource with id '{}' successful. Message: {}", bundle.getId(), result.message());
         return bundle;
     }
 
@@ -61,13 +79,12 @@ public class WorkflowService<T extends Bundle> {
         // TODO: load bpmn process by resourceType
         return switch (resourceType) {
             case "provider" -> "onboard-provider";
-            case "service" -> "onboard-service";
             default -> "onboard-resource";
         };
     }
 
     @JobWorker(type = "resource-onboard", autoComplete = true)
-    public Map<String, Object> onboardResource(@VariablesAsType Map<String, Object> vars,
+    public <T extends Bundle> Map<String, Object> onboardResource(@VariablesAsType Map<String, Object> vars,
                                                @CustomHeaders Map<String, String> headers) {
         String resourceName = headers.getOrDefault("resourceName", "resource");
         String status = headers.get("status");
@@ -84,10 +101,10 @@ public class WorkflowService<T extends Bundle> {
     }
 
     @JobWorker(type = "get-resource", autoComplete = true)
-    public Map<String, Object> getResourceBundle(@VariablesAsType Map<String, Object> vars,
+    public <T extends Bundle> Map<String, Object> getResourceBundle(@VariablesAsType Map<String, Object> vars,
                                                  @CustomHeaders Map<String, String> headers) {
         String id = (String) vars.get("id");
-        String resourceType = headers.getOrDefault("resourceType", "resourceTypes");
+        String resourceType = getResourceType(vars, headers);
         String resourceName = headers.getOrDefault("resourceName", "resource");
         logger.info("Running task 'get-resource' | resourceType: {}, id: {}", resourceType, id);
         T bundle = genericResourceService.get(resourceType, id);
@@ -96,10 +113,10 @@ public class WorkflowService<T extends Bundle> {
     }
 
     @JobWorker(type = "update-resource", autoComplete = true)
-    public Map<String, Object> updateResource(@VariablesAsType Map<String, Object> vars,
+    public <T extends Bundle> Map<String, Object> updateResource(@VariablesAsType Map<String, Object> vars,
                                  @CustomHeaders Map<String, String> headers) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
-        String resourceType = headers.getOrDefault("resourceType", "resourceTypes");
         String resourceName = headers.getOrDefault("resourceName", "resource");
+        String resourceType = getResourceType(vars, headers);
         T resource = getResourceBundle(vars, resourceName);
         logger.info("Running task 'update-resource' | resourceType: {}, id: {}", resourceType, resource.getId());
         T bundle = genericResourceService.update(resourceType, resource.getId(), resource);
@@ -108,10 +125,10 @@ public class WorkflowService<T extends Bundle> {
     }
 
     @JobWorker(type = "delete-resource", autoComplete = true)
-    public Map<String, Object> deleteResource(@VariablesAsType Map<String, Object> vars,
+    public <T extends Bundle> Map<String, Object> deleteResource(@VariablesAsType Map<String, Object> vars,
                                  @CustomHeaders Map<String, String> headers) {
         String id = (String) vars.get("id");
-        String resourceType = headers.getOrDefault("resourceType", "resourceTypes");
+        String resourceType = getResourceType(vars, headers);
         logger.info("Running task 'delete-resource' | resourceType: {}, id: {}", resourceType, id);
         T bundle = genericResourceService.get(resourceType, id);
         if (!bundle.isActive() && bundle.getStatus() == null) {
@@ -131,15 +148,15 @@ public class WorkflowService<T extends Bundle> {
         return vars;
     }
 
-    public T getResourceBundle(Map<String, Object> vars) {
+    public <T extends Bundle> T getResourceBundle(Map<String, Object> vars) {
         return getResourceBundle(vars, "resource");
     }
 
-    public void putResourceBundle(Map<String, Object> vars, T bundle) {
+    public <T extends Bundle> void putResourceBundle(Map<String, Object> vars, T bundle) {
         putResourceBundle(vars, bundle, "resource");
     }
 
-    public T getResourceBundle(Map<String, Object> vars, String resourceName) {
+    public <T extends Bundle> T getResourceBundle(Map<String, Object> vars, String resourceName) {
         String classKey = resourceName + "_class";
         Map<String, Object> resource = (Map<String, Object>) vars.get(resourceName);
         T bundle;
@@ -154,7 +171,7 @@ public class WorkflowService<T extends Bundle> {
         return bundle;
     }
 
-    public void putResourceBundle(Map<String, Object> vars, T bundle, String resourceName) {
+    public <T extends Bundle> void putResourceBundle(Map<String, Object> vars, T bundle, String resourceName) {
         Class<T> clazz = (Class<T>) bundle.getClass();
         vars.put(resourceName + "_class", clazz);
         vars.put(resourceName, toMap(bundle));
@@ -168,7 +185,7 @@ public class WorkflowService<T extends Bundle> {
         vars.put("user", user);
     }
 
-    private Map<String, Object> toMap(T resource) {
+    private <T extends Bundle> Map<String, Object> toMap(T resource) {
         Class<T> clazz = (Class<T>) resource.getClass();
         T bundle = mapper.convertValue(resource, clazz);
         bundle.setPayload(resource.getPayload());
@@ -178,5 +195,25 @@ public class WorkflowService<T extends Bundle> {
         res.put("payload", bundle.getPayload());
 
         return res;
+    }
+
+    private String getResourceType(Map<String, Object> vars, Map<String, String> headers) {
+        String resourceType;
+        if (headers.containsKey("resourceType") && !((String) headers.get("resourceType")).isEmpty()) {
+            resourceType = (String) headers.get("resourceType");
+        } else {
+            resourceType = (String) vars.get("resourceType");
+        }
+        if (resourceType == null || resourceType.isBlank()) {
+            throw new BpmnError("RESOURCE_TYPE_MISSING", "resourceType is required");
+        }
+        return resourceType;
+    }
+
+    private WorkflowResult getWorkflowResult(ProcessInstanceResult key) {
+        if (!key.getVariablesAsMap().containsKey("workflowResult")) {
+            return new WorkflowResult(WorkflowStatus.SUCCESS, 200, "Success");
+        }
+        return mapper.convertValue(key.getVariablesAsMap().get("workflowResult"), WorkflowResult.class);
     }
 }

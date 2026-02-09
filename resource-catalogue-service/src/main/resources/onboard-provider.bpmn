@@ -136,7 +136,7 @@ resource.catalogueId = "eosc"</bpmn:conditionExpression>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0lii30e</bpmn:incoming>
       <bpmn:incoming>Flow_17iczd4</bpmn:incoming>
-      <bpmn:outgoing>Flow_1osl97h</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1q1wtm2</bpmn:outgoing>
     </bpmn:scriptTask>
     <bpmn:sequenceFlow id="Flow_17iczd4" sourceRef="Activity_1lr0vvx" targetRef="Activity_07f9m3j" />
     <bpmn:endEvent id="Event_0uivhin">
@@ -145,9 +145,28 @@ resource.catalogueId = "eosc"</bpmn:conditionExpression>
           <zeebe:output source="=resource" target="resource" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1osl97h</bpmn:incoming>
+      <bpmn:incoming>Flow_091jq6x</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1osl97h" sourceRef="Activity_07f9m3j" targetRef="Event_0uivhin" />
+    <bpmn:sequenceFlow id="Flow_1q1wtm2" sourceRef="Activity_07f9m3j" targetRef="Activity_1fn2t4q" />
+    <bpmn:sequenceFlow id="Flow_091jq6x" sourceRef="Activity_1fn2t4q" targetRef="Event_0uivhin" />
+    <bpmn:serviceTask id="Activity_1fn2t4q" name="Save Provider" zeebe:modelerTemplate="update-resource-template" zeebe:modelerTemplateVersion="2">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-resource" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;provider&#34;" target="resourceTypePreset" />
+          <zeebe:input source="=resourceType" target="resourceTypeExpr" />
+          <zeebe:input source="=resourceType" target="resourceType" />
+          <zeebe:input source="=resource" target="resourceName" />
+          <zeebe:output source="=resource" target="resource" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="resourceName" value="resource" />
+          <zeebe:header key="resourceType" value="provider" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1q1wtm2</bpmn:incoming>
+      <bpmn:outgoing>Flow_091jq6x</bpmn:outgoing>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="onboard-provider">
@@ -199,7 +218,10 @@ resource.catalogueId = "eosc"</bpmn:conditionExpression>
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0uivhin_di" bpmnElement="Event_0uivhin">
-        <dc:Bounds x="1232" y="252" width="36" height="36" />
+        <dc:Bounds x="1472" y="252" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0wjcyxx_di" bpmnElement="Activity_1fn2t4q">
+        <dc:Bounds x="1290" y="230" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_13cl7fo_di" bpmnElement="Flow_13cl7fo">
         <di:waypoint x="360" y="145" />
@@ -261,9 +283,13 @@ resource.catalogueId = "eosc"</bpmn:conditionExpression>
         <di:waypoint x="980" y="270" />
         <di:waypoint x="1060" y="270" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1osl97h_di" bpmnElement="Flow_1osl97h">
+      <bpmndi:BPMNEdge id="Flow_1q1wtm2_di" bpmnElement="Flow_1q1wtm2">
         <di:waypoint x="1160" y="270" />
-        <di:waypoint x="1232" y="270" />
+        <di:waypoint x="1290" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_091jq6x_di" bpmnElement="Flow_091jq6x">
+        <di:waypoint x="1390" y="270" />
+        <di:waypoint x="1472" y="270" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

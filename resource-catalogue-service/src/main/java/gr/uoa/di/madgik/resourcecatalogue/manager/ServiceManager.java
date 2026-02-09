@@ -60,7 +60,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
     private final ModelService modelService;
-    private final WorkflowService<ServiceBundle> workflowService;
+    private final WorkflowService workflowService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -77,7 +77,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           GenericResourceService genericResourceService,
                           @Lazy RelationshipValidator relationshipValidator,
                           ModelService modelService,
-                          WorkflowService<ServiceBundle> workflowService) {
+                          WorkflowService workflowService) {
         super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService; // for providers
         this.commonMethods = commonMethods;
@@ -94,25 +94,24 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     //region generic
     @Override
-    public ServiceBundle add(ServiceBundle service, Authentication auth) {
-        ServiceBundle ret = super.add(service, auth);
-        ret = workflowService.onboard(getResourceTypeName(), ret, auth);
+    public ServiceBundle add(ServiceBundle bundle, Authentication auth) {
+        ServiceBundle ret = super.add(bundle, auth);
+        onboardingValidation(bundle);
+        try {
+            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
+        } catch (ResourceException e) {
+            genericResourceService.delete(getResourceTypeName(), bundle.getId());
+            throw e;
+        }
+        this.update(ret, auth); // adds logging info - possibly replace with generic update
         return ret;
     }
 
-    private void onboardingValidation(ServiceBundle service, ProviderBundle provider) {
+    private void onboardingValidation(ServiceBundle service) {
         relationshipValidator.checkRelatedResourceIDsConsistency(service);
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
-        if (!provider.getStatus().equals("approved")) {
-            throw new ResourceException(String.format("The Provider '%s' you provided as a Owner " +
-                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
-        }
-        if (provider.getTemplateStatus().equals("pending template")) {
-            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
-                    "Template.", provider.getId()), HttpStatus.CONFLICT);
-        }
     }
 
     @Override

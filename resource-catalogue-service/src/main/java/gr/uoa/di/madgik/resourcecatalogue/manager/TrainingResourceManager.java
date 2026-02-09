@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -52,6 +53,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
+    private final WorkflowService workflowService;
 
     public TrainingResourceManager(ProviderService providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
@@ -59,13 +61,15 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
                                    SynchronizerService<TrainingResource> synchronizerService,
                                    @Lazy ProviderResourcesCommonMethods commonMethods,
                                    @Lazy RelationshipValidator relationshipValidator,
-                                   GenericResourceService genericResourceService) {
+                                   GenericResourceService genericResourceService,
+                                   WorkflowService workflowService) {
         super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService;
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
+        this.workflowService = workflowService;
     }
 
     @Override
@@ -75,27 +79,28 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     //region generic
     @Override
-    public TrainingResourceBundle add(TrainingResourceBundle trainingResource, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
-                trainingResource.getCatalogueId());
-        onboard(trainingResource, provider, auth);
-        onboardingValidation(trainingResource, provider);
-        TrainingResourceBundle ret = genericResourceService.add(getResourceTypeName(), trainingResource);
+    public TrainingResourceBundle add(TrainingResourceBundle bundle, Authentication auth) {
+//        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
+//                trainingResource.getCatalogueId());
+//        onboard(trainingResource, provider, auth);
+//        onboardingValidation(trainingResource, provider);
+//        TrainingResourceBundle ret = genericResourceService.add(getResourceTypeName(), trainingResource);
+        TrainingResourceBundle ret = super.add(bundle, auth);
+        onboardingValidation(bundle);
+        try {
+            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
+        } catch (ResourceException e) {
+            genericResourceService.delete(getResourceTypeName(), bundle.getId());
+            throw e;
+        }
+        this.update(ret, auth); // adds logging info - possibly replace with generic update
         return ret;
     }
 
-    private void onboardingValidation(TrainingResourceBundle trainingResource, ProviderBundle provider) {
+    private void onboardingValidation(TrainingResourceBundle trainingResource) {
         relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource);
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
-        if (!provider.getStatus().equals("approved")) {
-            throw new ResourceException(String.format("The Provider '%s' you provided as a Owner " +
-                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
-        }
-        if (provider.getTemplateStatus().equals("pending template")) {
-            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
-                    "Template.", provider.getId()), HttpStatus.CONFLICT);
-        }
     }
 
     @Override
