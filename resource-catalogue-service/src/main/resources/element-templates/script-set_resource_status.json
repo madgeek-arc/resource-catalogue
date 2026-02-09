@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
   "name": "Set Resource's Status (Script Task)",
   "id": "resource-status-script",
-  "description": "Updates a resource object's status in variables using a FEEL script task (no DB call).",
+  "description": "Updates a resource's status using a FEEL script task.",
   "version": 1,
   "appliesTo": ["bpmn:Task"],
   "elementType": {
