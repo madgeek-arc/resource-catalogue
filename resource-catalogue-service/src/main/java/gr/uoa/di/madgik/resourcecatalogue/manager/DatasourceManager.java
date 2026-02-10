@@ -28,6 +28,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -56,6 +57,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
+    private final WorkflowService workflowService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -69,13 +71,15 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                              IdCreator idCreator,
                              GenericResourceService genericResourceService,
                              SecurityService securityService,
-                             RelationshipValidator relationshipValidator) {
+                             RelationshipValidator relationshipValidator,
+                             WorkflowService workflowService) {
         super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService;
         this.commonMethods = commonMethods;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
+        this.workflowService = workflowService;
     }
 
     @Override
@@ -85,33 +89,43 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     //region generic
     @Override
-    public DatasourceBundle add(DatasourceBundle datasource, Authentication auth) {
+    public DatasourceBundle add(DatasourceBundle bundle, Authentication auth) {
         // if Datasource has ID -> check if it exists in OpenAIRE Datasource list
-        if (datasource.getId() != null && !datasource.getId().isEmpty()) {
-            checkOpenAIREIDExistence(datasource);
+        if (bundle.getId() != null && !bundle.getId().isEmpty()) {
+            checkOpenAIREIDExistence(bundle);
         }
 
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
-        onboard(datasource, provider, auth);
-        onboardingValidation(datasource, provider);
-        DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), datasource);
+//        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
+//                datasource.getCatalogueId());
+//        onboard(datasource, provider, auth);
+//        onboardingValidation(datasource, provider);
+//        DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), datasource);
+//        return ret;
+        DatasourceBundle ret = super.add(bundle, auth);
+        onboardingValidation(bundle);
+        try {
+            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
+        } catch (ResourceException e) {
+            genericResourceService.delete(getResourceTypeName(), bundle.getId());
+            throw e;
+        }
+        this.update(ret, auth); // adds logging info - possibly replace with generic update
         return ret;
     }
 
-    private void onboardingValidation(DatasourceBundle datasource, ProviderBundle provider) {
-        relationshipValidator.checkRelatedResourceIDsConsistency(datasource);
+    private void onboardingValidation(DatasourceBundle bundle) {
+        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
-        if (!provider.getStatus().equals("approved")) {
-            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Owner " +
-                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
-        }
-        if (provider.getTemplateStatus().equals("pending template")) {
-            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
-                    "Template.", provider.getId()), HttpStatus.CONFLICT);
-        }
+//        if (!provider.getStatus().equals("approved")) {
+//            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Owner " +
+//                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
+//        }
+//        if (provider.getTemplateStatus().equals("pending template")) {
+//            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
+//                    "Template.", provider.getId()), HttpStatus.CONFLICT);
+//        }
     }
 
     @Override

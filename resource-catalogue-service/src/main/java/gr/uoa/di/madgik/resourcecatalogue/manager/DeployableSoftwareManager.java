@@ -24,11 +24,9 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableSoftwareBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -55,6 +53,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
+    private final WorkflowService workflowService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -65,12 +64,14 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
                                      IdCreator idCreator, @Lazy SecurityService securityService,
                                      @Lazy VocabularyService vocabularyService,
                                      @Lazy ProviderResourcesCommonMethods commonMethods,
-                                     GenericResourceService genericResourceService) {
+                                     GenericResourceService genericResourceService,
+                                     WorkflowService workflowService) {
         super(genericResourceService, securityService, vocabularyService);
         this.providerService = providerService;
         this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
+        this.workflowService = workflowService;
     }
 
     @Override
@@ -80,48 +81,36 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
 
     //region generic
     @Override
-    public DeployableSoftwareBundle add(DeployableSoftwareBundle deployableSoftware, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
-                deployableSoftware.getCatalogueId());
-        onboard(deployableSoftware, provider, auth);
-        onboardingValidation(provider);
-        DeployableSoftwareBundle ret = genericResourceService.add(getResourceTypeName(), deployableSoftware);
+    public DeployableSoftwareBundle add(DeployableSoftwareBundle bundle, Authentication auth) {
+//        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
+//                deployableSoftware.getCatalogueId());
+//        onboard(deployableSoftware, provider, auth);
+//        onboardingValidation(provider);
+//        DeployableSoftwareBundle ret = genericResourceService.add(getResourceTypeName(), deployableSoftware);
+//        return ret;
+        DeployableSoftwareBundle ret = super.add(bundle, auth);
+        onboardingValidation(bundle);
+        try {
+            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
+        } catch (ResourceException e) {
+            genericResourceService.delete(getResourceTypeName(), bundle.getId());
+            throw e;
+        }
+        this.update(ret, auth); // adds logging info - possibly replace with generic update
         return ret;
     }
 
-    private void onboard(DeployableSoftwareBundle deployableSoftware, ProviderBundle provider, Authentication auth) {
-        String catalogueId = deployableSoftware.getCatalogueId();
-        UserInfo user = UserInfo.of(auth);
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            if (provider.getTemplateStatus().equals("approved template")) {
-                deployableSoftware.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-                deployableSoftware.setActive(true);
-            } else {
-                deployableSoftware.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-            }
-            deployableSoftware.setCatalogueId(this.catalogueId);
-            this.createIdentifiers(deployableSoftware, getResourceTypeName(), false);
-            deployableSoftware.setId(deployableSoftware.getIdentifiers().getOriginalId());
-        } else {
-            deployableSoftware.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-//            commonMethods.validateCatalogueId(catalogueId); //FIXME
-            idCreator.validateId(deployableSoftware.getId());
-            this.createIdentifiers(deployableSoftware, getResourceTypeName(), true);
-        }
-        deployableSoftware.setAuditState(Auditable.NOT_AUDITED);
-    }
-
-    private void onboardingValidation(ProviderBundle provider) {
+    private void onboardingValidation(DeployableSoftwareBundle bundle) {
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
-        if (!provider.getStatus().equals("approved")) {
-            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Owner " +
-                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
-        }
-        if (provider.getTemplateStatus().equals("pending template")) {
-            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
-                    "Template.", provider.getId()), HttpStatus.CONFLICT);
-        }
+//        if (!provider.getStatus().equals("approved")) {
+//            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Owner " +
+//                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
+//        }
+//        if (provider.getTemplateStatus().equals("pending template")) {
+//            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
+//                    "Template.", provider.getId()), HttpStatus.CONFLICT);
+//        }
     }
 
     @Override
