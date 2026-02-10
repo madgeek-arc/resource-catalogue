@@ -25,10 +25,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
@@ -224,15 +221,10 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     //region EOSC Resource-specific
     @Override
-    public Paging<ServiceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
-                                                                int quantity, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
+    public Paging<ServiceBundle> getAllEOSCResourcesOfAProvider(String providerId, FacetFilter ff, Authentication auth) {
         ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        ff.setQuantity(quantity);
-        ff.addOrderBy("name", "asc");
         return getAll(ff, auth);
     }
 

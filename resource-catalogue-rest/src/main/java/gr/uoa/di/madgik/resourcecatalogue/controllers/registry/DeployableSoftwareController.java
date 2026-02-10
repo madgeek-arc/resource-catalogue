@@ -303,11 +303,8 @@ public class DeployableSoftwareController extends ResourceCatalogueGenericContro
                                                                           @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("resource_owner", id);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        ff.addFilter("draft", false);
-        return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, catalogueId, ff.getQuantity(), auth), HttpStatus.OK);
+        return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
     }
 
     @BrowseParameters

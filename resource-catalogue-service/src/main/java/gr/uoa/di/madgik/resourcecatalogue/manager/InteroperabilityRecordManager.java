@@ -24,6 +24,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
@@ -177,15 +178,10 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     //region EOSC Resource-specific
     @Override
-    public Paging<InteroperabilityRecordBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
-                                                                               int quantity, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
+    public Paging<InteroperabilityRecordBundle> getAllEOSCResourcesOfAProvider(String providerId, FacetFilter ff, Authentication auth) {
         ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        ff.setQuantity(quantity);
-        ff.addOrderBy("name", "asc");
         return getAll(ff, auth);
     }
 

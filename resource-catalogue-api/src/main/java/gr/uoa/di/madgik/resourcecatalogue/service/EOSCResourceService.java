@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import org.springframework.security.core.Authentication;
@@ -10,13 +11,12 @@ public interface EOSCResourceService<T extends Bundle> {
 
     /**
      *
-     * @param providerId  Provider ID
-     * @param catalogueId Catalogue ID
-     * @param quantity    Quantity to be fetched
-     * @param auth        Authentication
+     * @param providerId Provider ID
+     * @param ff         FacetFilter
+     * @param auth       Authentication
      * @return {@link Paging <T>}
      */
-    Paging<T> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId, int quantity, Authentication auth);
+    Paging<T> getAllEOSCResourcesOfAProvider(String providerId, FacetFilter ff, Authentication auth);
 
     /**
      * @param authentication Authentication

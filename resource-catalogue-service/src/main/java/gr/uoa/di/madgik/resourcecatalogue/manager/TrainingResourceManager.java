@@ -211,15 +211,10 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     //region EOSC Resource-specific
     @Override
-    public Paging<TrainingResourceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
-                                                                         int quantity, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
+    public Paging<TrainingResourceBundle> getAllEOSCResourcesOfAProvider(String providerId, FacetFilter ff, Authentication auth) {
         ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        ff.setQuantity(quantity);
-        ff.addOrderBy("name", "asc");
         return getAll(ff, auth);
     }
 

@@ -44,7 +44,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @org.springframework.stereotype.Service("providerManager")
 public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBundle>
@@ -296,16 +298,23 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
         createMapValuesForHLE(providers, "provider", mapValuesList);
         for (ProviderBundle providerBundle : providers) {
             services.addAll(serviceService.getAllEOSCResourcesOfAProvider(providerBundle.getId(),
-                    providerBundle.getCatalogueId(), maxQuantity, auth).getResults());
-            trainingResources.addAll(trainingResourceService.getAllEOSCResourcesOfAProvider(providerBundle.getCatalogueId(),
-                    providerBundle.getId(), maxQuantity, auth).getResults());
-            interoperabilityRecords.addAll(interoperabilityRecordService.getAllEOSCResourcesOfAProvider(
-                    providerBundle.getCatalogueId(), providerBundle.getId(), maxQuantity, auth).getResults());
+                    createFacetFilter(providerBundle.getCatalogueId()), auth).getResults());
+            trainingResources.addAll(trainingResourceService.getAllEOSCResourcesOfAProvider(providerBundle.getId(),
+                    createFacetFilter(providerBundle.getCatalogueId()), auth).getResults());
+            interoperabilityRecords.addAll(interoperabilityRecordService.getAllEOSCResourcesOfAProvider(providerBundle.getId(),
+                    createFacetFilter(providerBundle.getCatalogueId()), auth).getResults());
         }
         createMapValuesForHLE(services, "service", mapValuesList);
         createMapValuesForHLE(trainingResources, "training_resource", mapValuesList);
         createMapValuesForHLE(interoperabilityRecords, "interoperability_record", mapValuesList);
         return mapValuesList;
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        ff.addFilter("catalogue_id", catalogueId);
+        return ff;
     }
 
     private void createMapValuesForHLE(List<? extends Bundle> resources, String resourceType,

@@ -1,5 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
@@ -35,16 +36,16 @@ public class ProviderCascadeLifecycleManager {
     public void deleteAllRelatedResources(ProviderBundle bundle, Authentication auth) {
         String providerId = bundle.getId();
         String catalogueId = bundle.getCatalogueId();
-        serviceService.getAllEOSCResourcesOfAProvider(providerId, catalogueId, maxQuantity, auth)
+        serviceService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(serviceService::delete);
-        datasourceService.getAllEOSCResourcesOfAProvider(providerId, catalogueId, maxQuantity, auth)
+        datasourceService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(datasourceService::delete);
-        trainingResourceService.getAllEOSCResourcesOfAProvider(providerId, catalogueId, maxQuantity, auth)
+        trainingResourceService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(trainingResourceService::delete);
-        interoperabilityRecordService.getAllEOSCResourcesOfAProvider(providerId, catalogueId, maxQuantity, auth)
+        interoperabilityRecordService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(interoperabilityRecordService::delete);
     }
@@ -54,21 +55,28 @@ public class ProviderCascadeLifecycleManager {
         String providerId = bundle.getId();
         String catalogueId = bundle.getCatalogueId();
         boolean suspended = bundle.isSuspended();
-        serviceService.getAllEOSCResourcesOfAProvider(providerId, catalogueId, maxQuantity, auth)
+        serviceService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(s ->
                         serviceService.setSuspend(s.getId(), catalogueId, suspended, auth));
-        datasourceService.getAllEOSCResourcesOfAProvider(providerId, catalogueId, maxQuantity, auth)
+        datasourceService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(ds ->
                         datasourceService.setSuspend(ds.getId(), catalogueId, suspended, auth));
-        trainingResourceService.getAllEOSCResourcesOfAProvider(providerId, catalogueId, maxQuantity, auth)
+        trainingResourceService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(tr ->
                         trainingResourceService.setSuspend(tr.getId(), catalogueId, suspended, auth));
-        interoperabilityRecordService.getAllEOSCResourcesOfAProvider(providerId, catalogueId, maxQuantity, auth)
+        interoperabilityRecordService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(ig ->
                         interoperabilityRecordService.setSuspend(ig.getId(), catalogueId, suspended, auth));
+    }
+
+    private FacetFilter createFacetFilter(String catalogueId) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        ff.addFilter("catalogue_id", catalogueId);
+        return ff;
     }
 }
