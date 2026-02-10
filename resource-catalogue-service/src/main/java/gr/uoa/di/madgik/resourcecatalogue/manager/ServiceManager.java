@@ -139,7 +139,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     private void checkAndResetServiceOnboarding(ServiceBundle service, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
+        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (service.getStatus().equals(vocabularyService.get("rejected").getId())) {
@@ -181,7 +181,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     private void updateProviderTemplateStatus(ServiceBundle service, String status, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
+        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         switch (status) {
             case "pending":
@@ -203,7 +203,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     public ServiceBundle setActive(String id, Boolean active, Authentication auth) {
         ServiceBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getService().get("owner"),
+        ProviderBundle provider = providerService.get((String) existing.getService().get("resourceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Service, as its Provider is inactive", HttpStatus.CONFLICT);
@@ -227,7 +227,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     public Paging<ServiceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                 int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("owner", providerId);
+        ff.addFilter("resourceOwner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -238,7 +238,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         ServiceBundle service = get(id);
-        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
+        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
@@ -334,7 +334,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("owner", providerId);
+        ff.addFilter("resourceOwner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<ServiceBundle> allProviderServices = getAll(ff, auth).getResults();
@@ -377,7 +377,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     @Override
     public ServiceBundle finalizeDraft(ServiceBundle service, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("owner"),
+        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {

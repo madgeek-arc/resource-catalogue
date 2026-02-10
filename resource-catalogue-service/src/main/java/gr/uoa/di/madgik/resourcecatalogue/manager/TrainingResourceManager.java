@@ -126,7 +126,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     }
 
     private void checkAndResetServiceOnboarding(TrainingResourceBundle trainingResource, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
+        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (trainingResource.getStatus().equals(vocabularyService.get("rejected").getId())) {
@@ -168,7 +168,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     }
 
     private void updateProviderTemplateStatus(TrainingResourceBundle trainingResource, String status, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
+        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         switch (status) {
             case "pending":
@@ -190,7 +190,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     public TrainingResourceBundle setActive(String id, Boolean active, Authentication auth) {
         TrainingResourceBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getTrainingResource().get("owner"),
+        ProviderBundle provider = providerService.get((String) existing.getTrainingResource().get("resourceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Training Resource, as its Provider is inactive", HttpStatus.CONFLICT);
@@ -214,7 +214,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     public Paging<TrainingResourceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                          int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("owner", providerId);
+        ff.addFilter("resourceOwner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -225,7 +225,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         TrainingResourceBundle trainingResource = get(id);
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
+        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Training Resources", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResource, provider); //FIXME
@@ -257,7 +257,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("owner", providerId);
+        ff.addFilter("resourceOwner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();
@@ -300,7 +300,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     @Override
     public TrainingResourceBundle finalizeDraft(TrainingResourceBundle trainingResource, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
+        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {

@@ -86,7 +86,7 @@ public class DefaultStatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
         FacetFilter filter = new FacetFilter();
-        filter.addFilter("owner", id);
+        filter.addFilter("resourceOwner", id);
         Map<String, Integer> providerAddToProject = serviceBundleManager.getAll(filter).getResults()
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
@@ -349,7 +349,7 @@ public class DefaultStatisticsManager implements StatisticsService {
         for (ServiceBundle serviceBundle : allServices) {
             Value value = new Value(serviceBundle.getId(), (String) serviceBundle.getService().get("name"));
 
-            Set<String> countries = new HashSet<>(providerCountries.get(serviceBundle.getService().get("owner")));
+            Set<String> countries = new HashSet<>(providerCountries.get(serviceBundle.getService().get("resourceOwner")));
             for (String country : countries) {
                 if (mapValues.get(country) == null) {
                     continue;
@@ -369,7 +369,7 @@ public class DefaultStatisticsManager implements StatisticsService {
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
-        in.addValue("owner", providerId);
+        in.addValue("resourceOwner", providerId);
 
         String query = "SELECT resource_internal_id, name, " + vocabulary.getKey()
                 + " FROM service_view WHERE active=true ";

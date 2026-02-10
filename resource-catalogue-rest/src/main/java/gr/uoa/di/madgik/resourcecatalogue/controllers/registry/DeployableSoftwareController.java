@@ -22,9 +22,9 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableSoftwareBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.service.DeployableServiceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.DeployableSoftwareService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -49,11 +49,11 @@ import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(path = "deployableService", produces = {MediaType.APPLICATION_JSON_VALUE})
-@Tag(name = "deployable service")
-public class DeployableServiceController extends ResourceCatalogueGenericController<DeployableServiceBundle, DeployableServiceService> {
+@RequestMapping(path = "deployableSoftware", produces = {MediaType.APPLICATION_JSON_VALUE})
+@Tag(name = "deployable software")
+public class DeployableSoftwareController extends ResourceCatalogueGenericController<DeployableSoftwareBundle, DeployableSoftwareService> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DeployableServiceController.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DeployableSoftwareController.class.getName());
 
 
     @Value("${auditing.interval:6}")
@@ -61,35 +61,35 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    DeployableServiceController(DeployableServiceService deployableServiceService) {
-        super(deployableServiceService, "Deployable Service");
+    DeployableSoftwareController(DeployableSoftwareService deployableSoftwareService) {
+        super(deployableSoftwareService, "Deployable Software");
     }
 
     //region generic
-    @Operation(summary = "Returns the Deployable Service with the given id.")
+    @Operation(summary = "Returns the Deployable Software with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.deployableServiceIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.deployableSoftwareIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.get(id, catalogueId);
-        return new ResponseEntity<>(bundle.getDeployableService(), HttpStatus.OK);
+        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
+        return new ResponseEntity<>(bundle.getDeployableSoftware(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<DeployableServiceBundle> getBundle(@PathVariable String prefix,
-                                                             @PathVariable String suffix,
-                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<DeployableSoftwareBundle> getBundle(@PathVariable String prefix,
+                                                              @PathVariable String suffix,
+                                                              @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.get(id, catalogueId);
+        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
-    @Operation(summary = "Get a list of Deployable Services based on a list of filters.")
+    @Operation(summary = "Get a list of Deployable Software based on a list of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
@@ -100,8 +100,8 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<DeployableServiceBundle> paging = service.getAll(ff, auth);
-        return ResponseEntity.ok(paging.map(DeployableServiceBundle::getDeployableService));
+        Paging<DeployableSoftwareBundle> paging = service.getAll(ff, auth);
+        return ResponseEntity.ok(paging.map(DeployableSoftwareBundle::getDeployableSoftware));
     }
 
     @BrowseParameters
@@ -112,198 +112,198 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
     })
     @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<DeployableServiceBundle>> getAllBundles(@Parameter(hidden = true)
+    public ResponseEntity<Paging<DeployableSoftwareBundle>> getAllBundles(@Parameter(hidden = true)
                                                                          @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<DeployableServiceBundle> paging = service.getAll(ff);
+        Paging<DeployableSoftwareBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
-    @Operation(summary = "Returns all Deployable Services of a User.")
+    @Operation(summary = "Returns all Deployable Software of a User.")
     @GetMapping(path = "getMy")
-    public ResponseEntity<List<DeployableServiceBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
-                                                               @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<List<DeployableSoftwareBundle>> getMy(@RequestParam(defaultValue = "false") boolean draft,
+                                                                @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", draft);
         return new ResponseEntity<>(service.getMy(ff, auth).getResults(), HttpStatus.OK);
     }
 
-    @Operation(summary = "Get a random Paging of Deployable Services")
+    @Operation(summary = "Get a random Paging of Deployable Software")
     @Parameters({
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
     @GetMapping(path = "random")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<DeployableServiceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
-                                                                     @Parameter(hidden = true) Authentication auth) {
-        Paging<DeployableServiceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+    public ResponseEntity<Paging<DeployableSoftwareBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
+                                                                      @Parameter(hidden = true) Authentication auth) {
+        Paging<DeployableSoftwareBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 
-    @Operation(summary = "Adds a new Deployable Service.")
+    @Operation(summary = "Adds a new Deployable Software.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #deployableService, @resourceCatalogueInfo.catalogueId)")
-    public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> deployableService,
+            "@securityService.providerCanAddResources(#auth, #deployableSoftware, @resourceCatalogueInfo.catalogueId)")
+    public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> deployableSoftware,
                                  @Parameter(hidden = true) Authentication auth) {
-        DeployableServiceBundle bundle = new DeployableServiceBundle();
-        bundle.setDeployableService(deployableService);
-        DeployableServiceBundle ret = service.add(bundle, auth);
-        logger.info("Added Deployable Service with id '{}'", bundle.getId());
-        return new ResponseEntity<>(ret.getDeployableService(), HttpStatus.CREATED);
+        DeployableSoftwareBundle bundle = new DeployableSoftwareBundle();
+        bundle.setDeployableSoftware(deployableSoftware);
+        DeployableSoftwareBundle ret = service.add(bundle, auth);
+        logger.info("Added Deployable Software with id '{}'", bundle.getId());
+        return new ResponseEntity<>(ret.getDeployableSoftware(), HttpStatus.CREATED);
     }
 
     @PostMapping(path = {"/bundle"})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<DeployableServiceBundle> addBundle(@RequestBody DeployableServiceBundle deployableServiceBundle,
-                                                             @Parameter(hidden = true) Authentication auth) {
-        DeployableServiceBundle bundle = service.add(deployableServiceBundle, auth);
-        logger.info("Added DeployableServiceBundle with id '{}'", bundle.getId());
+    public ResponseEntity<DeployableSoftwareBundle> addBundle(@RequestBody DeployableSoftwareBundle deployableSoftwareBundle,
+                                                              @Parameter(hidden = true) Authentication auth) {
+        DeployableSoftwareBundle bundle = service.add(deployableSoftwareBundle, auth);
+        logger.info("Added DeployableSoftwareBundle with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/addBulk")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<DeployableServiceBundle> deployableServiceList,
+    public void addBulk(@RequestBody List<DeployableSoftwareBundle> deployableSoftwareList,
                         @Parameter(hidden = true) Authentication auth) {
-        service.addBulk(deployableServiceList, auth);
+        service.addBulk(deployableSoftwareList, auth);
     }
 
-    @Operation(summary = "Updates the Deployable Service with the given id.")
+    @Operation(summary = "Updates the Deployable Software with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableService['id'])")
-    public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> deployableService,
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableSoftware['id'])")
+    public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> deployableSoftware,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
-        String id = deployableService.get("id").toString();
-        DeployableServiceBundle bundle = service.get(id, catalogueId);
-        bundle.setDeployableService(deployableService);
+        String id = deployableSoftware.get("id").toString();
+        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
+        bundle.setDeployableSoftware(deployableSoftware);
         bundle = service.update(bundle, comment, auth);
-        logger.info("Updated the Deployable Service with id '{}'", deployableService.get("id"));
-        return new ResponseEntity<>(bundle.getDeployableService(), HttpStatus.OK);
+        logger.info("Updated the Deployable Software with id '{}'", deployableSoftware.get("id"));
+        return new ResponseEntity<>(bundle.getDeployableSoftware(), HttpStatus.OK);
     }
 
     @PutMapping(path = {"/bundle"})
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<DeployableServiceBundle> updateBundle(@RequestBody DeployableServiceBundle deployableService,
-                                                                @RequestParam(required = false) String comment,
-                                                                @Parameter(hidden = true) Authentication auth) {
-        DeployableServiceBundle bundle = service.update(deployableService, comment, auth);
-        logger.info("Updated the DeployableServiceBundle id '{}'", bundle.getId());
+    public ResponseEntity<DeployableSoftwareBundle> updateBundle(@RequestBody DeployableSoftwareBundle deployableSoftware,
+                                                                 @RequestParam(required = false) String comment,
+                                                                 @Parameter(hidden = true) Authentication auth) {
+        DeployableSoftwareBundle bundle = service.update(deployableSoftware, comment, auth);
+        logger.info("Updated the DeployableSoftwareBundle id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
-    @Operation(summary = "Deletes the Deployable Service with the given id.")
+    @Operation(summary = "Deletes the Deployable Software with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.get(id, catalogueId);
+        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
 
         service.delete(bundle);
-        logger.info("Deleted the Deployable Service with id '{}'", bundle.getId());
-        return new ResponseEntity<>(bundle.getDeployableService(), HttpStatus.OK);
+        logger.info("Deleted the Deployable Software with id '{}'", bundle.getId());
+        return new ResponseEntity<>(bundle.getDeployableSoftware(), HttpStatus.OK);
     }
 
-    @Operation(summary = "Verifies the Deployable Service.")
+    @Operation(summary = "Verifies the Deployable Software.")
     @PatchMapping(path = "verify/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<DeployableServiceBundle> setStatus(@PathVariable String prefix,
-                                                             @PathVariable String suffix,
-                                                             @RequestParam(required = false) Boolean active,
-                                                             @RequestParam(required = false) String status,
-                                                             @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<DeployableSoftwareBundle> setStatus(@PathVariable String prefix,
+                                                              @PathVariable String suffix,
+                                                              @RequestParam(required = false) Boolean active,
+                                                              @RequestParam(required = false) String status,
+                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.verify(id, status, active, auth);
-        logger.info("Verify Deployable Service with id: '{}' | status: '{}' | active: '{}'",
+        DeployableSoftwareBundle bundle = service.verify(id, status, active, auth);
+        logger.info("Verify Deployable Software with id: '{}' | status: '{}' | active: '{}'",
                 bundle.getId(), status, active);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
-    @Operation(summary = "Activates/Deactivates the Deployable Service.")
+    @Operation(summary = "Activates/Deactivates the Deployable Software.")
     @PatchMapping(path = "setActive/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
             "or @securityService.resourceIsApprovedAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<DeployableServiceBundle> setActive(@PathVariable String prefix,
-                                                             @PathVariable String suffix,
-                                                             @RequestParam Boolean active,
-                                                             @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<DeployableSoftwareBundle> setActive(@PathVariable String prefix,
+                                                              @PathVariable String suffix,
+                                                              @RequestParam Boolean active,
+                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.setActive(id, active, auth);
-        logger.info("Attempt to save Deployable Service with id '{}' as '{}'", id, active);
+        DeployableSoftwareBundle bundle = service.setActive(id, active, auth);
+        logger.info("Attempt to save Deployable Software with id '{}' as '{}'", id, active);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
-    @Operation(summary = "Audits the Deployable Service.")
+    @Operation(summary = "Audits the Deployable Software.")
     @PatchMapping(path = "audit/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<DeployableServiceBundle> audit(@PathVariable String prefix,
-                                                         @PathVariable String suffix,
-                                                         @RequestParam("catalogueId") String catalogueId,
-                                                         @RequestParam(required = false) String comment,
-                                                         @RequestParam LoggingInfo.ActionType actionType,
-                                                         @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<DeployableSoftwareBundle> audit(@PathVariable String prefix,
+                                                          @PathVariable String suffix,
+                                                          @RequestParam("catalogueId") String catalogueId,
+                                                          @RequestParam(required = false) String comment,
+                                                          @RequestParam LoggingInfo.ActionType actionType,
+                                                          @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.audit(id, catalogueId, comment, actionType, auth);
+        DeployableSoftwareBundle bundle = service.audit(id, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
-    @Operation(summary = "Suspends a specific Deployable Service.")
+    @Operation(summary = "Suspends a specific Deployable Software.")
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public DeployableServiceBundle suspend(@RequestParam String id,
-                                           @RequestParam String catalogueId,
-                                           @RequestParam boolean suspend,
-                                           @Parameter(hidden = true) Authentication auth) {
+    public DeployableSoftwareBundle suspend(@RequestParam String id,
+                                            @RequestParam String catalogueId,
+                                            @RequestParam boolean suspend,
+                                            @Parameter(hidden = true) Authentication auth) {
         return service.setSuspend(id, catalogueId, suspend, auth);
     }
 
-    @Operation(summary = "Get the LoggingInfo History of a specific Deployable Service.")
+    @Operation(summary = "Get the LoggingInfo History of a specific Deployable Software.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
                                                                 @PathVariable String suffix,
                                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.get(id, catalogueId);
+        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
-    @Operation(summary = "Validates the Deployable Service without actually changing the repository.")
+    @Operation(summary = "Validates the Deployable Software without actually changing the repository.")
     @PostMapping(path = "validate")
     public ResponseEntity<Void> validate(@RequestBody LinkedHashMap<String, Object> serviceMap) {
-        DeployableServiceBundle bundle = new DeployableServiceBundle();
-        bundle.setDeployableService(serviceMap);
+        DeployableSoftwareBundle bundle = new DeployableSoftwareBundle();
+        bundle.setDeployableSoftware(serviceMap);
         service.validate(bundle);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //region Deployable Service-specific
-    @Operation(summary = "Get a list of Deployable Services based on a set of ids.")
+    //region Deployable Software-specific
+    @Operation(summary = "Get a list of Deployable Software based on a set of ids.")
     @GetMapping(path = "ids")
     public ResponseEntity<List<LinkedHashMap<String, Object>>> getSome(@RequestParam("ids") String[] ids,
                                                                        @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(service.getByIds(auth, ids)
                 .stream()
-                .map(DeployableServiceBundle::getDeployableService)
+                .map(DeployableSoftwareBundle::getDeployableSoftware)
                 .collect(Collectors.toList()));
     }
 
     @BrowseParameters
     @GetMapping(path = "byProvider/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
-    public ResponseEntity<Paging<DeployableServiceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
-                                                                         @PathVariable String prefix,
-                                                                         @PathVariable String suffix,
-                                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Paging<DeployableSoftwareBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
+                                                                          @PathVariable String prefix,
+                                                                          @PathVariable String suffix,
+                                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("owner", id);
+        ff.addFilter("resourceOwner", id);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -348,24 +348,24 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
     public ResponseEntity<?> getDraft(@PathVariable String prefix,
                                       @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle draft = service.get(
+        DeployableSoftwareBundle draft = service.get(
                 new SearchService.KeyValue("resource_internal_id", id),
                 new SearchService.KeyValue("published", "false"),
                 new SearchService.KeyValue("draft", "true")
         );
-        return new ResponseEntity<>(draft.getDeployableService(), HttpStatus.OK);
+        return new ResponseEntity<>(draft.getDeployableSoftware(), HttpStatus.OK);
     }
 
     @BrowseParameters
     @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}")
-    public ResponseEntity<Browsing<DeployableServiceBundle>> getProviderDraftServices(@PathVariable String prefix,
-                                                                                      @PathVariable String suffix,
-                                                                                      @Parameter(hidden = true)
+    public ResponseEntity<Browsing<DeployableSoftwareBundle>> getProviderDraftServices(@PathVariable String prefix,
+                                                                                       @PathVariable String suffix,
+                                                                                       @Parameter(hidden = true)
                                                                                       @RequestParam MultiValueMap<String, Object> params,
-                                                                                      @Parameter(hidden = true) Authentication auth) {
+                                                                                       @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("owner", id);
+        ff.addFilter("resourceOwner", id);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
@@ -373,25 +373,25 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
 
     @PostMapping(path = "/draft")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> deployableService,
+    public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> deployableSoftware,
                                       @Parameter(hidden = true) Authentication auth) {
-        DeployableServiceBundle bundle = new DeployableServiceBundle();
-        bundle.setDeployableService(deployableService);
-        DeployableServiceBundle ret = service.addDraft(bundle, auth);
-        logger.info("Added Draft Deployable Service with id '{}'", bundle.getId());
-        return new ResponseEntity<>(ret.getDeployableService(), HttpStatus.CREATED);
+        DeployableSoftwareBundle bundle = new DeployableSoftwareBundle();
+        bundle.setDeployableSoftware(deployableSoftware);
+        DeployableSoftwareBundle ret = service.addDraft(bundle, auth);
+        logger.info("Added Draft Deployable Software with id '{}'", bundle.getId());
+        return new ResponseEntity<>(ret.getDeployableSoftware(), HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableService['id'])")
-    public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> deployableService,
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableSoftware['id'])")
+    public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> deployableSoftware,
                                          @Parameter(hidden = true) Authentication auth) {
-        String id = (String) deployableService.get("id");
-        DeployableServiceBundle bundle = service.get(id, catalogueId);
-        bundle.setDeployableService(deployableService);
+        String id = (String) deployableSoftware.get("id");
+        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
+        bundle.setDeployableSoftware(deployableSoftware);
         bundle = service.updateDraft(bundle, auth);
-        logger.info("Updated the Draft Deployable Service with id '{}'", id);
-        return new ResponseEntity<>(bundle.getDeployableService(), HttpStatus.OK);
+        logger.info("Updated the Draft Deployable Software with id '{}'", id);
+        return new ResponseEntity<>(bundle.getDeployableSoftware(), HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
@@ -400,22 +400,22 @@ public class DeployableServiceController extends ResourceCatalogueGenericControl
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableServiceBundle bundle = service.get(id, catalogueId);
+        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
         service.deleteDraft(bundle);
     }
 
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableService['id'])")
-    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> deployableService,
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableSoftware['id'])")
+    public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> deployableSoftware,
                                               @Parameter(hidden = true) Authentication auth) {
-        String id = (String) deployableService.get("id");
-        DeployableServiceBundle bundle = service.get(id, catalogueId);
-        bundle.setDeployableService(deployableService);
+        String id = (String) deployableSoftware.get("id");
+        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
+        bundle.setDeployableSoftware(deployableSoftware);
 
-        logger.info("Finalizing Draft Deployable Service with id '{}'", id);
+        logger.info("Finalizing Draft Deployable Software with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
 
-        return new ResponseEntity<>(bundle.getDeployableService(), HttpStatus.OK);
+        return new ResponseEntity<>(bundle.getDeployableSoftware(), HttpStatus.OK);
     }
     //endregion
 }

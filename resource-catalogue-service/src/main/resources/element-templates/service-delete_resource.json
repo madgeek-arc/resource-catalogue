@@ -31,7 +31,7 @@
         { "name": "Configuration Template", "value": "configuration_template" },
         { "name": "Configuration Template Instance", "value": "configuration_template_instance" },
         { "name": "Datasource", "value": "datasource" },
-        { "name": "Deployable Service", "value": "deployable_service" },
+        { "name": "Deployable Software", "value": "deployable_software" },
         { "name": "Helpdesk", "value": "helpdesk" },
         { "name": "Interoperability Record", "value": "interoperability_record" },
         { "name": "Monitoring", "value": "monitoring" },

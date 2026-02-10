@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 
 @Profile("beyond")
 @ControllerAdvice
@@ -103,8 +102,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyDatasourceBundle(t, auth);
         } else if (t instanceof TrainingResourceBundle) {
             modifyTrainingResourceBundle(t, auth);
-        } else if (t instanceof DeployableServiceBundle) {
-            modifyDeployableServiceBundle(t, auth);
+        } else if (t instanceof DeployableSoftwareBundle) {
+            modifyDeployableSoftwareBundle(t, auth);
         } else if (t instanceof InteroperabilityRecordBundle) {
             modifyInteroperabilityRecordBundle(t, auth);
         } else if (t instanceof LoggingInfo) {
@@ -195,15 +194,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private void modifyDeployableServiceBundle(T deployableServiceBundle, Authentication auth) {
-        modifyLoggingInfoList((T) ((DeployableServiceBundle) deployableServiceBundle).getLoggingInfo());
-        modifyLoggingInfo((T) ((DeployableServiceBundle) deployableServiceBundle).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((DeployableServiceBundle) deployableServiceBundle).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((DeployableServiceBundle) deployableServiceBundle).getLatestOnboardingInfo());
+    private void modifyDeployableSoftwareBundle(T deployableSoftwareBundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceAdmin(auth, ((DeployableServiceBundle) deployableServiceBundle).getId())) {
-            ((DeployableServiceBundle) deployableServiceBundle).getDeployableService().put("email", null);
-            ((DeployableServiceBundle) deployableServiceBundle).getMetadata().setTerms(null);
+        if (!this.securityService.isResourceAdmin(auth, ((DeployableSoftwareBundle) deployableSoftwareBundle).getId())) {
+            ((DeployableSoftwareBundle) deployableSoftwareBundle).getDeployableSoftware().put("email", null);
+            ((DeployableSoftwareBundle) deployableSoftwareBundle).getMetadata().setTerms(null);
         }
     }
 

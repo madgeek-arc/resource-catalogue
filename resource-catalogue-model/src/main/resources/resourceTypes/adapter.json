@@ -54,14 +54,14 @@
       "label": "Type",
       "multivalued": false,
       "name": "entity_type",
-      "path": "$.datasource.type",
+      "path": "$.adapter.type",
       "type": "java.lang.String"
     },
     {
-      "label": "Owner",
+      "label": "Resource Owner",
       "multivalued": false,
-      "name": "owner",
-      "path": "$.datasource.owner",
+      "name": "resource_owner",
+      "path": "$.adapter.resourceOwner",
       "type": "java.lang.String"
     },
     {

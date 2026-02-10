@@ -45,7 +45,7 @@ public class InternalToPublicConsistency {
     private final ProviderService providerService;
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
-    private final DeployableServiceService deployableServiceService;
+    private final DeployableSoftwareService deployableSoftwareService;
     private final AdapterService adapterService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
@@ -56,7 +56,7 @@ public class InternalToPublicConsistency {
     private final PublicProviderService publicProviderService;
     private final PublicServiceService publicServiceManager;
     private final PublicTrainingResourceService publicTrainingResourceManager;
-    private final PublicDeployableServiceService publicDeployableServiceService;
+    private final PublicDeployableSoftwareService publicDeployableSoftwareService;
     private final PublicAdapterService publicAdapterService;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
@@ -83,14 +83,14 @@ public class InternalToPublicConsistency {
                                        ServiceService serviceService,
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
-                                       DeployableServiceService deployableServiceService,
+                                       DeployableSoftwareService deployableSoftwareService,
                                        AdapterService adapterService,
                                        ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                        DatasourceService datasourceService,
                                        ConfigurationTemplateInstanceService configurationTemplateInstanceService,
                                        PublicProviderService publicProviderService, PublicServiceService publicServiceManager,
                                        PublicTrainingResourceService publicTrainingResourceManager,
-                                       PublicDeployableServiceService publicDeployableServiceService,
+                                       PublicDeployableSoftwareService publicDeployableSoftwareService,
                                        PublicAdapterService publicAdapterService,
                                        PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
                                        PublicDatasourceService publicDatasourceService,
@@ -100,7 +100,7 @@ public class InternalToPublicConsistency {
         this.providerService = providerService;
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
-        this.deployableServiceService = deployableServiceService;
+        this.deployableSoftwareService = deployableSoftwareService;
         this.adapterService = adapterService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
@@ -109,7 +109,7 @@ public class InternalToPublicConsistency {
         this.publicProviderService = publicProviderService;
         this.publicServiceManager = publicServiceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
-        this.publicDeployableServiceService = publicDeployableServiceService;
+        this.publicDeployableSoftwareService = publicDeployableSoftwareService;
         this.publicAdapterService = publicAdapterService;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
@@ -127,7 +127,7 @@ public class InternalToPublicConsistency {
         List<ProviderBundle> allInternalApprovedProviders = providerService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<ServiceBundle> allInternalApprovedServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<DeployableServiceBundle> allInternalApprovedDS = deployableServiceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<DeployableSoftwareBundle> allInternalApprovedDS = deployableSoftwareService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<ResourceInteroperabilityRecordBundle> allInternalApprovedRIR = resourceInteroperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allInternalApprovedDatasources = datasourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
@@ -198,16 +198,16 @@ public class InternalToPublicConsistency {
             }
         }
 
-        // check consistency for Deployable Services
-        for (DeployableServiceBundle deployableServiceBundle : allInternalApprovedDS) {
+        // check consistency for Deployable Software
+        for (DeployableSoftwareBundle deployableSoftwareBundle : allInternalApprovedDS) {
             // try and get its Public instance
             try {
-                publicDeployableServiceService.get(deployableServiceBundle.getIdentifiers().getPid(),
-                        deployableServiceBundle.getCatalogueId());
+                publicDeployableSoftwareService.get(deployableSoftwareBundle.getIdentifiers().getPid(),
+                        deployableSoftwareBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
-                logs.add(String.format("Deployable Service with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        deployableServiceBundle.getId(), deployableServiceBundle.getCatalogueId(),
-                        deployableServiceBundle.getIdentifiers().getPid()));
+                logs.add(String.format("Deployable Software with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
+                        deployableSoftwareBundle.getId(), deployableSoftwareBundle.getCatalogueId(),
+                        deployableSoftwareBundle.getIdentifiers().getPid()));
             }
         }
 

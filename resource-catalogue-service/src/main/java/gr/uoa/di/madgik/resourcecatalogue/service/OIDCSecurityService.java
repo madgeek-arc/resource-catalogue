@@ -39,7 +39,7 @@ public class OIDCSecurityService implements SecurityService {
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final DeployableServiceService deployableServiceService;
+    private final DeployableSoftwareService deployableSoftwareService;
     private final AdapterService adapterService;
     private final Authentication adminAccess = new AdminAuthentication();
 
@@ -55,7 +55,7 @@ public class OIDCSecurityService implements SecurityService {
             @Lazy DatasourceService datasourceService,
             @Lazy TrainingResourceService trainingResourceService,
             @Lazy InteroperabilityRecordService interoperabilityRecordService,
-            @Lazy DeployableServiceService deployableServiceService,
+            @Lazy DeployableSoftwareService deployableSoftwareService,
             @Lazy AdapterService adapterService,
             CatalogueProperties properties) {
 //        this.catalogueService = catalogueService;
@@ -64,7 +64,7 @@ public class OIDCSecurityService implements SecurityService {
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
-        this.deployableServiceService = deployableServiceService;
+        this.deployableSoftwareService = deployableSoftwareService;
         this.adapterService = adapterService;
     }
 
@@ -213,14 +213,14 @@ public class OIDCSecurityService implements SecurityService {
         String providerId;
         Bundle bundle = determineResourceType(resourceId);
         providerId = switch (bundle) {
-            case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("owner");
-            case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("owner");
+            case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("resourceOwner");
+            case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("resourceOwner");
             case TrainingResourceBundle trainingResourceBundle ->
-                    (String) trainingResourceBundle.getTrainingResource().get("owner");
-            case DeployableServiceBundle deployableServiceBundle ->
-                    (String) deployableServiceBundle.getDeployableService().get("owner");
+                    (String) trainingResourceBundle.getTrainingResource().get("resourceOwner");
+            case DeployableSoftwareBundle deployableSoftwareBundle ->
+                    (String) deployableSoftwareBundle.getDeployableSoftware().get("resourceOwner");
             case null, default ->
-                    (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("owner");
+                    (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("resourceOwner");
         };
         return providerId;
     }
@@ -234,8 +234,8 @@ public class OIDCSecurityService implements SecurityService {
             return datasourceService.getOrElseReturnNull(id);
         } else if (isTrainingResource(id)) {
             return trainingResourceService.getOrElseReturnNull(id);
-        } else if (isDeployableService(id)) {
-            return deployableServiceService.getOrElseReturnNull(id);
+        } else if (isDeployableSoftware(id)) {
+            return deployableSoftwareService.getOrElseReturnNull(id);
         } else {
             return interoperabilityRecordService.getOrElseReturnNull(id);
         }
@@ -277,9 +277,9 @@ public class OIDCSecurityService implements SecurityService {
         }
     }
 
-    private boolean isDeployableService(String id) {
+    private boolean isDeployableSoftware(String id) {
         try {
-            deployableServiceService.get(id);
+            deployableSoftwareService.get(id);
             return true;
         } catch (ResourceException e) {
             return false;
@@ -288,7 +288,7 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean providerCanAddResources(Authentication auth, LinkedHashMap<String, Object> resource, String catalogueId) {
-        String providerId = (String) resource.get("owner");
+        String providerId = (String) resource.get("resourceOwner");
         if (catalogueId == null || catalogueId.isEmpty()) {
             catalogueId = this.catalogueId;
         }
@@ -373,9 +373,9 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean deployableServiceIsActive(String id, String catalogueId) {
-        DeployableServiceBundle deployableServiceBundle = deployableServiceService.get(id, catalogueId);
-        return deployableServiceBundle.isActive();
+    public boolean deployableSoftwareIsActive(String id, String catalogueId) {
+        DeployableSoftwareBundle deployableSoftwareBundle = deployableSoftwareService.get(id, catalogueId);
+        return deployableSoftwareBundle.isActive();
     }
     //endregion
 

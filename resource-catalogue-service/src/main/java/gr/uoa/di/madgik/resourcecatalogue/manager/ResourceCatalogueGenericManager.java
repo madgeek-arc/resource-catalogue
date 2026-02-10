@@ -167,7 +167,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         filter.setResourceType(getResourceTypeName());
         filter.setQuantity(maxQuantity);
         filter.addFilter("published", false);
-        filter.addFilter("owner", providers.stream().map(T::getId).toList());
+        filter.addFilter("resourceOwner", providers.stream().map(T::getId).toList());
         filter.addOrderBy("name", "asc");
         return genericResourceService.getResults(filter);
     }
@@ -289,8 +289,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         T bundle = get(id, catalogueId);
-        String owner = (String) bundle.getPayload().get("owner");
-        suspensionValidation(bundle, catalogueId, owner, suspend);
+        String resourceOwner = (String) bundle.getPayload().get("resourceOwner");
+        suspensionValidation(bundle, catalogueId, resourceOwner, suspend);
 
         logger.info("{} resource '{}' with id: '{}'", suspend ? "Suspending" : "Unsuspending",
                 getResourceTypeName(), bundle.getId());
@@ -304,11 +304,11 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     //TODO: delete catalogueId if not used
-    private void suspensionValidation(Bundle bundle, String catalogueId, String owner, boolean suspend) {
+    private void suspensionValidation(Bundle bundle, String catalogueId, String resourceOwner, boolean suspend) {
         if (bundle.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
         }
-        ProviderBundle providerBundle = genericResourceService.get("provider", owner);
+        ProviderBundle providerBundle = genericResourceService.get("provider", resourceOwner);
         if (providerBundle.isSuspended() && !suspend) {
             throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
                     HttpStatus.CONFLICT);

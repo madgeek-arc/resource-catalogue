@@ -115,11 +115,11 @@ public interface SecurityService {
     boolean datasourceIsActive(String id, String catalogueId);
 
     /**
-     * @param id          deployable service id
+     * @param id          deployable software id
      * @param catalogueId catalogue id
      * @return True if service is active
      */
-    boolean deployableServiceIsActive(String id, String catalogueId);
+    boolean deployableSoftwareIsActive(String id, String catalogueId);
 
     /**
      * @param id          service id

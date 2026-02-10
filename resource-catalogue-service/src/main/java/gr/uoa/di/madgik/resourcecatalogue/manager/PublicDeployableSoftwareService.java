@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableSoftwareBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
@@ -25,32 +25,32 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.springframework.stereotype.Service;
 
-@Service("publicDeployableServiceManager")
-public class PublicDeployableServiceService extends AbstractPublicResourceManager<DeployableServiceBundle> {
+@Service("publicDeployableSoftwareManager")
+public class PublicDeployableSoftwareService extends AbstractPublicResourceManager<DeployableSoftwareBundle> {
 
     private final ProviderService providerService;
 
-    public PublicDeployableServiceService(GenericResourceService genericResourceService,
-                                          JmsService jmsService,
-                                          PidIssuer pidIssuer,
-                                          FacetLabelService facetLabelService,
-                                          ProviderService providerService) {
+    public PublicDeployableSoftwareService(GenericResourceService genericResourceService,
+                                           JmsService jmsService,
+                                           PidIssuer pidIssuer,
+                                           FacetLabelService facetLabelService,
+                                           ProviderService providerService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
         this.providerService = providerService;
     }
 
     @Override
     public String getResourceTypeName() {
-        return "deployable_service";
+        return "deployable_software";
     }
 
     @Override
-    public void updateIdsToPublic(DeployableServiceBundle deployableService) {
-        // Owner
+    public void updateIdsToPublic(DeployableSoftwareBundle deployableSoftware) {
+        // Resource Owner
         ProviderBundle provider = providerService.get(
-                (String) deployableService.getDeployableService().get("owner"),
-                deployableService.getCatalogueId()
+                (String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
+                deployableSoftware.getCatalogueId()
         );
-        deployableService.getDeployableService().put("owner", provider.getIdentifiers().getPid());
+        deployableSoftware.getDeployableSoftware().put("resourceOwner", provider.getIdentifiers().getPid());
     }
 }
