@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
@@ -46,15 +45,20 @@ import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogra
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
+import org.postgresql.jdbc.PgArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,8 +74,9 @@ public class ElasticStatisticsManager implements StatisticsService {
     private final ProviderService providerService;
     private final SearchService searchService;
     private final ParserService parserService;
-    private final ServiceService serviceBundleManager;
+    private final ServiceService serviceService;
     private final VocabularyService vocabularyService;
+    private final DataSource dataSource;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
@@ -79,15 +84,17 @@ public class ElasticStatisticsManager implements StatisticsService {
     ElasticStatisticsManager(RestHighLevelClient client, Analytics analyticsService,
                              ProviderService providerService,
                              SearchService searchService, ParserService parserService,
-                             ServiceService serviceBundleManager,
-                             VocabularyService vocabularyService) {
+                             ServiceService serviceService,
+                             VocabularyService vocabularyService,
+                             DataSource dataSource) {
         this.client = client;
         this.analyticsService = analyticsService;
         this.providerService = providerService;
         this.searchService = searchService;
         this.parserService = parserService;
-        this.serviceBundleManager = serviceBundleManager;
+        this.serviceService = serviceService;
         this.vocabularyService = vocabularyService;
+        this.dataSource = dataSource;
     }
 
     private ParsedDateHistogram histogram(String id, String eventType, Interval by) {
@@ -181,7 +188,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
         FacetFilter filter = new FacetFilter();
         filter.addFilter("resourceOwner", id);
-        Map<String, Integer> providerAddToProject = serviceBundleManager.getAll(filter).getResults()
+        Map<String, Integer> providerAddToProject = serviceService.getAll(filter).getResults()
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -227,7 +234,7 @@ public class ElasticStatisticsManager implements StatisticsService {
         Map<String, Integer> results = new HashMap<>();
         FacetFilter filter = new FacetFilter();
         filter.addFilter("resourceOwner", id);
-        for (ServiceBundle service : serviceBundleManager.getAll(filter).getResults()) {
+        for (ServiceBundle service : serviceService.getAll(filter).getResults()) {
             Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(), by).entrySet();
             for (Map.Entry<String, Integer> entry : entrySet) {
                 if (!results.containsKey(entry.getKey())) {
@@ -244,7 +251,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     public Map<String, Float> providerVisitation(String id, Interval by) {
         FacetFilter filter = new FacetFilter();
         filter.addFilter("resourceOwner", id);
-        Map<String, Integer> counts = serviceBundleManager.getAll(filter).getResults().stream().collect(Collectors.toMap(s ->
+        Map<String, Integer> counts = serviceService.getAll(filter).getResults().stream().collect(Collectors.toMap(s ->
                         (String) s.getService().get("name"),
                 s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()
         ));
@@ -359,7 +366,7 @@ public class ElasticStatisticsManager implements StatisticsService {
 
         Map<String, Set<String>> providerCountries = providerCountriesMap();
 
-        List<ServiceBundle> allServices = serviceBundleManager.getAll(ff, null).getResults();
+        List<ServiceBundle> allServices = serviceService.getAll(ff, null).getResults();
         for (ServiceBundle serviceBundle : allServices) {
             Value value = new Value(serviceBundle.getId(), (String) serviceBundle.getService().get("name"));
 
@@ -377,12 +384,53 @@ public class ElasticStatisticsManager implements StatisticsService {
         return toListMapValues(mapValues);
     }
 
+    //TODO: fetch from elastic
     @Override
-    public List<MapValues> mapServicesToVocabulary(String providerId, Vocabulary vocabulary) {
-//        FacetFilter filter = new FacetFilter();
-//        filter.addFilter("resourceOwner", providerId);
-//        List<LinkedHashMap<String, Object>> bundles = serviceBundleManager.getAll(filter).map(ServiceBundle::getService).getResults();
-        throw new UnsupportedOperationException("Not implemented");
+    public List<MapValues> mapServicesToVocabulary(String providerId, String vocType) {
+        Map<String, Set<Value>> vocabularyServices = new HashMap<>();
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+        in.addValue("resourceOwner", providerId);
+
+        String query = "select resource_internal_id,name," + vocType +
+                " from service_view where active=true and published=false";
+        if (providerId != null) {
+            query += " and resource_owner='" + providerId + "'";
+        }
+
+        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
+
+        try {
+            for (Map<String, Object> entry : records) {
+                Value value = new Value();
+                value.setId(entry.get("resource_internal_id").toString());
+                value.setName(entry.get("name").toString());
+
+                String[] vocabularyValues;
+                if (!vocType.equals("order_type")) { // because order type is not multivalued
+                    PgArray pgArray = ((PgArray) entry.get(vocType));
+                    vocabularyValues = ((String[]) pgArray.getArray());
+                } else {
+                    vocabularyValues = new String[]{((String) entry.get(vocType))};
+                }
+
+                for (String voc : vocabularyValues) {
+                    Set<Value> values;
+                    if (vocabularyServices.containsKey(voc)) {
+                        values = vocabularyServices.get(voc);
+                    } else {
+                        values = new HashSet<>();
+                    }
+                    values.add(value);
+                    vocabularyServices.put(voc, values);
+                }
+            }
+        } catch (SQLException throwables) {
+            logger.error(throwables.getMessage(), throwables);
+        }
+
+        return toListMapValues(vocabularyServices);
     }
 
     private Map<String, Set<String>> providerCountriesMap() {

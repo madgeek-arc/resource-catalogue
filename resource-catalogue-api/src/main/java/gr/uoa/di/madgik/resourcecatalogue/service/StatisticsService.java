@@ -155,42 +155,9 @@ public interface StatisticsService {
      * Providing the Provider's ID, get the relation between all his Services and a specific Vocabulary
      * (e.g. subcategories).
      *
-     * @param id         Provider ID
-     * @param vocabulary Vocabulary
+     * @param providerId Provider ID
+     * @param vocType    Vocabulary Type
      * @return {@link List}&lt;{@link MapValues}&gt;
      */
-    List<MapValues> mapServicesToVocabulary(String id, Vocabulary vocabulary);
-
-    enum Vocabulary {
-        SUBCATEGORY("subcategories"),
-        SCIENTIFIC_SUBDOMAIN("scientific_subdomains"),
-        TARGET_USERS("target_users"),
-        ACCESS_MODES("access_modes"),
-        ACCESS_TYPES("access_types"),
-        ORDER_TYPE("order_type");
-
-        private final String vocabulary;
-
-        Vocabulary(final String vocabulary) {
-            this.vocabulary = vocabulary;
-        }
-
-        public String getKey() {
-            return vocabulary;
-        }
-
-        /**
-         * @return the Enum representation for the given string.
-         * @throws IllegalArgumentException if unknown string.
-         */
-        public static Vocabulary fromString(String s) throws IllegalArgumentException {
-            return Arrays.stream(Vocabulary.values())
-                    .filter(v -> v.vocabulary.equals(s))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Unknown value: " + s + " ; Valid options: "
-                            + Arrays.stream(values())
-                            .map(Vocabulary::getKey)
-                            .collect(Collectors.joining(", "))));
-        }
-    }
+    List<MapValues> mapServicesToVocabulary(String providerId, String vocType);
 }
