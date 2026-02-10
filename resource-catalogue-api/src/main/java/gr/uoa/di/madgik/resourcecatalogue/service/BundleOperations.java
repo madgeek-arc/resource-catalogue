@@ -78,9 +78,7 @@ public interface BundleOperations<T extends Bundle> {
      */
     default List<LoggingInfo> getLoggingInfoHistory(T bundle) {
         if (bundle != null && bundle.getLoggingInfo() != null) {
-            List<LoggingInfo> loggingInfoList = bundle.getLoggingInfo();
-            loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
-            return loggingInfoList;
+            return bundle.getLoggingInfo().reversed();
         }
         return Collections.emptyList();
     }
