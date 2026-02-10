@@ -112,7 +112,7 @@ public class StatisticsController {
     //    @Operation(summary = "Providing the Provider's id, get the relation between all his services and a specific Vocabulary")
     @GetMapping(path = "provider/mapServicesToVocabulary", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MapValues>> mapServicesToVocabulary(@RequestParam(required = false) String providerId,
-                                                                   @RequestParam StatisticsService.Vocabulary vocabulary) {
+                                                                   @RequestParam String vocabulary) {
         return new ResponseEntity<>(statisticsService.mapServicesToVocabulary(providerId, vocabulary), HttpStatus.OK);
     }
 

@@ -364,17 +364,17 @@ public class DefaultStatisticsManager implements StatisticsService {
     }
 
     @Override
-    public List<MapValues> mapServicesToVocabulary(String providerId, Vocabulary vocabulary) {
+    public List<MapValues> mapServicesToVocabulary(String providerId, String vocType) {
         Map<String, Set<Value>> vocabularyServices = new HashMap<>();
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         MapSqlParameterSource in = new MapSqlParameterSource();
         in.addValue("resourceOwner", providerId);
 
-        String query = "SELECT resource_internal_id, name, " + vocabulary.getKey()
-                + " FROM service_view WHERE active=true ";
+        String query = "select resource_internal_id,name," + vocType +
+                " from service_view where active=true and published=false";
         if (providerId != null) {
-            query += " AND :owner=service_owner"; // TODO: service_owner to owner
+            query += " and resource_owner='" + providerId + "'";
         }
 
         List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
@@ -387,11 +387,11 @@ public class DefaultStatisticsManager implements StatisticsService {
 
                 // TODO: refactor this code and Vocabulary enum
                 String[] vocabularyValues;
-                if (vocabulary != Vocabulary.ORDER_TYPE) { // because order type is not multivalued
-                    PgArray pgArray = ((PgArray) entry.get(vocabulary.getKey()));
+                if (!vocType.equals("order_type")) { // because order type is not multivalued
+                    PgArray pgArray = ((PgArray) entry.get(vocType));
                     vocabularyValues = ((String[]) pgArray.getArray());
                 } else {
-                    vocabularyValues = new String[]{((String) entry.get(vocabulary.getKey()))};
+                    vocabularyValues = new String[]{((String) entry.get(vocType))};
                 }
 
                 for (String voc : vocabularyValues) {
@@ -410,7 +410,6 @@ public class DefaultStatisticsManager implements StatisticsService {
         }
 
         return toListMapValues(vocabularyServices);
-//        throw new UnsupportedOperationException("Not Implemented");
     }
 
     private Map<String, Set<String>> providerCountriesMap() {

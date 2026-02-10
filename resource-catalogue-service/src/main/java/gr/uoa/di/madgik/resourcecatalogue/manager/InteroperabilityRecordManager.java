@@ -180,7 +180,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     public Paging<InteroperabilityRecordBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                                int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("resourceOwner", providerId);
+        ff.addFilter("resource_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);

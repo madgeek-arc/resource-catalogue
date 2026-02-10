@@ -214,7 +214,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     public Paging<TrainingResourceBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                          int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("resourceOwner", providerId);
+        ff.addFilter("resource_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -257,7 +257,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("resourceOwner", providerId);
+        ff.addFilter("resource_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();

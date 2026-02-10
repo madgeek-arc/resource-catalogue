@@ -221,7 +221,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     public Paging<DeployableSoftwareBundle> getAllEOSCResourcesOfAProvider(String providerId, String catalogueId,
                                                                            int quantity, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("resourceOwner", providerId);
+        ff.addFilter("resource_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -264,7 +264,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.addFilter("resourceOwner", providerId);
+        ff.addFilter("resource_owner", providerId);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<DeployableSoftwareBundle> allProviderDeployableSoftware = getAll(ff, auth).getResults();
