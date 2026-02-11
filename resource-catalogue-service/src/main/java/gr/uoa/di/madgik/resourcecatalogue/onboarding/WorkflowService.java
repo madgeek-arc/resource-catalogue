@@ -29,16 +29,13 @@ public class WorkflowService {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkflowService.class);
 
-    private final CatalogueService catalogueService;
     private final GenericResourceService genericResourceService;
     private final ObjectMapper mapper;
     private final CamundaClient client;
 
-    public WorkflowService(CatalogueService catalogueService,
-                           GenericResourceService genericResourceService,
+    public WorkflowService(GenericResourceService genericResourceService,
                            ObjectMapper objectMapper,
                            CamundaClient client) {
-        this.catalogueService = catalogueService;
         this.genericResourceService = genericResourceService;
         this.mapper = objectMapper;
         this.client = client;
@@ -142,7 +139,7 @@ public class WorkflowService {
         var catalogueId = (String) vars.get("catalogueId");
         CatalogueBundle catalogue = null;
         try {
-            catalogue = catalogueService.get(catalogueId);
+            catalogue = genericResourceService.get("catalogue", catalogueId);
         } catch (Exception ignore) {}
         vars.put("catalogue", catalogue);
         return vars;
