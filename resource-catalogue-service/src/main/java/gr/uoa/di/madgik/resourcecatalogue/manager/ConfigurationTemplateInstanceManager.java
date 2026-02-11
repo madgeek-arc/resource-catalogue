@@ -49,7 +49,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     private final ConfigurationTemplateService configService;
     private final SecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final IdCreator idCreator;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
 
@@ -63,12 +62,11 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
                                                 ProviderResourcesCommonMethods commonMethods,
                                                 GenericResourceService genericResourceService,
                                                 VocabularyService vocabularyService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.service = service;
         this.configService = configService;
         this.rirService = rirService;
         this.securityService = securityService;
-        this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;

@@ -66,7 +66,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
                                                  VocabularyService vocabularyService,
                                                  ConfigurationTemplateService ctService,
                                                  ConfigurationTemplateInstanceService ctiService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;

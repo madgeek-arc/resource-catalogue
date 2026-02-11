@@ -48,7 +48,6 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private static final Logger logger = LoggerFactory.getLogger(AdapterManager.class);
     private final OIDCSecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final ProviderService providerService;
     private final GenericResourceService genericResourceService;
 
     @Value("${catalogue.id}")
@@ -60,13 +59,10 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                           VocabularyService vocabularyService,
                           ProviderResourcesCommonMethods commonMethods,
                           IdCreator idCreator,
-                          ServiceService serviceService,
-                          ProviderService providerService,
                           GenericResourceService genericResourceService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.securityService = securityService;
         this.commonMethods = commonMethods;
-        this.providerService = providerService;
         this.genericResourceService = genericResourceService;
     }
 

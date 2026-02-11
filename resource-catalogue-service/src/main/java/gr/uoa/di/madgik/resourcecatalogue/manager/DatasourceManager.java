@@ -73,7 +73,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                              SecurityService securityService,
                              RelationshipValidator relationshipValidator,
                              WorkflowService workflowService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.providerService = providerService;
         this.commonMethods = commonMethods;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
@@ -95,37 +95,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
             checkOpenAIREIDExistence(bundle);
         }
 
-//        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
-//                datasource.getCatalogueId());
-//        onboard(datasource, provider, auth);
-//        onboardingValidation(datasource, provider);
-//        DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), datasource);
-//        return ret;
-        DatasourceBundle ret = super.add(bundle, auth);
-        onboardingValidation(bundle);
-        try {
-            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
-        } catch (ResourceException e) {
-            genericResourceService.delete(getResourceTypeName(), bundle.getId());
-            throw e;
-        }
-        this.update(ret, auth); // adds logging info - possibly replace with generic update
-        return ret;
-    }
-
-    private void onboardingValidation(DatasourceBundle bundle) {
-        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
-        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
-//        VocabularyValidationUtils.validateCategories();
-//        VocabularyValidationUtils.validateScientificDomains();
-//        if (!provider.getStatus().equals("approved")) {
-//            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Owner " +
-//                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
-//        }
-//        if (provider.getTemplateStatus().equals("pending template")) {
-//            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
-//                    "Template.", provider.getId()), HttpStatus.CONFLICT);
-//        }
+        return super.add(bundle, auth);
     }
 
     @Override

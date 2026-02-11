@@ -10,6 +10,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
@@ -41,9 +42,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     protected final GenericResourceService genericResourceService;
     protected final SecurityService securityService;
     protected final VocabularyService vocabularyService;
+    protected final IdCreator idCreator;
 
     @Autowired
-    protected IdCreator idCreator;
+    protected WorkflowService workflowService;
     @Value("${catalogue.id}")
     protected String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
@@ -52,9 +54,11 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     protected abstract String getResourceTypeName();
 
     public ResourceCatalogueGenericManager(GenericResourceService genericResourceService,
+                                           IdCreator idCreator,
                                            SecurityService securityService,
                                            VocabularyService vocabularyService) {
         this.genericResourceService = genericResourceService;
+        this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
     }
@@ -102,6 +106,14 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             this.createIdentifiers(bundle, getResourceTypeName(), true);
         }
         bundle.setAuditState(Auditable.NOT_AUDITED);
+    }
+
+    protected void onboardingValidation(T bundle) {
+        logger.warn("Onboarding Validator: remove me when catalogue validation is implemented.");
+//        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
+        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
+//        VocabularyValidationUtils.validateCategories();
+//        VocabularyValidationUtils.validateScientificDomains();
     }
 
     //TODO: we don't need this
@@ -244,7 +256,18 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public T add(T bundle, Authentication auth) {
         createIdentifiers(bundle);
-        return genericResourceService.add(getResourceTypeName(), bundle);
+        T ret = genericResourceService.add(getResourceTypeName(), bundle);
+        onboardingValidation(bundle);
+        try {
+            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
+            ret = genericResourceService.update(getResourceTypeName(), ret.getId(), ret); // adds logging info - possibly replace with generic update
+        } catch (ResourceException e) {
+            genericResourceService.delete(getResourceTypeName(), bundle.getId());
+            throw e;
+        } catch (NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+        return ret;
     }
 
     @Override

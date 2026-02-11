@@ -66,7 +66,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          ProviderResourcesCommonMethods commonMethods,
                                          GenericResourceService genericResourceService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.providerService = providerService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;

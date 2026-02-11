@@ -58,14 +58,12 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     public TrainingResourceManager(ProviderService providerService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    VocabularyService vocabularyService,
-                                   SynchronizerService<TrainingResource> synchronizerService,
                                    @Lazy ProviderResourcesCommonMethods commonMethods,
                                    @Lazy RelationshipValidator relationshipValidator,
                                    GenericResourceService genericResourceService,
                                    WorkflowService workflowService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.providerService = providerService;
-        this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
@@ -78,31 +76,6 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     }
 
     //region generic
-    @Override
-    public TrainingResourceBundle add(TrainingResourceBundle bundle, Authentication auth) {
-//        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("owner"),
-//                trainingResource.getCatalogueId());
-//        onboard(trainingResource, provider, auth);
-//        onboardingValidation(trainingResource, provider);
-//        TrainingResourceBundle ret = genericResourceService.add(getResourceTypeName(), trainingResource);
-        TrainingResourceBundle ret = super.add(bundle, auth);
-        onboardingValidation(bundle);
-        try {
-            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
-        } catch (ResourceException e) {
-            genericResourceService.delete(getResourceTypeName(), bundle.getId());
-            throw e;
-        }
-        this.update(ret, auth); // adds logging info - possibly replace with generic update
-        return ret;
-    }
-
-    private void onboardingValidation(TrainingResourceBundle trainingResource) {
-        relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource);
-        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
-//        VocabularyValidationUtils.validateScientificDomains();
-    }
-
     @Override
     @Transactional
     public TrainingResourceBundle update(TrainingResourceBundle trainingResource, String comment, Authentication auth) {

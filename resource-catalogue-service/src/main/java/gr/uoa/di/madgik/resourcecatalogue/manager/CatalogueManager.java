@@ -69,7 +69,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
                             @Lazy ProviderResourcesCommonMethods commonMethods,
 //                            EmailService emailService,
                             GenericResourceService genericResourceService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.providerService = providerService;
         this.serviceService = serviceService;
         this.commonMethods = commonMethods;

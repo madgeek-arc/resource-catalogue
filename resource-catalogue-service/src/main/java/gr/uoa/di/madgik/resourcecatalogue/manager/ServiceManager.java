@@ -56,7 +56,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
-    private final ModelService modelService;
     private final WorkflowService workflowService;
 
     @Value("${catalogue.id}")
@@ -69,17 +68,15 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           SecurityService securityService,
                           VocabularyService vocabularyService,
                           ProviderResourcesCommonMethods commonMethods,
-//                          @Qualifier("serviceValidator") Validator serviceValidator,
                           FacetLabelService facetLabelService,
                           GenericResourceService genericResourceService,
                           @Lazy RelationshipValidator relationshipValidator,
                           ModelService modelService,
                           WorkflowService workflowService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.providerService = providerService; // for providers
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
-        this.modelService = modelService;
         this.relationshipValidator = relationshipValidator;
         this.workflowService = workflowService;
     }
@@ -90,27 +87,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     //region generic
-    @Override
-    public ServiceBundle add(ServiceBundle bundle, Authentication auth) {
-        ServiceBundle ret = super.add(bundle, auth);
-        onboardingValidation(bundle);
-        try {
-            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
-        } catch (ResourceException e) {
-            genericResourceService.delete(getResourceTypeName(), bundle.getId());
-            throw e;
-        }
-        this.update(ret, auth); // adds logging info - possibly replace with generic update
-        return ret;
-    }
-
-    private void onboardingValidation(ServiceBundle service) {
-        relationshipValidator.checkRelatedResourceIDsConsistency(service);
-        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
-//        VocabularyValidationUtils.validateCategories();
-//        VocabularyValidationUtils.validateScientificDomains();
-    }
-
     @Override
     @Transactional
 //    @TriggersAspects({"AfterServiceUpdateEmails"})

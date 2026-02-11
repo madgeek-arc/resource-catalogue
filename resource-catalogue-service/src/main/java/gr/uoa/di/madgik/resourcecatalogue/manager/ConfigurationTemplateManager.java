@@ -60,7 +60,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
                                         SecurityService securityService,
                                         GenericResourceService genericResourceService,
                                         VocabularyService vocabularyService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.commonMethods = commonMethods;
         this.providerService = providerService;
         this.interoperabilityRecordService = interoperabilityRecordService;

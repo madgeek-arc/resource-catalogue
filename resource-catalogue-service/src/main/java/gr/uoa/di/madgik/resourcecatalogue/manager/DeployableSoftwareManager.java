@@ -50,7 +50,6 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     private static final Logger logger = LoggerFactory.getLogger(DeployableSoftwareManager.class);
 
     private final ProviderService providerService;
-    private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final WorkflowService workflowService;
@@ -61,14 +60,14 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     protected int maxQuantity;
 
     public DeployableSoftwareManager(ProviderService providerService,
-                                     IdCreator idCreator, @Lazy SecurityService securityService,
+                                     IdCreator idCreator,
+                                     @Lazy SecurityService securityService,
                                      @Lazy VocabularyService vocabularyService,
                                      @Lazy ProviderResourcesCommonMethods commonMethods,
                                      GenericResourceService genericResourceService,
                                      WorkflowService workflowService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.providerService = providerService;
-        this.idCreator = idCreator;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.workflowService = workflowService;
@@ -80,39 +79,6 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     }
 
     //region generic
-    @Override
-    public DeployableSoftwareBundle add(DeployableSoftwareBundle bundle, Authentication auth) {
-//        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
-//                deployableSoftware.getCatalogueId());
-//        onboard(deployableSoftware, provider, auth);
-//        onboardingValidation(provider);
-//        DeployableSoftwareBundle ret = genericResourceService.add(getResourceTypeName(), deployableSoftware);
-//        return ret;
-        DeployableSoftwareBundle ret = super.add(bundle, auth);
-        onboardingValidation(bundle);
-        try {
-            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
-        } catch (ResourceException e) {
-            genericResourceService.delete(getResourceTypeName(), bundle.getId());
-            throw e;
-        }
-        this.update(ret, auth); // adds logging info - possibly replace with generic update
-        return ret;
-    }
-
-    private void onboardingValidation(DeployableSoftwareBundle bundle) {
-        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
-//        VocabularyValidationUtils.validateScientificDomains();
-//        if (!provider.getStatus().equals("approved")) {
-//            throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Owner " +
-//                    "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
-//        }
-//        if (provider.getTemplateStatus().equals("pending template")) {
-//            throw new ResourceException(String.format("The Provider with id %s has already registered a Resource " +
-//                    "Template.", provider.getId()), HttpStatus.CONFLICT);
-//        }
-    }
-
     @Override
     @Transactional
     public DeployableSoftwareBundle update(DeployableSoftwareBundle deployableSoftware, String comment, Authentication auth) {

@@ -61,9 +61,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     private final GenericResourceService genericResourceService;
     private final ServiceService serviceService;
-    private final IdCreator idCreator;
     private final ProviderResourcesCommonMethods commonMethods;
-    private final SecurityService securityService;
     private final ProviderCascadeLifecycleManager cascadeLifecycleService;
     private final WorkflowService workflowService;
 
@@ -83,12 +81,10 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
                            SecurityService securityService,
                            ProviderCascadeLifecycleManager cascadeLifecycleService,
                            WorkflowService workflowService) {
-        super(genericResourceService, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService);
         this.genericResourceService = genericResourceService;
         this.serviceService = serviceService;
-        this.idCreator = idCreator;
         this.commonMethods = commonMethods;
-        this.securityService = securityService;
         this.cascadeLifecycleService = cascadeLifecycleService;
         this.workflowService = workflowService;
     }
@@ -101,22 +97,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
     //region generic
     @Override
     public ProviderBundle add(ProviderBundle bundle, Authentication auth) {
-        ProviderBundle ret = super.add(bundle, auth);
-        onboardingValidation(bundle);
-        try {
-            ret = workflowService.onboard(getResourceTypeName(), ret, auth);
-        } catch (ResourceException e) {
-            genericResourceService.delete(getResourceTypeName(), bundle.getId());
-            throw e;
-        }
-        this.update(ret, auth); // adds logging info - possibly replace with generic update
-        return ret;
-    }
-
-    private void onboardingValidation(ProviderBundle bundle) {
-        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
-//        VocabularyValidationUtils.validateScientificDomains();
-
+        return super.add(bundle, auth);
 //        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
     }
 
