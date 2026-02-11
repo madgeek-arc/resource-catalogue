@@ -16,6 +16,7 @@ import io.camunda.client.api.response.ProcessInstanceResult;
 import io.camunda.client.exception.BpmnError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -34,7 +35,7 @@ public class WorkflowService {
     private final ObjectMapper mapper;
     private final CamundaClient client;
 
-    public WorkflowService(CatalogueService catalogueService,
+    public WorkflowService(@Lazy CatalogueService catalogueService,
                            GenericResourceService genericResourceService,
                            ObjectMapper objectMapper,
                            CamundaClient client) {
