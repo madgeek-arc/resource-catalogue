@@ -236,6 +236,8 @@ public class OIDCSecurityService implements SecurityService {
             return trainingResourceService.getOrElseReturnNull(id);
         } else if (isDeployableSoftware(id)) {
             return deployableSoftwareService.getOrElseReturnNull(id);
+        } else if (isAdapter(id)) {
+            return adapterService.getOrElseReturnNull(id);
         } else {
             return interoperabilityRecordService.getOrElseReturnNull(id);
         }
@@ -280,6 +282,15 @@ public class OIDCSecurityService implements SecurityService {
     private boolean isDeployableSoftware(String id) {
         try {
             deployableSoftwareService.get(id);
+            return true;
+        } catch (ResourceException e) {
+            return false;
+        }
+    }
+
+    private boolean isAdapter(String id) {
+        try {
+            adapterService.get(id);
             return true;
         } catch (ResourceException e) {
             return false;
@@ -375,42 +386,11 @@ public class OIDCSecurityService implements SecurityService {
         DeployableSoftwareBundle deployableSoftwareBundle = deployableSoftwareService.get(id, catalogueId);
         return deployableSoftwareBundle.isActive();
     }
-    //endregion
-
-    //region Adapters
-    @Override
-    public boolean hasAdapterAccess(Authentication auth, @NotNull String id) {
-        return getAuthenticatedUser(auth)
-                .map(user -> userHasAdapterAccess(user, id))
-                .orElse(false);
-    }
 
     @Override
-    public boolean userHasAdapterAccess(User user, @NotNull String id) {
-        AdapterBundle registeredAdapter = checkAdapterExistence(id);
-        if (registeredAdapter == null) {
-            return false;
-        }
-
-        Object usersObj = registeredAdapter.getAdapter().get("users");
-        if (!(usersObj instanceof List<?>)) {
-            return false;
-        }
-
-        @SuppressWarnings("unchecked")
-        List<User> adapterAdmins = (List<User>) usersObj;
-
-        return adapterAdmins.stream()
-                .filter(Objects::nonNull)
-                .anyMatch(u -> userMatches(u, user));
-    }
-
-    private AdapterBundle checkAdapterExistence(String adapterId) {
-        try {
-            return adapterService.get(adapterId, null);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            return null;
-        }
+    public boolean adapterIsActive(String id, String catalogueId) {
+        AdapterBundle adapterBundle = adapterService.get(id, catalogueId);
+        return adapterBundle.isActive();
     }
     //endregion
 }

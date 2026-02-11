@@ -136,18 +136,11 @@ public interface SecurityService {
     boolean guidelineIsActive(String id, String catalogueId);
 
     /**
-     * @param auth Authentication
-     * @param id   Catalogue or Adapter id
-     * @return True if the authenticated user is an Adapter Admin
+     * @param id          adapter id
+     * @param catalogueId catalogue id
+     * @return True if adapter is active
      */
-    boolean hasAdapterAccess(Authentication auth, @NotNull String id);
-
-    /**
-     * @param user User
-     * @param id   Catalogue or Adapter id
-     * @return True if the authenticated user is an Adapter Admin
-     */
-    boolean userHasAdapterAccess(User user, @NotNull String id);
+    boolean adapterIsActive(String id, String catalogueId);
 
     /**
      *

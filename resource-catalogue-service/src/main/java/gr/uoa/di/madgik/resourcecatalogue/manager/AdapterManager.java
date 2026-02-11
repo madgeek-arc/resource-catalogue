@@ -20,27 +20,27 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
-import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @org.springframework.stereotype.Service("adapterManager")
 public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundle> implements AdapterService {
@@ -49,6 +49,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private final OIDCSecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
+    private final ProviderService providerService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -59,11 +60,13 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                           VocabularyService vocabularyService,
                           ProviderResourcesCommonMethods commonMethods,
                           IdCreator idCreator,
-                          GenericResourceService genericResourceService) {
+                          GenericResourceService genericResourceService,
+                          ProviderService providerService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
         this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
+        this.providerService = providerService;
     }
 
     @Override
@@ -72,20 +75,33 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     }
 
     @Override
-    public AdapterBundle add(AdapterBundle bundle, Authentication auth) {
-        onboard(bundle, auth);
-        AdapterBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
+    public AdapterBundle add(AdapterBundle adapter, Authentication auth) {
+        ProviderBundle provider = providerService.get((String) adapter.getAdapter().get("resourceOwner"),
+                adapter.getCatalogueId());
+        onboard(adapter, provider, auth);
+        AdapterBundle ret = genericResourceService.add(getResourceTypeName(), adapter);
         return ret;
     }
 
-    //TODO: revisit when we support external catalogue adapters
-    private void onboard(AdapterBundle bundle, Authentication auth) {
-        bundle.setCatalogueId(this.catalogueId);
-        determineOnboard(bundle, auth);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-        commonMethods.addAuthenticatedUser(bundle.getAdapter(), auth);
-        bundle.setAuditState(Auditable.NOT_AUDITED);
+    private void onboard(AdapterBundle adapter, ProviderBundle provider, Authentication auth) {
+        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
+            if (provider.getStatus().equals("approved")) {
+                adapter.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
+                adapter.setActive(true);
+            } else {
+                throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Owner " +
+                        "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
+            }
+            adapter.setCatalogueId(this.catalogueId);
+            this.createIdentifiers(adapter, getResourceTypeName(), false);
+            adapter.setId(adapter.getIdentifiers().getOriginalId());
+        } else {
+            adapter.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
+//            commonMethods.validateCatalogueId(catalogueId); //FIXME
+            idCreator.validateId(adapter.getId());
+            this.createIdentifiers(adapter, getResourceTypeName(), true);
+        }
+        adapter.setAuditState(Auditable.NOT_AUDITED);
     }
 
     @Override
@@ -106,11 +122,8 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
 
     @Override
     public void delete(AdapterBundle bundle) {
-        // block Public Provider deletion
-        if (bundle.getMetadata().isPublished()) {
-            throw new ValidationException("You cannot directly delete a Public Adapter");
-        }
-        logger.info("Deleting ADapter: {} and all its Resources", bundle.getId());
+        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        logger.info("Deleting Adapter: {}", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
 
@@ -135,6 +148,12 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     public AdapterBundle setActive(String id, Boolean active, Authentication auth) {
         AdapterBundle existing = get(id);
 
+        ProviderBundle provider = providerService.get((String) existing.getAdapter().get("resourceOwner"),
+                existing.getCatalogueId());
+        if (active && !provider.isActive()) {
+            throw new ResourceException("You cannot activate the Adapter, as its Provider is inactive",
+                    HttpStatus.CONFLICT);
+        }
         if ((existing.getStatus().equals(vocabularyService.get("pending").getId()) ||
                 existing.getStatus().equals(vocabularyService.get("rejected").getId())) && !existing.isActive()) {
             throw new ValidationException("You cannot activate this Adapter, because it is not yet approved.");
@@ -147,93 +166,46 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
             throw new RuntimeException(e);
         }
     }
-
-    @Override
-    public AdapterBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        AdapterBundle bundle = get(id, catalogueId);
-
-        logger.info("Suspending Adapter: {} and all its Resources", bundle.getId());
-        bundle.markSuspend(suspend, auth);
-
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Browsing<AdapterBundle> getMy(FacetFilter ff, Authentication auth) {
-        return getMyProvidersOrAdapters(ff, auth, getResourceTypeName());
-    }
     //endregion
 
-    //region Adapter-specific
+    //region EOSC Resource-specific
     @Override
-    public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
-        AdapterBundle bundle = get(
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "false")
-        );
-        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
-
-        List<String> adapterAdmins = extractEmails(bundle);
-        List<String> acceptedTerms = bundle.getMetadata().getTerms();
-
-        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
-            return !adapterAdmins.contains(userEmail); // false -> show modal, true -> no modal
-        }
-
-        return !adapterAdmins.contains(userEmail) || acceptedTerms.contains(userEmail); // Show or not modal
+    public Paging<AdapterBundle> getAllEOSCResourcesOfAProvider(String providerId, FacetFilter ff, Authentication auth) {
+        ff.addFilter("resource_owner", providerId);
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        return getAll(ff, auth);
     }
 
-    private List<String> extractEmails(AdapterBundle bundle) {
-        List<String> emails = new ArrayList<>();
-
-        Object usersObj = bundle.getAdapter().get("users");
-        if (usersObj instanceof Collection<?>) {
-            for (Object obj : (Collection<?>) usersObj) {
-                if (obj instanceof User user) {
-                    emails.add(user.getEmail().toLowerCase());
-                }
-            }
-        }
-        return emails;
+    public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
+        AdapterBundle adapter = get(id);
+        ProviderBundle provider = providerService.get((String) adapter.getAdapter().get("resourceOwner"),
+                adapter.getCatalogueId());
+        logger.info("Sending email to Provider '{}' for outdated Adapters", provider.getId());
+//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
     }
 
     @Override
-    public void adminAcceptedTerms(String id, Authentication auth) {
-        AdapterBundle bundle = get(id);
-        String userEmail = AuthenticationInfo.getEmail(auth);
-
-        List<String> existingTerms = bundle.getMetadata().getTerms();
-        if (existingTerms == null) {
-            existingTerms = new ArrayList<>();
-        }
-
-        if (!existingTerms.contains(userEmail)) {
-            existingTerms.add(userEmail);
-            bundle.getMetadata().setTerms(existingTerms);
-
-            try {
-                genericResourceService.update(getResourceTypeName(), id, bundle);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.info("Could not update terms for Adapter with id: '{}'", id);
-            } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public Browsing<AdapterBundle> getMy(FacetFilter filter, Authentication auth) {
+        return getMyResources(filter, auth);
     }
 
-    private void determineOnboard(AdapterBundle bundle, Authentication auth) {
-        UserInfo user = UserInfo.of(auth);
-        if (securityService.hasPortalAdminRole(auth) || securityService.hasRole(auth, "ROLE_PROVIDER")) {
-            bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else if (securityService.hasRole(auth, "ROLE_USER")) {
-            bundle.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        } else {
-            throw new AccessDeniedException("You do not have permission to perform this action");
-        }
+    //FIXME
+    @Override
+    public List<AdapterBundle> getByIds(Authentication auth, String... ids) {
+        List<AdapterBundle> resources;
+        resources = Arrays.stream(ids)
+                .map(id ->
+                {
+                    try {
+                        return get(id, catalogueId);
+                    } catch (ServiceException | ResourceNotFoundException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toList();
+        return resources;
     }
     //endregion
 
@@ -267,10 +239,12 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     }
 
     @Override
-    public AdapterBundle finalizeDraft(AdapterBundle bundle, Authentication auth) {
-        determineOnboard(bundle, auth);
-        bundle = update(bundle, auth);
-        return bundle;
+    public AdapterBundle finalizeDraft(AdapterBundle adapter, Authentication auth) {
+        UserInfo user = UserInfo.of(auth);
+        adapter.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
+        adapter = update(adapter, auth);
+
+        return adapter;
     }
     //endregion
 }

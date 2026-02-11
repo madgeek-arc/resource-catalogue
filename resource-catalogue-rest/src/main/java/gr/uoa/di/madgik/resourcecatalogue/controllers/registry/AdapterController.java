@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
+import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
@@ -67,15 +69,19 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     //region generic
     @Operation(summary = "Returns the Adapter with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
+            "@securityService.adapterIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> get(@PathVariable String prefix,
-                                 @PathVariable String suffix) {
+                                 @PathVariable String suffix,
+                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         AdapterBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle.getAdapter(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<AdapterBundle> getBundle(@PathVariable String prefix,
                                                    @PathVariable String suffix,
                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -84,7 +90,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
-    @Operation(summary = "Get a list of Services based on a list of filters.")
+    @Operation(summary = "Get a list of Adapters based on a list of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
@@ -139,7 +145,8 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
 
     @Operation(summary = "Adds a new Adapter.")
     @PostMapping()
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.providerCanAddResources(#auth, #adapter, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> adapter,
                                  @Parameter(hidden = true) Authentication auth) {
         AdapterBundle bundle = new AdapterBundle();
@@ -162,14 +169,12 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<AdapterBundle> adapterList,
                         @Parameter(hidden = true) Authentication auth) {
-        for (AdapterBundle bundle : adapterList) {
-            service.add(bundle, auth);
-        }
+        service.addBulk(adapterList, auth);
     }
 
     @Operation(summary = "Updates the Adapter with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth,#adapter.id)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#adapter['id'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> adapter,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -193,9 +198,10 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
 
     @Operation(summary = "Deletes the Adapter with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> delete(@PathVariable String prefix,
-                                    @PathVariable String suffix) {
+                                    @PathVariable String suffix,
+                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         AdapterBundle bundle = service.get(id, catalogueId);
 
@@ -221,7 +227,8 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
 
     @Operation(summary = "Activates/Deactivates the Adapter.")
     @PatchMapping(path = "setActive/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
+            "or @securityService.resourceIsApprovedAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<AdapterBundle> setActive(@PathVariable String prefix,
                                                    @PathVariable String suffix,
                                                    @RequestParam(required = false) Boolean active,
@@ -278,14 +285,49 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     //endregion
 
     //region Adapter-specific
-    @GetMapping(path = "hasAdminAcceptedTerms")
-    public boolean hasAdminAcceptedTerms(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
-        return service.hasAdminAcceptedTerms(id, auth);
+    @Operation(summary = "Get a list of Adapters based on a set of ids.")
+    @GetMapping(path = "ids")
+    public ResponseEntity<List<LinkedHashMap<String, Object>>> getSome(@RequestParam("ids") String[] ids,
+                                                                       @Parameter(hidden = true) Authentication auth) {
+        return ResponseEntity.ok(service.getByIds(auth, ids)
+                .stream()
+                .map(AdapterBundle::getAdapter)
+                .collect(Collectors.toList()));
     }
 
-    @PutMapping(path = "adminAcceptedTerms")
-    public void adminAcceptedTerms(@RequestParam String id, @Parameter(hidden = true) Authentication auth) {
-        service.adminAcceptedTerms(id, auth);
+    @BrowseParameters
+    @GetMapping(path = "byProvider/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    public ResponseEntity<Paging<AdapterBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
+                                                               @PathVariable String prefix,
+                                                               @PathVariable String suffix,
+                                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                               @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("catalogue_id", catalogueId);
+        return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
+    }
+
+    @BrowseParameters
+    @BrowseCatalogue
+    @GetMapping(path = "inactive/all")
+    public ResponseEntity<Paging<?>> getInactive(@Parameter(hidden = true)
+                                                 @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        ff.addFilter("active", false);
+        return new ResponseEntity<>(service.getAll(ff), HttpStatus.OK);
+    }
+
+    @GetMapping(path = {"sendEmailForOutdatedResource/{prefix}/{suffix}"})
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public void sendEmailNotificationToProviderForOutdatedAdapter(@PathVariable String prefix,
+                                                                  @PathVariable String suffix,
+                                                                  @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        service.sendEmailNotificationToProviderForOutdatedEOSCResource(id, auth);
     }
     //endregion
 
@@ -302,6 +344,21 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
         return new ResponseEntity<>(draft.getAdapter(), HttpStatus.OK);
     }
 
+    @BrowseParameters
+    @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}")
+    public ResponseEntity<Browsing<AdapterBundle>> getProviderDraftServices(@PathVariable String prefix,
+                                                                            @PathVariable String suffix,
+                                                                            @Parameter(hidden = true)
+                                                                            @RequestParam MultiValueMap<String, Object> params,
+                                                                            @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("resource_owner", id);
+        ff.addFilter("catalogue_id", catalogueId);
+        ff.addFilter("draft", true);
+        return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
+    }
+
     @PostMapping(path = "/draft")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> adapter,
@@ -314,7 +371,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     }
 
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth,#adapter['id'])")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #adapter['id'])")
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> adapter,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) adapter.get("id");
@@ -326,7 +383,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     }
 
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public void deleteDraft(@PathVariable String prefix,
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -336,7 +393,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     }
 
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth,#adapter['id'])")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #adapter['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> adapter,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) adapter.get("id");
