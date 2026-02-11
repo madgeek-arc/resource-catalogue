@@ -298,9 +298,6 @@ public class OIDCSecurityService implements SecurityService {
 
     private boolean canAddResources(Authentication auth, ProviderBundle provider) {
         // provider related check
-        if (!hasAdminAccess(auth, provider.getId())) {
-            return false;
-        }
         if (!provider.isActive()) {
             return false;
         }
@@ -317,10 +314,11 @@ public class OIDCSecurityService implements SecurityService {
         if ("no template status".equals(templateStatus)) {
             return true;
         }
-        if ("rejected template status".equals(templateStatus)) {
+        if ("rejected template".equals(templateStatus)) {
             return true;
         }
-        return false;
+
+        return hasAdminAccess(auth, provider.getId());
     }
 
     @Override
