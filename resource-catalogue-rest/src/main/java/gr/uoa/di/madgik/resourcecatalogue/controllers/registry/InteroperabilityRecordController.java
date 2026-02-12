@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(path = "interoperabilityRecord", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = {"interoperabilityRecord", "interoperability_record"}, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "interoperability record")
 public class InteroperabilityRecordController
         extends ResourceCatalogueGenericController<InteroperabilityRecordBundle, InteroperabilityRecordService> {
