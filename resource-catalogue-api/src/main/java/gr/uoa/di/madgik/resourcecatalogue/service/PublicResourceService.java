@@ -19,9 +19,10 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import org.springframework.security.core.Authentication;
 
-public interface PublicResourceService<T> {
+public interface PublicResourceService<T> extends ResourceCRUDService<T, Authentication> {
 
     /**
      * Return a Public resource

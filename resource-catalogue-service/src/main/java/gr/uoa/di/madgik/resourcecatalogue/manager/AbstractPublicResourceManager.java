@@ -5,10 +5,12 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +44,11 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
     }
 
     @Override
+    public T get(String id) {
+        return null;
+    }
+
+    @Override
     public T get(String id, String catalogueId) {
         if (catalogueId != null && !catalogueId.isBlank()) {
             return genericResourceService.get(getResourceTypeName(),
@@ -55,6 +62,10 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
     }
 
     public Browsing<T> getAll(FacetFilter ff) {
+        return getAll(ff, null);
+    }
+
+    public Browsing<T> getAll(FacetFilter ff, Authentication authentication) {
         ff.setResourceType(getResourceTypeName());
         Browsing<T> browsing = genericResourceService.getResults(ff);
         //TODO: test if we need this
@@ -64,7 +75,12 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         return browsing;
     }
 
-    public T add(T t) {
+    @Override
+    public Browsing<T> getMy(FacetFilter filter, Authentication authentication) {
+        throw new NotImplementedException();
+    }
+
+    public T add(T t, Authentication authentication) {
         String lowerLevelId = t.getId();
         t.setId(t.getIdentifiers().getPid());
         t.getMetadata().setPublished(true);
@@ -85,7 +101,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         return ret;
     }
 
-    public T update(T t) {
+    public T update(T t, Authentication authentication) {
         T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
         t.setIdentifiers(published.getIdentifiers());
         t.setId(published.getId());
@@ -117,6 +133,6 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
     @Override
     public T createPublicResource(T t, Authentication auth) {
-        return add(t);
+        return add(t, auth);
     }
 }
