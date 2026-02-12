@@ -77,6 +77,8 @@ public class WorkflowService {
         return switch (resourceType) {
             case "provider" -> "onboard-provider";
             case "service", "datasource", "training_resource", "deployable_software" -> "onboard-resource";
+            case "adapter"  -> "onboard-adapter";
+            case "interoperability_record" -> "onboard-guideline";
             default -> throw new IllegalStateException("Unhandled onboarding for resourceType: " + resourceType);
         };
     }

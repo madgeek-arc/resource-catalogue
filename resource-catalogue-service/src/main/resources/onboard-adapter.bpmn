@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1p43gtl" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.41.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
+  <bpmn:process id="onboard-adapter" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_OnboardResource" name="Start Resource Onboard">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=resource" target="resource" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_11flptb</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gateway_1cobda0" name="Check if Catalogue is Approved">
+      <bpmn:incoming>Flow_0pjxq7p</bpmn:incoming>
+      <bpmn:outgoing>Flow_0r3bpfb</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0p1meom</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gateway_0ux95fk" name="Check if Resource is owned by a Catalogue">
+      <bpmn:incoming>Flow_11flptb</bpmn:incoming>
+      <bpmn:outgoing>Flow_13cl7fo</bpmn:outgoing>
+      <bpmn:outgoing>Flow_07azb67</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Activity_1ewiokm" name="Get Catalogue">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="get-catalogue" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=resource.catalogueId" target="catalogueId" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_13cl7fo</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pjxq7p</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="Activity_1otm8rv" name="Set Catalogue Value" zeebe:modelerTemplate="set-key-value-script" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="=resource" target="resource" />
+          <zeebe:input source="catalogueId" target="key" />
+          <zeebe:input source="eosc" target="value" />
+          <zeebe:output source="=resource" target="resource" />
+        </zeebe:ioMapping>
+        <zeebe:script expression="=context put(resource, key, value)" resultVariable="resource" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_07azb67</bpmn:incoming>
+      <bpmn:outgoing>Flow_1b9ungf</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="Activity_1lr0vvx" name="Onboard - Approved" zeebe:modelerTemplate="resource-onboard-template" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="resource-onboard" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=resource" target="resource" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="resourceName" value="resource" />
+          <zeebe:header key="status" value="approved" />
+          <zeebe:header key="active" value="true" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0r3bpfb</bpmn:incoming>
+      <bpmn:incoming>Flow_0i7qnvc</bpmn:incoming>
+      <bpmn:outgoing>Flow_0skdybj</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_0a1sz4u" name="Check Provider Status">
+      <bpmn:incoming>Flow_0sojgzr</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ff3515</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0i7qnvc</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Activity_1euokmg" name="Save Resource" zeebe:modelerTemplate="update-resource-template" zeebe:modelerTemplateVersion="2">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="update-resource" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=resourceType" target="resourceType" />
+          <zeebe:input source="=resource" target="resourceName" />
+          <zeebe:output source="=resource" target="resource" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="resourceName" value="resource" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0zjya31</bpmn:incoming>
+      <bpmn:outgoing>Flow_1fbt47z</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="Activity_1vdxr7y" name="Set Audit State" zeebe:modelerTemplate="resource-audit-status-script" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="=resource" target="resource" />
+          <zeebe:input source="Not audited" target="auditState" />
+          <zeebe:output source="=resource" target="resource" />
+        </zeebe:ioMapping>
+        <zeebe:script expression="=context put(resource, &#34;auditState&#34;, auditState)" resultVariable="resource" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0skdybj</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zjya31</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="Activity_0vagvot" name="Get Provider" zeebe:modelerTemplate="get-resource-template" zeebe:modelerTemplateVersion="2">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="get-resource" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=resourceType" target="resourceType" />
+          <zeebe:input source="=resource.payload.resourceOwner" target="id" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="resourceName" value="provider" />
+          <zeebe:header key="resourceType" value="provider" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1b9ungf</bpmn:incoming>
+      <bpmn:outgoing>Flow_0sojgzr</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_05bf4c9">
+      <bpmn:incoming>Flow_19dxg20</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:scriptTask id="Activity_1a6x7qv" name="Mark Failure" zeebe:modelerTemplate="workflow-result-failure-script" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;FAILURE&#34;" target="status" />
+          <zeebe:input source="=403" target="code" />
+          <zeebe:input source="=&#34;Provider is not eligible to onboard a resource.&#34;" target="message" />
+          <zeebe:output source="=result" target="workflowResult" />
+        </zeebe:ioMapping>
+        <zeebe:script expression="={ status: status, code: code, message: message }" resultVariable="result" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ff3515</bpmn:incoming>
+      <bpmn:outgoing>Flow_19dxg20</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:scriptTask id="Activity_0trchkm" name="Mark Success" zeebe:modelerTemplate="workflow-result-success-script" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;SUCCESS&#34;" target="status" />
+          <zeebe:input source="=200" target="code" />
+          <zeebe:input source="=&#34;Success&#34;" target="message" />
+          <zeebe:output source="=result" target="workflowResult" />
+        </zeebe:ioMapping>
+        <zeebe:script expression="={ status: status, code: code, message: message }" resultVariable="result" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1fbt47z</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jgq31p</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:scriptTask id="Activity_101mfzm" name="Mark Failure" zeebe:modelerTemplate="workflow-result-failure-script" zeebe:modelerTemplateVersion="1">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;FAILURE&#34;" target="status" />
+          <zeebe:input source="=403" target="code" />
+          <zeebe:input source="=&#34;Catalogue is not eligible to onboard a resource.&#34;" target="message" />
+          <zeebe:output source="=result" target="workflowResult" />
+        </zeebe:ioMapping>
+        <zeebe:script expression="={ status: status, code: code, message: message }" resultVariable="result" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0p1meom</bpmn:incoming>
+      <bpmn:outgoing>Flow_0f5rjas</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:endEvent id="Event_1dw2hiy">
+      <bpmn:incoming>Flow_0f5rjas</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0pjxq7p" sourceRef="Activity_1ewiokm" targetRef="Gateway_1cobda0" />
+    <bpmn:sequenceFlow id="Flow_0r3bpfb" name="approved" sourceRef="Gateway_1cobda0" targetRef="Activity_1lr0vvx">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=catalogue.status = "approved"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0p1meom" name="not approved" sourceRef="Gateway_1cobda0" targetRef="Activity_101mfzm">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=catalogue = null or catalogue.status != "approved"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_13cl7fo" name="catalogueId is not null" sourceRef="Gateway_0ux95fk" targetRef="Activity_1ewiokm">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=resource.catalogueId != null</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_07azb67" name="no catalogue" sourceRef="Gateway_0ux95fk" targetRef="Activity_1otm8rv">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=resource.catalogueId = null or resource.catalogueId = "" or resource.catalogueId = "eosc"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1b9ungf" sourceRef="Activity_1otm8rv" targetRef="Activity_0vagvot" />
+    <bpmn:sequenceFlow id="Flow_0skdybj" sourceRef="Activity_1lr0vvx" targetRef="Activity_1vdxr7y" />
+    <bpmn:sequenceFlow id="Flow_0sojgzr" sourceRef="Activity_0vagvot" targetRef="Gateway_0a1sz4u" />
+    <bpmn:sequenceFlow id="Flow_1ff3515" name="not approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1a6x7qv">
+      <bpmn:documentation>The provider is not approved and cannot accept resources.</bpmn:documentation>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=provider.status != "approved"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0zjya31" sourceRef="Activity_1vdxr7y" targetRef="Activity_1euokmg" />
+    <bpmn:sequenceFlow id="Flow_1fbt47z" sourceRef="Activity_1euokmg" targetRef="Activity_0trchkm" />
+    <bpmn:sequenceFlow id="Flow_19dxg20" sourceRef="Activity_1a6x7qv" targetRef="Event_05bf4c9" />
+    <bpmn:sequenceFlow id="Flow_0f5rjas" sourceRef="Activity_101mfzm" targetRef="Event_1dw2hiy" />
+    <bpmn:sequenceFlow id="Flow_0i7qnvc" name="approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1lr0vvx">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=provider.status = "approved"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_11flptb" sourceRef="StartEvent_OnboardResource" targetRef="Gateway_0ux95fk" />
+    <bpmn:endEvent id="Event_0m8eqx7">
+      <bpmn:incoming>Flow_0jgq31p</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0jgq31p" sourceRef="Activity_0trchkm" targetRef="Event_0m8eqx7" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="onboard-adapter">
+      <bpmndi:BPMNShape id="BPMNShape_0ep12p1" bpmnElement="Gateway_0ux95fk" isMarkerVisible="true">
+        <dc:Bounds x="285" y="265" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="265" y="220" width="90" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0ejp7bp" bpmnElement="Activity_1ewiokm">
+        <dc:Bounds x="260" y="400" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0gryh9r" bpmnElement="Activity_1otm8rv">
+        <dc:Bounds x="430" y="250" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_03cwlzl" bpmnElement="Activity_1lr0vvx">
+        <dc:Bounds x="750" y="400" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0rybvhn" bpmnElement="Gateway_0a1sz4u" isMarkerVisible="true">
+        <dc:Bounds x="775" y="265" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="835" y="276" width="76" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0s1ll53" bpmnElement="Activity_1euokmg">
+        <dc:Bounds x="1090" y="400" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_08bmj6w" bpmnElement="Activity_1vdxr7y">
+        <dc:Bounds x="930" y="400" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0oj9z9m" bpmnElement="Activity_0vagvot">
+        <dc:Bounds x="600" y="250" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_15p9f2b" bpmnElement="Event_05bf4c9">
+        <dc:Bounds x="962" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_060geur" bpmnElement="Activity_1a6x7qv">
+        <dc:Bounds x="750" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0uk4nkh" bpmnElement="Activity_0trchkm">
+        <dc:Bounds x="1264" y="400" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0i80e8v" bpmnElement="StartEvent_OnboardResource">
+        <dc:Bounds x="132" y="272" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="114" y="315" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1rx50kt" bpmnElement="Gateway_1cobda0" isMarkerVisible="true">
+        <dc:Bounds x="465" y="415" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="459" y="365" width="62" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1g28os3" bpmnElement="Activity_101mfzm">
+        <dc:Bounds x="440" y="540" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1545gpb" bpmnElement="Event_1dw2hiy">
+        <dc:Bounds x="472" y="702" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0m8eqx7_di" bpmnElement="Event_0m8eqx7">
+        <dc:Bounds x="1442" y="422" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_11flptb_di" bpmnElement="Flow_11flptb">
+        <di:waypoint x="168" y="290" />
+        <di:waypoint x="285" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0zvou53" bpmnElement="Flow_13cl7fo">
+        <di:waypoint x="310" y="315" />
+        <di:waypoint x="310" y="400" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="216" y="346" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0m7234n" bpmnElement="Flow_07azb67">
+        <di:waypoint x="335" y="290" />
+        <di:waypoint x="430" y="290" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="348" y="273" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_04xq0db" bpmnElement="Flow_0pjxq7p">
+        <di:waypoint x="360" y="440" />
+        <di:waypoint x="465" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_1ofq49q" bpmnElement="Flow_1b9ungf">
+        <di:waypoint x="530" y="290" />
+        <di:waypoint x="600" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0jadvem" bpmnElement="Flow_0r3bpfb">
+        <di:waypoint x="515" y="440" />
+        <di:waypoint x="750" y="440" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="599" y="422" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i7qnvc_di" bpmnElement="Flow_0i7qnvc">
+        <di:waypoint x="800" y="315" />
+        <di:waypoint x="800" y="400" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="738" y="343" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0ume9sl" bpmnElement="Flow_0skdybj">
+        <di:waypoint x="850" y="440" />
+        <di:waypoint x="930" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0dvy0zv" bpmnElement="Flow_0sojgzr">
+        <di:waypoint x="700" y="290" />
+        <di:waypoint x="775" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0jzo03f" bpmnElement="Flow_1ff3515">
+        <di:waypoint x="800" y="265" />
+        <di:waypoint x="800" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="728" y="203" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_08lv3uc" bpmnElement="Flow_0zjya31">
+        <di:waypoint x="1030" y="440" />
+        <di:waypoint x="1090" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0rqig9l" bpmnElement="Flow_1fbt47z">
+        <di:waypoint x="1190" y="440" />
+        <di:waypoint x="1264" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_14pr1h8" bpmnElement="Flow_19dxg20">
+        <di:waypoint x="850" y="120" />
+        <di:waypoint x="962" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_1g195vi" bpmnElement="Flow_0p1meom">
+        <di:waypoint x="490" y="465" />
+        <di:waypoint x="490" y="540" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="417" y="483" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0f5rjas_di" bpmnElement="Flow_0f5rjas">
+        <di:waypoint x="490" y="620" />
+        <di:waypoint x="490" y="702" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jgq31p_di" bpmnElement="Flow_0jgq31p">
+        <di:waypoint x="1364" y="440" />
+        <di:waypoint x="1442" y="440" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
