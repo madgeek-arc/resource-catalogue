@@ -190,9 +190,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void addBulk(@RequestBody List<ProviderBundle> providerList,
                         @Parameter(hidden = true) Authentication auth) {
-        for (ProviderBundle bundle : providerList) {
-            service.add(bundle, auth);
-        }
+        service.addBulk(providerList, auth);
     }
 
     @Operation(summary = "Updates the Provider with the given id.")

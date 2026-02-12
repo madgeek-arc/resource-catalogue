@@ -186,20 +186,19 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     @Override
     public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) {
-        if (catalogueId == null) {
-            catalogueId = this.catalogueId;
-        }
+        final String effectiveCatalogueId = catalogueId != null ? catalogueId : this.catalogueId;
         List<Bundle> bundles = Stream.concat(
-                this.getAll(createFacetFilter(catalogueId, false, getResourceTypeName()))
+                this.getAll(createFacetFilter(effectiveCatalogueId, false, getResourceTypeName()))
                         .getResults()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(c -> (Bundle) c),
-                this.getAll(createFacetFilter(catalogueId, true, getResourceTypeName()))
+                this.getAll(createFacetFilter(effectiveCatalogueId, true, getResourceTypeName()))
                         .getResults()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(c -> (Bundle) c)
+                        .filter(b -> !Objects.equals(b.getCatalogueId(), effectiveCatalogueId))
         ).toList();
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = bundles.stream()

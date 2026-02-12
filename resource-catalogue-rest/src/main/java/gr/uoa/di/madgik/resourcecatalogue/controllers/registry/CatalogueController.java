@@ -88,7 +88,7 @@ public class CatalogueController {
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 //    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addCatalogue(@RequestBody LinkedHashMap catalogue,
-                                                  @Parameter(hidden = true) Authentication auth) {
+                                          @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle catalogueBundle = new CatalogueBundle();
         catalogueBundle.setCatalogue(catalogue);
         catalogueBundle = genericResourceService.add("catalogue", catalogueBundle);
@@ -664,7 +664,7 @@ public class CatalogueController {
 
     @Operation(description = "Returns the AdapterBundle of the specific Catalogue with the given id.")
     @GetMapping(path = "{catalogueId}/adapter/bundle/{adapterId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #adapterId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #adapterId)")
     public ResponseEntity<AdapterBundle> getCatalogueAdapterBundle(@PathVariable String catalogueId,
                                                                    @PathVariable String adapterId,
                                                                    @SuppressWarnings("unused")
@@ -706,7 +706,7 @@ public class CatalogueController {
 
     @Hidden
     @GetMapping(path = {"{catalogueId}/adapter/loggingInfoHistory/{adapterId}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #adapterId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #adapterId)")
     public ResponseEntity<List<LoggingInfo>> adapterLoggingInfoHistory(@PathVariable String catalogueId,
                                                                        @PathVariable String adapterId,
                                                                        @SuppressWarnings("unused")
@@ -732,7 +732,7 @@ public class CatalogueController {
 
     @Operation(description = "Updates the Adapter of the specific Catalogue.")
     @PutMapping(path = "{catalogueId}/adapter")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth,#adapter['id'])")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#adapter['id'])")
     public ResponseEntity<?> updateCatalogueAdapter(@RequestBody LinkedHashMap<String, Object> adapter,
                                                     @PathVariable String catalogueId,
                                                     @RequestParam(required = false) String comment,
@@ -747,7 +747,7 @@ public class CatalogueController {
 
     @Operation(description = "Deletes the Adapter of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{catalogueId}/adapter/{adapterId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdapterAccess(#auth, #catalogueId)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<?> deleteCatalogueAdapter(@PathVariable String catalogueId,
                                                     @PathVariable String adapterId,
                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

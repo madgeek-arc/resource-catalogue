@@ -161,7 +161,7 @@ public class InteroperabilityRecordController
     @Operation(summary = "Adds a new Interoperability Record.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #interoperabilityRecord)")
+            "@securityService.providerCanAddResources(#auth, #guideline, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> guideline,
                                  @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle bundle = new InteroperabilityRecordBundle();
@@ -404,11 +404,11 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordRead")
     @BrowseParameters
     @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}")
-    public ResponseEntity<Browsing<InteroperabilityRecordBundle>> getProviderDraftServices(@PathVariable String prefix,
-                                                                                           @PathVariable String suffix,
-                                                                                           @Parameter(hidden = true)
-                                                                                           @RequestParam MultiValueMap<String, Object> params,
-                                                                                           @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Browsing<InteroperabilityRecordBundle>> getProviderDraftGuidelines(@PathVariable String prefix,
+                                                                                             @PathVariable String suffix,
+                                                                                             @Parameter(hidden = true)
+                                                                                             @RequestParam MultiValueMap<String, Object> params,
+                                                                                             @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
@@ -457,7 +457,7 @@ public class InteroperabilityRecordController
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #guideline['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> guideline,
-                                              @Parameter(hidden = true) Authentication auth) {
+                                      @Parameter(hidden = true) Authentication auth) {
         String id = (String) guideline.get("id");
         InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
         bundle.setInteroperabilityRecord(guideline);

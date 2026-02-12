@@ -113,7 +113,7 @@ public class DeployableSoftwareController extends ResourceCatalogueGenericContro
     @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DeployableSoftwareBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                         @RequestParam MultiValueMap<String, Object> params) {
+                                                                          @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -355,11 +355,11 @@ public class DeployableSoftwareController extends ResourceCatalogueGenericContro
 
     @BrowseParameters
     @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}")
-    public ResponseEntity<Browsing<DeployableSoftwareBundle>> getProviderDraftServices(@PathVariable String prefix,
-                                                                                       @PathVariable String suffix,
-                                                                                       @Parameter(hidden = true)
-                                                                                      @RequestParam MultiValueMap<String, Object> params,
-                                                                                       @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Browsing<DeployableSoftwareBundle>> getProviderDraftDeployableSoftware(@PathVariable String prefix,
+                                                                                                 @PathVariable String suffix,
+                                                                                                 @Parameter(hidden = true)
+                                                                                                 @RequestParam MultiValueMap<String, Object> params,
+                                                                                                 @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
@@ -404,7 +404,7 @@ public class DeployableSoftwareController extends ResourceCatalogueGenericContro
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableSoftware['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> deployableSoftware,
-                                              @Parameter(hidden = true) Authentication auth) {
+                                      @Parameter(hidden = true) Authentication auth) {
         String id = (String) deployableSoftware.get("id");
         DeployableSoftwareBundle bundle = service.get(id, catalogueId);
         bundle.setDeployableSoftware(deployableSoftware);
