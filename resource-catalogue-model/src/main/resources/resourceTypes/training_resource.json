@@ -58,7 +58,7 @@
       "type": "java.lang.String"
     },
     {
-      "label": "ResourceOwner",
+      "label": "Resource Owner",
       "multivalued": false,
       "name": "resource_owner",
       "path": "$.trainingResource.resourceOwner",

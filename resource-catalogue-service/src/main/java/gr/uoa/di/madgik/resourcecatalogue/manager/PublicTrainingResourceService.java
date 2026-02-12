@@ -72,12 +72,7 @@ public class PublicTrainingResourceService extends AbstractPublicResourceManager
         if (existingObj instanceof Collection<?>) {
             for (Object eoscRelatedServiceIdObj : (Collection<?>) existingObj) {
                 String eoscRelatedServiceId = (String) eoscRelatedServiceIdObj;
-                Bundle eoscRelatedService;
-                try {
-                    eoscRelatedService = serviceService.get(eoscRelatedServiceId, bundle.getCatalogueId());
-                } catch (Exception e) { // TODO: specify the Exception
-                    eoscRelatedService = trainingResourceService.get(eoscRelatedServiceId, bundle.getCatalogueId());
-                }
+                Bundle eoscRelatedService = serviceService.get(eoscRelatedServiceId, bundle.getCatalogueId());;
                 eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
             }
             bundle.getTrainingResource().put("eoscRelatedServices", eoscRelatedServices);

@@ -42,7 +42,7 @@ public interface ResourceCatalogueGenericService<T extends Bundle>
      * @param auth Authentication
      * @return {@link Browsing<T>}
      */
-    Browsing<T> getMyProvidersOrAdapters(FacetFilter ff, Authentication auth, String resourceType);
+    Browsing<T> getMyProviders(FacetFilter ff, Authentication auth, String resourceType);
 
     /**
      *

@@ -191,7 +191,7 @@ public class ProviderManager extends ResourceCatalogueGenericManager<ProviderBun
 
     @Override
     public Browsing<ProviderBundle> getMy(FacetFilter ff, Authentication auth) {
-        return getMyProvidersOrAdapters(ff, auth, getResourceTypeName());
+        return getMyProviders(ff, auth, getResourceTypeName());
     }
     //endregion
 

@@ -107,13 +107,9 @@ public class RelationshipValidator {
                         try {
                             serviceService.get(eoscRelatedService, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
-                            try {
-                                trainingResourceService.get(eoscRelatedService, catalogueId);
-                            } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
-                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue. ",
-                                        eoscRelatedService, catalogueId));
-                            }
+                            throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
+                                            "There is no Service with ID '%s' in the %s Catalogue. ",
+                                    eoscRelatedService, catalogueId));
                         }
                     }
                 }

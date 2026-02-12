@@ -86,7 +86,7 @@ public class DefaultStatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
         FacetFilter filter = new FacetFilter();
-        filter.addFilter("resourceOwner", id);
+        filter.addFilter("resource_owner", id);
         Map<String, Integer> providerAddToProject = serviceBundleManager.getAll(filter).getResults()
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())

@@ -29,7 +29,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,36 +73,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         return "adapter";
     }
 
-    @Override
-    public AdapterBundle add(AdapterBundle adapter, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) adapter.getAdapter().get("resourceOwner"),
-                adapter.getCatalogueId());
-        onboard(adapter, provider, auth);
-        AdapterBundle ret = genericResourceService.add(getResourceTypeName(), adapter);
-        return ret;
-    }
-
-    private void onboard(AdapterBundle adapter, ProviderBundle provider, Authentication auth) {
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            if (provider.getStatus().equals("approved")) {
-                adapter.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
-                adapter.setActive(true);
-            } else {
-                throw new ResourceException(String.format("The Provider '%s' you provided as a Resource Owner " +
-                        "is not yet approved", provider.getId()), HttpStatus.CONFLICT);
-            }
-            adapter.setCatalogueId(this.catalogueId);
-            this.createIdentifiers(adapter, getResourceTypeName(), false);
-            adapter.setId(adapter.getIdentifiers().getOriginalId());
-        } else {
-            adapter.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
-//            commonMethods.validateCatalogueId(catalogueId); //FIXME
-            idCreator.validateId(adapter.getId());
-            this.createIdentifiers(adapter, getResourceTypeName(), true);
-        }
-        adapter.setAuditState(Auditable.NOT_AUDITED);
-    }
-
+    //region generic
     @Override
     public AdapterBundle update(AdapterBundle bundle, String comment, Authentication auth) {
         AdapterBundle existing = get(bundle.getId(), bundle.getCatalogueId());

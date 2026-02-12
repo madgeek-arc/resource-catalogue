@@ -114,9 +114,9 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Version",
+      "label": "Adapter Version",
       "multivalued": false,
-      "name": "version",
+      "name": "adapter_version",
       "path": "$.adapter.version",
       "type": "java.lang.String"
     },

@@ -187,7 +187,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
         FacetFilter filter = new FacetFilter();
-        filter.addFilter("resourceOwner", id);
+        filter.addFilter("resource_owner", id);
         Map<String, Integer> providerAddToProject = serviceService.getAll(filter).getResults()
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
@@ -233,7 +233,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     public Map<String, Integer> providerVisits(String id, Interval by) {
         Map<String, Integer> results = new HashMap<>();
         FacetFilter filter = new FacetFilter();
-        filter.addFilter("resourceOwner", id);
+        filter.addFilter("resource_owner", id);
         for (ServiceBundle service : serviceService.getAll(filter).getResults()) {
             Set<Map.Entry<String, Integer>> entrySet = visits(service.getId(), by).entrySet();
             for (Map.Entry<String, Integer> entry : entrySet) {
@@ -250,7 +250,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     @Override
     public Map<String, Float> providerVisitation(String id, Interval by) {
         FacetFilter filter = new FacetFilter();
-        filter.addFilter("resourceOwner", id);
+        filter.addFilter("resource_owner", id);
         Map<String, Integer> counts = serviceService.getAll(filter).getResults().stream().collect(Collectors.toMap(s ->
                         (String) s.getService().get("name"),
                 s -> visits(s.getId(), by).values().stream().mapToInt(Integer::intValue).sum()

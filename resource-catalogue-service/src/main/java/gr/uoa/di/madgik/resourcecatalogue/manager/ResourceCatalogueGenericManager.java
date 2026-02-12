@@ -158,7 +158,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     @Override
-    public Browsing<T> getMyProvidersOrAdapters(FacetFilter ff, Authentication auth, String resourceType) {
+    public Browsing<T> getMyProviders(FacetFilter ff, Authentication auth, String resourceType) {
         ff.setResourceType(resourceType);
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
@@ -171,7 +171,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     public Browsing<T> getMyResources(FacetFilter filter, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", false); // A Draft Provider cannot have resources
-        List<T> providers = getMyProvidersOrAdapters(ff, auth, "provider").getResults();
+        List<T> providers = getMyProviders(ff, auth, "provider").getResults();
         if (providers.isEmpty()) {
             return new Browsing<>();
         }
@@ -179,7 +179,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         filter.setResourceType(getResourceTypeName());
         filter.setQuantity(maxQuantity);
         filter.addFilter("published", false);
-        filter.addFilter("resourceOwner", providers.stream().map(T::getId).toList());
+        filter.addFilter("resource_owner", providers.stream().map(T::getId).toList());
         filter.addOrderBy("name", "asc");
         return genericResourceService.getResults(filter);
     }
