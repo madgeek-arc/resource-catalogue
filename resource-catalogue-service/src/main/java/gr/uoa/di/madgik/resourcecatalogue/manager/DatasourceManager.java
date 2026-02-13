@@ -91,10 +91,11 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     @Override
     public DatasourceBundle add(DatasourceBundle bundle, Authentication auth) {
         // if Datasource has ID -> check if it exists in OpenAIRE Datasource list
-        if (bundle.getId() != null && !bundle.getId().isEmpty()) {
+        Object raw = bundle.getDatasource() != null ? bundle.getDatasource().get("id") : null;
+        String id = (String) raw;
+        if (id != null && !id.isEmpty()) {
             checkOpenAIREIDExistence(bundle);
         }
-
         return super.add(bundle, auth);
     }
 
