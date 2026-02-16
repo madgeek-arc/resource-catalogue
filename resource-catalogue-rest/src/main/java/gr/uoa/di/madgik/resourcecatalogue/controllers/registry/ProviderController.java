@@ -332,7 +332,7 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType(resourceType);
-        ff.addFilter("resource_organisation", id);
+        ff.addFilter("resource_owner", id);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         ff.addFilter("status", "rejected");

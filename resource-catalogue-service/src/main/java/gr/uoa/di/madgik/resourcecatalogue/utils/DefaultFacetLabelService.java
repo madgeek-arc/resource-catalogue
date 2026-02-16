@@ -134,8 +134,8 @@ public class DefaultFacetLabelService implements FacetLabelService {
             for (Value value : facet.getValues()) {
 
                 switch (facet.getField()) {
-                    case "resource_providers":
-                    case "resource_organisation":
+                    case "service_providers":
+                    case "resource_owner":
                         value.setLabel(providerNames.get(value.getValue()));
                         break;
 

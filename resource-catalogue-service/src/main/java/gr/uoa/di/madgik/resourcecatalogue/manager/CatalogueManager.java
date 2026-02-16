@@ -18,20 +18,18 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +40,9 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
 
 @Service("catalogueManager")
 public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueBundle> implements CatalogueService {
@@ -61,6 +58,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     @Value("${catalogue.id}")
     private String catalogueId;
 
+    //FIXME: REFACTOR CONCERNING HOW WE MOVE ON
     public CatalogueManager(IdCreator idCreator,
                             @Lazy ProviderService providerService,
                             @Lazy ServiceService serviceService,
@@ -91,22 +89,6 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
             throw new ResourceNotFoundException(id, "Catalogue");
         }
         return catalogue;
-    }
-
-    @Override
-    public CatalogueBundle get(String id, Authentication auth) {
-        CatalogueBundle catalogueBundle = get(id);
-        if (auth != null && auth.isAuthenticated()) {
-            // if user is ADMIN/EPOT or Catalogue Admin on the specific Catalogue, return everything
-            if (securityService.hasPortalAdminRole(auth) || securityService.hasAdminAccess(auth, id)) {
-                return catalogueBundle;
-            }
-        }
-        // else return the Catalogue ONLY if it is active
-        if (catalogueBundle.getStatus().equals(vocabularyService.get("approved").getId())) {
-            return catalogueBundle;
-        }
-        throw new InsufficientAuthenticationException("You cannot view the specific Catalogue");
     }
 
     @Override
@@ -158,7 +140,6 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
         commonMethods.addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
         catalogue.setId(idCreator.generate(this.getResourceTypeName()));
-
 
 
         CatalogueBundle ret;
@@ -323,19 +304,22 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
         }
     }
 
-    public CatalogueBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        CatalogueBundle existingCatalogue = get(id, auth);
-        existingCatalogue.markSuspend(suspend, auth);
+    @Override
+    public CatalogueBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
+        CatalogueBundle bundle = get(id);
+        //TODO: enable and fix if Catalogues return to their original state
+//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend);
 
-        // Suspend Catalogue's resources
-        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(id), auth).getResults();
-        if (providers != null && !providers.isEmpty()) {
-            for (ProviderBundle providerBundle : providers) {
-                providerService.setSuspend(providerBundle.getId(), id, suspend, auth);
-            }
+        logger.info("Suspending Catalogue: {} and all its Resources", bundle.getId());
+        bundle.markSuspend(suspend, auth);
+        //TODO: enable and fix if Catalogues return to their original state
+//        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
+
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
-
-        return super.update(existingCatalogue, auth);
     }
 
     @Override
