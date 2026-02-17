@@ -7,9 +7,9 @@
   "subType": null,
   "series": null,
   "resourceType": "provider",
-  "creationDate": null,
+  "creationDate": "2026-01-27T16:34:25.001+00:00",
   "createdBy": null,
-  "modificationDate": "2026-01-05T15:03:06.522+00:00",
+  "modificationDate": "2026-01-27T16:34:25.001+00:00",
   "modifiedBy": null,
   "sections": [
     {
@@ -41,9 +41,14 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "string",
-                "values": null,
                 "vocabulary": null,
+                "type": "string",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -94,9 +99,14 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "string",
-                "values": null,
                 "vocabulary": null,
+                "type": "string",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -147,9 +157,14 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "string",
-                "values": null,
                 "vocabulary": null,
+                "type": "string",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -200,9 +215,11 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "composite",
-                "values": null,
                 "vocabulary": null,
+                "type": "composite",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
                 "multiplicity": true,
                 "prefill": null
               },
@@ -252,9 +269,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -305,9 +327,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -360,9 +387,15 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
+                "vocabulary": null,
                 "type": "vocabulary",
+                "defaultValue": null,
                 "values": null,
-                "vocabulary": "NODE",
+                "properties": {
+                  "url": "/api/vocabulary/byType/NODE",
+                  "idField": "id",
+                  "labelField": "name"
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -413,9 +446,13 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "url",
-                "values": null,
                 "vocabulary": null,
+                "type": "url",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "strictValidation": true
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -466,9 +503,15 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
+                "vocabulary": null,
                 "type": "vocabulary",
+                "defaultValue": null,
                 "values": null,
-                "vocabulary": "COUNTRY",
+                "properties": {
+                  "url": "/api/vocabulary/byType/COUNTRY",
+                  "idField": "id",
+                  "labelField": "name"
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -519,12 +562,20 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "radio",
-                "values": [
-                  "true",
-                  "false"
-                ],
                 "vocabulary": null,
+                "type": "radio",
+                "defaultValue": null,
+                "values": [
+                  {
+                    "id": "true",
+                    "label": "true"
+                  },
+                  {
+                    "id": "false",
+                    "label": "false"
+                  }
+                ],
+                "properties": {},
                 "multiplicity": false,
                 "prefill": null
               },
@@ -575,9 +626,15 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
+                "vocabulary": null,
                 "type": "vocabulary",
+                "defaultValue": null,
                 "values": null,
-                "vocabulary": "PROVIDER_LEGAL_STATUS",
+                "properties": {
+                  "url": "/api/vocabulary/byType/PROVIDER_LEGAL_STATUS",
+                  "idField": "id",
+                  "labelField": "name"
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -632,9 +689,15 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
+                "vocabulary": null,
                 "type": "vocabulary",
+                "defaultValue": null,
                 "values": null,
-                "vocabulary": "PROVIDER_HOSTING_LEGAL_ENTITY",
+                "properties": {
+                  "url": "/api/vocabulary/byType/PROVIDER_HOSTING_LEGAL_ENTITY",
+                  "idField": "id",
+                  "labelField": "name"
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -695,9 +758,11 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "richText",
-                "values": null,
                 "vocabulary": null,
+                "type": "richText",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
                 "multiplicity": false,
                 "prefill": null
               },
@@ -748,9 +813,13 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "url",
-                "values": null,
                 "vocabulary": null,
+                "type": "url",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "strictValidation": true
+                },
                 "multiplicity": false,
                 "prefill": null
               },
@@ -801,9 +870,11 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "composite",
-                "values": null,
                 "vocabulary": null,
+                "type": "composite",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
                 "multiplicity": true,
                 "prefill": null
               },
@@ -853,9 +924,13 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "url",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "url",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "strictValidation": true
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -906,9 +981,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -950,238 +1030,11 @@
           ]
         },
         {
-          "id": "Classification",
-          "name": "Classification",
-          "description": null,
-          "subType": null,
-          "order": 3,
-          "subSections": null,
-          "fields": [
-            {
-              "id": "scientificDomains",
-              "name": "scientificDomains",
-              "parentId": null,
-              "parent": null,
-              "label": {
-                "text": "Scientific Categorisation",
-                "cssClasses": null,
-                "style": null,
-                "showLess": false
-              },
-              "accessPath": null,
-              "kind": null,
-              "typeInfo": {
-                "type": "composite",
-                "values": null,
-                "vocabulary": null,
-                "multiplicity": true,
-                "prefill": null
-              },
-              "includedInSnippet": false,
-              "deprecated": false,
-              "form": {
-                "dependsOn": null,
-                "affects": null,
-                "group": null,
-                "description": {
-                  "text": null,
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "suggestion": {
-                  "text": null,
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "placeholder": null,
-                "mandatory": false,
-                "immutable": true,
-                "display": {
-                  "placement": null,
-                  "order": 1,
-                  "visible": true,
-                  "hasBorder": true,
-                  "cssClasses": null,
-                  "style": null
-                }
-              },
-              "display": null,
-              "subFields": [
-                {
-                  "id": "scientificDomain",
-                  "name": "scientificDomain",
-                  "parentId": "scientificDomains",
-                  "parent": "scientificDomains",
-                  "label": {
-                    "text": "Scientific Domain",
-                    "cssClasses": null,
-                    "style": null,
-                    "showLess": false
-                  },
-                  "accessPath": null,
-                  "kind": null,
-                  "typeInfo": {
-                    "type": "vocabulary",
-                    "values": null,
-                    "vocabulary": "SCIENTIFIC_DOMAIN",
-                    "multiplicity": false,
-                    "prefill": null
-                  },
-                  "includedInSnippet": false,
-                  "deprecated": false,
-                  "form": {
-                    "dependsOn": null,
-                    "affects": null,
-                    "group": null,
-                    "description": {
-                      "text": "A named group of Providers that offer access to the same type of Resources.",
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "suggestion": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "placeholder": null,
-                    "mandatory": false,
-                    "immutable": true,
-                    "display": {
-                      "placement": null,
-                      "order": 1,
-                      "visible": true,
-                      "hasBorder": false,
-                      "cssClasses": null,
-                      "style": null
-                    }
-                  },
-                  "display": null,
-                  "subFields": []
-                },
-                {
-                  "id": "scientificSubdomain",
-                  "name": "scientificSubdomain",
-                  "parentId": "scientificDomains",
-                  "parent": "scientificDomains",
-                  "label": {
-                    "text": "Scientific Subdomain",
-                    "cssClasses": null,
-                    "style": null,
-                    "showLess": false
-                  },
-                  "accessPath": null,
-                  "kind": null,
-                  "typeInfo": {
-                    "type": "vocabulary",
-                    "values": null,
-                    "vocabulary": "SCIENTIFIC_SUBDOMAIN",
-                    "multiplicity": false,
-                    "prefill": null
-                  },
-                  "includedInSnippet": false,
-                  "deprecated": false,
-                  "form": {
-                    "dependsOn": {
-                      "id": "scientificDomain",
-                      "name": "scientificDomain",
-                      "value": null
-                    },
-                    "affects": null,
-                    "group": null,
-                    "description": {
-                      "text": "A named group of Providers that offer access to the same type of Resources, within the defined domain.",
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "suggestion": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "placeholder": null,
-                    "mandatory": false,
-                    "immutable": true,
-                    "display": {
-                      "placement": null,
-                      "order": 2,
-                      "visible": true,
-                      "hasBorder": false,
-                      "cssClasses": null,
-                      "style": null
-                    }
-                  },
-                  "display": null,
-                  "subFields": []
-                }
-              ]
-            },
-            {
-              "id": "tags",
-              "name": "tags",
-              "parentId": null,
-              "parent": null,
-              "label": {
-                "text": "Tags",
-                "cssClasses": null,
-                "style": null,
-                "showLess": false
-              },
-              "accessPath": null,
-              "kind": null,
-              "typeInfo": {
-                "type": "string",
-                "values": null,
-                "vocabulary": null,
-                "multiplicity": true,
-                "prefill": null
-              },
-              "includedInSnippet": false,
-              "deprecated": false,
-              "form": {
-                "dependsOn": null,
-                "affects": null,
-                "group": null,
-                "description": {
-                  "text": "Keywords associated to the Provider to simplify search by relevant keywords.",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "suggestion": {
-                  "text": "Add one Tag in each entry. For multi-word keywords, please use '-' to concatenate words. Suggested length is 20 characters",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "placeholder": null,
-                "mandatory": false,
-                "immutable": true,
-                "display": {
-                  "placement": null,
-                  "order": 2,
-                  "visible": true,
-                  "hasBorder": false,
-                  "cssClasses": null,
-                  "style": null
-                }
-              },
-              "display": null,
-              "subFields": []
-            }
-          ]
-        },
-        {
           "id": "Contact",
           "name": "Contact",
           "description": null,
           "subType": null,
-          "order": 5,
+          "order": 4,
           "subSections": null,
           "fields": [
             {
@@ -1198,9 +1051,11 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "composite",
-                "values": null,
                 "vocabulary": null,
+                "type": "composite",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
                 "multiplicity": false,
                 "prefill": null
               },
@@ -1250,9 +1105,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -1303,9 +1163,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -1356,9 +1221,13 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "email",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "email",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "pattern": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -1409,9 +1278,13 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "phone",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "phone",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "pattern": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -1462,9 +1335,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -1502,6 +1380,64 @@
                   "subFields": []
                 }
               ]
+            },
+            {
+              "id": "publicContacts",
+              "name": "publicContacts",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Public Contacts",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "email",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
+                "multiplicity": true,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "List of public contact emails.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
             }
           ]
         },
@@ -1510,7 +1446,7 @@
           "name": "Admins",
           "description": null,
           "subType": null,
-          "order": 6,
+          "order": 5,
           "subSections": null,
           "fields": [
             {
@@ -1527,9 +1463,11 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "type": "composite",
-                "values": null,
                 "vocabulary": null,
+                "type": "composite",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
                 "multiplicity": true,
                 "prefill": null
               },
@@ -1579,9 +1517,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -1632,9 +1575,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -1685,9 +1633,14 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "string",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
@@ -1738,9 +1691,13 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "type": "email",
-                    "values": null,
                     "vocabulary": null,
+                    "type": "email",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "pattern": null
+                    },
                     "multiplicity": false,
                     "prefill": null
                   },
