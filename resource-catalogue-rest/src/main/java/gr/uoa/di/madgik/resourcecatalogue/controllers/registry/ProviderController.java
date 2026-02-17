@@ -125,24 +125,6 @@ public class ProviderController extends ResourceCatalogueGenericController<Provi
         return ResponseEntity.ok(paging);
     }
 
-    //TODO: remove, this Controller should be only for default catalogue. Ask front
-    @Operation(summary = "Returns a list of Providers providing a Catalogue ID.")
-    @BrowseParameters
-    @GetMapping(path = "byCatalogue/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
-    public ResponseEntity<Paging<ProviderBundle>> getByCatalogue(@Parameter(hidden = true)
-                                                                 @RequestParam MultiValueMap<String, Object> params,
-                                                                 @PathVariable String id,
-                                                                 @SuppressWarnings("unused")
-                                                                 @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("catalogue_id", id);
-        ff.addFilter("published", false);
-        ff.addFilter("draft", false);
-        Paging<ProviderBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging);
-    }
-
     @Operation(summary = "Returns all Providers of a User.")
     @GetMapping(path = "getMy")
     @PreAuthorize("isAuthenticated()")

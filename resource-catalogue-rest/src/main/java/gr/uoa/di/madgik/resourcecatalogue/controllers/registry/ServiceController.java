@@ -141,25 +141,6 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
         return ResponseEntity.ok(paging);
     }
 
-    //TODO: remove, this Controller should be only for default catalogue. Ask front
-    @Tag(name = "ServiceRead")
-    @Operation(summary = "Returns a list of Services providing a Catalogue ID.")
-    @BrowseParameters
-    @GetMapping(path = "byCatalogue/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
-    public ResponseEntity<Paging<ServiceBundle>> getByCatalogue(@Parameter(hidden = true)
-                                                                @RequestParam MultiValueMap<String, Object> params,
-                                                                @PathVariable String id,
-                                                                @SuppressWarnings("unused")
-                                                                @Parameter(hidden = true) Authentication auth) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("catalogue_id", id);
-        ff.addFilter("published", false);
-        ff.addFilter("draft", false);
-        Paging<ServiceBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging);
-    }
-
     @Tag(name = "ServiceRead")
     @Operation(summary = "Returns all Services of a User.")
     @GetMapping(path = "getMy")

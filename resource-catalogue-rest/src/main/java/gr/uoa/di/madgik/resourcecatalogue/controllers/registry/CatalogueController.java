@@ -298,13 +298,14 @@ public class CatalogueController {
         ff.setResourceType("provider");
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<ProviderBundle> paging = providerService.getAll(ff);
         return ResponseEntity.ok(paging.map(ProviderBundle::getProvider));
     }
 
     @Hidden
     @GetMapping(path = "{catalogueId}/provider/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
     public ResponseEntity<Paging<ProviderBundle>> getAllCatalogueProviderBundles(@PathVariable String catalogueId,
                                                                                  @Parameter(hidden = true)
                                                                                  @RequestParam MultiValueMap<String, Object> params,
@@ -313,6 +314,7 @@ public class CatalogueController {
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("provider");
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         ff.addFilter("catalogue_id", catalogueId);
         Paging<ProviderBundle> paging = providerService.getAll(ff);
         return ResponseEntity.ok(paging);
@@ -459,6 +461,23 @@ public class CatalogueController {
     }
 
     @Hidden
+    @GetMapping(path = "{catalogueId}/service/bundle/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    public ResponseEntity<Paging<ServiceBundle>> getAllCatalogueServiceBundles(@PathVariable String catalogueId,
+                                                                               @Parameter(hidden = true)
+                                                                               @RequestParam MultiValueMap<String, Object> params,
+                                                                               @SuppressWarnings("unused")
+                                                                               @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.setResourceType("service");
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        ff.addFilter("catalogue_id", catalogueId);
+        Paging<ServiceBundle> paging = serviceService.getAll(ff);
+        return ResponseEntity.ok(paging);
+    }
+
+    @Hidden
     @GetMapping(path = {"{catalogueId}/service/loggingInfoHistory/{serviceId}"})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceId)")
     public ResponseEntity<List<LoggingInfo>> serviceLoggingInfoHistory(@PathVariable String catalogueId,
@@ -577,6 +596,23 @@ public class CatalogueController {
     }
 
     @Hidden
+    @GetMapping(path = "{catalogueId}/datasource/bundle/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    public ResponseEntity<Paging<DatasourceBundle>> getAllCatalogueDatasourceBundles(@PathVariable String catalogueId,
+                                                                                     @Parameter(hidden = true)
+                                                                                     @RequestParam MultiValueMap<String, Object> params,
+                                                                                     @SuppressWarnings("unused")
+                                                                                     @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.setResourceType("service");
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        ff.addFilter("catalogue_id", catalogueId);
+        Paging<DatasourceBundle> paging = datasourceService.getAll(ff);
+        return ResponseEntity.ok(paging);
+    }
+
+    @Hidden
     @GetMapping(path = {"{catalogueId}/datasource/loggingInfoHistory/{datasourceId}"})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasourceId)")
     public ResponseEntity<List<LoggingInfo>> datasourceLoggingInfoHistory(@PathVariable String catalogueId,
@@ -672,13 +708,14 @@ public class CatalogueController {
         ff.setResourceType("adapter");
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<AdapterBundle> paging = adapterService.getAll(ff);
         return ResponseEntity.ok(paging.map(AdapterBundle::getAdapter));
     }
 
     @Hidden
     @GetMapping(path = "{catalogueId}/adapter/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
     public ResponseEntity<Paging<AdapterBundle>> getAllCatalogueAdapterBundles(@PathVariable String catalogueId,
                                                                                @Parameter(hidden = true)
                                                                                @RequestParam MultiValueMap<String, Object> params,
@@ -687,6 +724,7 @@ public class CatalogueController {
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("adapter");
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         ff.addFilter("catalogue_id", catalogueId);
         Paging<AdapterBundle> paging = adapterService.getAll(ff);
         return ResponseEntity.ok(paging);
@@ -813,6 +851,23 @@ public class CatalogueController {
     }
 
     @Hidden
+    @GetMapping(path = "{catalogueId}/trainingResource/bundle/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    public ResponseEntity<Paging<TrainingResourceBundle>> getAllCatalogueTrainingResourceBundles(@PathVariable String catalogueId,
+                                                                                                 @Parameter(hidden = true)
+                                                                                                 @RequestParam MultiValueMap<String, Object> params,
+                                                                                                 @SuppressWarnings("unused")
+                                                                                                 @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.setResourceType("training_resource");
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        ff.addFilter("catalogue_id", catalogueId);
+        Paging<TrainingResourceBundle> paging = trainingResourceService.getAll(ff);
+        return ResponseEntity.ok(paging);
+    }
+
+    @Hidden
     @GetMapping(path = {"{catalogueId}/trainingResource/loggingInfoHistory/{trainingResourceId}"})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId)")
     public ResponseEntity<List<LoggingInfo>> trainingResourceLoggingInfoHistory(@PathVariable String catalogueId,
@@ -933,6 +988,23 @@ public class CatalogueController {
     }
 
     @Hidden
+    @GetMapping(path = "{catalogueId}/deployableSoftware/bundle/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    public ResponseEntity<Paging<DeployableSoftwareBundle>> getAllCatalogueDeployableSoftwareBundles(@PathVariable String catalogueId,
+                                                                                                     @Parameter(hidden = true)
+                                                                                                     @RequestParam MultiValueMap<String, Object> params,
+                                                                                                     @SuppressWarnings("unused")
+                                                                                                     @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.setResourceType("depoloyable_software");
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        ff.addFilter("catalogue_id", catalogueId);
+        Paging<DeployableSoftwareBundle> paging = deployableSoftwareService.getAll(ff);
+        return ResponseEntity.ok(paging);
+    }
+
+    @Hidden
     @GetMapping(path = {"{catalogueId}/deployableSoftware/loggingInfoHistory/{deployableSoftwareId}"})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableSoftwareId)")
     public ResponseEntity<List<LoggingInfo>> deployableSoftwareLoggingInfoHistory(@PathVariable String catalogueId,
@@ -1045,6 +1117,23 @@ public class CatalogueController {
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("resource_owner", providerId);
+        Paging<InteroperabilityRecordBundle> paging = guidelineService.getAll(ff);
+        return ResponseEntity.ok(paging);
+    }
+
+    @Hidden
+    @GetMapping(path = "{catalogueId}/interoperabilityRecord/bundle/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllCatalogueInteroperabilityRecordBundles(@PathVariable String catalogueId,
+                                                                                                             @Parameter(hidden = true)
+                                                                                                             @RequestParam MultiValueMap<String, Object> params,
+                                                                                                             @SuppressWarnings("unused")
+                                                                                                             @Parameter(hidden = true) Authentication auth) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.setResourceType("deployable_software");
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        ff.addFilter("catalogue_id", catalogueId);
         Paging<InteroperabilityRecordBundle> paging = guidelineService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
