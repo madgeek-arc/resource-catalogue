@@ -20,10 +20,6 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
@@ -40,7 +36,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @org.springframework.stereotype.Service("configurationTemplateInstanceManager")
-public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGenericManager<ConfigurationTemplateInstanceBundle> implements ConfigurationTemplateInstanceService {
+public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGenericManager<ConfigurationTemplateInstanceBundle>
+        implements ConfigurationTemplateInstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceManager.class);
     private final ConfigurationTemplateInstanceService service;
@@ -223,16 +220,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
 
     //region Not-Used
     @Override
-    public ConfigurationTemplateInstanceBundle get(String id) {
-        return null;
-    }
-
-    @Override
-    public Browsing<ConfigurationTemplateInstanceBundle> getAll(FacetFilter filter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
     public Browsing<ConfigurationTemplateInstanceBundle> getMy(FacetFilter filter, Authentication authentication) {
         return null;
     }
@@ -243,32 +230,12 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     }
 
     @Override
-    public ConfigurationTemplateInstanceBundle getOrElseReturnNull(String id) {
-        return null;
-    }
-
-    @Override
     public ConfigurationTemplateInstanceBundle verify(String id, String status, Boolean active, Authentication auth) {
         return null;
     }
 
     @Override
     public ConfigurationTemplateInstanceBundle setActive(String id, Boolean active, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public Paging<ConfigurationTemplateInstanceBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         return null;
     }
 
@@ -293,78 +260,13 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     }
 
     @Override
-    public Browsing<ConfigurationTemplateInstanceBundle> getAll(FacetFilter filter) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle get(String id, String catalogueId) {
-        return null;
-    }
-
-    @Override
-    public String createId(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-        return "";
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle save(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-        return null;
-    }
-
-    @Override
-    public Map<String, List<ConfigurationTemplateInstanceBundle>> getBy(String field) {
-        return Map.of();
-    }
-
-    @Override
-    public List<ConfigurationTemplateInstanceBundle> getSome(String... ids) {
-        return List.of();
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle get(SearchService.KeyValue... keyValues) {
-        return null;
-    }
-
-    @Override
-    public List<ConfigurationTemplateInstanceBundle> delAll() {
-        return List.of();
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle validate(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-        return null;
-    }
-
-    @Override
-    public Resource getResource(String id) {
-        return null;
-    }
-
-    @Override
-    public Resource getResource(String id, String catalogueId) {
-        return null;
-    }
-
-    @Override
-    public boolean exists(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-        return false;
-    }
-
-    @Override
-    public boolean exists(String id) {
-        return false;
-    }
-
-    @Override
     public void addBulk(List<ConfigurationTemplateInstanceBundle> resources, Authentication auth) {
-        ConfigurationTemplateInstanceService.super.addBulk(resources, auth);
+        super.addBulk(resources, auth);
     }
 
     @Override
     public void updateBulk(List<ConfigurationTemplateInstanceBundle> resources, Authentication auth) {
-        ConfigurationTemplateInstanceService.super.updateBulk(resources, auth);
+        super.updateBulk(resources, auth);
     }
     //endregion
 }

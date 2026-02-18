@@ -20,11 +20,8 @@ import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
@@ -41,7 +38,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
-public class ConfigurationTemplateManager extends ResourceCatalogueGenericManager<ConfigurationTemplateBundle> implements ConfigurationTemplateService {
+public class ConfigurationTemplateManager extends ResourceCatalogueGenericManager<ConfigurationTemplateBundle>
+        implements ConfigurationTemplateService {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateManager.class);
     private final ProviderResourcesCommonMethods commonMethods;
@@ -129,7 +127,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
         ff.setQuantity(1000);
         ff.addFilter("published", false);
         ff.addFilter("interoperability_record_id", interoperabilityRecordId);
-        return genericResourceService.getResults(ff).map(r -> ((ConfigurationTemplateBundle) r).getPayload());
+        return genericResourceService.getResults(ff);
     }
 
     public Map<String, List<String>> getInteroperabilityRecordIdToConfigurationTemplateListMap() {
@@ -151,16 +149,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
 
     //region Not-Needed
     @Override
-    public ConfigurationTemplateBundle get(String id) {
-        return null;
-    }
-
-    @Override
-    public Browsing<ConfigurationTemplateBundle> getAll(FacetFilter filter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
     public Browsing<ConfigurationTemplateBundle> getMy(FacetFilter filter, Authentication authentication) {
         return null;
     }
@@ -171,32 +159,12 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     }
 
     @Override
-    public ConfigurationTemplateBundle getOrElseReturnNull(String id) {
-        return null;
-    }
-
-    @Override
     public ConfigurationTemplateBundle verify(String id, String status, Boolean active, Authentication auth) {
         return null;
     }
 
     @Override
     public ConfigurationTemplateBundle setActive(String id, Boolean active, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public Paging<ConfigurationTemplateBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         return null;
     }
 
@@ -221,78 +189,13 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     }
 
     @Override
-    public Browsing<ConfigurationTemplateBundle> getAll(FacetFilter filter) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateBundle get(String id, String catalogueId) {
-        return null;
-    }
-
-    @Override
-    public String createId(ConfigurationTemplateBundle configurationTemplateBundle) {
-        return "";
-    }
-
-    @Override
-    public ConfigurationTemplateBundle save(ConfigurationTemplateBundle configurationTemplateBundle) {
-        return null;
-    }
-
-    @Override
-    public Map<String, List<ConfigurationTemplateBundle>> getBy(String field) {
-        return Map.of();
-    }
-
-    @Override
-    public List<ConfigurationTemplateBundle> getSome(String... ids) {
-        return List.of();
-    }
-
-    @Override
-    public ConfigurationTemplateBundle get(SearchService.KeyValue... keyValues) {
-        return null;
-    }
-
-    @Override
-    public List<ConfigurationTemplateBundle> delAll() {
-        return List.of();
-    }
-
-    @Override
-    public ConfigurationTemplateBundle validate(ConfigurationTemplateBundle configurationTemplateBundle) {
-        return null;
-    }
-
-    @Override
-    public Resource getResource(String id) {
-        return null;
-    }
-
-    @Override
-    public Resource getResource(String id, String catalogueId) {
-        return null;
-    }
-
-    @Override
-    public boolean exists(ConfigurationTemplateBundle configurationTemplateBundle) {
-        return false;
-    }
-
-    @Override
-    public boolean exists(String id) {
-        return false;
-    }
-
-    @Override
     public void addBulk(List<ConfigurationTemplateBundle> resources, Authentication auth) {
-        ConfigurationTemplateService.super.addBulk(resources, auth);
+        super.addBulk(resources, auth);
     }
 
     @Override
     public void updateBulk(List<ConfigurationTemplateBundle> resources, Authentication auth) {
-        ConfigurationTemplateService.super.updateBulk(resources, auth);
+        super.updateBulk(resources, auth);
     }
-
+    //endregion
 }

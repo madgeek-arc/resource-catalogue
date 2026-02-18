@@ -20,11 +20,8 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
@@ -39,10 +36,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
-public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGenericManager<ResourceInteroperabilityRecordBundle> implements ResourceInteroperabilityRecordService {
+public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGenericManager<ResourceInteroperabilityRecordBundle>
+        implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
     private final ServiceService serviceService;
@@ -152,7 +153,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceService, resourceType);
-        } else if (resourceType.equals("training_resource")) {
+        } else if (resourceType.equals("training_resource")) { //TODO: probably remove
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
         } else {
             throw new ValidationException("Field 'resourceType' should be either 'service' or 'training_resource'");
@@ -241,34 +242,9 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         }
     }
 
-    //region Not-Needed
-    @Override
-    public ResourceInteroperabilityRecordBundle getOrElseReturnNull(String id) {
-        return null;
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle get(String id) {
-        return null;
-    }
-
-    @Override
-    public Browsing<ResourceInteroperabilityRecordBundle> getAll(FacetFilter filter, Authentication authentication) {
-        return null;
-    }
-
+    //region not-needed
     @Override
     public Browsing<ResourceInteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resource, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle resource, Authentication authentication) {
         return null;
     }
 
@@ -279,21 +255,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
 
     @Override
     public ResourceInteroperabilityRecordBundle setActive(String id, Boolean active, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        return null;
-    }
-
-    @Override
-    public Paging<ResourceInteroperabilityRecordBundle> getRandomResourcesForAuditing(int quantity, int auditingInterval, Authentication auth) {
         return null;
     }
 
@@ -318,78 +279,13 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     }
 
     @Override
-    public Browsing<ResourceInteroperabilityRecordBundle> getAll(FacetFilter filter) {
-        return null;
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle get(String id, String catalogueId) {
-        return null;
-    }
-
-    @Override
-    public String createId(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        return "";
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle save(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        return null;
-    }
-
-    @Override
-    public Map<String, List<ResourceInteroperabilityRecordBundle>> getBy(String field) {
-        return Map.of();
-    }
-
-    @Override
-    public List<ResourceInteroperabilityRecordBundle> getSome(String... ids) {
-        return List.of();
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle get(SearchService.KeyValue... keyValues) {
-        return null;
-    }
-
-    @Override
-    public List<ResourceInteroperabilityRecordBundle> delAll() {
-        return List.of();
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        return null;
-    }
-
-    @Override
-    public Resource getResource(String id) {
-        return null;
-    }
-
-    @Override
-    public Resource getResource(String id, String catalogueId) {
-        return null;
-    }
-
-    @Override
-    public boolean exists(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        return false;
-    }
-
-    @Override
-    public boolean exists(String id) {
-        return false;
-    }
-
-    @Override
     public void addBulk(List<ResourceInteroperabilityRecordBundle> resources, Authentication auth) {
-        ResourceInteroperabilityRecordService.super.addBulk(resources, auth);
+        super.addBulk(resources, auth);
     }
 
     @Override
     public void updateBulk(List<ResourceInteroperabilityRecordBundle> resources, Authentication auth) {
-        ResourceInteroperabilityRecordService.super.updateBulk(resources, auth);
+        super.updateBulk(resources, auth);
     }
     //endregion
 }
