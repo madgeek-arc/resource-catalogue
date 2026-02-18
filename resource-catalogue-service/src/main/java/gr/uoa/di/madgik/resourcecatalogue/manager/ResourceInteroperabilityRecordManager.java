@@ -22,11 +22,12 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
@@ -87,10 +88,14 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_id", resourceId);
         ff.addFilter("published", "false");
-        ResourceInteroperabilityRecordBundle bundle = genericResourceService.get(getResourceTypeName(),
-                new SearchService.KeyValue("resource_id", resourceId),
-                new SearchService.KeyValue("published", "false"));
-        return bundle;
+        try {
+            ResourceInteroperabilityRecordBundle bundle = genericResourceService.get(getResourceTypeName(),
+                    new SearchService.KeyValue("resource_id", resourceId),
+                    new SearchService.KeyValue("published", "false"));
+            return bundle;
+        } catch (ResourceException e) {
+            return null;
+        }
     }
 
     @Override
