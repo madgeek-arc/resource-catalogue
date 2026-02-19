@@ -1,71 +1,49 @@
-///*
-// * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
-// *
-// * Licensed under the Apache License, Version 2.0 (the "License");
-// * you may not use this file except in compliance with the License.
-// * You may obtain a copy of the License at
-// *
-// *      https://www.apache.org/licenses/LICENSE-2.0
-// *
-// * Unless required by applicable law or agreed to in writing, software
-// * distributed under the License is distributed on an "AS IS" BASIS,
-// * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// * See the License for the specific language governing permissions and
-// * limitations under the License.
-// */
-//
-//package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
-//
-//import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-//import gr.uoa.di.madgik.registry.domain.FacetFilter;
-//import gr.uoa.di.madgik.registry.domain.Paging;
-//import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-//import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-//import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-//import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-//import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;
-//import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
-//import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
-//import gr.uoa.di.madgik.resourcecatalogue.validators.HelpdeskValidator;
-//import gr.uoa.di.madgik.resourcecatalogue.validators.MonitoringValidator;
-//import io.swagger.v3.oas.annotations.Operation;
-//import io.swagger.v3.oas.annotations.Parameter;
-//import io.swagger.v3.oas.annotations.tags.Tag;
-//import jakarta.validation.Valid;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.context.annotation.Profile;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.access.prepost.PreAuthorize;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.util.MultiValueMap;
-//import org.springframework.web.bind.WebDataBinder;
-//import org.springframework.web.bind.annotation.*;
-//
-//import java.time.OffsetDateTime;
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-//
-//@Profile("beyond")
-//@RestController
-//@RequestMapping("service-extensions")
-//@Tag(name = "service extensions", description = "Operations about Services' Helpdesks/Monitorings")
-//public class ServiceExtensionsController {
-//
-//    private static final Logger logger = LoggerFactory.getLogger(ServiceExtensionsController.class);
-//    private final HelpdeskService helpdeskService;
-//    private final MonitoringService monitoringService;
-//    private final ServiceService serviceService;
-//    @Value("${argo.grnet.monitoring.availability:}")
-//    private String monitoringAvailability;
-//    @Value("${argo.grnet.monitoring.status:}")
-//    private String monitoringStatus;
-//    private final GenericResourceService genericResourceService;
-//
+/*
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
+
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@Profile("beyond")
+@RestController
+@RequestMapping("service-extensions")
+@Tag(name = "service extensions", description = "Operations about Services' Helpdesks/Monitorings")
+public class ServiceExtensionsController {
+
+    private final MonitoringService monitoringService;
+    @Value("${argo.grnet.monitoring.availability:}")
+    private String monitoringAvailability;
+    @Value("${argo.grnet.monitoring.status:}")
+    private String monitoringStatus;
+
+    //
 //    @InitBinder("helpdesk")
 //    protected void initHelpdeskBinder(WebDataBinder binder) {
 //        binder.addValidators(new HelpdeskValidator());
@@ -76,16 +54,11 @@
 //        binder.addValidators(new MonitoringValidator());
 //    }
 //
-//    ServiceExtensionsController(HelpdeskService helpdeskService,
-//                                MonitoringService monitoringService,
-//                                ServiceService serviceService,
-//                                GenericResourceService genericResourceService) {
-//        this.helpdeskService = helpdeskService;
-//        this.monitoringService = monitoringService;
-//        this.serviceService = serviceService;
-//        this.genericResourceService = genericResourceService;
-//    }
-//
+    ServiceExtensionsController(MonitoringService monitoringService) {
+        this.monitoringService = monitoringService;
+    }
+
+    //
 //    //SECTION: HELPDESK
 //    @Operation(summary = "Returns the Helpdesk with the given id.")
 //    @GetMapping(path = "/helpdesk/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -265,11 +238,11 @@
 //        return ResponseEntity.ok(paging);
 //    }
 //
-//    @Operation(summary = "Returns all the available Monitoring serviceTypes")
-//    @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public ResponseEntity<List<Vocabulary>> getAvailableServiceTypes() {
-//        return new ResponseEntity<>(monitoringService.getAvailableServiceTypes(), HttpStatus.OK);
-//    }
+    @Operation(summary = "Returns all the available Monitoring serviceTypes")
+    @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Vocabulary>> getAvailableServiceTypes() {
+        return new ResponseEntity<>(monitoringService.getAvailableServiceTypes(), HttpStatus.OK);
+    }
 //
 //    @Operation(summary = "Creates a new Monitoring.")
 //    @PostMapping(path = "/monitoring", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -398,4 +371,4 @@
 //        monitoringService.addBulk(monitoringList, auth);
 //    }
 //
-//}
+}

@@ -1,88 +1,50 @@
-///*
-// * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
-// *
-// * Licensed under the Apache License, Version 2.0 (the "License");
-// * you may not use this file except in compliance with the License.
-// * You may obtain a copy of the License at
-// *
-// *      https://www.apache.org/licenses/LICENSE-2.0
-// *
-// * Unless required by applicable law or agreed to in writing, software
-// * distributed under the License is distributed on an "AS IS" BASIS,
-// * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// * See the License for the specific language governing permissions and
-// * limitations under the License.
-// */
-//
-//package gr.uoa.di.madgik.resourcecatalogue.manager;
-//
-//
-//import com.google.gson.Gson;
-//import com.google.gson.JsonArray;
-//import com.google.gson.JsonElement;
-//import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-//import gr.uoa.di.madgik.registry.domain.Resource;
-//import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
-//import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-//import gr.uoa.di.madgik.registry.service.SearchService;
-//import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-//import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-//import gr.uoa.di.madgik.resourcecatalogue.service.*;
-//import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-//import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-//import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-//import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
-//import org.json.JSONArray;
-//import org.json.JSONObject;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.context.annotation.Lazy;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.web.reactive.function.client.WebClient;
-//import reactor.core.publisher.Mono;
-//
-//import java.util.*;
-//
-//
-//@org.springframework.stereotype.Service("monitoringManager")
-//public class MonitoringManager extends ResourceCatalogueManager<MonitoringBundle> implements MonitoringService {
-//
-//    private static final Logger logger = LoggerFactory.getLogger(MonitoringManager.class);
-//    private final ServiceService serviceService;
-//    private final TrainingResourceService trainingResourceService;
-//    private final SecurityService securityService;
-//    private final EmailService emailService;
-//    private final ProviderResourcesCommonMethods commonMethods;
-//    private final WebClient webClient;
-//
-//    @Value("${catalogue.id}")
-//    private String catalogueId;
-//
-//    @Value("${argo.grnet.monitoring.token:}")
-//    private String monitoringToken;
-//    @Value("${argo.grnet.monitoring.service.types:}")
-//    private String monitoringServiceTypes;
-//
-//    private final IdCreator idCreator;
-//
-//
-//    public MonitoringManager(ServiceService serviceService,
-//                             TrainingResourceService trainingResourceService,
-//                             @Lazy SecurityService securityService,
-//                             @Lazy EmailService emailService,
-//                             ProviderResourcesCommonMethods commonMethods,
-//                             IdCreator idCreator,
-//                             WebClient.Builder webClientBuilder) {
-//        super(MonitoringBundle.class);
-//        this.serviceService = serviceService;
-//        this.trainingResourceService = trainingResourceService;
-//        this.securityService = securityService;
-//        this.emailService = emailService;
-//        this.commonMethods = commonMethods;
-//        this.idCreator = idCreator;
-//        this.webClient = webClientBuilder.build();
-//    }
+/*
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package gr.uoa.di.madgik.resourcecatalogue.manager;
+
+
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.service.MonitoringService;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.util.*;
+
+
+@org.springframework.stereotype.Service("monitoringManager")
+public class MonitoringManager /*extends ResourceCatalogueManager<MonitoringBundle>*/ implements MonitoringService {
+
+    private final WebClient webClient;
+
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
+    @Value("${argo.grnet.monitoring.token:}")
+    private String monitoringToken;
+    @Value("${argo.grnet.monitoring.service.types:}")
+    private String monitoringServiceTypes;
+
+
+    public MonitoringManager(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.build();
+    }
 //
 //    @Override
 //    public String getResourceTypeName() {
@@ -128,7 +90,7 @@
 //        validate(monitoring, resourceType);
 //
 //        monitoring.setId(idCreator.generate(getResourceTypeName()));
-////        commonMethods.createIdentifiers(monitoring, getResourceTypeName(), false);
+//        commonMethods.createIdentifiers(monitoring, getResourceTypeName(), false);
 //        logger.trace("Attempting to add a new Monitoring: {}", monitoring);
 //
 //        monitoring.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth),
@@ -221,38 +183,39 @@
 //                monitoring.getMonitoring().getId(), monitoring.getMonitoring().getCatalogueId());
 //    }
 //
-//    public List<Vocabulary> getAvailableServiceTypes() {
-//        String response = callMonitoringApi(monitoringServiceTypes, monitoringToken);
-//        if (response == null || response.isEmpty()) return Collections.emptyList();
-//
-//        JSONObject obj = new JSONObject(response);
-//        JSONArray array = obj.getJSONArray("data");
-//        return createServiceTypeVocabularyList(array);
-//    }
-//
-//    private List<Vocabulary> createServiceTypeVocabularyList(JSONArray array) {
-//        List<Vocabulary> serviceTypeList = new ArrayList<>();
-//        for (int i = 0; i < array.length(); i++) {
-//            String date = array.getJSONObject(i).get("date").toString();
-//            String name = array.getJSONObject(i).get("name").toString();
-//            String title = array.getJSONObject(i).get("title").toString();
-//            String description = array.getJSONObject(i).get("description").toString();
-//            JSONArray tagsArray = array.getJSONObject(i).getJSONArray("tags");
-//            List<String> tags = new ArrayList<>();
-//            for (int j = 0; j < tagsArray.length(); j++) {
-//                tags.add(tagsArray.getString(j));
-//            }
-//            String tagsString = String.join(",", tags);
-//            Map<String, String> extras = new HashMap<>();
-//            extras.put("date", date);
-//            extras.put("tags", tagsString);
-//            Vocabulary vocabulary = new Vocabulary(name, description, description, null,
-//                    "external-monitoring_service_type", extras);
-//            serviceTypeList.add(vocabulary);
-//        }
-//        return serviceTypeList;
-//    }
-//
+    public List<Vocabulary> getAvailableServiceTypes() {
+        String response = callMonitoringApi(monitoringServiceTypes, monitoringToken);
+        if (response == null || response.isEmpty()) return Collections.emptyList();
+
+        JSONObject obj = new JSONObject(response);
+        JSONArray array = obj.getJSONArray("data");
+        return createServiceTypeVocabularyList(array);
+    }
+
+    private List<Vocabulary> createServiceTypeVocabularyList(JSONArray array) {
+        List<Vocabulary> serviceTypeList = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            String date = array.getJSONObject(i).get("date").toString();
+            String name = array.getJSONObject(i).get("name").toString();
+            String title = array.getJSONObject(i).get("title").toString();
+            String description = array.getJSONObject(i).get("description").toString();
+            JSONArray tagsArray = array.getJSONObject(i).getJSONArray("tags");
+            List<String> tags = new ArrayList<>();
+            for (int j = 0; j < tagsArray.length(); j++) {
+                tags.add(tagsArray.getString(j));
+            }
+            String tagsString = String.join(",", tags);
+            Map<String, String> extras = new HashMap<>();
+            extras.put("date", date);
+            extras.put("tags", tagsString);
+            Vocabulary vocabulary = new Vocabulary(name, description, description, null,
+                    "external-monitoring_service_type", extras);
+            serviceTypeList.add(vocabulary);
+        }
+        return serviceTypeList;
+    }
+
+    //
 //    @Override
 //    public MonitoringBundle get(String serviceId, String catalogueId) {
 //        Resource res = where(false,
@@ -321,16 +284,16 @@
 //        return serviceMonitoringStatuses;
 //    }
 //
-//    private String callMonitoringApi(String url, String token) {
-//        return webClient.get()
-//                .uri(url)
-//                .header("accept", "application/json")
-//                .header("Content-Type", "application/json")
-//                .header("x-api-key", token)
-//                .retrieve()
-//                .onStatus(status -> !status.is2xxSuccessful(), clientResponse -> Mono.empty())
-//                .bodyToMono(String.class)
-//                .onErrorResume(e -> Mono.empty())
-//                .block();
-//    }
-//}
+    private String callMonitoringApi(String url, String token) {
+        return webClient.get()
+                .uri(url)
+                .header("accept", "application/json")
+                .header("Content-Type", "application/json")
+                .header("x-api-key", token)
+                .retrieve()
+                .onStatus(status -> !status.is2xxSuccessful(), clientResponse -> Mono.empty())
+                .bodyToMono(String.class)
+                .onErrorResume(e -> Mono.empty())
+                .block();
+    }
+}
