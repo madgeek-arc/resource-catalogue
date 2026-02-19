@@ -119,7 +119,9 @@ public class WorkflowService {
         String resourceType = getResourceType(vars, headers);
         T resource = getResourceBundle(vars, resourceName);
         logger.info("Running task 'update-resource' | resourceType: {}, id: {}", resourceType, resource.getId());
-        T bundle = genericResourceService.update(resourceType, resource.getId(), resource);
+        // IMPORTANT: Validation is disabled by design. It's up to the admin to provide correct values to the resource
+        // ModelResponseValidator -> validateVocabulary -> outside servlet
+        T bundle = genericResourceService.update(resourceType, resource.getId(), resource, false);
         putResourceBundle(vars, bundle, resourceName);
         return vars;
     }
