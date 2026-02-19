@@ -79,7 +79,6 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     }
 
     //region generic
-    //TODO: pre-auth?
     @Operation(summary = "Returns the Datasource with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +

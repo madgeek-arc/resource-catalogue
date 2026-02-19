@@ -52,9 +52,11 @@ public class PublicDatasourceController {
         this.service = service;
     }
 
-    //TODO: add pre-authorize?
     @Operation(description = "Returns the Public Datasource with the given id.")
     @GetMapping(path = "public/datasource/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.datasourceIsActive(#prefix+'/'+#suffix, catalogueId) or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
