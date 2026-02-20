@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
@@ -27,6 +26,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -103,12 +103,13 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     @GetMapping(path = "types/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Vocabulary>> getByTypeV2(@PathVariable(value = "type") String type,
                                                         @RequestParam(required = false) String parent_id,
-                                                        @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams) {
+                                                        @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, Sort sort) {
         FacetFilter filter = FacetFilter.from(allRequestParams);
         filter.addFilter("type", type);
         filter.setQuantity(10000);
-        Browsing<Vocabulary> vocs = vocabularyService.getAll(filter);
-        return new ResponseEntity<>(vocs.getResults(), HttpStatus.OK);
+        List<Vocabulary> vocs = vocabularyService.getAll(filter).getResults();
+        vocs.sort(Comparator.comparing(Vocabulary::getName));
+        return new ResponseEntity<>(vocs, HttpStatus.OK);
     }
 
     @Operation(summary = "Get vocabularies by id")
