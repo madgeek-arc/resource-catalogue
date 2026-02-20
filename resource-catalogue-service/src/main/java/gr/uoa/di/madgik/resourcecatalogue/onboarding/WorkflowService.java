@@ -7,7 +7,6 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
-import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import io.camunda.client.CamundaClient;
 import io.camunda.client.annotation.CustomHeaders;
 import io.camunda.client.annotation.JobWorker;
