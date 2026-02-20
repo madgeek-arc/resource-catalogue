@@ -60,7 +60,7 @@ public class WorkflowService {
                 .latestVersion()
                 .variables(vars)
                 .withResult()
-                .requestTimeout(java.time.Duration.ofSeconds(120))
+                .requestTimeout(java.time.Duration.ofSeconds(60))
                 .send()
                 .join();
         WorkflowResult result = getWorkflowResult(key);
@@ -83,7 +83,7 @@ public class WorkflowService {
         };
     }
 
-    @JobWorker(type = "resource-onboard", autoComplete = true)
+    @JobWorker(type = "resource-onboard", timeout = 30_000, maxJobsActive = 5)
     public <T extends Bundle> Map<String, Object> onboardResource(@VariablesAsType Map<String, Object> vars,
                                                @CustomHeaders Map<String, String> headers) {
         String resourceName = headers.getOrDefault("resourceName", "resource");
@@ -100,7 +100,7 @@ public class WorkflowService {
         return Map.of(resourceName, toMap(bundle));
     }
 
-    @JobWorker(type = "get-resource", autoComplete = true)
+    @JobWorker(type = "get-resource", timeout = 30_000, maxJobsActive = 5)
     public <T extends Bundle> Map<String, Object> getResourceBundle(@VariablesAsType Map<String, Object> vars,
                                                  @CustomHeaders Map<String, String> headers) {
         String id = (String) vars.get("id");
@@ -112,7 +112,7 @@ public class WorkflowService {
         return vars;
     }
 
-    @JobWorker(type = "update-resource", autoComplete = true)
+    @JobWorker(type = "update-resource", timeout = 30_000, maxJobsActive = 5)
     public <T extends Bundle> Map<String, Object> updateResource(@VariablesAsType Map<String, Object> vars,
                                  @CustomHeaders Map<String, String> headers) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
         String resourceName = headers.getOrDefault("resourceName", "resource");
@@ -126,7 +126,7 @@ public class WorkflowService {
         return vars;
     }
 
-    @JobWorker(type = "delete-resource", autoComplete = true)
+    @JobWorker(type = "delete-resource", timeout = 30_000, maxJobsActive = 5)
     public <T extends Bundle> Map<String, Object> deleteResource(@VariablesAsType Map<String, Object> vars,
                                  @CustomHeaders Map<String, String> headers) {
         String id = (String) vars.get("id");
@@ -139,7 +139,7 @@ public class WorkflowService {
         return vars;
     }
 
-    @JobWorker(type = "get-catalogue", autoComplete = true)
+    @JobWorker(type = "get-catalogue", timeout = 30_000, maxJobsActive = 5)
     public Map<String, Object> getCatalogue(@VariablesAsType Map<String, Object> vars) {
         var catalogueId = (String) vars.get("catalogueId");
         CatalogueBundle catalogue = null;
