@@ -391,7 +391,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/NODE",
+                  "url": "/api/vocabulary/types/Node",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -865,6 +865,121 @@
               ]
             },
             {
+              "id": "tagline",
+              "name": "tagline",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Tagline",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "string",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Tagline",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "logo",
+              "name": "logo",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Logo",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "url",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "strictValidation": true
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": "Link to the logo/visual identity of the Resource. The logo will be visible at the Portal. If there is no specific logo for the Resource the logo of the Provider may be used. Go to the Resource Provider's website --> Right Click on the Resource Provider's logo on the website --> Select 'Copy Image Link' --> Paste it in the below field.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": "use http:// or https://",
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 3,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
               "id": "documentation",
               "name": "documentation",
               "parentId": null,
@@ -911,7 +1026,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 2,
+                  "order": 4,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -968,7 +1083,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 3,
+                  "order": 5,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -1025,7 +1140,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 4,
+                  "order": 6,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -1054,7 +1169,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/ADAPTER_PROGRAMMING_LANGUAGE",
+                  "url": "/api/vocabulary/types/Adapter%20programming%20language",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1084,7 +1199,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 5,
+                  "order": 7,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -1113,7 +1228,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/ADAPTER_LICENSE",
+                  "url": "/api/vocabulary/types/Spdx%20license",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1127,7 +1242,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "Software/Code license (eg, MIT, APache, GPL)",
+                  "text": "SPDX License",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -1143,7 +1258,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 6,
+                  "order": 8,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -1201,7 +1316,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 7,
+                  "order": 9,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -1259,7 +1374,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 8,
+                  "order": 10,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -1321,7 +1436,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 9,
+                  "order": 11,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -1472,7 +1587,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/CREDIT",
+                      "url": "/api/vocabulary/types/Credit",
                       "idField": "id",
                       "labelField": "name"
                     },

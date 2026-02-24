@@ -13,8 +13,8 @@
   "modifiedBy": null,
   "sections": [
     {
-      "id": "Catalogue",
-      "name": "Catalogue",
+      "id": "catalogue",
+      "name": "catalogue",
       "description": null,
       "subType": null,
       "order": 0,
@@ -220,7 +220,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabularies-endpoint/NODE",
+                  "url": "/api/vocabulary/types/Node",
                   "idField": "id",
                   "labelField": "name",
                   "urlParams": null
@@ -401,7 +401,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabularies-endpoint/PROVIDER_LEGAL_STATUS",
+                  "url": "/api/vocabulary/types/Provider%20legal%20status",
                   "idField": "id",
                   "labelField": "name",
                   "urlParams": null
@@ -465,7 +465,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabularies-endpoint/PROVIDER_HOSTING_LEGAL_ENTITY",
+                  "url": "/api/vocabulary/types/Provider%20hosting%20legal%20entity",
                   "idField": "id",
                   "labelField": "name",
                   "urlParams": null
@@ -1112,7 +1112,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabularies-endpoint/SCIENTIFIC_DOMAIN",
+                      "url": "/api/vocabulary/types/Scientific%20domain",
                       "idField": "id",
                       "labelField": "name",
                       "urlParams": null
@@ -1172,7 +1172,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabularies-endpoint/SCIENTIFIC_SUBDOMAIN",
+                      "url": "/api/vocabulary/types/Scientific%20subdomain",
                       "idField": "id",
                       "labelField": "name",
                       "urlParams": null
@@ -1592,7 +1592,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabularies-endpoint/COUNTRY",
+                      "url": "/api/vocabulary/types/Country",
                       "idField": "id",
                       "labelField": "name",
                       "urlParams": null
@@ -2366,7 +2366,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabularies-endpoint/COUNTRY",
+                  "url": "/api/vocabulary/types/Country",
                   "idField": "id",
                   "labelField": "name",
                   "urlParams": null
@@ -2484,7 +2484,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabularies-endpoint/PROVIDER_NETWORK",
+                  "url": "/api/vocabulary/types/Provider%20network",
                   "idField": "id",
                   "labelField": "name",
                   "urlParams": null

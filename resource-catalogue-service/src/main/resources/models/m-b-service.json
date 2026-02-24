@@ -391,7 +391,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/NODE",
+                  "url": "/api/vocabulary/types/Node",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -621,7 +621,7 @@
               "kind": null,
               "typeInfo": {
                 "vocabulary": null,
-                "type": "string",
+                "type": "vocabulary",
                 "defaultValue": null,
                 "values": null,
                 "properties": {
@@ -849,6 +849,65 @@
           "subSections": null,
           "fields": [
             {
+              "id": "jurisdiction",
+              "name": "jurisdiction",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Jurisdiction",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "vocabulary",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "url": "/api/vocabulary/types/Jurisdiction",
+                  "idField": "id",
+                  "labelField": "name"
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 0,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
               "id": "scientificDomains",
               "name": "scientificDomains",
               "parentId": null,
@@ -921,7 +980,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/SCIENTIFIC_DOMAIN",
+                      "url": "/api/vocabulary/types/Scientific%20domain",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -1105,7 +1164,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/CATEGORY",
+                      "url": "/api/vocabulary/types/Category",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -1273,65 +1332,6 @@
               },
               "display": null,
               "subFields": []
-            },
-            {
-              "id": "jurisdiction",
-              "name": "jurisdiction",
-              "parentId": null,
-              "parent": null,
-              "label": {
-                "text": "Jurisdiction",
-                "cssClasses": null,
-                "style": null,
-                "showLess": false
-              },
-              "accessPath": null,
-              "kind": null,
-              "typeInfo": {
-                "vocabulary": null,
-                "type": "vocabulary",
-                "defaultValue": null,
-                "values": null,
-                "properties": {
-                  "url": "/api/vocabulary/byType/DS_JURISDICTION",
-                  "idField": "id",
-                  "labelField": "name"
-                },
-                "multiplicity": false,
-                "prefill": null
-              },
-              "includedInSnippet": false,
-              "deprecated": false,
-              "form": {
-                "dependsOn": null,
-                "affects": null,
-                "group": null,
-                "description": {
-                  "text": "The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property.",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "suggestion": {
-                  "text": null,
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "placeholder": null,
-                "mandatory": true,
-                "immutable": true,
-                "display": {
-                  "placement": null,
-                  "order": 4,
-                  "visible": true,
-                  "hasBorder": false,
-                  "cssClasses": null,
-                  "style": null
-                }
-              },
-              "display": null,
-              "subFields": []
             }
           ]
         },
@@ -1362,7 +1362,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/TRL",
+                  "url": "/api/vocabulary/types/Technology%20readiness%20level",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1602,7 +1602,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/ORDER_TYPE",
+                  "url": "/api/vocabulary/types/Order%20type",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1840,7 +1840,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/CREDIT",
+                      "url": "/api/vocabulary/types/Credit",
                       "idField": "id",
                       "labelField": "name"
                     },

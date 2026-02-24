@@ -391,7 +391,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/NODE",
+                  "url": "/api/vocabulary/types/Node",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -921,7 +921,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/SCIENTIFIC_DOMAIN",
+                      "url": "/api/vocabulary/types/Scientific%20domain",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -1231,7 +1231,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/CREDIT",
+                      "url": "/api/vocabulary/types/Credit",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -1749,12 +1749,12 @@
               "subFields": []
             },
             {
-              "id": "softwareLicense",
-              "name": "softwareLicense",
+              "id": "license",
+              "name": "license",
               "parentId": null,
               "parent": null,
               "label": {
-                "text": "Software License",
+                "text": "License",
                 "cssClasses": null,
                 "style": null,
                 "showLess": false
@@ -1767,7 +1767,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/ADAPTER_LICENSE",
+                  "url": "/api/vocabulary/types/Spdx%20license",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1781,7 +1781,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "License (eg, MIT, Apache 2.0, GPL 3.0)",
+                  "text": "SPDX License",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false

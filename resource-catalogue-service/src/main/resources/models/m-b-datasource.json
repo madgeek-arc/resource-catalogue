@@ -391,7 +391,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/NODE",
+                  "url": "/api/vocabulary/types/Node",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -849,6 +849,65 @@
           "subSections": null,
           "fields": [
             {
+              "id": "jurisdiction",
+              "name": "jurisdiction",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Jurisdiction",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "vocabulary",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "url": "/api/vocabulary/types/Jurisdiction",
+                  "idField": "id",
+                  "labelField": "name"
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 0,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
               "id": "scientificDomains",
               "name": "scientificDomains",
               "parentId": null,
@@ -903,65 +962,6 @@
               "display": null,
               "subFields": [
                 {
-                  "id": "jurisdiction",
-                  "name": "jurisdiction",
-                  "parentId": null,
-                  "parent": null,
-                  "label": {
-                    "text": "Jurisdiction",
-                    "cssClasses": null,
-                    "style": null,
-                    "showLess": false
-                  },
-                  "accessPath": null,
-                  "kind": null,
-                  "typeInfo": {
-                    "vocabulary": null,
-                    "type": "vocabulary",
-                    "defaultValue": null,
-                    "values": null,
-                    "properties": {
-                      "url": "/api/vocabulary/byType/DS_JURISDICTION",
-                      "idField": "id",
-                      "labelField": "name"
-                    },
-                    "multiplicity": false,
-                    "prefill": null
-                  },
-                  "includedInSnippet": false,
-                  "deprecated": false,
-                  "form": {
-                    "dependsOn": null,
-                    "affects": null,
-                    "group": null,
-                    "description": {
-                      "text": "The property defines the jurisdiction of the users of the data source, based on the vocabulary for this property.",
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "suggestion": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "placeholder": null,
-                    "mandatory": true,
-                    "immutable": true,
-                    "display": {
-                      "placement": null,
-                      "order": 0,
-                      "visible": true,
-                      "hasBorder": false,
-                      "cssClasses": null,
-                      "style": null
-                    }
-                  },
-                  "display": null,
-                  "subFields": []
-                },
-                {
                   "id": "scientificDomain",
                   "name": "scientificDomain",
                   "parentId": "scientificDomains",
@@ -980,7 +980,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/SCIENTIFIC_DOMAIN",
+                      "url": "/api/vocabulary/types/Scientific%20domain",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -1164,7 +1164,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/CATEGORY",
+                      "url": "/api/vocabulary/types/Category",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -1362,7 +1362,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/TRL",
+                  "url": "/api/vocabulary/types/Technology%20readiness%20level",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1602,7 +1602,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/ORDER_TYPE",
+                  "url": "/api/vocabulary/types/Order%20type",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1840,7 +1840,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/CREDIT",
+                      "url": "/api/vocabulary/types/Credit",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -2546,7 +2546,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/DS_RESEARCH_ENTITY_TYPE",
+                      "url": "/api/vocabulary/types/Research%20entity%20type",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -2605,11 +2605,11 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/DS_PERSISTENT_IDENTITY_SCHEME",
+                      "url": "/api/vocabulary/types/Persistent%20identity%20scheme",
                       "idField": "id",
                       "labelField": "name"
                     },
-                    "multiplicity": true,
+                    "multiplicity": false,
                     "prefill": null
                   },
                   "includedInSnippet": false,
@@ -2676,7 +2676,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/DS_CLASSIFICATION",
+                  "url": "/api/vocabulary/types/Classification",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -2735,7 +2735,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/DS_RESEARCH_ENTITY_TYPE",
+                  "url": "/api/vocabulary/types/Research%20entity%20type",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -2850,12 +2850,12 @@
           "subSections": null,
           "fields": [
             {
-              "id": "researchProductMetadataLicensing",
-              "name": "researchProductMetadataLicensing",
+              "id": "metadataLicense",
+              "name": "metadataLicense",
               "parentId": null,
               "parent": null,
               "label": {
-                "text": "Research Product Metadata Licensing",
+                "text": "Metadata License",
                 "cssClasses": null,
                 "style": null,
                 "showLess": false
@@ -2904,69 +2904,12 @@
               "display": null,
               "subFields": [
                 {
-                  "id": "researchProductMetadataLicenseURL",
-                  "name": "researchProductMetadataLicenseURL",
-                  "parentId": "researchProductMetadataLicensing",
-                  "parent": "researchProductMetadataLicensing",
+                  "id": "metadataLicenseName",
+                  "name": "metadataLicenseName",
+                  "parentId": "metadataLicense",
+                  "parent": "metadataLicense",
                   "label": {
-                    "text": "Research Product Metadata License URL",
-                    "cssClasses": null,
-                    "style": null,
-                    "showLess": false
-                  },
-                  "accessPath": null,
-                  "kind": null,
-                  "typeInfo": {
-                    "vocabulary": null,
-                    "type": "url",
-                    "defaultValue": null,
-                    "values": null,
-                    "properties": {
-                      "strictValidation": true
-                    },
-                    "multiplicity": false,
-                    "prefill": null
-                  },
-                  "includedInSnippet": false,
-                  "deprecated": false,
-                  "form": {
-                    "dependsOn": null,
-                    "affects": null,
-                    "group": null,
-                    "description": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "suggestion": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "placeholder": "use http:// or https://",
-                    "mandatory": false,
-                    "immutable": true,
-                    "display": {
-                      "placement": null,
-                      "order": 1,
-                      "visible": true,
-                      "hasBorder": false,
-                      "cssClasses": null,
-                      "style": null
-                    }
-                  },
-                  "display": null,
-                  "subFields": []
-                },
-                {
-                  "id": "researchProductMetadataLicenseName",
-                  "name": "researchProductMetadataLicenseName",
-                  "parentId": "researchProductMetadataLicensing",
-                  "parent": "researchProductMetadataLicensing",
-                  "label": {
-                    "text": "Research Product Metadata License Name",
+                    "text": "Metadata License Name",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -3017,67 +2960,65 @@
                   },
                   "display": null,
                   "subFields": []
+                },
+                {
+                  "id": "metadataLicenseURL",
+                  "name": "metadataLicenseURL",
+                  "parentId": "metadataLicense",
+                  "parent": "metadataLicense",
+                  "label": {
+                    "text": "Metadata License URL",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "url",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "strictValidation": true
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": "use http:// or https://",
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 1,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
                 }
               ]
-            },
-            {
-              "id": "researchProductMetadataAccessPolicies",
-              "name": "researchProductMetadataAccessPolicies",
-              "parentId": null,
-              "parent": null,
-              "label": {
-                "text": "Research Product Metadata Access Policy",
-                "cssClasses": null,
-                "style": null,
-                "showLess": false
-              },
-              "accessPath": null,
-              "kind": null,
-              "typeInfo": {
-                "vocabulary": null,
-                "type": "vocabulary",
-                "defaultValue": null,
-                "values": null,
-                "properties": {
-                  "url": "/api/vocabulary/byType/DS_COAR_ACCESS_RIGHTS_1_0",
-                  "idField": "id",
-                  "labelField": "name"
-                },
-                "multiplicity": true,
-                "prefill": null
-              },
-              "includedInSnippet": false,
-              "deprecated": false,
-              "form": {
-                "dependsOn": null,
-                "affects": null,
-                "group": null,
-                "description": {
-                  "text": null,
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "suggestion": {
-                  "text": null,
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "placeholder": null,
-                "mandatory": false,
-                "immutable": true,
-                "display": {
-                  "placement": null,
-                  "order": 2,
-                  "visible": true,
-                  "hasBorder": false,
-                  "cssClasses": null,
-                  "style": null
-                }
-              },
-              "display": null,
-              "subFields": []
             }
           ]
         }

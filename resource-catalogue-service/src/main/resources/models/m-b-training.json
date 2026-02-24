@@ -391,7 +391,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/NODE",
+                  "url": "/api/vocabulary/types/Node",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -783,12 +783,12 @@
               "subFields": []
             },
             {
-              "id": "licenseURL",
-              "name": "licenseURL",
+              "id": "license",
+              "name": "license",
               "parentId": null,
               "parent": null,
               "label": {
-                "text": "License URL",
+                "text": "License",
                 "cssClasses": null,
                 "style": null,
                 "showLess": false
@@ -797,12 +797,10 @@
               "kind": null,
               "typeInfo": {
                 "vocabulary": null,
-                "type": "url",
+                "type": "composite",
                 "defaultValue": null,
                 "values": null,
-                "properties": {
-                  "strictValidation": true
-                },
+                "properties": {},
                 "multiplicity": false,
                 "prefill": null
               },
@@ -813,65 +811,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "A license document that applies to this content, typically indicated by URL.",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "suggestion": {
-                  "text": null,
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "placeholder": "use http:// or https://",
-                "mandatory": true,
-                "immutable": true,
-                "display": {
-                  "placement": null,
-                  "order": 11,
-                  "visible": true,
-                  "hasBorder": false,
-                  "cssClasses": null,
-                  "style": null
-                }
-              },
-              "display": null,
-              "subFields": []
-            },
-            {
-              "id": "licenseName",
-              "name": "licenseName",
-              "parentId": null,
-              "parent": null,
-              "label": {
-                "text": "License Name",
-                "cssClasses": null,
-                "style": null,
-                "showLess": false
-              },
-              "accessPath": null,
-              "kind": null,
-              "typeInfo": {
-                "vocabulary": null,
-                "type": "string",
-                "defaultValue": null,
-                "values": null,
-                "properties": {
-                  "minLength": null,
-                  "maxLength": null
-                },
-                "multiplicity": false,
-                "prefill": null
-              },
-              "includedInSnippet": false,
-              "deprecated": false,
-              "form": {
-                "dependsOn": null,
-                "affects": null,
-                "group": null,
-                "description": {
-                  "text": null,
+                  "text": "A license document that applies to this resource",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -883,19 +823,136 @@
                   "showLess": false
                 },
                 "placeholder": null,
-                "mandatory": true,
+                "mandatory": false,
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 12,
+                  "order": 11,
                   "visible": true,
-                  "hasBorder": false,
+                  "hasBorder": true,
                   "cssClasses": null,
                   "style": null
                 }
               },
               "display": null,
-              "subFields": []
+              "subFields": [
+                {
+                  "id": "licenseURL",
+                  "name": "licenseURL",
+                  "parentId": null,
+                  "parent": null,
+                  "label": {
+                    "text": "License URL",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "url",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "strictValidation": true
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "A license document that applies to this content, typically indicated by URL.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": "use http:// or https://",
+                    "mandatory": true,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 1,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "licenseName",
+                  "name": "licenseName",
+                  "parentId": null,
+                  "parent": null,
+                  "label": {
+                    "text": "License Name",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "vocabulary",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "url": "/api/vocabulary/types/Spdx%20license",
+                      "idField": "id",
+                      "labelField": "name"
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "SPDX License",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": true,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 2,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                }
+              ]
             },
             {
               "id": "accessRights",
@@ -916,7 +973,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/TR_ACCESS_RIGHT",
+                  "url": "/api/vocabulary/types/Training%20Resource%20access%20right",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1047,7 +1104,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/TARGET_USER",
+                  "url": "/api/vocabulary/types/Target%20user",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1106,7 +1163,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/TR_DCMI_TYPE",
+                  "url": "/api/vocabulary/types/Training%20Resource%20dcmi%20type",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1223,7 +1280,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/TR_EXPERTISE_LEVEL",
+                  "url": "/api/vocabulary/types/Training%20Resource%20expertise%20level",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1282,7 +1339,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/TR_CONTENT_RESOURCE_TYPE",
+                  "url": "/api/vocabulary/types/Training%20Resource%20content%20resource%20type",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1341,7 +1398,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/TR_QUALIFICATION",
+                  "url": "/api/vocabulary/types/Training%20Resource%20qualification",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1468,7 +1525,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/vocabulary/byType/LANGUAGE",
+                  "url": "/api/vocabulary/types/Language",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -1591,7 +1648,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/SCIENTIFIC_DOMAIN",
+                      "url": "/api/vocabulary/types/Scientific%20domain",
                       "idField": "id",
                       "labelField": "name"
                     },
@@ -1843,7 +1900,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/byType/CREDIT",
+                      "url": "/api/vocabulary/types/Credit",
                       "idField": "id",
                       "labelField": "name"
                     },
