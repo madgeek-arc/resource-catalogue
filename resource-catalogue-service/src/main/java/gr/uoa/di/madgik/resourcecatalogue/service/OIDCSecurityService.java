@@ -219,6 +219,8 @@ public class OIDCSecurityService implements SecurityService {
                     (String) trainingResourceBundle.getTrainingResource().get("resourceOwner");
             case DeployableSoftwareBundle deployableSoftwareBundle ->
                     (String) deployableSoftwareBundle.getDeployableSoftware().get("resourceOwner");
+            case AdapterBundle adapterBundle ->
+                    (String) adapterBundle.getAdapter().get("resourceOwner");
             case null, default ->
                     (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("resourceOwner");
         };
