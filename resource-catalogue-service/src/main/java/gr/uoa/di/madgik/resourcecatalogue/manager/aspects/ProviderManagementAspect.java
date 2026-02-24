@@ -17,7 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 
-import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -91,7 +90,9 @@ public class ProviderManagementAspect {
                                     PublicAdapterService publicAdapterService,
                                     PublicResourceInteroperabilityRecordService publicRIRService,
                                     PublicConfigurationTemplateInstanceService publicCTIService,
-                                    SecurityService securityService, ConfigurationTemplateService configurationTemplateService, ConfigurationTemplateInstanceService configurationTemplateInstanceService, PublicInteroperabilityRecordService publicInteroperabilityRecordService) {
+                                    SecurityService securityService, ConfigurationTemplateService configurationTemplateService,
+                                    ConfigurationTemplateInstanceService configurationTemplateInstanceService,
+                                    PublicInteroperabilityRecordService publicInteroperabilityRecordService) {
         this.providerService = providerService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
@@ -157,7 +158,7 @@ public class ProviderManagementAspect {
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.finalizeDraft(..)) " +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.update(..))",
             returning = "bundle")
     public void updateServiceState(final ServiceBundle bundle) {
@@ -205,7 +206,7 @@ public class ProviderManagementAspect {
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.finalizeDraft(..)) " +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..))",
             returning = "bundle")
     public void updateTrainingResourceState(final TrainingResourceBundle bundle) {
@@ -229,7 +230,7 @@ public class ProviderManagementAspect {
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.finalizeDraft(..)) " +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.update(..))",
             returning = "bundle")
     public void updateDeployableSoftwareState(final DeployableSoftwareBundle bundle) {
@@ -320,11 +321,11 @@ public class ProviderManagementAspect {
     /**
      * Around aspect which updates the public resource associated with the provided resource.
      *
-     * @param pjp the proceeding join point
-     * @param service the public-layer service of the resource
+     * @param pjp      the proceeding join point
+     * @param service  the public-layer service of the resource
      * @param resource the resource that has been updated
+     * @param <T>      the type of the resource
      * @return
-     * @param <T> the type of the resource
      * @throws Throwable
      */
     public <T extends Bundle> T updatePublicBundle(ProceedingJoinPoint pjp, PublicResourceService<T> service, T resource) throws Throwable {
@@ -371,7 +372,7 @@ public class ProviderManagementAspect {
 
     //region Public Service
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.add(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.finalizeDraft(..))",
             /*"|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.changeProvider(..))",*/
@@ -463,7 +464,7 @@ public class ProviderManagementAspect {
 
     //region Public Training Resource
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.add(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
             returning = "training")
     public void addPublicTrainingResource(final TrainingResourceBundle training) {
@@ -485,8 +486,8 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.audit(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "training")
     public void updatePublicTrainingResource(final TrainingResourceBundle training) {
         try {
@@ -508,7 +509,7 @@ public class ProviderManagementAspect {
 
     //region Public Interoperability Record
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.add(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.verify(..))",
             returning = "guideline")
     public void addPublicGuideline(final InteroperabilityRecordBundle guideline) {
@@ -530,8 +531,8 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.verify(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.audit(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "guideline")
     public void updatePublicGuideline(final InteroperabilityRecordBundle guideline) {
         try {
@@ -553,7 +554,7 @@ public class ProviderManagementAspect {
 
     //region Public Deployable Software
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.add(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.verify(..))",
             returning = "deployableSoftware")
     public void addPublicDeployableSoftware(final DeployableSoftwareBundle deployableSoftware) {
@@ -575,8 +576,8 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.verify(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.audit(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "deployableSoftware")
     public void updatePublicDeployableSoftware(final DeployableSoftwareBundle deployableSoftware) {
         try {
@@ -598,7 +599,7 @@ public class ProviderManagementAspect {
 
     //region Public Adapter
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.add(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))",
             returning = "adapter")
     public void addPublicAdapter(final AdapterBundle adapter) {
@@ -619,8 +620,8 @@ public class ProviderManagementAspect {
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setSuspend(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.audit(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "adapter")
     public void updatePublicAdapter(final AdapterBundle adapter) {
         try {
@@ -710,7 +711,7 @@ public class ProviderManagementAspect {
 
     //region extras
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.add(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "service")
     public void assignEoscMonitoringGuidelineToService(final ServiceBundle service) {
