@@ -384,7 +384,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                         // Include providers that were last audited before the threshold
                         resourcesToBeAudited.add(bundle);
                     }
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException ignore) {
                 }
             }
         }

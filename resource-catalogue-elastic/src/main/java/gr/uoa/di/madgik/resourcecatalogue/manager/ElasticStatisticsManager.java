@@ -210,7 +210,7 @@ public class ElasticStatisticsManager implements StatisticsService {
                             if (subTerm.getBuckets() != null) {
                                 for (int i = 0; i < subTerm.getBuckets().size(); i++) {
                                     Double key = (Double) subTerm.getBuckets().get(i).getKey();
-                                    Integer keyToInt = key.intValue();
+                                    int keyToInt = key.intValue();
                                     int totalVistisOnBucket = keyToInt * Integer.parseInt(String.valueOf(subTerm.getBuckets().get(i).getDocCount()));
                                     totalDocCounts[j[0]] += totalVistisOnBucket;
                                 }
