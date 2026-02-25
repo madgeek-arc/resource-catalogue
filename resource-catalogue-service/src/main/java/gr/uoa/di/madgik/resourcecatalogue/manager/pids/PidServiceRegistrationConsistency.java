@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.utils;
+package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

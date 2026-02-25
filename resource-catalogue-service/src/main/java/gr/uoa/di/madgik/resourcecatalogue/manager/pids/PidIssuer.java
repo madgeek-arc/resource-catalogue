@@ -18,7 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PidServiceResponse;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;

@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.utils;
+package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
-import java.util.Collections;
-import java.util.List;
+import org.springframework.http.HttpStatusCode;
 
-public class SortUtils {
+import java.util.Map;
 
-    private SortUtils() {
+public class PidServiceResponse {
+    private final HttpStatusCode statusCode;
+    private final Map<String, Object> body;
+
+    public PidServiceResponse(HttpStatusCode statusCode, Map<String, Object> body) {
+        this.statusCode = statusCode;
+        this.body = body;
     }
 
-    public static <T extends Comparable<? super T>> List<T> sort(List<T> list) {
-        if (list != null) {
-            Collections.sort(list);
-        }
-        return list;
+    public HttpStatusCode getStatusCode() {
+        return statusCode;
+    }
+
+    public Map<String, Object> getBody() {
+        return body;
     }
 }
