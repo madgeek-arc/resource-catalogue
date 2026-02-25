@@ -67,6 +67,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
     public Browsing<T> getAll(FacetFilter ff, Authentication authentication) {
         ff.setResourceType(getResourceTypeName());
+        ff.addFilter("published", true);
         Browsing<T> browsing = genericResourceService.getResults(ff);
         //TODO: test if we need this
         if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
