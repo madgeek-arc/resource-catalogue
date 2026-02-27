@@ -41,6 +41,14 @@ public interface PublicResourceService<T> extends ResourceCRUDService<T, Authent
     Browsing<T> getAll(FacetFilter ff);
 
     /**
+     *
+     * @param t           resource
+     * @param registerPID should the resource be registered in the PID service
+     * @return {@link T}
+     */
+    T add(T t, boolean registerPID);
+
+    /**
      * Create Public resource
      *
      * @param resource Resource

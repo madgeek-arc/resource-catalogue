@@ -81,13 +81,17 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         throw new NotImplementedException();
     }
 
-    public T add(T t, Authentication authentication) {
+    public T add(T t, Authentication auth) {
+        return add(t, false);
+    }
+
+    public T add(T t, boolean registerPID) {
         String lowerLevelId = t.getId();
         t.setId(t.getIdentifiers().getPid());
         t.getMetadata().setPublished(true);
 
         // Post PID
-        if (pidServiceEnabled) {
+        if (pidServiceEnabled && registerPID) {
             logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
             pidIssuer.postPID(t.getId(), null);
         }

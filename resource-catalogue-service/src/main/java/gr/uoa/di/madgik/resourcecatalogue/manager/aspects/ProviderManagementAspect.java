@@ -313,7 +313,7 @@ public class ProviderManagementAspect {
             try {
                 publicProviderService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
             } catch (ResourceException e) {
-                publicProviderService.add(ObjectUtils.clone(bundle), null);
+                publicProviderService.add(ObjectUtils.clone(bundle), true);
             }
         }
     }
@@ -382,7 +382,7 @@ public class ProviderManagementAspect {
             try {
                 publicServiceService.get(service.getIdentifiers().getPid(), service.getCatalogueId());
             } catch (ResourceException e) {
-                publicServiceService.add(ObjectUtils.clone(service), null);
+                publicServiceService.add(ObjectUtils.clone(service), true);
             }
         }
     }
@@ -428,7 +428,7 @@ public class ProviderManagementAspect {
             try {
                 publicDatasourceService.get(datasource.getIdentifiers().getPid(), datasource.getCatalogueId());
             } catch (ResourceException e) {
-                publicDatasourceService.add(ObjectUtils.clone(datasource), null);
+                publicDatasourceService.add(ObjectUtils.clone(datasource), true);
             }
         }
     }
@@ -472,7 +472,7 @@ public class ProviderManagementAspect {
             try {
                 publicTrainingResourceService.get(training.getIdentifiers().getPid(), training.getCatalogueId());
             } catch (ResourceException e) {
-                publicTrainingResourceService.add(ObjectUtils.clone(training), null);
+                publicTrainingResourceService.add(ObjectUtils.clone(training), true);
             }
         }
     }
@@ -517,7 +517,7 @@ public class ProviderManagementAspect {
             try {
                 publicGuidelineService.get(guideline.getIdentifiers().getPid(), guideline.getCatalogueId());
             } catch (ResourceException e) {
-                publicGuidelineService.add(ObjectUtils.clone(guideline), null);
+                publicGuidelineService.add(ObjectUtils.clone(guideline), true);
             }
         }
     }
@@ -562,7 +562,7 @@ public class ProviderManagementAspect {
             try {
                 publicDeployableSoftwareService.get(deployableSoftware.getIdentifiers().getPid(), deployableSoftware.getCatalogueId());
             } catch (ResourceException e) {
-                publicDeployableSoftwareService.add(ObjectUtils.clone(deployableSoftware), null);
+                publicDeployableSoftwareService.add(ObjectUtils.clone(deployableSoftware), true);
             }
         }
     }
@@ -607,7 +607,7 @@ public class ProviderManagementAspect {
             try {
                 publicAdapterService.get(adapter.getIdentifiers().getPid(), adapter.getCatalogueId());
             } catch (ResourceException | ResourceNotFoundException e) {
-                publicAdapterService.add(ObjectUtils.clone(adapter), null);
+                publicAdapterService.add(ObjectUtils.clone(adapter), true);
             }
         }
     }
@@ -649,7 +649,7 @@ public class ProviderManagementAspect {
         try {
             publicRIRService.get(rir.getIdentifiers().getPid(), rir.getCatalogueId());
         } catch (ResourceException | ResourceNotFoundException e) {
-            publicRIRService.add(ObjectUtils.clone(rir), null);
+            publicRIRService.add(ObjectUtils.clone(rir), false);
         }
     }
 
@@ -678,7 +678,7 @@ public class ProviderManagementAspect {
         try {
             publicCTIService.get(cti.getIdentifiers().getPid(), cti.getCatalogueId());
         } catch (ResourceException | ResourceNotFoundException e) {
-            publicCTIService.add(ObjectUtils.clone(cti), null);
+            publicCTIService.add(ObjectUtils.clone(cti), false);
         }
     }
 
