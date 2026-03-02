@@ -373,12 +373,12 @@
               ]
             },
             {
-              "id": "node",
-              "name": "node",
+              "id": "nodePID",
+              "name": "nodePID",
               "parentId": null,
               "parent": null,
               "label": {
-                "text": "Node",
+                "text": "Node PID",
                 "cssClasses": null,
                 "style": null,
                 "showLess": false
@@ -1224,14 +1224,10 @@
               "kind": null,
               "typeInfo": {
                 "vocabulary": null,
-                "type": "vocabulary",
+                "type": "composite",
                 "defaultValue": null,
                 "values": null,
-                "properties": {
-                  "url": "/api/vocabulary/types/Spdx%20license",
-                  "idField": "id",
-                  "labelField": "name"
-                },
+                "properties": {},
                 "multiplicity": false,
                 "prefill": null
               },
@@ -1242,7 +1238,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "SPDX License",
+                  "text": "A license document that applies to this resource",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -1254,19 +1250,136 @@
                   "showLess": false
                 },
                 "placeholder": null,
-                "mandatory": true,
+                "mandatory": false,
                 "immutable": true,
                 "display": {
                   "placement": null,
                   "order": 8,
                   "visible": true,
-                  "hasBorder": false,
+                  "hasBorder": true,
                   "cssClasses": null,
                   "style": null
                 }
               },
               "display": null,
-              "subFields": []
+              "subFields": [
+                {
+                  "id": "licenseName",
+                  "name": "licenseName",
+                  "parentId": null,
+                  "parent": null,
+                  "label": {
+                    "text": "License Name",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "vocabulary",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "url": "/api/vocabulary/types/Spdx%20license",
+                      "idField": "id",
+                      "labelField": "name"
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "SPDX License",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 1,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "licenseURL",
+                  "name": "licenseURL",
+                  "parentId": null,
+                  "parent": null,
+                  "label": {
+                    "text": "License URL",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "url",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "strictValidation": true
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "A license document that applies to this content, typically indicated by URL.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": "use http:// or https://",
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 2,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                }
+              ]
             },
             {
               "id": "version",
@@ -1511,12 +1624,12 @@
               "display": null,
               "subFields": [
                 {
-                  "id": "creatorName",
-                  "name": "creatorName",
+                  "id": "firstName",
+                  "name": "firstName",
                   "parentId": "creators",
                   "parent": "creators",
                   "label": {
-                    "text": "Creator Name",
+                    "text": "First Name",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1542,7 +1655,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": "The full name of the creator.",
+                      "text": "The first name of the creator.",
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1569,12 +1682,12 @@
                   "subFields": []
                 },
                 {
-                  "id": "creatorRole",
-                  "name": "creatorRole",
+                  "id": "lastName",
+                  "name": "lastName",
                   "parentId": "creators",
                   "parent": "creators",
                   "label": {
-                    "text": "Creator Role",
+                    "text": "Last Name",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1583,13 +1696,12 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "vocabulary",
+                    "type": "string",
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/types/Credit",
-                      "idField": "id",
-                      "labelField": "name"
+                      "minLength": null,
+                      "maxLength": null
                     },
                     "multiplicity": false,
                     "prefill": null
@@ -1601,7 +1713,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": null,
+                      "text": "The last name of the creator.",
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1613,7 +1725,7 @@
                       "showLess": false
                     },
                     "placeholder": null,
-                    "mandatory": false,
+                    "mandatory": true,
                     "immutable": true,
                     "display": {
                       "placement": null,
@@ -1628,12 +1740,12 @@
                   "subFields": []
                 },
                 {
-                  "id": "creatorPIDSchema",
-                  "name": "creatorPIDSchema",
+                  "id": "email",
+                  "name": "email",
                   "parentId": "creators",
                   "parent": "creators",
                   "label": {
-                    "text": "Creator PID Schema",
+                    "text": "Email",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1642,12 +1754,11 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "string",
+                    "type": "email",
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "minLength": null,
-                      "maxLength": null
+                      "pattern": null
                     },
                     "multiplicity": false,
                     "prefill": null
@@ -1659,7 +1770,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": null,
+                      "text": "Email of the creator.",
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1671,7 +1782,7 @@
                       "showLess": false
                     },
                     "placeholder": null,
-                    "mandatory": false,
+                    "mandatory": true,
                     "immutable": true,
                     "display": {
                       "placement": null,
@@ -1686,12 +1797,12 @@
                   "subFields": []
                 },
                 {
-                  "id": "creatorPID",
-                  "name": "creatorPID",
+                  "id": "PIDs",
+                  "name": "PIDs",
                   "parentId": "creators",
                   "parent": "creators",
                   "label": {
-                    "text": "Creator PID",
+                    "text": "PIDs",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1700,14 +1811,11 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "string",
+                    "type": "composite",
                     "defaultValue": null,
                     "values": null,
-                    "properties": {
-                      "minLength": null,
-                      "maxLength": null
-                    },
-                    "multiplicity": false,
+                    "properties": {},
+                    "multiplicity": true,
                     "prefill": null
                   },
                   "includedInSnippet": false,
@@ -1717,7 +1825,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": "Uniquely identifies an individual or legal entity, according to various schemes.",
+                      "text": null,
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1741,7 +1849,124 @@
                     }
                   },
                   "display": null,
-                  "subFields": []
+                  "subFields": [
+                    {
+                      "id": "creatorPID",
+                      "name": "creatorPID",
+                      "parentId": "PIDs",
+                      "parent": "PIDs",
+                      "label": {
+                        "text": "Creator PID",
+                        "cssClasses": null,
+                        "style": null,
+                        "showLess": false
+                      },
+                      "accessPath": null,
+                      "kind": null,
+                      "typeInfo": {
+                        "vocabulary": null,
+                        "type": "string",
+                        "defaultValue": null,
+                        "values": null,
+                        "properties": {
+                          "minLength": null,
+                          "maxLength": null
+                        },
+                        "multiplicity": false,
+                        "prefill": null
+                      },
+                      "includedInSnippet": false,
+                      "deprecated": false,
+                      "form": {
+                        "dependsOn": null,
+                        "affects": null,
+                        "group": null,
+                        "description": {
+                          "text": "Uniquely identifies an individual or legal entity, according to various schemes.",
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "suggestion": {
+                          "text": null,
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "placeholder": null,
+                        "mandatory": true,
+                        "immutable": true,
+                        "display": {
+                          "placement": null,
+                          "order": 1,
+                          "visible": true,
+                          "hasBorder": false,
+                          "cssClasses": null,
+                          "style": null
+                        }
+                      },
+                      "display": null,
+                      "subFields": []
+                    },
+                    {
+                      "id": "creatorPIDScheme",
+                      "name": "creatorPIDScheme",
+                      "parentId": "PIDs",
+                      "parent": "PIDs",
+                      "label": {
+                        "text": "Creator PID Scheme",
+                        "cssClasses": null,
+                        "style": null,
+                        "showLess": false
+                      },
+                      "accessPath": null,
+                      "kind": null,
+                      "typeInfo": {
+                        "vocabulary": null,
+                        "type": "string",
+                        "defaultValue": null,
+                        "values": null,
+                        "properties": {
+                          "minLength": null,
+                          "maxLength": null
+                        },
+                        "multiplicity": false,
+                        "prefill": null
+                      },
+                      "includedInSnippet": false,
+                      "deprecated": false,
+                      "form": {
+                        "dependsOn": null,
+                        "affects": null,
+                        "group": null,
+                        "description": {
+                          "text": "Uniquely identifies the organizational affiliation of the creator.",
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "suggestion": {
+                          "text": null,
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "placeholder": null,
+                        "mandatory": true,
+                        "immutable": true,
+                        "display": {
+                          "placement": null,
+                          "order": 2,
+                          "visible": true,
+                          "hasBorder": false,
+                          "cssClasses": null,
+                          "style": null
+                        }
+                      },
+                      "display": null,
+                      "subFields": []
+                    }
+                  ]
                 },
                 {
                   "id": "affiliations",
@@ -1870,7 +2095,7 @@
                       "kind": null,
                       "typeInfo": {
                         "vocabulary": null,
-                        "type": "string",
+                        "type": "composite",
                         "defaultValue": null,
                         "values": null,
                         "properties": {
@@ -1911,17 +2136,134 @@
                         }
                       },
                       "display": null,
-                      "subFields": []
+                      "subFields": [
+                        {
+                          "id": "creatorID",
+                          "name": "creatorID",
+                          "parentId": "affiliationIdentifier",
+                          "parent": "affiliationIdentifier",
+                          "label": {
+                            "text": "Creator ID",
+                            "cssClasses": null,
+                            "style": null,
+                            "showLess": false
+                          },
+                          "accessPath": null,
+                          "kind": null,
+                          "typeInfo": {
+                            "vocabulary": null,
+                            "type": "string",
+                            "defaultValue": null,
+                            "values": null,
+                            "properties": {
+                              "minLength": null,
+                              "maxLength": null
+                            },
+                            "multiplicity": false,
+                            "prefill": null
+                          },
+                          "includedInSnippet": false,
+                          "deprecated": false,
+                          "form": {
+                            "dependsOn": null,
+                            "affects": null,
+                            "group": null,
+                            "description": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "suggestion": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "placeholder": null,
+                            "mandatory": true,
+                            "immutable": true,
+                            "display": {
+                              "placement": null,
+                              "order": 1,
+                              "visible": true,
+                              "hasBorder": false,
+                              "cssClasses": null,
+                              "style": null
+                            }
+                          },
+                          "display": null,
+                          "subFields": []
+                        },
+                        {
+                          "id": "creatorType",
+                          "name": "creatorType",
+                          "parentId": "affiliationIdentifier",
+                          "parent": "affiliationIdentifier",
+                          "label": {
+                            "text": "Creator Type",
+                            "cssClasses": null,
+                            "style": null,
+                            "showLess": false
+                          },
+                          "accessPath": null,
+                          "kind": null,
+                          "typeInfo": {
+                            "vocabulary": null,
+                            "type": "string",
+                            "defaultValue": null,
+                            "values": null,
+                            "properties": {
+                              "minLength": null,
+                              "maxLength": null
+                            },
+                            "multiplicity": false,
+                            "prefill": null
+                          },
+                          "includedInSnippet": false,
+                          "deprecated": false,
+                          "form": {
+                            "dependsOn": null,
+                            "affects": null,
+                            "group": null,
+                            "description": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "suggestion": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "placeholder": null,
+                            "mandatory": true,
+                            "immutable": true,
+                            "display": {
+                              "placement": null,
+                              "order": 2,
+                              "visible": true,
+                              "hasBorder": false,
+                              "cssClasses": null,
+                              "style": null
+                            }
+                          },
+                          "display": null,
+                          "subFields": []
+                        }
+                      ]
                     }
                   ]
                 },
                 {
-                  "id": "creatorEmail",
-                  "name": "email",
+                  "id": "creatorRole",
+                  "name": "creatorRole",
                   "parentId": "creators",
                   "parent": "creators",
                   "label": {
-                    "text": "Email",
+                    "text": "Creator Role",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1930,11 +2272,13 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "email",
+                    "type": "vocabulary",
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "pattern": null
+                      "url": "/api/vocabulary/types/Credit",
+                      "idField": "id",
+                      "labelField": "name"
                     },
                     "multiplicity": false,
                     "prefill": null
@@ -1946,7 +2290,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": "Email of the creator.",
+                      "text": null,
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1977,11 +2321,69 @@
           ]
         },
         {
+          "id": "publicContacts",
+          "name": "publicContacts",
+          "parentId": null,
+          "parent": null,
+          "label": {
+            "text": "Public Contacts",
+            "cssClasses": null,
+            "style": null,
+            "showLess": false
+          },
+          "accessPath": null,
+          "kind": null,
+          "typeInfo": {
+            "vocabulary": null,
+            "type": "email",
+            "defaultValue": null,
+            "values": null,
+            "properties": {
+              "minLength": null,
+              "maxLength": null
+            },
+            "multiplicity": true,
+            "prefill": null
+          },
+          "includedInSnippet": false,
+          "deprecated": false,
+          "form": {
+            "dependsOn": null,
+            "affects": null,
+            "group": null,
+            "description": {
+              "text": "List of public contact emails.",
+              "cssClasses": null,
+              "style": null,
+              "showLess": false
+            },
+            "suggestion": {
+              "text": null,
+              "cssClasses": null,
+              "style": null,
+              "showLess": false
+            },
+            "placeholder": null,
+            "mandatory": true,
+            "immutable": true,
+            "display": {
+              "placement": null,
+              "order": 4,
+              "visible": true,
+              "hasBorder": false,
+              "cssClasses": null,
+              "style": null
+            }
+          },
+          "display": null,
+          "subFields": []
+        },
+        {
           "id": "Notes",
           "name": "Notes",
           "description": null,
           "subType": null,
-          "order": 4,
+          "order": 5,
           "subSections": null,
           "fields": [
             {

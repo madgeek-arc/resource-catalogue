@@ -373,12 +373,12 @@
               ]
             },
             {
-              "id": "node",
-              "name": "node",
+              "id": "nodePID",
+              "name": "nodePID",
               "parentId": null,
               "parent": null,
               "label": {
-                "text": "Node",
+                "text": "Node PID",
                 "cssClasses": null,
                 "style": null,
                 "showLess": false
@@ -1276,6 +1276,65 @@
               ]
             },
             {
+              "id": "accessTypes",
+              "name": "accessTypes",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Access Types",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "vocabulary",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "url": "/api/vocabulary/types/Access%20types",
+                  "idField": "id",
+                  "labelField": "name"
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "The way a user can access the resource (Remote, Physical, Virtual, etc.).",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
               "id": "tags",
               "name": "tags",
               "parentId": null,
@@ -1702,20 +1761,20 @@
           ]
         },
         {
-          "id": "Creators",
-          "name": "Creators",
+          "id": "mainContact",
+          "name": "mainContact",
           "description": null,
           "subType": null,
           "order": 5,
           "subSections": null,
           "fields": [
             {
-              "id": "creators",
-              "name": "creators",
+              "id": "mainContact",
+              "name": "mainContact",
               "parentId": null,
               "parent": null,
               "label": {
-                "text": "Creators",
+                "text": "Main Contact",
                 "cssClasses": null,
                 "style": null,
                 "showLess": false
@@ -1728,7 +1787,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {},
-                "multiplicity": true,
+                "multiplicity": false,
                 "prefill": null
               },
               "includedInSnippet": false,
@@ -1764,12 +1823,12 @@
               "display": null,
               "subFields": [
                 {
-                  "id": "creatorName",
-                  "name": "creatorName",
-                  "parentId": "creators",
-                  "parent": "creators",
+                  "id": "firstName",
+                  "name": "firstName",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
                   "label": {
-                    "text": "Creator Name",
+                    "text": "First Name",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1795,7 +1854,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": "The full name of the creator.",
+                      "text": "The first name of the main contact.",
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1822,12 +1881,12 @@
                   "subFields": []
                 },
                 {
-                  "id": "creatorRole",
-                  "name": "creatorRole",
-                  "parentId": "creators",
-                  "parent": "creators",
+                  "id": "lastName",
+                  "name": "lastName",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
                   "label": {
-                    "text": "Creator Role",
+                    "text": "Last Name",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1836,13 +1895,12 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "vocabulary",
+                    "type": "string",
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/vocabulary/types/Credit",
-                      "idField": "id",
-                      "labelField": "name"
+                      "minLength": null,
+                      "maxLength": null
                     },
                     "multiplicity": false,
                     "prefill": null
@@ -1854,7 +1912,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": null,
+                      "text": "The last name of the main contact.",
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1866,7 +1924,7 @@
                       "showLess": false
                     },
                     "placeholder": null,
-                    "mandatory": false,
+                    "mandatory": true,
                     "immutable": true,
                     "display": {
                       "placement": null,
@@ -1881,12 +1939,12 @@
                   "subFields": []
                 },
                 {
-                  "id": "creatorPIDSchema",
-                  "name": "creatorPIDSchema",
-                  "parentId": "creators",
-                  "parent": "creators",
+                  "id": "email",
+                  "name": "email",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
                   "label": {
-                    "text": "Creator PID Schema",
+                    "text": "Email",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1895,12 +1953,11 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "string",
+                    "type": "email",
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "minLength": null,
-                      "maxLength": null
+                      "pattern": null
                     },
                     "multiplicity": false,
                     "prefill": null
@@ -1912,7 +1969,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": null,
+                      "text": "Email of the main contact.",
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1924,7 +1981,7 @@
                       "showLess": false
                     },
                     "placeholder": null,
-                    "mandatory": false,
+                    "mandatory": true,
                     "immutable": true,
                     "display": {
                       "placement": null,
@@ -1939,12 +1996,12 @@
                   "subFields": []
                 },
                 {
-                  "id": "creatorPID",
-                  "name": "creatorPID",
-                  "parentId": "creators",
-                  "parent": "creators",
+                  "id": "PIDs",
+                  "name": "PIDs",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
                   "label": {
-                    "text": "Creator PID",
+                    "text": "PIDs",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -1953,14 +2010,11 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "string",
+                    "type": "composite",
                     "defaultValue": null,
                     "values": null,
-                    "properties": {
-                      "minLength": null,
-                      "maxLength": null
-                    },
-                    "multiplicity": false,
+                    "properties": {},
+                    "multiplicity": true,
                     "prefill": null
                   },
                   "includedInSnippet": false,
@@ -1970,7 +2024,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": "Uniquely identifies an individual or legal entity, according to various schemes.",
+                      "text": null,
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1994,13 +2048,130 @@
                     }
                   },
                   "display": null,
-                  "subFields": []
+                  "subFields": [
+                    {
+                      "id": "mainContactPID",
+                      "name": "mainContactPID",
+                      "parentId": "PIDs",
+                      "parent": "PIDs",
+                      "label": {
+                        "text": "Main Contact PID",
+                        "cssClasses": null,
+                        "style": null,
+                        "showLess": false
+                      },
+                      "accessPath": null,
+                      "kind": null,
+                      "typeInfo": {
+                        "vocabulary": null,
+                        "type": "string",
+                        "defaultValue": null,
+                        "values": null,
+                        "properties": {
+                          "minLength": null,
+                          "maxLength": null
+                        },
+                        "multiplicity": false,
+                        "prefill": null
+                      },
+                      "includedInSnippet": false,
+                      "deprecated": false,
+                      "form": {
+                        "dependsOn": null,
+                        "affects": null,
+                        "group": null,
+                        "description": {
+                          "text": "Uniquely identifies an individual or legal entity, according to various schemes.",
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "suggestion": {
+                          "text": null,
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "placeholder": null,
+                        "mandatory": true,
+                        "immutable": true,
+                        "display": {
+                          "placement": null,
+                          "order": 1,
+                          "visible": true,
+                          "hasBorder": false,
+                          "cssClasses": null,
+                          "style": null
+                        }
+                      },
+                      "display": null,
+                      "subFields": []
+                    },
+                    {
+                      "id": "mainContactPIDScheme",
+                      "name": "mainContactPIDScheme",
+                      "parentId": "PIDs",
+                      "parent": "PIDs",
+                      "label": {
+                        "text": "Main Contact PID Scheme",
+                        "cssClasses": null,
+                        "style": null,
+                        "showLess": false
+                      },
+                      "accessPath": null,
+                      "kind": null,
+                      "typeInfo": {
+                        "vocabulary": null,
+                        "type": "string",
+                        "defaultValue": null,
+                        "values": null,
+                        "properties": {
+                          "minLength": null,
+                          "maxLength": null
+                        },
+                        "multiplicity": false,
+                        "prefill": null
+                      },
+                      "includedInSnippet": false,
+                      "deprecated": false,
+                      "form": {
+                        "dependsOn": null,
+                        "affects": null,
+                        "group": null,
+                        "description": {
+                          "text": "Uniquely identifies the organizational affiliation of the main contact.",
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "suggestion": {
+                          "text": null,
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "placeholder": null,
+                        "mandatory": true,
+                        "immutable": true,
+                        "display": {
+                          "placement": null,
+                          "order": 2,
+                          "visible": true,
+                          "hasBorder": false,
+                          "cssClasses": null,
+                          "style": null
+                        }
+                      },
+                      "display": null,
+                      "subFields": []
+                    }
+                  ]
                 },
                 {
                   "id": "affiliations",
                   "name": "affiliations",
-                  "parentId": "creators",
-                  "parent": "creators",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
                   "label": {
                     "text": "Affiliations",
                     "cssClasses": null,
@@ -2082,7 +2253,7 @@
                         "affects": null,
                         "group": null,
                         "description": {
-                          "text": "The organizational or institutional affiliation of the creator.",
+                          "text": "The organizational or institutional affiliation of the main contact.",
                           "cssClasses": null,
                           "style": null,
                           "showLess": false
@@ -2123,7 +2294,7 @@
                       "kind": null,
                       "typeInfo": {
                         "vocabulary": null,
-                        "type": "string",
+                        "type": "composite",
                         "defaultValue": null,
                         "values": null,
                         "properties": {
@@ -2140,7 +2311,7 @@
                         "affects": null,
                         "group": null,
                         "description": {
-                          "text": "Uniquely identifies the organizational affiliation of the creator.",
+                          "text": "Uniquely identifies the organizational affiliation of the main contact.",
                           "cssClasses": null,
                           "style": null,
                           "showLess": false
@@ -2164,17 +2335,134 @@
                         }
                       },
                       "display": null,
-                      "subFields": []
+                      "subFields": [
+                        {
+                          "id": "mainContactID",
+                          "name": "mainContactID",
+                          "parentId": "affiliationIdentifier",
+                          "parent": "affiliationIdentifier",
+                          "label": {
+                            "text": "Main Contact ID",
+                            "cssClasses": null,
+                            "style": null,
+                            "showLess": false
+                          },
+                          "accessPath": null,
+                          "kind": null,
+                          "typeInfo": {
+                            "vocabulary": null,
+                            "type": "string",
+                            "defaultValue": null,
+                            "values": null,
+                            "properties": {
+                              "minLength": null,
+                              "maxLength": null
+                            },
+                            "multiplicity": false,
+                            "prefill": null
+                          },
+                          "includedInSnippet": false,
+                          "deprecated": false,
+                          "form": {
+                            "dependsOn": null,
+                            "affects": null,
+                            "group": null,
+                            "description": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "suggestion": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "placeholder": null,
+                            "mandatory": true,
+                            "immutable": true,
+                            "display": {
+                              "placement": null,
+                              "order": 1,
+                              "visible": true,
+                              "hasBorder": false,
+                              "cssClasses": null,
+                              "style": null
+                            }
+                          },
+                          "display": null,
+                          "subFields": []
+                        },
+                        {
+                          "id": "mainContactType",
+                          "name": "mainContactType",
+                          "parentId": "affiliationIdentifier",
+                          "parent": "affiliationIdentifier",
+                          "label": {
+                            "text": "Main Contact Type",
+                            "cssClasses": null,
+                            "style": null,
+                            "showLess": false
+                          },
+                          "accessPath": null,
+                          "kind": null,
+                          "typeInfo": {
+                            "vocabulary": null,
+                            "type": "string",
+                            "defaultValue": null,
+                            "values": null,
+                            "properties": {
+                              "minLength": null,
+                              "maxLength": null
+                            },
+                            "multiplicity": false,
+                            "prefill": null
+                          },
+                          "includedInSnippet": false,
+                          "deprecated": false,
+                          "form": {
+                            "dependsOn": null,
+                            "affects": null,
+                            "group": null,
+                            "description": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "suggestion": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "placeholder": null,
+                            "mandatory": true,
+                            "immutable": true,
+                            "display": {
+                              "placement": null,
+                              "order": 2,
+                              "visible": true,
+                              "hasBorder": false,
+                              "cssClasses": null,
+                              "style": null
+                            }
+                          },
+                          "display": null,
+                          "subFields": []
+                        }
+                      ]
                     }
                   ]
                 },
                 {
-                  "id": "email",
-                  "name": "email",
-                  "parentId": "creators",
-                  "parent": "creators",
+                  "id": "mainContactRole",
+                  "name": "mainContactRole",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
                   "label": {
-                    "text": "Email",
+                    "text": "Main Contact Role",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -2183,11 +2471,13 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "email",
+                    "type": "vocabulary",
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "pattern": null
+                      "url": "/api/vocabulary/types/Credit",
+                      "idField": "id",
+                      "labelField": "name"
                     },
                     "multiplicity": false,
                     "prefill": null
@@ -2199,7 +2489,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": "Email of the creator.",
+                      "text": null,
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -2226,66 +2516,66 @@
                   "subFields": []
                 }
               ]
-            },
-            {
-              "id": "publicContacts",
-              "name": "publicContacts",
-              "parentId": null,
-              "parent": null,
-              "label": {
-                "text": "Public Contacts",
-                "cssClasses": null,
-                "style": null,
-                "showLess": false
-              },
-              "accessPath": null,
-              "kind": null,
-              "typeInfo": {
-                "vocabulary": null,
-                "type": "email",
-                "defaultValue": null,
-                "values": null,
-                "properties": {
-                  "minLength": null,
-                  "maxLength": null
-                },
-                "multiplicity": true,
-                "prefill": null
-              },
-              "includedInSnippet": false,
-              "deprecated": false,
-              "form": {
-                "dependsOn": null,
-                "affects": null,
-                "group": null,
-                "description": {
-                  "text": "List of public contact emails.",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "suggestion": {
-                  "text": null,
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "placeholder": null,
-                "mandatory": true,
-                "immutable": true,
-                "display": {
-                  "placement": null,
-                  "order": 2,
-                  "visible": true,
-                  "hasBorder": false,
-                  "cssClasses": null,
-                  "style": null
-                }
-              },
-              "display": null,
-              "subFields": []
             }
           ]
+        },
+        {
+          "id": "publicContacts",
+          "name": "publicContacts",
+          "parentId": null,
+          "parent": null,
+          "label": {
+            "text": "Public Contacts",
+            "cssClasses": null,
+            "style": null,
+            "showLess": false
+          },
+          "accessPath": null,
+          "kind": null,
+          "typeInfo": {
+            "vocabulary": null,
+            "type": "email",
+            "defaultValue": null,
+            "values": null,
+            "properties": {
+              "minLength": null,
+              "maxLength": null
+            },
+            "multiplicity": true,
+            "prefill": null
+          },
+          "includedInSnippet": false,
+          "deprecated": false,
+          "form": {
+            "dependsOn": null,
+            "affects": null,
+            "group": null,
+            "description": {
+              "text": "List of public contact emails.",
+              "cssClasses": null,
+              "style": null,
+              "showLess": false
+            },
+            "suggestion": {
+              "text": null,
+              "cssClasses": null,
+              "style": null,
+              "showLess": false
+            },
+            "placeholder": null,
+            "mandatory": true,
+            "immutable": true,
+            "display": {
+              "placement": null,
+              "order": 6,
+              "visible": true,
+              "hasBorder": false,
+              "cssClasses": null,
+              "style": null
+            }
+          },
+          "display": null,
+          "subFields": []
         }
       ],
       "fields": null
