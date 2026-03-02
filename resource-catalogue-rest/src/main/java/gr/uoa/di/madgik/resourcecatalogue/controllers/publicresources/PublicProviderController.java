@@ -53,7 +53,10 @@ public class PublicProviderController {
     }
 
     @Operation(description = "Returns the Public Provider with the given id.")
-    @GetMapping(path = "public/provider/{prefix}/{suffix}")
+    @GetMapping(path = {
+            "public/provider/{prefix}/{suffix}",
+            "public/organisation/{prefix}/{suffix}"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
@@ -69,7 +72,10 @@ public class PublicProviderController {
 
     }
 
-    @GetMapping(path = "public/provider/bundle/{prefix}/{suffix}")
+    @GetMapping(path = {
+            "public/provider/bundle/{prefix}/{suffix}",
+            "public/organisation/bundle/{prefix}/{suffix}"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
@@ -85,7 +91,10 @@ public class PublicProviderController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/provider/all")
+    @GetMapping(path = {
+            "public/provider/all",
+            "public/organisation/all"
+    })
     public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -97,7 +106,10 @@ public class PublicProviderController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/provider/bundle/all")
+    @GetMapping(path = {
+            "public/provider/bundle/all",
+            "public/organisation/bundle/all"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ProviderBundle>> getAllBundles(@Parameter(hidden = true)
                                                                 @RequestParam MultiValueMap<String, Object> params) {

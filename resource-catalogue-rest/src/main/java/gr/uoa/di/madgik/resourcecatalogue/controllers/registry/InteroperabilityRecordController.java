@@ -325,7 +325,10 @@ public class InteroperabilityRecordController
 
     @Tag(name = "InteroperabilityRecordRead")
     @BrowseParameters
-    @GetMapping(path = "byProvider/{prefix}/{suffix}")
+    @GetMapping(path = {
+            "byProvider/{prefix}/{suffix}",
+            "byOrganisation/{prefix}/{suffix}"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                               @PathVariable String prefix,
@@ -403,7 +406,10 @@ public class InteroperabilityRecordController
 
     @Tag(name = "InteroperabilityRecordRead")
     @BrowseParameters
-    @GetMapping(path = "/draft/byProvider/{prefix}/{suffix}")
+    @GetMapping(path = {
+            "draft/byProvider/{prefix}/{suffix}",
+            "draft/byOrganisation/{prefix}/{suffix}"
+    })
     public ResponseEntity<Browsing<InteroperabilityRecordBundle>> getProviderDraftGuidelines(@PathVariable String prefix,
                                                                                              @PathVariable String suffix,
                                                                                              @Parameter(hidden = true)

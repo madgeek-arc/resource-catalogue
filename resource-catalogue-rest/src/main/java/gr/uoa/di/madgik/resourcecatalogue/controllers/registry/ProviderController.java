@@ -50,8 +50,8 @@ import java.util.List;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(path = "provider", produces = {MediaType.APPLICATION_JSON_VALUE})
-@Tag(name = "provider")
+@RequestMapping(path = { "provider", "organisation" }, produces = {MediaType.APPLICATION_JSON_VALUE})
+@Tag(name = "provider / organisation")
 public class ProviderController extends ResourceCatalogueGenericController<ProviderBundle, ProviderService> {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);

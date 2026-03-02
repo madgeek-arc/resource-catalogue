@@ -30,7 +30,7 @@ import java.time.LocalDate;
 
 @Profile("beyond")
 @RestController
-@RequestMapping("accounting")
+@RequestMapping(path = "accounting", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "accounting")
 public class AccountingController {
 
@@ -42,20 +42,20 @@ public class AccountingController {
 
     //region Project
     @Operation(summary = "Get all Providers and Installations of the Project")
-    @GetMapping(path = "project/info", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "project/info")
     public ResponseEntity<Object> getAllProjectProvidersAndInstallations() {
         return accountingService.getAllProjectProvidersAndInstallations();
     }
 
     @Operation(summary = "Get all Installations of the Project")
-    @GetMapping(path = "project/installations", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "project/installations")
     public ResponseEntity<Object> getAllProjectInstallations(@RequestParam(defaultValue = "1") int page,
                                                              @RequestParam(defaultValue = "10") int size) {
         return accountingService.getAllProjectInstallations(page, size);
     }
 
     @Operation(summary = "Get Project report")
-    @GetMapping(path = "project/report", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "project/report")
     public ResponseEntity<Object> getProjectReport(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         return accountingService.getProjectReport(start, end);
@@ -64,7 +64,10 @@ public class AccountingController {
 
     //region Provider
     @Operation(summary = "Get Provider report")
-    @GetMapping(path = "project/provider/{prefix}/{suffix}/report", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = {
+            "project/provider/{prefix}/{suffix}/report",
+            "project/organisation/{prefix}/{suffix}/report"
+    })
     public ResponseEntity<Object> getProviderReport(@Parameter(description = "The left part of the ID before the '/'")
                                                     @PathVariable("prefix") String prefix,
                                                     @Parameter(description = "The right part of the ID after the '/'")
@@ -77,7 +80,7 @@ public class AccountingController {
 
     //region Installation
     @Operation(summary = "Get Installation report")
-    @GetMapping(path = "project/installation/{prefix}/{suffix}/report", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "project/installation/{prefix}/{suffix}/report")
     public ResponseEntity<Object> getInstallationReport(@Parameter(description = "The left part of the ID before the '/'")
                                                         @PathVariable("prefix") String prefix,
                                                         @Parameter(description = "The right part of the ID after the '/'")
@@ -90,7 +93,10 @@ public class AccountingController {
 
     //region Metric
     @Operation(summary = "Get all Metrics under a specific Provider")
-    @GetMapping(path = "project/provider/{prefix}/{suffix}/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = {
+            "project/provider/{prefix}/{suffix}/metrics",
+            "project/organisation/{prefix}/{suffix}/metrics"
+    })
     public ResponseEntity<Object> getProviderMetrics(@Parameter(description = "The left part of the ID before the '/'")
                                                      @PathVariable("prefix") String prefix,
                                                      @Parameter(description = "The right part of the ID after the '/'")
@@ -106,7 +112,7 @@ public class AccountingController {
     }
 
     @Operation(summary = "Get all Metrics under a specific Installation")
-    @GetMapping(path = "project/installation/{prefix}/{suffix}/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "project/installation/{prefix}/{suffix}/metrics")
     public ResponseEntity<Object> getInstallationMetrics(@Parameter(description = "The left part of the ID before the '/'")
                                                          @PathVariable("prefix") String prefix,
                                                          @Parameter(description = "The right part of the ID after the '/'")

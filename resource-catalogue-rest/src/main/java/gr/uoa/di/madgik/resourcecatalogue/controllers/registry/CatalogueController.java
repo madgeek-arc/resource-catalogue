@@ -271,14 +271,20 @@ public class CatalogueController {
 
     //region Provider
     @Operation(description = "Returns the Provider of the specific Catalogue with the given id.")
-    @GetMapping(path = "{catalogueId}/provider/{providerId}")
+    @GetMapping(path = {
+            "{catalogueId}/provider/{providerId}",
+            "{catalogueId}/organisation/{providerId}"
+    })
     public ResponseEntity<?> getCatalogueProvider(@PathVariable String catalogueId,
                                                   @PathVariable String providerId) {
         return new ResponseEntity<>(providerService.get(providerId, catalogueId).getProvider(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the ProviderBundle of the specific Catalogue with the given id.")
-    @GetMapping(path = "{catalogueId}/provider/bundle/{providerId}")
+    @GetMapping(path = {
+            "{catalogueId}/provider/bundle/{providerId}",
+            "{catalogueId}/organisation/bundle/{providerId}"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
     public ResponseEntity<ProviderBundle> getCatalogueProviderBundle(@PathVariable String catalogueId,
                                                                      @PathVariable String providerId,
@@ -290,7 +296,10 @@ public class CatalogueController {
     @BrowseParameters
     @Operation(description = "Get a list of all Providers in the specific Catalogue.")
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "{catalogueId}/provider/all")
+    @GetMapping(path = {
+            "{catalogueId}/provider/all",
+            "{catalogueId}/organisation/all"
+    })
     public ResponseEntity<Paging<?>> getAllCatalogueProviders(@Parameter(hidden = true)
                                                               @RequestParam MultiValueMap<String, Object> params,
                                                               @PathVariable String catalogueId) {
@@ -304,7 +313,10 @@ public class CatalogueController {
     }
 
     @Hidden
-    @GetMapping(path = "{catalogueId}/provider/bundle/all")
+    @GetMapping(path = {
+            "{catalogueId}/provider/bundle/all",
+            "{catalogueId}/organisation/bundle/all"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
     public ResponseEntity<Paging<ProviderBundle>> getAllCatalogueProviderBundles(@PathVariable String catalogueId,
                                                                                  @Parameter(hidden = true)
@@ -321,7 +333,10 @@ public class CatalogueController {
     }
 
     @Hidden
-    @GetMapping(path = {"{catalogueId}/provider/loggingInfoHistory/{providerId}"})
+    @GetMapping(path = {
+            "{catalogueId}/provider/loggingInfoHistory/{providerId}",
+            "{catalogueId}/organisation/loggingInfoHistory/{providerId}"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
     public ResponseEntity<List<LoggingInfo>> providerLoggingInfoHistory(@PathVariable String catalogueId,
                                                                         @PathVariable String providerId,
@@ -333,7 +348,10 @@ public class CatalogueController {
     }
 
     @Operation(description = "Creates a new Provider for the specific Catalogue.")
-    @PostMapping(path = "{catalogueId}/provider")
+    @PostMapping(path = {
+            "{catalogueId}/provider",
+            "{catalogueId}/organisation"
+    })
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addCatalogueProvider(@RequestBody LinkedHashMap<String, Object> provider,
                                                   @PathVariable String catalogueId,
@@ -347,7 +365,10 @@ public class CatalogueController {
     }
 
     @Hidden
-    @PostMapping(path = "{catalogueId}/provider/bundle")
+    @PostMapping(path = {
+            "{catalogueId}/provider/bundle",
+            "{catalogueId}/organisation/bundle"
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> addCatalogueProviderBundle(@RequestBody ProviderBundle provider,
                                                                      @PathVariable String catalogueId,
@@ -359,7 +380,10 @@ public class CatalogueController {
     }
 
     @Operation(description = "Updates the Provider of the specific Catalogue.")
-    @PutMapping(path = "{catalogueId}/provider")
+    @PutMapping(path = {
+            "{catalogueId}/provider",
+            "{catalogueId}/organisation"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider['id'])")
     public ResponseEntity<?> updateCatalogueProvider(@RequestBody LinkedHashMap<String, Object> provider,
                                                      @PathVariable String catalogueId,
@@ -374,7 +398,10 @@ public class CatalogueController {
     }
 
     @Hidden
-    @PutMapping(path = "{catalogueId}/bundle/provider")
+    @PutMapping(path = {
+            "{catalogueId}/bundle/provider",
+            "{catalogueId}/bundle/organisation"
+    })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProviderBundle> updateCatalogueProviderBundle(@RequestBody ProviderBundle provider,
                                                                         @RequestParam(required = false) String comment,
@@ -385,7 +412,10 @@ public class CatalogueController {
     }
 
     @Operation(description = "Deletes the Provider of the specific Catalogue with the given id.")
-    @DeleteMapping(path = "{catalogueId}/provider/{providerId}")
+    @DeleteMapping(path = {
+            "{catalogueId}/provider/{providerId}",
+            "{catalogueId}/organisation/{providerId}"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
     public ResponseEntity<?> deleteCatalogueProvider(@PathVariable String catalogueId,
                                                      @PathVariable String providerId,
@@ -397,7 +427,10 @@ public class CatalogueController {
     }
 
     @Hidden
-    @PatchMapping(path = "{catalogueId}/provider/audit/{providerId}")
+    @PatchMapping(path = {
+            "{catalogueId}/provider/audit/{providerId}",
+            "{catalogueId}/organisation/audit/{providerId}"
+    })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ProviderBundle> auditProvider(@PathVariable String providerId,
                                                         @PathVariable String catalogueId,
