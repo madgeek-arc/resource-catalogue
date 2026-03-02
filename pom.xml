@@ -34,7 +34,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version.core>2.18.4</jackson.version.core>
+        <jackson.version.core>2.18.6</jackson.version.core>
         <registry-core.version>4.1.0-SNAPSHOT</registry-core.version>
         <javax.mail-version>1.4.3</javax.mail-version>
         <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
