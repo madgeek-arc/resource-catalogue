@@ -50,8 +50,8 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     @Value("${openaire.ds.metrics:}")
     private String openaireMetrics;
 
-    private String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
-        String[] pagination = createPagination(ff);
+    private String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff, String keywordField) {
+        String[] pagination = createPagination(ff, keywordField);
         int page = Integer.parseInt(pagination[0]);
         int quantity = Integer.parseInt(pagination[1]);
         String ordering = pagination[2];
@@ -69,7 +69,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
         return new String[]{};
     }
 
-    private String[] createPagination(FacetFilter ff) {
+    private String[] createPagination(FacetFilter ff, String keywordField) {
         int page;
         int quantity = ff.getQuantity();
         if (ff.getFrom() >= quantity) {
@@ -92,8 +92,9 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
                 data = "{  \"id\": \"" + ff.getFilter().get("id") + "\"}";
             }
         }
+        if (keywordField == null) keywordField = "officialname";
         if (ff.getKeyword() != null && !ff.getKeyword().isEmpty()) {
-            data = "{  \"officialname\": \"" + ff.getKeyword() + "\"}";
+            data = "{\"" + keywordField + "\": \"" + ff.getKeyword() + "\"}";
         }
         return new String[]{Integer.toString(page), Integer.toString(quantity), ordering, data};
     }
@@ -119,7 +120,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     public LinkedHashMap<String, Object> get(String id) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("id", id);
-        String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
+        String datasource = getOpenAIREDatasourcesAsJSON(ff, null)[1];
         if (datasource != null) {
             JSONObject obj = new JSONObject(datasource);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
@@ -141,7 +142,16 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     public Map<Integer, List<LinkedHashMap<String, Object>>> getAll(FacetFilter ff) {
         Map<Integer, List<LinkedHashMap<String, Object>>> datasourceMap = new HashMap<>();
         List<LinkedHashMap<String, Object>> allDatasources = new ArrayList<>();
-        String[] datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff);
+        String[] datasourcesAsJSON;
+        if (ff.getKeyword() != null && !ff.getKeyword().isEmpty()) {
+            datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff, "id");
+            if (datasourcesAsJSON.length == 0 || datasourcesAsJSON[0].equals("0")) {
+                datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff, "officialname");
+            }
+        } else {
+            datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff, "officialname");
+        }
+
         int total = Integer.parseInt(datasourcesAsJSON[0]);
         String allOpenAIREDatasources = datasourcesAsJSON[1];
         if (allOpenAIREDatasources != null) {
@@ -172,7 +182,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     public String getRegisterBy(String openaireDatasourceID) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("id", openaireDatasourceID);
-        String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
+        String datasource = getOpenAIREDatasourcesAsJSON(ff, null)[1];
         String registerBy = null;
         if (datasource != null) {
             JSONObject obj = new JSONObject(datasource);
