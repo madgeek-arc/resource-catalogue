@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.validators;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Helpdesk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.Errors;

@@ -18,9 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableSoftwareBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.springframework.stereotype.Service;
@@ -28,15 +28,15 @@ import org.springframework.stereotype.Service;
 @Service("publicDeployableSoftwareManager")
 public class PublicDeployableSoftwareService extends AbstractPublicResourceManager<DeployableSoftwareBundle> {
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
 
     public PublicDeployableSoftwareService(GenericResourceService genericResourceService,
                                            JmsService jmsService,
                                            PidIssuer pidIssuer,
                                            FacetLabelService facetLabelService,
-                                           ProviderService providerService) {
+                                           OrganisationService organisationService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
-        this.providerService = providerService;
+        this.organisationService = organisationService;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class PublicDeployableSoftwareService extends AbstractPublicResourceManag
     @Override
     public void updateIdsToPublic(DeployableSoftwareBundle deployableSoftware) {
         // Resource Owner
-        ProviderBundle provider = providerService.get(
+        OrganisationBundle provider = organisationService.get(
                 (String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
                 deployableSoftware.getCatalogueId()
         );

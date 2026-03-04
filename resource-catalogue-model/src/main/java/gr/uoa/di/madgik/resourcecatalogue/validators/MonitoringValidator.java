@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.validators;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Monitoring;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Monitoring;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;

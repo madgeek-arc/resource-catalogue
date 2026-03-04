@@ -34,7 +34,7 @@ import java.util.*;
 public class OIDCSecurityService implements SecurityService {
 
     //    private final CatalogueService catalogueService;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
@@ -50,7 +50,7 @@ public class OIDCSecurityService implements SecurityService {
     private String catalogueId;
 
     public OIDCSecurityService(/*@Lazy CatalogueService catalogueService,*/
-            @Lazy ProviderService providerService,
+            @Lazy OrganisationService organisationService,
             @Lazy ServiceService serviceService,
             @Lazy DatasourceService datasourceService,
             @Lazy TrainingResourceService trainingResourceService,
@@ -59,7 +59,7 @@ public class OIDCSecurityService implements SecurityService {
             @Lazy AdapterService adapterService,
             CatalogueProperties properties) {
 //        this.catalogueService = catalogueService;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
@@ -128,11 +128,11 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private List<User> getProviderUsers(String id) {
-        ProviderBundle registeredProvider = checkProviderExistence(id);
+        OrganisationBundle registeredProvider = checkProviderExistence(id);
         if (registeredProvider == null) {
             return null;
         }
-        Object usersObj = registeredProvider.getProvider().get("users");
+        Object usersObj = registeredProvider.getOrganisation().get("users");
         if (!(usersObj instanceof List<?> usersList)) {
             return null;
         }
@@ -164,9 +164,9 @@ public class OIDCSecurityService implements SecurityService {
 //        return registeredCatalogue.getCatalogue().getUsers();
 //    }
 
-    private ProviderBundle checkProviderExistence(String providerId) {
+    private OrganisationBundle checkProviderExistence(String providerId) {
         try {
-            return providerService.get(providerId);
+            return organisationService.get(providerId);
         } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
@@ -187,7 +187,7 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean isApprovedProvider(String prefix, String suffix) {
         String id = prefix + "/" + suffix;
-        ProviderBundle bundle = providerService.get(id);
+        OrganisationBundle bundle = organisationService.get(id);
         return "approved".equals(bundle.getStatus());
     }
     //endregion
@@ -229,7 +229,7 @@ public class OIDCSecurityService implements SecurityService {
 
     private Bundle determineResourceType(String id) {
         if (isProvider(id)) {
-            return providerService.getOrElseReturnNull(id);
+            return organisationService.getOrElseReturnNull(id);
         } else if (isService(id)) {
             return serviceService.getOrElseReturnNull(id);
         } else if (isDatasource(id)) {
@@ -247,7 +247,7 @@ public class OIDCSecurityService implements SecurityService {
 
     private boolean isProvider(String id) {
         try {
-            providerService.get(id);
+            organisationService.get(id);
             return true;
         } catch (ResourceException e) {
             return false;
@@ -305,11 +305,11 @@ public class OIDCSecurityService implements SecurityService {
         if (catalogueId == null || catalogueId.isEmpty()) {
             catalogueId = this.catalogueId;
         }
-        ProviderBundle provider = providerService.get(providerId, catalogueId);
+        OrganisationBundle provider = organisationService.get(providerId, catalogueId);
         return canAddResources(auth, provider);
     }
 
-    private boolean canAddResources(Authentication auth, ProviderBundle provider) {
+    private boolean canAddResources(Authentication auth, OrganisationBundle provider) {
         // provider related check
         if (!provider.isActive()) {
             return false;
@@ -338,13 +338,13 @@ public class OIDCSecurityService implements SecurityService {
     public boolean resourceIsApprovedAndUserIsAdmin(Authentication auth, String id) {
         Bundle bundle = determineResourceType(id);
         if (bundle != null) {
-            if (bundle instanceof ProviderBundle) {
+            if (bundle instanceof OrganisationBundle) {
                 if (bundle.getStatus().equals("approved")) {
                     return hasAdminAccess(auth, id);
                 }
             } else {
                 String providerId = getProviderId(id);
-                ProviderBundle provider = providerService.get(providerId);
+                OrganisationBundle provider = organisationService.get(providerId);
                 if (provider.getStatus().equals("approved")) {
                     return hasAdminAccess(auth, providerId);
                 }
@@ -355,8 +355,8 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean providerIsActive(String id, String catalogueId) {
-        ProviderBundle providerBundle = providerService.get(id, catalogueId);
-        return providerBundle.isActive();
+        OrganisationBundle organisationBundle = organisationService.get(id, catalogueId);
+        return organisationBundle.isActive();
     }
 
     @Override

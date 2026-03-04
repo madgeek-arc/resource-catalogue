@@ -53,7 +53,7 @@ public class CatalogueController {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogueController.class);
     private final CatalogueService catalogueService;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final AdapterService adapterService;
@@ -68,7 +68,7 @@ public class CatalogueController {
     private String catalogueId;
 
     CatalogueController(CatalogueService catalogueService,
-                        ProviderService providerService,
+                        OrganisationService organisationService,
                         ServiceService serviceService,
                         DatasourceService datasourceService,
                         AdapterService adapterService,
@@ -76,7 +76,7 @@ public class CatalogueController {
                         InteroperabilityRecordService guidelineService,
                         DeployableSoftwareService deployableSoftwareService) {
         this.catalogueService = catalogueService;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.adapterService = adapterService;
@@ -269,15 +269,15 @@ public class CatalogueController {
     }
     //endregion
 
-    //region Provider
-    @Operation(description = "Returns the Provider of the specific Catalogue with the given id.")
+    //region Organisation
+    @Operation(description = "Returns the Organisation of the specific Catalogue with the given id.")
     @GetMapping(path = {
             "{catalogueId}/provider/{providerId}",
             "{catalogueId}/organisation/{providerId}"
     })
     public ResponseEntity<?> getCatalogueProvider(@PathVariable String catalogueId,
                                                   @PathVariable String providerId) {
-        return new ResponseEntity<>(providerService.get(providerId, catalogueId).getProvider(), HttpStatus.OK);
+        return new ResponseEntity<>(organisationService.get(providerId, catalogueId).getOrganisation(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the ProviderBundle of the specific Catalogue with the given id.")
@@ -286,11 +286,11 @@ public class CatalogueController {
             "{catalogueId}/organisation/bundle/{providerId}"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
-    public ResponseEntity<ProviderBundle> getCatalogueProviderBundle(@PathVariable String catalogueId,
-                                                                     @PathVariable String providerId,
-                                                                     @SuppressWarnings("unused")
+    public ResponseEntity<OrganisationBundle> getCatalogueProviderBundle(@PathVariable String catalogueId,
+                                                                         @PathVariable String providerId,
+                                                                         @SuppressWarnings("unused")
                                                                      @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(providerService.get(providerId, catalogueId), HttpStatus.OK);
+        return new ResponseEntity<>(organisationService.get(providerId, catalogueId), HttpStatus.OK);
     }
 
     @BrowseParameters
@@ -304,12 +304,12 @@ public class CatalogueController {
                                                               @RequestParam MultiValueMap<String, Object> params,
                                                               @PathVariable String catalogueId) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("provider");
+        ff.setResourceType("organisation");
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<ProviderBundle> paging = providerService.getAll(ff);
-        return ResponseEntity.ok(paging.map(ProviderBundle::getProvider));
+        Paging<OrganisationBundle> paging = organisationService.getAll(ff);
+        return ResponseEntity.ok(paging.map(OrganisationBundle::getOrganisation));
     }
 
     @Hidden
@@ -318,17 +318,17 @@ public class CatalogueController {
             "{catalogueId}/organisation/bundle/all"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
-    public ResponseEntity<Paging<ProviderBundle>> getAllCatalogueProviderBundles(@PathVariable String catalogueId,
-                                                                                 @Parameter(hidden = true)
+    public ResponseEntity<Paging<OrganisationBundle>> getAllCatalogueProviderBundles(@PathVariable String catalogueId,
+                                                                                     @Parameter(hidden = true)
                                                                                  @RequestParam MultiValueMap<String, Object> params,
-                                                                                 @SuppressWarnings("unused")
+                                                                                     @SuppressWarnings("unused")
                                                                                  @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("provider");
+        ff.setResourceType("organisation");
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         ff.addFilter("catalogue_id", catalogueId);
-        Paging<ProviderBundle> paging = providerService.getAll(ff);
+        Paging<OrganisationBundle> paging = organisationService.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
@@ -342,8 +342,8 @@ public class CatalogueController {
                                                                         @PathVariable String providerId,
                                                                         @SuppressWarnings("unused")
                                                                         @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle bundle = providerService.get(providerId, catalogueId);
-        List<LoggingInfo> loggingInfoHistory = providerService.getLoggingInfoHistory(bundle);
+        OrganisationBundle bundle = organisationService.get(providerId, catalogueId);
+        List<LoggingInfo> loggingInfoHistory = organisationService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
 
@@ -356,12 +356,12 @@ public class CatalogueController {
     public ResponseEntity<?> addCatalogueProvider(@RequestBody LinkedHashMap<String, Object> provider,
                                                   @PathVariable String catalogueId,
                                                   @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle bundle = new ProviderBundle();
-        bundle.setProvider(provider);
+        OrganisationBundle bundle = new OrganisationBundle();
+        bundle.setOrganisation(provider);
         bundle.setCatalogueId(catalogueId);
-        ProviderBundle ret = providerService.add(bundle, auth);
+        OrganisationBundle ret = organisationService.add(bundle, auth);
         logger.info("Added Provider with id '{}' in the Catalogue '{}'", provider.get("id"), catalogueId);
-        return new ResponseEntity<>(ret.getProvider(), HttpStatus.CREATED);
+        return new ResponseEntity<>(ret.getOrganisation(), HttpStatus.CREATED);
     }
 
     @Hidden
@@ -370,11 +370,11 @@ public class CatalogueController {
             "{catalogueId}/organisation/bundle"
     })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ProviderBundle> addCatalogueProviderBundle(@RequestBody ProviderBundle provider,
-                                                                     @PathVariable String catalogueId,
-                                                                     @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<OrganisationBundle> addCatalogueProviderBundle(@RequestBody OrganisationBundle provider,
+                                                                         @PathVariable String catalogueId,
+                                                                         @Parameter(hidden = true) Authentication auth) {
         provider.setCatalogueId(catalogueId);
-        ProviderBundle bundle = providerService.add(provider, auth);
+        OrganisationBundle bundle = organisationService.add(provider, auth);
         logger.info("Added the Provider Bundle with id '{}' in the Catalogue '{}'", provider.getId(), catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
@@ -390,11 +390,11 @@ public class CatalogueController {
                                                      @RequestParam(required = false) String comment,
                                                      @Parameter(hidden = true) Authentication auth) {
         String id = provider.get("id").toString();
-        ProviderBundle bundle = providerService.get(id, catalogueId);
-        bundle.setProvider(provider);
-        bundle = providerService.update(bundle, comment, auth);
+        OrganisationBundle bundle = organisationService.get(id, catalogueId);
+        bundle.setOrganisation(provider);
+        bundle = organisationService.update(bundle, comment, auth);
         logger.info("Updated the Provider with id '{}'", bundle.getId());
-        return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
+        return new ResponseEntity<>(bundle.getOrganisation(), HttpStatus.OK);
     }
 
     @Hidden
@@ -403,10 +403,10 @@ public class CatalogueController {
             "{catalogueId}/bundle/organisation"
     })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ProviderBundle> updateCatalogueProviderBundle(@RequestBody ProviderBundle provider,
-                                                                        @RequestParam(required = false) String comment,
-                                                                        @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle bundle = providerService.update(provider, comment, auth);
+    public ResponseEntity<OrganisationBundle> updateCatalogueProviderBundle(@RequestBody OrganisationBundle provider,
+                                                                            @RequestParam(required = false) String comment,
+                                                                            @Parameter(hidden = true) Authentication auth) {
+        OrganisationBundle bundle = organisationService.update(provider, comment, auth);
         logger.info("Updated the Provider Bundle id '{}'", provider.getId());
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
@@ -420,10 +420,10 @@ public class CatalogueController {
     public ResponseEntity<?> deleteCatalogueProvider(@PathVariable String catalogueId,
                                                      @PathVariable String providerId,
                                                      @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle provider = providerService.get(providerId, catalogueId);
-        providerService.delete(provider);
+        OrganisationBundle provider = organisationService.get(providerId, catalogueId);
+        organisationService.delete(provider);
         logger.info("Deleted the Provider with id '{}' of the Catalogue '{}'", providerId, catalogueId);
-        return new ResponseEntity<>(provider.getProvider(), HttpStatus.OK);
+        return new ResponseEntity<>(provider.getOrganisation(), HttpStatus.OK);
     }
 
     @Hidden
@@ -432,12 +432,12 @@ public class CatalogueController {
             "{catalogueId}/organisation/audit/{providerId}"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<ProviderBundle> auditProvider(@PathVariable String providerId,
-                                                        @PathVariable String catalogueId,
-                                                        @RequestParam(required = false) String comment,
-                                                        @RequestParam LoggingInfo.ActionType actionType,
-                                                        @Parameter(hidden = true) Authentication auth) {
-        ProviderBundle provider = providerService.audit(providerId, catalogueId, comment, actionType, auth);
+    public ResponseEntity<OrganisationBundle> auditProvider(@PathVariable String providerId,
+                                                            @PathVariable String catalogueId,
+                                                            @RequestParam(required = false) String comment,
+                                                            @RequestParam LoggingInfo.ActionType actionType,
+                                                            @Parameter(hidden = true) Authentication auth) {
+        OrganisationBundle provider = organisationService.audit(providerId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
     //endregion

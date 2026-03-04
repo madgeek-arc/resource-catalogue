@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class ServiceSync extends AbstractSyncService<gr.uoa.di.madgik.resourcecatalogue.domain.Service> {
+public class ServiceSync extends AbstractSyncService<gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Service> {
 
     public ServiceSync(@Value("${sync.host:}") String host,
                        @Value("${sync.token.filepath:}") String filename,

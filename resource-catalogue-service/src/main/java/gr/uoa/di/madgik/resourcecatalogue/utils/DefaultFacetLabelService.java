@@ -19,9 +19,9 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.registry.domain.Facet;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Value;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.apache.commons.collections.list.TreeList;
 import org.slf4j.Logger;
@@ -37,15 +37,15 @@ import java.util.*;
 public class DefaultFacetLabelService implements FacetLabelService {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultFacetLabelService.class);
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final VocabularyService vocabularyService;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    DefaultFacetLabelService(ProviderService providerService,
+    DefaultFacetLabelService(OrganisationService organisationService,
                              VocabularyService vocabularyService) {
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.vocabularyService = vocabularyService;
     }
 
@@ -109,9 +109,9 @@ public class DefaultFacetLabelService implements FacetLabelService {
         ff.setQuantity(maxQuantity);
 //        ff.addFilter("active", "true");
         // TODO: get all final providers (after deduplication process)
-        List<ProviderBundle> allProviders = providerService.getAll(ff, null).getResults();
+        List<OrganisationBundle> allProviders = organisationService.getAll(ff, null).getResults();
         Map<String, String> providerNames = new TreeMap<>();
-        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), (String) p.getProvider().get("name")));
+        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), (String) p.getOrganisation().get("name")));
 
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 

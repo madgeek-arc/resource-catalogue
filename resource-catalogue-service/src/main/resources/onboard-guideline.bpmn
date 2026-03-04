@@ -98,8 +98,8 @@
           <zeebe:input source="=resource.payload.resourceOwner" target="id" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
-          <zeebe:header key="resourceName" value="provider" />
-          <zeebe:header key="resourceType" value="provider" />
+          <zeebe:header key="resourceName" value="organisation" />
+          <zeebe:header key="resourceType" value="organisation" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1b9ungf</bpmn:incoming>

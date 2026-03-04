@@ -20,9 +20,9 @@
 //import gr.uoa.di.madgik.registry.domain.FacetFilter;
 //import gr.uoa.di.madgik.registry.domain.Paging;
 //import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-//import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
+//import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Helpdesk;
 //import gr.uoa.di.madgik.resourcecatalogue.domain.HelpdeskBundle;
-//import gr.uoa.di.madgik.resourcecatalogue.domain.Monitoring;
+//import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Monitoring;
 //import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
 //import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 //import gr.uoa.di.madgik.resourcecatalogue.service.HelpdeskService;

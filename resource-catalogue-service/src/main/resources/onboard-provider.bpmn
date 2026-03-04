@@ -161,7 +161,7 @@ resource.catalogueId = "eosc"</bpmn:conditionExpression>
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="resourceName" value="resource" />
-          <zeebe:header key="resourceType" value="provider" />
+          <zeebe:header key="resourceType" value="organisation" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1q1wtm2</bpmn:incoming>

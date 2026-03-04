@@ -43,7 +43,7 @@
         { "name": "Helpdesk", "value": "helpdesk" },
         { "name": "Interoperability Record", "value": "interoperability_record" },
         { "name": "Monitoring", "value": "monitoring" },
-        { "name": "Provider", "value": "provider" },
+        { "name": "Organisation", "value": "organisation" },
         { "name": "Resource Interoperability_record", "value": "resource_interoperability_record" },
         { "name": "Service", "value": "service" },
         { "name": "Training Resource", "value": "training_resource" },

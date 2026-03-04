@@ -25,7 +25,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
@@ -51,7 +51,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     private static final String RESERVED_NAME = "EOSC Monitoring: Architecture and Interoperability Guidelines";
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
 
@@ -60,12 +60,12 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    public InteroperabilityRecordManager(ProviderService providerService, IdCreator idCreator,
+    public InteroperabilityRecordManager(OrganisationService organisationService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          ProviderResourcesCommonMethods commonMethods,
                                          GenericResourceService genericResourceService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
     }
@@ -121,7 +121,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     public InteroperabilityRecordBundle setActive(String id, Boolean active, Authentication auth) {
         InteroperabilityRecordBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getInteroperabilityRecord().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) existing.getInteroperabilityRecord().get("resourceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Interoperability Record, as its Provider is inactive",
@@ -153,7 +153,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         InteroperabilityRecordBundle guideline = get(id);
-        ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
                 guideline.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Interoperability Records", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
@@ -234,7 +234,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     @Override
     public InteroperabilityRecordBundle finalizeDraft(InteroperabilityRecordBundle guideline, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
                 guideline.getCatalogueId());
         UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {

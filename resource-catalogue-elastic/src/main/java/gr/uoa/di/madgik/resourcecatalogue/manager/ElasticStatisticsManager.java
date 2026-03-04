@@ -23,7 +23,7 @@ import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
@@ -71,7 +71,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     private static final Logger logger = LoggerFactory.getLogger(ElasticStatisticsManager.class);
     private final RestHighLevelClient client;
     private final Analytics analyticsService;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final SearchService searchService;
     private final ParserService parserService;
     private final ServiceService serviceService;
@@ -82,14 +82,14 @@ public class ElasticStatisticsManager implements StatisticsService {
     private int maxQuantity;
 
     ElasticStatisticsManager(RestHighLevelClient client, Analytics analyticsService,
-                             ProviderService providerService,
+                             OrganisationService organisationService,
                              SearchService searchService, ParserService parserService,
                              ServiceService serviceService,
                              VocabularyService vocabularyService,
                              DataSource dataSource) {
         this.client = client;
         this.analyticsService = analyticsService;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.searchService = searchService;
         this.parserService = parserService;
         this.serviceService = serviceService;
@@ -441,9 +441,9 @@ public class ElasticStatisticsManager implements StatisticsService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
 
-        for (ProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
+        for (OrganisationBundle organisationBundle : organisationService.getAll(ff, null).getResults()) {
             Set<String> countries = new HashSet<>();
-            String country = (String) providerBundle.getProvider().get("country");
+            String country = (String) organisationBundle.getOrganisation().get("country");
             if (country.equalsIgnoreCase("WW")) {
                 countries.addAll(Arrays.asList(world));
             } else if (country.equalsIgnoreCase("EU")) {
@@ -451,7 +451,7 @@ public class ElasticStatisticsManager implements StatisticsService {
             } else {
                 countries.add(country);
             }
-            providerCountries.put(providerBundle.getId(), countries);
+            providerCountries.put(organisationBundle.getId(), countries);
         }
         return providerCountries;
     }

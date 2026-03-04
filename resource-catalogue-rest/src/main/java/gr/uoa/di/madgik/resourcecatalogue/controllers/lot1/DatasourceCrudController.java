@@ -19,7 +19,7 @@
 //import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 //import gr.uoa.di.madgik.registry.domain.FacetFilter;
 //import gr.uoa.di.madgik.registry.domain.Paging;
-//import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
+//import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Datasource;
 //import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 //import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
 //import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;

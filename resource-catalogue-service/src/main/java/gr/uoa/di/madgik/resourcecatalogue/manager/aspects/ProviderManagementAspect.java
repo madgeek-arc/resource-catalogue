@@ -20,7 +20,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -48,7 +48,7 @@ public class ProviderManagementAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(ProviderManagementAspect.class);
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
@@ -56,7 +56,7 @@ public class ProviderManagementAspect {
     private final DeployableSoftwareService deployableSoftwareService;
     private final ResourceInteroperabilityRecordService rirService;
     private final ConfigurationTemplateInstanceService ctiService;
-    private final PublicProviderService publicProviderService;
+    private final PublicOrganisationService publicOrganisationService;
     private final PublicServiceService publicServiceService;
     private final PublicDatasourceService publicDatasourceService;
     private final PublicTrainingResourceService publicTrainingResourceService;
@@ -73,7 +73,7 @@ public class ProviderManagementAspect {
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ProviderManagementAspect(ProviderService providerService,
+    public ProviderManagementAspect(OrganisationService organisationService,
                                     ServiceService serviceService,
                                     DatasourceService datasourceService,
                                     TrainingResourceService trainingResourceService,
@@ -81,7 +81,7 @@ public class ProviderManagementAspect {
                                     DeployableSoftwareService deployableSoftwareService,
                                     ResourceInteroperabilityRecordService rirService,
                                     ConfigurationTemplateInstanceService ctiService,
-                                    PublicProviderService publicProviderService,
+                                    PublicOrganisationService publicOrganisationService,
                                     PublicServiceService publicServiceService,
                                     PublicDatasourceService publicDatasourceService,
                                     PublicTrainingResourceService publicTrainingResourceService,
@@ -93,7 +93,7 @@ public class ProviderManagementAspect {
                                     SecurityService securityService, ConfigurationTemplateService configurationTemplateService,
                                     ConfigurationTemplateInstanceService configurationTemplateInstanceService,
                                     PublicInteroperabilityRecordService publicInteroperabilityRecordService) {
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
@@ -101,7 +101,7 @@ public class ProviderManagementAspect {
         this.deployableSoftwareService = deployableSoftwareService;
         this.rirService = rirService;
         this.ctiService = ctiService;
-        this.publicProviderService = publicProviderService;
+        this.publicOrganisationService = publicOrganisationService;
         this.publicServiceService = publicServiceService;
         this.publicDatasourceService = publicDatasourceService;
         this.publicTrainingResourceService = publicTrainingResourceService;
@@ -121,40 +121,40 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "service")
     public void updatePublicProviderTemplateStatus(final ServiceBundle service) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
-        publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
-        publicProviderService.update(provider, null);
+        publicOrganisationService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
+        publicOrganisationService.update(provider, null);
     }
 
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
             returning = "datasource")
     public void updatePublicProviderTemplateStatus(final DatasourceBundle datasource) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
-        publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
-        publicProviderService.update(provider, null);
+        publicOrganisationService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
+        publicOrganisationService.update(provider, null);
     }
 
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
             returning = "trainingResource")
     public void updatePublicProviderTemplateStatus(final TrainingResourceBundle trainingResource) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
-        publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
-        publicProviderService.update(provider, null);
+        publicOrganisationService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
+        publicOrganisationService.update(provider, null);
     }
 
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.verify(..))",
             returning = "deployableSoftware")
     public void updatePublicProviderTemplateStatus(final DeployableSoftwareBundle deployableSoftware) {
-        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
                 deployableSoftware.getCatalogueId());
-        publicProviderService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
-        publicProviderService.update(provider, null);
+        publicOrganisationService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
+        publicOrganisationService.update(provider, null);
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.finalizeDraft(..)) " +
@@ -170,7 +170,7 @@ public class ProviderManagementAspect {
     public void updateServiceStatus(ServiceBundle service) {
         if (service.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
+                OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                         service.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     serviceService.verify(service.getId(), "pending", false, securityService.getAdminAccess());
@@ -194,7 +194,7 @@ public class ProviderManagementAspect {
     public void updateDatasourceStatus(DatasourceBundle datasource) {
         if (datasource.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
+                OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                         datasource.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     datasourceService.verify(datasource.getId(), "pending", false, securityService.getAdminAccess());
@@ -218,7 +218,7 @@ public class ProviderManagementAspect {
     public void updateTrainingResourceStatus(TrainingResourceBundle training) {
         if (training.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) training.getTrainingResource().get("resourceOwner"),
+                OrganisationBundle provider = organisationService.get((String) training.getTrainingResource().get("resourceOwner"),
                         training.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     trainingResourceService.verify(training.getId(), "pending", false, securityService.getAdminAccess());
@@ -242,7 +242,7 @@ public class ProviderManagementAspect {
     public void updateDeployableSoftwareStatus(DeployableSoftwareBundle bundle) {
         if (bundle.getCatalogueId().equals(catalogueId)) {
             try {
-                ProviderBundle provider = providerService.get((String) bundle.getDeployableSoftware().get("resourceOwner"),
+                OrganisationBundle provider = organisationService.get((String) bundle.getDeployableSoftware().get("resourceOwner"),
                         bundle.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
                     deployableSoftwareService.verify(bundle.getId(), "pending", false, securityService.getAdminAccess());
@@ -255,11 +255,11 @@ public class ProviderManagementAspect {
     //endregion
 
     //region registration emails
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.verify(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.finalizeDraft(..))",
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.finalizeDraft(..))",
             returning = "bundle")
-    public void providerRegistrationEmails(final ProviderBundle bundle) {
+    public void providerRegistrationEmails(final OrganisationBundle bundle) {
         logger.trace("Sending Registration emails");
         if (!bundle.getMetadata().isPublished() && bundle.getCatalogueId().equals(catalogueId)) {
 //            emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "providerManager"); //FIXME
@@ -269,7 +269,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "service")
     public void providerRegistrationEmails(final ServiceBundle service) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -278,7 +278,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
             returning = "datasource")
     public void providerRegistrationEmails(final DatasourceBundle datasource) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -287,7 +287,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
             returning = "training")
     public void providerRegistrationEmails(final TrainingResourceBundle training) {
-        ProviderBundle provider = providerService.get((String) training.getTrainingResource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) training.getTrainingResource().get("resourceOwner"),
                 training.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -296,7 +296,7 @@ public class ProviderManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.verify(..))",
             returning = "deployableSoftware")
     public void providerRegistrationEmails(final DeployableSoftwareBundle deployableSoftware) {
-        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
                 deployableSoftware.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
@@ -305,15 +305,15 @@ public class ProviderManagementAspect {
 
     //region Public Provider
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.verify(..))",
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.verify(..))",
             returning = "bundle")
-    public void addPublicProvider(final ProviderBundle bundle) {
+    public void addPublicProvider(final OrganisationBundle bundle) {
         if (bundle.getStatus().equals("approved") && bundle.isActive()) {
             try {
-                publicProviderService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+                publicOrganisationService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
             } catch (ResourceException e) {
-                publicProviderService.add(ObjectUtils.clone(bundle), true);
+                publicOrganisationService.add(ObjectUtils.clone(bundle), true);
             }
         }
     }
@@ -341,30 +341,30 @@ public class ProviderManagementAspect {
         return ret;
     }
 
-    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.update(..)) && args(provider, ..)")
-    public Object updatePublicProvider(ProceedingJoinPoint pjp, ProviderBundle provider) throws Throwable {
-        return updatePublicBundle(pjp, publicProviderService, provider);
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.update(..)) && args(provider, ..)")
+    public Object updatePublicProvider(ProceedingJoinPoint pjp, OrganisationBundle provider) throws Throwable {
+        return updatePublicBundle(pjp, publicOrganisationService, provider);
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setActive(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.verify(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.setSuspend(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.setActive(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "bundle")
-    public void updatePublicProvider(final ProviderBundle bundle) {
+    public void updatePublicProvider(final OrganisationBundle bundle) {
         try {
-            publicProviderService.update(ObjectUtils.clone(bundle), null);
+            publicOrganisationService.update(ObjectUtils.clone(bundle), null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
     @Async
-    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ProviderManager.delete(..))")
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.delete(..))")
     public void deletePublicProvider(JoinPoint joinPoint) {
-        ProviderBundle bundle = (ProviderBundle) joinPoint.getArgs()[0];
+        OrganisationBundle bundle = (OrganisationBundle) joinPoint.getArgs()[0];
         try {
-            publicProviderService.delete(bundle);
+            publicOrganisationService.delete(bundle);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }

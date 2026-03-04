@@ -17,7 +17,7 @@
 //package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 //
  //TODO: delete?
-//import gr.uoa.di.madgik.resourcecatalogue.domain.EOSCIFGuidelines;
+//import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.EOSCIFGuidelines;
 //import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 //import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 //import io.swagger.v3.oas.annotations.Hidden;

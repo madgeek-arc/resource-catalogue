@@ -28,7 +28,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +48,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
 
     private static final Logger logger = LoggerFactory.getLogger(DeployableSoftwareManager.class);
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final WorkflowService workflowService;
@@ -59,7 +58,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    public DeployableSoftwareManager(ProviderService providerService,
+    public DeployableSoftwareManager(OrganisationService organisationService,
                                      IdCreator idCreator,
                                      @Lazy SecurityService securityService,
                                      @Lazy VocabularyService vocabularyService,
@@ -67,7 +66,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
                                      GenericResourceService genericResourceService,
                                      WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.workflowService = workflowService;
@@ -101,7 +100,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     }
 
     private void checkAndResetDeployableSoftwareOnboarding(DeployableSoftwareBundle deployableSoftware, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
                 deployableSoftware.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (deployableSoftware.getStatus().equals(vocabularyService.get("rejected").getId())) {
@@ -109,7 +108,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
                 deployableSoftware.setStatus(vocabularyService.get("pending").getId());
                 deployableSoftware.setActive(false);
                 provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(provider, "system update", auth);
+                organisationService.update(provider, "system update", auth);
             }
         }
     }
@@ -141,7 +140,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
     }
 
     private void updateProviderTemplateStatus(DeployableSoftwareBundle deployableSoftware, String status, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
                 deployableSoftware.getCatalogueId());
         switch (status) {
             case "pending":
@@ -156,14 +155,14 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
             default:
                 break;
         }
-        providerService.update(provider, "system update", auth);
+        organisationService.update(provider, "system update", auth);
     }
 
     @Override
     public DeployableSoftwareBundle setActive(String id, Boolean active, Authentication auth) {
         DeployableSoftwareBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getDeployableSoftware().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) existing.getDeployableSoftware().get("resourceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Deployable Software, as its Provider is inactive", HttpStatus.CONFLICT);
@@ -193,7 +192,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         DeployableSoftwareBundle deployableSoftware = get(id);
-        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
                 deployableSoftware.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
@@ -268,7 +267,7 @@ public class DeployableSoftwareManager extends ResourceCatalogueGenericManager<D
 
     @Override
     public DeployableSoftwareBundle finalizeDraft(DeployableSoftwareBundle deployableSoftware, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
                 deployableSoftware.getCatalogueId());
         UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {

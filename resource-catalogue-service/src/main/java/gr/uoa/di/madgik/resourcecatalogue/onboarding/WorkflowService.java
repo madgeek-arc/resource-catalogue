@@ -74,7 +74,7 @@ public class WorkflowService {
     private String getBpmnProcess(String resourceType) {
         // TODO: load bpmn process by resourceType
         return switch (resourceType) {
-            case "provider" -> "onboard-provider";
+            case "organisation" -> "onboard-provider";
             case "service", "datasource", "training_resource", "deployable_software" -> "onboard-resource";
             case "adapter"  -> "onboard-adapter";
             case "interoperability_record" -> "onboard-guideline";

@@ -20,7 +20,7 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,9 +46,9 @@ import java.util.Map;
 @Tag(name = "public provider")
 public class PublicProviderController {
 
-    private final PublicResourceService<ProviderBundle> service;
+    private final PublicResourceService<OrganisationBundle> service;
 
-    public PublicProviderController(PublicResourceService<ProviderBundle> service) {
+    public PublicProviderController(PublicResourceService<OrganisationBundle> service) {
         this.service = service;
     }
 
@@ -63,9 +63,9 @@ public class PublicProviderController {
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id, catalogueId);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getProvider(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.getOrganisation(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Provider is not active"));
@@ -83,7 +83,7 @@ public class PublicProviderController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ProviderBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -99,8 +99,8 @@ public class PublicProviderController {
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<ProviderBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(ProviderBundle::getProvider));
+        Paging<OrganisationBundle> paging = service.getAll(ff);
+        return ResponseEntity.ok(paging.map(OrganisationBundle::getOrganisation));
     }
 
     @BrowseParameters
@@ -111,19 +111,19 @@ public class PublicProviderController {
             "public/organisation/bundle/all"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<ProviderBundle>> getAllBundles(@Parameter(hidden = true)
+    public ResponseEntity<Paging<OrganisationBundle>> getAllBundles(@Parameter(hidden = true)
                                                                 @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<ProviderBundle> paging = service.getAll(ff);
+        Paging<OrganisationBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
     @Hidden
     @PostMapping(path = "public/provider/add")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ProviderBundle> createPublicProvider(@RequestBody ProviderBundle bundle,
-                                                               @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<OrganisationBundle> createPublicProvider(@RequestBody OrganisationBundle bundle,
+                                                                   @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }

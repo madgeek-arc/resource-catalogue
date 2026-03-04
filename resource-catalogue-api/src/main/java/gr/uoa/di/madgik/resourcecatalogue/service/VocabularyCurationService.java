@@ -18,7 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.VocabularyCuration;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.VocabularyCuration;
 import org.springframework.security.core.Authentication;
 
 public interface VocabularyCurationService extends ResourceService<VocabularyCuration> {

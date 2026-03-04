@@ -20,10 +20,10 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.dynamicproperties.PropertyChangeEvent;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
     private final int maxQuantity;
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
 
 //    private final CatalogueService catalogueService;
     private final SecurityService securityService;
@@ -62,11 +62,11 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
                                      CatalogueProperties catalogueProperties,
-                                     ProviderService manager,
+                                     OrganisationService manager,
 //                                     CatalogueService catalogueService,
                                      SecurityService securityService) {
         this.catalogueProperties = catalogueProperties;
-        this.providerService = manager;
+        this.organisationService = manager;
 //        this.catalogueService = catalogueService;
         this.securityService = securityService;
         this.maxQuantity = maxQuantity;
@@ -123,9 +123,9 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         ff.addFilter("published", false);
         ff.setQuantity(maxQuantity);
 
-        List<ProviderBundle> providers = new ArrayList<>();
+        List<OrganisationBundle> providers = new ArrayList<>();
         try {
-            providers.addAll(providerService.getAll(ff).getResults());
+            providers.addAll(organisationService.getAll(ff).getResults());
         } catch (Exception e) {
             logger.warn("There are no Provider entries in DB");
         }
@@ -178,10 +178,10 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         return authorities;
     }
 
-    private Set<String> getProviderUserEmails(List<ProviderBundle> providerBundles) {
-        return providerBundles.stream()
+    private Set<String> getProviderUserEmails(List<OrganisationBundle> organisationBundles) {
+        return organisationBundles.stream()
                 .flatMap(pb -> {
-                    Object usersObj = pb.getProvider().get("users");
+                    Object usersObj = pb.getOrganisation().get("users");
                     if (!(usersObj instanceof List<?> users)) {
                         return Stream.empty();
                     }

@@ -27,10 +27,8 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
-import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
@@ -52,7 +50,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
@@ -63,7 +61,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    public ServiceManager(ProviderService providerService,
+    public ServiceManager(OrganisationService organisationService,
                           IdCreator idCreator,
                           SecurityService securityService,
                           VocabularyService vocabularyService,
@@ -74,7 +72,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           ModelService modelService,
                           WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
-        this.providerService = providerService; // for providers
+        this.organisationService = organisationService; // for providers
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
@@ -112,7 +110,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     private void checkAndResetServiceOnboarding(ServiceBundle service, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (service.getStatus().equals(vocabularyService.get("rejected").getId())) {
@@ -120,7 +118,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                 service.setStatus(vocabularyService.get("pending").getId());
                 service.setActive(false);
                 provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(provider, "system update", auth);
+                organisationService.update(provider, "system update", auth);
             }
         }
     }
@@ -154,7 +152,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     private void updateProviderTemplateStatus(ServiceBundle service, String status, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         switch (status) {
             case "pending":
@@ -169,14 +167,14 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
             default:
                 break;
         }
-        providerService.update(provider, "system update", auth);
+        organisationService.update(provider, "system update", auth);
     }
 
     @Override
     public ServiceBundle setActive(String id, Boolean active, Authentication auth) {
         ServiceBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getService().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) existing.getService().get("resourceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Service, as its Provider is inactive", HttpStatus.CONFLICT);
@@ -206,7 +204,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         ServiceBundle service = get(id);
-        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
@@ -345,7 +343,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     @Override
     public ServiceBundle finalizeDraft(ServiceBundle service, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) service.getService().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {

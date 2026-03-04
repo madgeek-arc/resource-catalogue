@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import org.springframework.security.core.Authentication;
 
 public interface MigrationService {
@@ -27,10 +27,10 @@ public interface MigrationService {
      * @param catalogueId    The Catalogue ID in which the Provider is registered
      * @param newCatalogueId The new Catalogue ID in which the Provider will be registered
      * @param authentication Authentication
-     * @return {@link ProviderBundle}
+     * @return {@link OrganisationBundle}
      */
-    ProviderBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId,
-                                           Authentication authentication);
+    OrganisationBundle changeProviderCatalogue(String providerId, String catalogueId, String newCatalogueId,
+                                               Authentication authentication);
 
     /**
      * Update all Project's resources' fields related to a specific resource ID when migrating this resource to another

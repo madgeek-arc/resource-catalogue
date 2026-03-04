@@ -22,7 +22,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -42,7 +42,7 @@ public class InternalToPublicConsistency {
 
     private static final Logger logger = LoggerFactory.getLogger(InternalToPublicConsistency.class);
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableSoftwareService deployableSoftwareService;
@@ -53,7 +53,7 @@ public class InternalToPublicConsistency {
     private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
 
 
-    private final PublicProviderService publicProviderService;
+    private final PublicOrganisationService publicOrganisationService;
     private final PublicServiceService publicServiceManager;
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicDeployableSoftwareService publicDeployableSoftwareService;
@@ -79,7 +79,7 @@ public class InternalToPublicConsistency {
     @Value("${catalogue.email-properties.resource-consistency.cc:}")
     private String consistencyCC;
 
-    public InternalToPublicConsistency(ProviderService providerService,
+    public InternalToPublicConsistency(OrganisationService organisationService,
                                        ServiceService serviceService,
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
@@ -88,7 +88,7 @@ public class InternalToPublicConsistency {
                                        ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                        DatasourceService datasourceService,
                                        ConfigurationTemplateInstanceService configurationTemplateInstanceService,
-                                       PublicProviderService publicProviderService, PublicServiceService publicServiceManager,
+                                       PublicOrganisationService publicOrganisationService, PublicServiceService publicServiceManager,
                                        PublicTrainingResourceService publicTrainingResourceManager,
                                        PublicDeployableSoftwareService publicDeployableSoftwareService,
                                        PublicAdapterService publicAdapterService,
@@ -97,7 +97,7 @@ public class InternalToPublicConsistency {
                                        PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceService,
                                        PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                                        SecurityService securityService, Configuration cfg, MailService mailService) {
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.deployableSoftwareService = deployableSoftwareService;
@@ -106,7 +106,7 @@ public class InternalToPublicConsistency {
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.datasourceService = datasourceService;
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
-        this.publicProviderService = publicProviderService;
+        this.publicOrganisationService = publicOrganisationService;
         this.publicServiceManager = publicServiceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicDeployableSoftwareService = publicDeployableSoftwareService;
@@ -124,7 +124,7 @@ public class InternalToPublicConsistency {
 //    @Scheduled(cron = "0 0 0 * * *") // At midnight every day
 //    @Scheduled(initialDelay = 0, fixedRate = 6000) // every 2 min
     protected void logInternalToPublicResourceConsistency() {
-        List<ProviderBundle> allInternalApprovedProviders = providerService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<OrganisationBundle> allInternalApprovedProviders = organisationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<ServiceBundle> allInternalApprovedServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<DeployableSoftwareBundle> allInternalApprovedDS = deployableSoftwareService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
@@ -136,14 +136,14 @@ public class InternalToPublicConsistency {
         List<String> logs = new ArrayList<>();
 
         // check consistency for Providers
-        for (ProviderBundle providerBundle : allInternalApprovedProviders) {
+        for (OrganisationBundle organisationBundle : allInternalApprovedProviders) {
             // try and get its Public instance
             try {
-                publicProviderService.get(providerBundle.getIdentifiers().getPid(),
-                        providerBundle.getCatalogueId());
+                publicOrganisationService.get(organisationBundle.getIdentifiers().getPid(),
+                        organisationBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Provider with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        providerBundle.getId(), providerBundle.getCatalogueId(), providerBundle.getIdentifiers().getPid()));
+                        organisationBundle.getId(), organisationBundle.getCatalogueId(), organisationBundle.getIdentifiers().getPid()));
             }
         }
 

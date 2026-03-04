@@ -39,7 +39,7 @@ public class PidServiceRegistrationConsistency {
 
     private final PidIssuer pidIssuer;
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
@@ -50,7 +50,7 @@ public class PidServiceRegistrationConsistency {
     private final SecurityService securityService;
 
     public PidServiceRegistrationConsistency(PidIssuer pidIssuer,
-                                             ProviderService providerService,
+                                             OrganisationService organisationService,
                                              ServiceService serviceService,
                                              DatasourceService datasourceService,
                                              TrainingResourceService trainingResourceService,
@@ -59,7 +59,7 @@ public class PidServiceRegistrationConsistency {
                                              AdapterService adapterService,
                                              SecurityService securityService) {
         this.pidIssuer = pidIssuer;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
@@ -73,7 +73,7 @@ public class PidServiceRegistrationConsistency {
 //    @Scheduled(initialDelay = 0, fixedRate = 6000)
 //    @Scheduled(cron = "0 0 0 * * *")
     protected void postUnregisteredResourcesToPIDService() {
-        List<ProviderBundle> allPublicProviders = providerService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<OrganisationBundle> allPublicProviders = organisationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<ServiceBundle> allPublicServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allPublicDatasources = datasourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allPublicTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
@@ -83,12 +83,12 @@ public class PidServiceRegistrationConsistency {
 
         logger.info("PID Service registration consistency");
         // check consistency for Providers
-        for (ProviderBundle providerBundle : allPublicProviders) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(providerBundle.getId());
+        for (OrganisationBundle organisationBundle : allPublicProviders) {
+            HttpStatusCode httpStatusCode = getResourceFromPidService(organisationBundle.getId());
             if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                 if (pidServiceEnabled) {
-                    logger.info("Posting Provider with id {} to PID service", providerBundle.getId());
-                    pidIssuer.postPID(providerBundle.getId(), null);
+                    logger.info("Posting Provider with id {} to PID service", organisationBundle.getId());
+                    pidIssuer.postPID(organisationBundle.getId(), null);
                 }
             }
         }

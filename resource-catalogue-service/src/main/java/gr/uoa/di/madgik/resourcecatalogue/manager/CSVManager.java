@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CSVService;
@@ -31,13 +31,13 @@ import java.util.*;
 @org.springframework.stereotype.Service
 public class CSVManager implements CSVService {
 
-    public String listProvidersToCSV(List<ProviderBundle> list) {
-        list.sort(Comparator.comparing(ProviderBundle::getId));
+    public String listProvidersToCSV(List<OrganisationBundle> list) {
+        list.sort(Comparator.comparing(OrganisationBundle::getId));
         StringBuilder csv = new StringBuilder();
         csv.append("id,name\n");
-        for (ProviderBundle bundle : list) {
+        for (OrganisationBundle bundle : list) {
             String id = bundle.getId();
-            Object nameObj = bundle.getProvider().get("name");
+            Object nameObj = bundle.getOrganisation().get("name");
             String name = nameObj != null ? nameObj.toString() : "";
             csv.append(formatCSVField(id)).append(",");
             csv.append(formatCSVField(name)).append("\n");
@@ -95,16 +95,16 @@ public class CSVManager implements CSVService {
     }
 
     public String computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
-                                                                       List<ProviderBundle> providers,
+                                                                       List<OrganisationBundle> providers,
                                                                        List<ServiceBundle> services) {
         Map<String, String> providerIdToCountry = new TreeMap<>();
         Map<String, String> providerIdToName = new TreeMap<>();
         Map<String, Integer> providerToServiceCountApprovedBeforeTimestamp = new TreeMap<>();
         List<String> providerOfServicesWithMalformedLoggingInfo = new ArrayList<>();
-        for (ProviderBundle provider : providers) {
-            Object nameObj = provider.getProvider().get("name");
+        for (OrganisationBundle provider : providers) {
+            Object nameObj = provider.getOrganisation().get("name");
             providerIdToName.put(provider.getId(), nameObj != null ? nameObj.toString() : "");
-            Object countryObj = provider.getProvider().get("country");
+            Object countryObj = provider.getOrganisation().get("country");
             providerIdToCountry.put(provider.getId(), countryObj != null ? countryObj.toString() : "");
         }
         for (ServiceBundle service : services) {
