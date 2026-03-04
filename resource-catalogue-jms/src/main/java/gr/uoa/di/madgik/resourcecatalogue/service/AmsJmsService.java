@@ -42,7 +42,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
 
     private final WebClient webClient;
     private final AmsProperties amsProperties;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Value("${catalogue.jms.prefix}")
     private String jmsPrefix;
@@ -50,10 +50,12 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     public AmsJmsService(JmsTemplate jmsTopicTemplate,
                          JmsTemplate jmsQueueTemplate,
                          WebClient.Builder webClientBuilder,
-                         AmsProperties amsProperties) {
+                         AmsProperties amsProperties,
+                         ObjectMapper objectMapper) {
         super(jmsTopicTemplate, jmsQueueTemplate);
         this.webClient = webClientBuilder.build();
         this.amsProperties = amsProperties;
+        this.objectMapper = objectMapper;
     }
 
     @Override
