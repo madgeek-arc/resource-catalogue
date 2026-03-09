@@ -57,7 +57,7 @@
       <bpmn:incoming>Flow_0r3bpfb</bpmn:incoming>
       <bpmn:outgoing>Flow_0skdybj</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:exclusiveGateway id="Gateway_0a1sz4u" name="Check Provider Status">
+    <bpmn:exclusiveGateway id="Gateway_0a1sz4u" name="Check Organisation Status">
       <bpmn:incoming>Flow_0sojgzr</bpmn:incoming>
       <bpmn:outgoing>Flow_1ff3515</bpmn:outgoing>
       <bpmn:outgoing>Flow_1o7p270</bpmn:outgoing>
@@ -90,7 +90,7 @@
       <bpmn:incoming>Flow_1ut3wy5</bpmn:incoming>
       <bpmn:outgoing>Flow_0zjya31</bpmn:outgoing>
     </bpmn:scriptTask>
-    <bpmn:serviceTask id="Activity_0vagvot" name="Get Provider" zeebe:modelerTemplate="get-resource-template" zeebe:modelerTemplateVersion="2">
+    <bpmn:serviceTask id="Activity_0vagvot" name="Get Organisation" zeebe:modelerTemplate="get-resource-template" zeebe:modelerTemplateVersion="2">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="get-resource" />
         <zeebe:ioMapping>
@@ -114,7 +114,7 @@
         <zeebe:ioMapping>
           <zeebe:input source="=&#34;FAILURE&#34;" target="status" />
           <zeebe:input source="=403" target="code" />
-          <zeebe:input source="=&#34;Provider is not eligible to onboard a resource.&#34;" target="message" />
+          <zeebe:input source="=&#34;Organisation is not eligible to onboard a resource.&#34;" target="message" />
           <zeebe:output source="=result" target="workflowResult" />
         </zeebe:ioMapping>
         <zeebe:script expression="={ status: status, code: code, message: message }" resultVariable="result" />
@@ -169,8 +169,8 @@
     <bpmn:sequenceFlow id="Flow_0skdybj" sourceRef="Activity_1lr0vvx" targetRef="Activity_1vdxr7y" />
     <bpmn:sequenceFlow id="Flow_0sojgzr" sourceRef="Activity_0vagvot" targetRef="Gateway_0a1sz4u" />
     <bpmn:sequenceFlow id="Flow_1ff3515" name="not approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1a6x7qv">
-      <bpmn:documentation>The provider is not approved and cannot accept resources.</bpmn:documentation>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=provider.status != "approved"</bpmn:conditionExpression>
+      <bpmn:documentation>The organisation is not approved and cannot accept resources.</bpmn:documentation>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=organisation.status != "approved"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_19dxg20" sourceRef="Activity_1a6x7qv" targetRef="Event_05bf4c9" />
     <bpmn:sequenceFlow id="Flow_1fbt47z" sourceRef="Activity_1euokmg" targetRef="Activity_0trchkm" />
@@ -204,7 +204,7 @@
       <bpmn:outgoing>Flow_1ut3wy5</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1o7p270" name="approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_0fof8ny">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=provider.status = "approved"</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=organisation.status = "approved"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1ut3wy5" sourceRef="Activity_0fof8ny" targetRef="Activity_1vdxr7y" />
     <bpmn:sequenceFlow id="Flow_0udute6" sourceRef="Activity_0trchkm" targetRef="Event_05bf4c9" />

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1rve9a7" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.41.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
-  <bpmn:process id="onboard-provider" name="Onboard Provider" isExecutable="true">
+  <bpmn:process id="onboard-provider" name="Onboard Organisation" isExecutable="true">
     <bpmn:extensionElements>
       <zeebe:versionTag value="0.0.1" />
     </bpmn:extensionElements>
-    <bpmn:startEvent id="StartEvent_OnboardProvider" name="Start Provider Onboard">
+    <bpmn:startEvent id="StartEvent_OnboardProvider" name="Start Organisation Onboard">
       <bpmn:extensionElements>
         <zeebe:ioMapping>
           <zeebe:output source="=resource" target="resource" />
@@ -30,7 +30,7 @@ resource.catalogueId = "eosc"</bpmn:conditionExpression>
     <bpmn:sequenceFlow id="Flow_0r3bpfb" name="approved" sourceRef="Gateway_1cobda0" targetRef="Activity_setStatusApproved">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=catalogue.status = "approved"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:exclusiveGateway id="Gateway_0ux95fk" name="Check if Provider is owned by a Catalogue">
+    <bpmn:exclusiveGateway id="Gateway_0ux95fk" name="Check if Organisation is owned by a Catalogue">
       <bpmn:extensionElements />
       <bpmn:incoming>Flow_1cnsxh6</bpmn:incoming>
       <bpmn:outgoing>Flow_13cl7fo</bpmn:outgoing>
@@ -149,11 +149,11 @@ resource.catalogueId = "eosc"</bpmn:conditionExpression>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1q1wtm2" sourceRef="Activity_07f9m3j" targetRef="Activity_1fn2t4q" />
     <bpmn:sequenceFlow id="Flow_091jq6x" sourceRef="Activity_1fn2t4q" targetRef="Event_0uivhin" />
-    <bpmn:serviceTask id="Activity_1fn2t4q" name="Save Provider" zeebe:modelerTemplate="update-resource-template" zeebe:modelerTemplateVersion="2">
+    <bpmn:serviceTask id="Activity_1fn2t4q" name="Save Organisation" zeebe:modelerTemplate="update-resource-template" zeebe:modelerTemplateVersion="2">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="update-resource" />
         <zeebe:ioMapping>
-          <zeebe:input source="=&#34;provider&#34;" target="resourceTypePreset" />
+          <zeebe:input source="=&#34;organisation&#34;" target="resourceTypePreset" />
           <zeebe:input source="=resourceType" target="resourceTypeExpr" />
           <zeebe:input source="=resourceType" target="resourceType" />
           <zeebe:input source="=resource" target="resourceName" />
