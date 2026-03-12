@@ -85,6 +85,7 @@ public class Vocabulary implements Identifiable {
         TR_QUALIFICATION("Training Resource qualification"),
         // Adapter
         ADAPTER_PROGRAMMING_LANGUAGE("Adapter programming language"),
+        SQA_BADGE("Sqa badge"),
         // Configuration Template
         CT_PROTOCOL("Configuration Template protocol"),
         CT_COMPATIBILITY("Configuration Template compatibility");
