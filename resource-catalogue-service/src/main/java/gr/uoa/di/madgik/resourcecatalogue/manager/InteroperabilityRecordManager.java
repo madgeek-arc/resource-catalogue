@@ -85,7 +85,8 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         }
         guideline.markUpdate(UserInfo.of(auth), comment);
 
-        blockNamingAsEOSCMonitoringGuideline((String) guideline.getInteroperabilityRecord().get("name"));
+        blockNamingAsEOSCMonitoringGuideline((String) guideline.getInteroperabilityRecord().get("name"),
+                (String) existing.getInteroperabilityRecord().get("name"));
         try {
             return genericResourceService.update(getResourceTypeName(), guideline.getId(), guideline);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -194,8 +195,8 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         throw new CatalogueResourceNotFoundException("Could not find EOSC Monitoring Guideline");
     }
 
-    private void blockNamingAsEOSCMonitoringGuideline(String name) {
-        if (RESERVED_NAME.equals(name)) {
+    private void blockNamingAsEOSCMonitoringGuideline(String name, String existingName) {
+        if (!RESERVED_NAME.equals(existingName) && RESERVED_NAME.equals(name)) {
             throw new ValidationException(
                     String.format("Name '%s' is committed for the EOSC Monitoring Guideline", name)
             );
