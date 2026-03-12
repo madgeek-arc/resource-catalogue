@@ -43,16 +43,16 @@ import java.util.Map;
 @Profile("beyond")
 @RestController
 @RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-@Tag(name = "public provider")
-public class PublicProviderController {
+@Tag(name = "public organisation")
+public class PublicOrganisationController {
 
     private final PublicResourceService<OrganisationBundle> service;
 
-    public PublicProviderController(PublicResourceService<OrganisationBundle> service) {
+    public PublicOrganisationController(PublicResourceService<OrganisationBundle> service) {
         this.service = service;
     }
 
-    @Operation(description = "Returns the Public Provider with the given id.")
+    @Operation(description = "Returns the Public Organisation with the given id.")
     @GetMapping(path = {
             "public/provider/{prefix}/{suffix}",
             "public/organisation/{prefix}/{suffix}"
@@ -68,7 +68,7 @@ public class PublicProviderController {
             return new ResponseEntity<>(bundle.getOrganisation(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Provider is not active"));
+                "The specific Organisation is not active"));
 
     }
 
@@ -87,7 +87,7 @@ public class PublicProviderController {
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
-    @Operation(description = "Get a list of all Public Providers in the Catalogue, based on a set of filters.")
+    @Operation(description = "Get a list of all Public Organisations in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
@@ -112,7 +112,7 @@ public class PublicProviderController {
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<OrganisationBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                @RequestParam MultiValueMap<String, Object> params) {
+                                                                    @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<OrganisationBundle> paging = service.getAll(ff);
@@ -122,8 +122,8 @@ public class PublicProviderController {
     @Hidden
     @PostMapping(path = "public/provider/add")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<OrganisationBundle> createPublicProvider(@RequestBody OrganisationBundle bundle,
-                                                                   @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<OrganisationBundle> createPublicOrganisation(@RequestBody OrganisationBundle bundle,
+                                                                       @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }

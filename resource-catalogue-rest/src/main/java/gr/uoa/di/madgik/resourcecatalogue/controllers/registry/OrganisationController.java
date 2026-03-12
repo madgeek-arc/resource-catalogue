@@ -50,7 +50,7 @@ import java.util.List;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(path = { "provider", "organisation" }, produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = {"provider", "organisation"}, produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "provider / organisation")
 public class OrganisationController extends ResourceCatalogueGenericController<OrganisationBundle, OrganisationService> {
 
@@ -87,7 +87,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     public ResponseEntity<OrganisationBundle> getBundle(@PathVariable String prefix,
                                                         @PathVariable String suffix,
                                                         @SuppressWarnings("unused")
-                                                    @Parameter(hidden = true) Authentication auth) {
+                                                        @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         OrganisationBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
@@ -117,7 +117,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<OrganisationBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                @RequestParam MultiValueMap<String, Object> params) {
+                                                                    @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
