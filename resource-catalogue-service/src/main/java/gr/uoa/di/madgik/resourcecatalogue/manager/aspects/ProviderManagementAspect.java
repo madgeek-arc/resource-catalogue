@@ -20,7 +20,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
@@ -53,7 +52,7 @@ public class ProviderManagementAspect {
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService guidelineService;
-    private final DeployableSoftwareService deployableSoftwareService;
+    private final DeployableApplicationService deployableApplicationService;
     private final ResourceInteroperabilityRecordService rirService;
     private final ConfigurationTemplateInstanceService ctiService;
     private final PublicOrganisationService publicOrganisationService;
@@ -61,7 +60,7 @@ public class ProviderManagementAspect {
     private final PublicDatasourceService publicDatasourceService;
     private final PublicTrainingResourceService publicTrainingResourceService;
     private final PublicInteroperabilityRecordService publicGuidelineService;
-    private final PublicDeployableSoftwareService publicDeployableSoftwareService;
+    private final PublicDeployableApplicationService publicDeployableApplicationService;
     private final PublicAdapterService publicAdapterService;
     private final PublicResourceInteroperabilityRecordService publicRIRService;
     private final PublicConfigurationTemplateInstanceService publicCTIService;
@@ -78,7 +77,7 @@ public class ProviderManagementAspect {
                                     DatasourceService datasourceService,
                                     TrainingResourceService trainingResourceService,
                                     InteroperabilityRecordService guidelineService,
-                                    DeployableSoftwareService deployableSoftwareService,
+                                    DeployableApplicationService deployableApplicationService,
                                     ResourceInteroperabilityRecordService rirService,
                                     ConfigurationTemplateInstanceService ctiService,
                                     PublicOrganisationService publicOrganisationService,
@@ -86,7 +85,7 @@ public class ProviderManagementAspect {
                                     PublicDatasourceService publicDatasourceService,
                                     PublicTrainingResourceService publicTrainingResourceService,
                                     PublicInteroperabilityRecordService publicGuidelineService,
-                                    PublicDeployableSoftwareService publicDeployableSoftwareService,
+                                    PublicDeployableApplicationService publicDeployableApplicationService,
                                     PublicAdapterService publicAdapterService,
                                     PublicResourceInteroperabilityRecordService publicRIRService,
                                     PublicConfigurationTemplateInstanceService publicCTIService,
@@ -98,7 +97,7 @@ public class ProviderManagementAspect {
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
         this.guidelineService = guidelineService;
-        this.deployableSoftwareService = deployableSoftwareService;
+        this.deployableApplicationService = deployableApplicationService;
         this.rirService = rirService;
         this.ctiService = ctiService;
         this.publicOrganisationService = publicOrganisationService;
@@ -107,7 +106,7 @@ public class ProviderManagementAspect {
         this.publicTrainingResourceService = publicTrainingResourceService;
         this.publicAdapterService = publicAdapterService;
         this.publicGuidelineService = publicGuidelineService;
-        this.publicDeployableSoftwareService = publicDeployableSoftwareService;
+        this.publicDeployableApplicationService = publicDeployableApplicationService;
         this.publicRIRService = publicRIRService;
         this.publicCTIService = publicCTIService;
         this.securityService = securityService;
@@ -148,11 +147,11 @@ public class ProviderManagementAspect {
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.verify(..))",
-            returning = "deployableSoftware")
-    public void updatePublicProviderTemplateStatus(final DeployableSoftwareBundle deployableSoftware) {
-        OrganisationBundle provider = organisationService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
-                deployableSoftware.getCatalogueId());
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))",
+            returning = "deployableApplication")
+    public void updatePublicProviderTemplateStatus(final DeployableApplicationBundle deployableApplication) {
+        OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
+                deployableApplication.getCatalogueId());
         publicOrganisationService.get(provider.getIdentifiers().getPid(), provider.getCatalogueId());
         publicOrganisationService.update(provider, null);
     }
@@ -229,23 +228,23 @@ public class ProviderManagementAspect {
         }
     }
 
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.finalizeDraft(..)) " +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.finalizeDraft(..)) " +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.update(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.update(..))",
             returning = "bundle")
-    public void updateDeployableSoftwareState(final DeployableSoftwareBundle bundle) {
+    public void updateDeployableApplicationState(final DeployableApplicationBundle bundle) {
         logger.trace("Updating Provider States");
-        updateDeployableSoftwareStatus(bundle);
+        updateDeployableApplicationStatus(bundle);
     }
 
     @Async
-    public void updateDeployableSoftwareStatus(DeployableSoftwareBundle bundle) {
+    public void updateDeployableApplicationStatus(DeployableApplicationBundle bundle) {
         if (bundle.getCatalogueId().equals(catalogueId)) {
             try {
-                OrganisationBundle provider = organisationService.get((String) bundle.getDeployableSoftware().get("resourceOwner"),
+                OrganisationBundle provider = organisationService.get((String) bundle.getDeployableApplication().get("resourceOwner"),
                         bundle.getCatalogueId());
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
-                    deployableSoftwareService.verify(bundle.getId(), "pending", false, securityService.getAdminAccess());
+                    deployableApplicationService.verify(bundle.getId(), "pending", false, securityService.getAdminAccess());
                 }
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(), e);
@@ -293,11 +292,11 @@ public class ProviderManagementAspect {
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
     }
 
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.verify(..))",
-            returning = "deployableSoftware")
-    public void providerRegistrationEmails(final DeployableSoftwareBundle deployableSoftware) {
-        OrganisationBundle provider = organisationService.get((String) deployableSoftware.getDeployableSoftware().get("resourceOwner"),
-                deployableSoftware.getCatalogueId());
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))",
+            returning = "deployableApplication")
+    public void providerRegistrationEmails(final DeployableApplicationBundle deployableApplication) {
+        OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
+                deployableApplication.getCatalogueId());
         logger.trace("Sending Registration emails");
 //        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
     }
@@ -552,46 +551,46 @@ public class ProviderManagementAspect {
     }
     //endregion
 
-    //region Public Deployable Software
+    //region Public Deployable Application
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.verify(..))",
-            returning = "deployableSoftware")
-    public void addPublicDeployableSoftware(final DeployableSoftwareBundle deployableSoftware) {
-        if (deployableSoftware.getStatus().equals("approved") && deployableSoftware.isActive()) {
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))",
+            returning = "deployableApplication")
+    public void addPublicDeployableApplication(final DeployableApplicationBundle deployableApplication) {
+        if (deployableApplication.getStatus().equals("approved") && deployableApplication.isActive()) {
             try {
-                publicDeployableSoftwareService.get(deployableSoftware.getIdentifiers().getPid(), deployableSoftware.getCatalogueId());
+                publicDeployableApplicationService.get(deployableApplication.getIdentifiers().getPid(), deployableApplication.getCatalogueId());
             } catch (ResourceException e) {
-                publicDeployableSoftwareService.add(ObjectUtils.clone(deployableSoftware), true);
+                publicDeployableApplicationService.add(ObjectUtils.clone(deployableApplication), true);
             }
         }
     }
 
-    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.update(..)) " +
-            "&& args(deployableSoftware,..)")
-    public Object updatePublicDeployableSoftware(ProceedingJoinPoint pjp, DeployableSoftwareBundle deployableSoftware) throws Throwable {
-        return updatePublicBundle(pjp, publicDeployableSoftwareService, deployableSoftware);
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.update(..)) " +
+            "&& args(deployableApplication,..)")
+    public Object updatePublicDeployableApplication(ProceedingJoinPoint pjp, DeployableApplicationBundle deployableApplication) throws Throwable {
+        return updatePublicBundle(pjp, publicDeployableApplicationService, deployableApplication);
     }
 
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.setActive(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.verify(..))" +
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.setActive(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
-            returning = "deployableSoftware")
-    public void updatePublicDeployableSoftware(final DeployableSoftwareBundle deployableSoftware) {
+            returning = "deployableApplication")
+    public void updatePublicDeployableApplication(final DeployableApplicationBundle deployableApplication) {
         try {
-            publicDeployableSoftwareService.update(ObjectUtils.clone(deployableSoftware), null);
+            publicDeployableApplicationService.update(ObjectUtils.clone(deployableApplication), null);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
 
     @Async
-    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableSoftwareManager.delete(..))")
-    public void deletePublicDeployableSoftware(JoinPoint joinPoint) {
-        DeployableSoftwareBundle deployableSoftware = (DeployableSoftwareBundle) joinPoint.getArgs()[0];
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.delete(..))")
+    public void deletePublicDeployableApplication(JoinPoint joinPoint) {
+        DeployableApplicationBundle deployableApplication = (DeployableApplicationBundle) joinPoint.getArgs()[0];
         try {
-            publicDeployableSoftwareService.delete(deployableSoftware);
+            publicDeployableApplicationService.delete(deployableApplication);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }

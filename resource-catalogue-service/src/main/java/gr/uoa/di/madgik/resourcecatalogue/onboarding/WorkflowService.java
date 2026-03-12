@@ -75,7 +75,7 @@ public class WorkflowService {
         // TODO: load bpmn process by resourceType
         return switch (resourceType) {
             case "organisation" -> "onboard-provider";
-            case "service", "datasource", "training_resource", "deployable_software" -> "onboard-resource";
+            case "service", "datasource", "training_resource", "deployable_application" -> "onboard-resource";
             case "adapter"  -> "onboard-adapter";
             case "interoperability_record" -> "onboard-guideline";
             default -> throw new IllegalStateException("Unhandled onboarding for resourceType: " + resourceType);

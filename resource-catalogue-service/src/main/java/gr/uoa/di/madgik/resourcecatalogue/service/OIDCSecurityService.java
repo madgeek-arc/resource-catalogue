@@ -39,7 +39,7 @@ public class OIDCSecurityService implements SecurityService {
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final DeployableSoftwareService deployableSoftwareService;
+    private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
     private final Authentication adminAccess = new AdminAuthentication();
 
@@ -55,7 +55,7 @@ public class OIDCSecurityService implements SecurityService {
             @Lazy DatasourceService datasourceService,
             @Lazy TrainingResourceService trainingResourceService,
             @Lazy InteroperabilityRecordService interoperabilityRecordService,
-            @Lazy DeployableSoftwareService deployableSoftwareService,
+            @Lazy DeployableApplicationService deployableApplicationService,
             @Lazy AdapterService adapterService,
             CatalogueProperties properties) {
 //        this.catalogueService = catalogueService;
@@ -64,7 +64,7 @@ public class OIDCSecurityService implements SecurityService {
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
-        this.deployableSoftwareService = deployableSoftwareService;
+        this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
     }
 
@@ -217,8 +217,8 @@ public class OIDCSecurityService implements SecurityService {
             case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("resourceOwner");
             case TrainingResourceBundle trainingResourceBundle ->
                     (String) trainingResourceBundle.getTrainingResource().get("resourceOwner");
-            case DeployableSoftwareBundle deployableSoftwareBundle ->
-                    (String) deployableSoftwareBundle.getDeployableSoftware().get("resourceOwner");
+            case DeployableApplicationBundle deployableApplicationBundle ->
+                    (String) deployableApplicationBundle.getDeployableApplication().get("resourceOwner");
             case AdapterBundle adapterBundle ->
                     (String) adapterBundle.getAdapter().get("resourceOwner");
             case null, default ->
@@ -236,8 +236,8 @@ public class OIDCSecurityService implements SecurityService {
             return datasourceService.getOrElseReturnNull(id);
         } else if (isTrainingResource(id)) {
             return trainingResourceService.getOrElseReturnNull(id);
-        } else if (isDeployableSoftware(id)) {
-            return deployableSoftwareService.getOrElseReturnNull(id);
+        } else if (isDeployableApplication(id)) {
+            return deployableApplicationService.getOrElseReturnNull(id);
         } else if (isAdapter(id)) {
             return adapterService.getOrElseReturnNull(id);
         } else {
@@ -281,9 +281,9 @@ public class OIDCSecurityService implements SecurityService {
         }
     }
 
-    private boolean isDeployableSoftware(String id) {
+    private boolean isDeployableApplication(String id) {
         try {
-            deployableSoftwareService.get(id);
+            deployableApplicationService.get(id);
             return true;
         } catch (ResourceException e) {
             return false;
@@ -384,9 +384,9 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean deployableSoftwareIsActive(String id, String catalogueId) {
-        DeployableSoftwareBundle deployableSoftwareBundle = deployableSoftwareService.get(id, catalogueId);
-        return deployableSoftwareBundle.isActive();
+    public boolean deployableApplicationIsActive(String id, String catalogueId) {
+        DeployableApplicationBundle deployableApplicationBundle = deployableApplicationService.get(id, catalogueId);
+        return deployableApplicationBundle.isActive();
     }
 
     @Override

@@ -103,8 +103,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyDatasourceBundle(t, auth);
         } else if (t instanceof TrainingResourceBundle) {
             modifyTrainingResourceBundle(t, auth);
-        } else if (t instanceof DeployableSoftwareBundle) {
-            modifyDeployableSoftwareBundle(t, auth);
+        } else if (t instanceof DeployableApplicationBundle) {
+            modifyDeployableApplicationBundle(t, auth);
         } else if (t instanceof InteroperabilityRecordBundle) {
             modifyInteroperabilityRecordBundle(t, auth);
         } else if (t instanceof LoggingInfo) {
@@ -195,15 +195,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private void modifyDeployableSoftwareBundle(T deployableSoftwareBundle, Authentication auth) {
-        modifyLoggingInfoList((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLoggingInfo());
-        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestOnboardingInfo());
+    private void modifyDeployableApplicationBundle(T deployableApplicationBundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((DeployableApplicationBundle) deployableApplicationBundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((DeployableApplicationBundle) deployableApplicationBundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((DeployableApplicationBundle) deployableApplicationBundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((DeployableApplicationBundle) deployableApplicationBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceAdmin(auth, ((DeployableSoftwareBundle) deployableSoftwareBundle).getId())) {
-            ((DeployableSoftwareBundle) deployableSoftwareBundle).getDeployableSoftware().put("email", null);
-            ((DeployableSoftwareBundle) deployableSoftwareBundle).getMetadata().setTerms(null);
+        if (!this.securityService.isResourceAdmin(auth, ((DeployableApplicationBundle) deployableApplicationBundle).getId())) {
+            ((DeployableApplicationBundle) deployableApplicationBundle).getDeployableApplication().put("email", null);
+            ((DeployableApplicationBundle) deployableApplicationBundle).getMetadata().setTerms(null);
         }
     }
 

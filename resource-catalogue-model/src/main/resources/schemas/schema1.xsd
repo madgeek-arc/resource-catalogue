@@ -1175,7 +1175,7 @@ name and should refer to the main value or purpose of the Resource.]]></xs:docum
       
   </xs:complexType>
     
-  <xs:complexType name="deployableSoftwareBundle">
+  <xs:complexType name="deployableApplicationBundle">
         
     <xs:complexContent>
             

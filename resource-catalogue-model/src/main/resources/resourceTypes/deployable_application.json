@@ -4,7 +4,7 @@
       "label": null,
       "multivalued": false,
       "name": "resource_internal_id",
-      "path": "$.deployableSoftware.id",
+      "path": "$.deployableApplication.id",
       "primaryKey": true,
       "type": "java.lang.String"
     },
@@ -19,63 +19,63 @@
       "label": "Urls",
       "multivalued": true,
       "name": "urls",
-      "path": "$.deployableSoftware.urls[*]",
+      "path": "$.deployableApplication.urls[*]",
       "type": "java.lang.String"
     },
     {
-      "label": "Deployable Software Name",
+      "label": "Deployable Application Name",
       "multivalued": false,
       "name": "name",
-      "path": "$.deployableSoftware.name",
+      "path": "$.deployableApplication.name",
       "type": "java.lang.String"
     },
     {
       "label": "Description",
       "multivalued": false,
       "name": "description",
-      "path": "$.deployableSoftware.description",
+      "path": "$.deployableApplication.description",
       "type": "java.lang.String"
     },
     {
       "label": "Alternative PIDs",
       "multivalued": true,
       "name": "alternative_pids",
-      "path": "$.deployableSoftware.alternativePIDs[*].pid",
+      "path": "$.deployableApplication.alternativePIDs[*].pid",
       "type": "java.lang.String"
     },
     {
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.deployableSoftware.node",
+      "path": "$.deployableApplication.node",
       "type": "java.lang.String"
     },
     {
       "label": "Type",
       "multivalued": false,
       "name": "entity_type",
-      "path": "$.deployableSoftware.type",
+      "path": "$.deployableApplication.type",
       "type": "java.lang.String"
     },
     {
       "label": "Resource Owner",
       "multivalued": false,
       "name": "resource_owner",
-      "path": "$.deployableSoftware.resourceOwner",
+      "path": "$.deployableApplication.resourceOwner",
       "type": "java.lang.String"
     },
     {
       "label": "Acronym",
       "multivalued": false,
       "name": "acronym",
-      "path": "$.deployableSoftware.acronym",
+      "path": "$.deployableApplication.acronym",
       "type": "java.lang.String"
     },
     {
       "label": "Tagline",
       "multivalued": false,
       "name": "tagline",
-      "path": "$.deployableSoftware.tagline",
+      "path": "$.deployableApplication.tagline",
       "type": "java.lang.String"
     },
     {
@@ -89,42 +89,42 @@
       "label": "Scientific Domain",
       "multivalued": true,
       "name": "scientific_domains",
-      "path": "$.deployableSoftware.scientificDomains[*]",
+      "path": "$.deployableApplication.scientificDomains[*]",
       "type": "java.lang.String"
     },
     {
       "label": "Scientific Subdomain",
       "multivalued": true,
       "name": "scientific_subdomains",
-      "path": "$.deployableSoftware.scientificDomains[*].scientificSubdomain",
+      "path": "$.deployableApplication.scientificDomains[*].scientificSubdomain",
       "type": "java.lang.String"
     },
     {
       "label": "Tag",
       "multivalued": true,
       "name": "tags",
-      "path": "$.deployableSoftware.tags[*]",
+      "path": "$.deployableApplication.tags[*]",
       "type": "java.lang.String"
     },
     {
-      "label": "Deployable Software Version",
+      "label": "Deployable Application Version",
       "multivalued": false,
-      "name": "deployable_software_version",
-      "path": "$.deployableSoftware.version",
+      "name": "deployable_application_version",
+      "path": "$.deployableApplication.version",
       "type": "java.lang.String"
     },
     {
       "label": "Last Update",
       "multivalued": false,
       "name": "last_update",
-      "path": "$.deployableSoftware.lastUpdate",
+      "path": "$.deployableApplication.lastUpdate",
       "type": "java.util.Date"
     },
     {
-      "label": "Software License",
+      "label": "License",
       "multivalued": false,
-      "name": "software_license",
-      "path": "$.deployableSoftware.softwareLicense",
+      "name": "license",
+      "path": "$.deployableApplication.license.licenseName",
       "type": "java.lang.String"
     },
     {
@@ -297,10 +297,10 @@
     "resourceTypes",
     "eoscResources"
   ],
-  "name": "deployable_software",
+  "name": "deployable_application",
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.DeployableSoftwareBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.DeployableApplicationBundle"
   },
   "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

@@ -43,7 +43,7 @@ public class PidServiceRegistrationConsistency {
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
-    private final DeployableSoftwareService deployableSoftwareService;
+    private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
@@ -55,7 +55,7 @@ public class PidServiceRegistrationConsistency {
                                              DatasourceService datasourceService,
                                              TrainingResourceService trainingResourceService,
                                              InteroperabilityRecordService interoperabilityRecordService,
-                                             DeployableSoftwareService deployableSoftwareService,
+                                             DeployableApplicationService deployableApplicationService,
                                              AdapterService adapterService,
                                              SecurityService securityService) {
         this.pidIssuer = pidIssuer;
@@ -63,7 +63,7 @@ public class PidServiceRegistrationConsistency {
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
-        this.deployableSoftwareService = deployableSoftwareService;
+        this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.securityService = securityService;
@@ -77,7 +77,7 @@ public class PidServiceRegistrationConsistency {
         List<ServiceBundle> allPublicServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allPublicDatasources = datasourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allPublicTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<DeployableSoftwareBundle> allPublicDS = deployableSoftwareService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<DeployableApplicationBundle> allPublicDS = deployableApplicationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allPublicIG = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<AdapterBundle> allPublicAdapters = adapterService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
 
@@ -137,13 +137,13 @@ public class PidServiceRegistrationConsistency {
             }
         }
 
-        // check consistency for Deployable Software
-        for (DeployableSoftwareBundle deployableSoftwareBundle : allPublicDS) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(deployableSoftwareBundle.getId());
+        // check consistency for Deployable Application
+        for (DeployableApplicationBundle deployableApplicationBundle : allPublicDS) {
+            HttpStatusCode httpStatusCode = getResourceFromPidService(deployableApplicationBundle.getId());
             if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                 if (pidServiceEnabled) {
-                    logger.info("Posting Deployable Software with id {} to PID service", deployableSoftwareBundle.getId());
-                    pidIssuer.postPID(deployableSoftwareBundle.getId(), null);
+                    logger.info("Posting Deployable Application with id {} to PID service", deployableApplicationBundle.getId());
+                    pidIssuer.postPID(deployableApplicationBundle.getId(), null);
                 }
             }
         }

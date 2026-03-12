@@ -79,17 +79,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "License URL",
+      "label": "License",
       "multivalued": false,
-      "name": "license_url",
-      "path": "$.trainingResource.licenseURL",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "License Name",
-      "multivalued": false,
-      "name": "license_name",
-      "path": "$.trainingResource.licenseName",
+      "name": "license",
+      "path": "$.trainingResource.license.licenseName",
       "type": "java.lang.String"
     },
     {

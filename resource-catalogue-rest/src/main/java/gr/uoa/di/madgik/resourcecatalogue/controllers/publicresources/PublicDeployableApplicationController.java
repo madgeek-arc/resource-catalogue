@@ -20,7 +20,7 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableSoftwareBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableApplicationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,34 +43,34 @@ import java.util.Map;
 @Profile("beyond")
 @RestController
 @RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-@Tag(name = "public deployable software")
-public class PublicDeployableSoftwareController {
+@Tag(name = "public deployable application")
+public class PublicDeployableApplicationController {
 
-    private final PublicResourceService<DeployableSoftwareBundle> service;
+    private final PublicResourceService<DeployableApplicationBundle> service;
 
-    public PublicDeployableSoftwareController(PublicResourceService<DeployableSoftwareBundle> service) {
+    public PublicDeployableApplicationController(PublicResourceService<DeployableApplicationBundle> service) {
         this.service = service;
     }
 
-    @Operation(description = "Returns the Public Deployable Software with the given id.")
-    @GetMapping(path = "public/deployableSoftware/{prefix}/{suffix}")
+    @Operation(description = "Returns the Public Deployable Application with the given id.")
+    @GetMapping(path = "public/deployableApplication/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.deployableSoftwareIsActive(#prefix+'/'+#suffix, catalogueId) or " +
+            "@securityService.deployableApplicationIsActive(#prefix+'/'+#suffix, catalogueId) or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id, catalogueId);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getDeployableSoftware(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.getDeployableApplication(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Deployable Software is not active"));
+                "The specific Deployable Application is not active"));
     }
 
-    @GetMapping(path = "public/deployableSoftware/bundle/{prefix}/{suffix}")
+    @GetMapping(path = "public/deployableApplication/bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
@@ -78,41 +78,41 @@ public class PublicDeployableSoftwareController {
                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableSoftwareBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id, catalogueId);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
-    @Operation(description = "Get a list of all Public Deployable Software in the Catalogue, based on a set of filters.")
+    @Operation(description = "Get a list of all Public Deployable Application in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/deployableSoftware/all")
+    @GetMapping(path = "public/deployableApplication/all")
     public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<DeployableSoftwareBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(DeployableSoftwareBundle::getDeployableSoftware));
+        Paging<DeployableApplicationBundle> paging = service.getAll(ff);
+        return ResponseEntity.ok(paging.map(DeployableApplicationBundle::getDeployableApplication));
     }
 
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/deployableSoftware/bundle/all")
+    @GetMapping(path = "public/deployableApplication/bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<DeployableSoftwareBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                          @RequestParam MultiValueMap<String, Object> params) {
+    public ResponseEntity<Paging<DeployableApplicationBundle>> getAllBundles(@Parameter(hidden = true)
+                                                                             @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<DeployableSoftwareBundle> paging = service.getAll(ff);
+        Paging<DeployableApplicationBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
 
     @Hidden
-    @PostMapping(path = "public/deployableSoftware/add")
+    @PostMapping(path = "public/deployableApplication/add")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<DeployableSoftwareBundle> createPublicDeployableSoftware(@RequestBody DeployableSoftwareBundle bundle,
-                                                                                   @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<DeployableApplicationBundle> createPublicDeployableApplication(@RequestBody DeployableApplicationBundle bundle,
+                                                                                         @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }
