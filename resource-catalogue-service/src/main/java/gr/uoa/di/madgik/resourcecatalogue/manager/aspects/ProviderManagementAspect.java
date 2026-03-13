@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.controllers.registry.sqaaas.SqaaasAssessmentService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -37,6 +38,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 
 //TODO: create different files for different aspect functionality
 
@@ -53,6 +55,7 @@ public class ProviderManagementAspect {
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService guidelineService;
     private final DeployableApplicationService deployableApplicationService;
+    private final AdapterService adapterService;
     private final ResourceInteroperabilityRecordService rirService;
     private final ConfigurationTemplateInstanceService ctiService;
     private final PublicOrganisationService publicOrganisationService;
@@ -68,6 +71,7 @@ public class ProviderManagementAspect {
     private final ConfigurationTemplateService configurationTemplateService;
     private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordService;
+    private final SqaaasAssessmentService sqaaasAssessmentService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -78,6 +82,7 @@ public class ProviderManagementAspect {
                                     TrainingResourceService trainingResourceService,
                                     InteroperabilityRecordService guidelineService,
                                     DeployableApplicationService deployableApplicationService,
+                                    AdapterService adapterService,
                                     ResourceInteroperabilityRecordService rirService,
                                     ConfigurationTemplateInstanceService ctiService,
                                     PublicOrganisationService publicOrganisationService,
@@ -91,13 +96,15 @@ public class ProviderManagementAspect {
                                     PublicConfigurationTemplateInstanceService publicCTIService,
                                     SecurityService securityService, ConfigurationTemplateService configurationTemplateService,
                                     ConfigurationTemplateInstanceService configurationTemplateInstanceService,
-                                    PublicInteroperabilityRecordService publicInteroperabilityRecordService) {
+                                    PublicInteroperabilityRecordService publicInteroperabilityRecordService,
+                                    SqaaasAssessmentService sqaaasAssessmentService) {
         this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
         this.guidelineService = guidelineService;
         this.deployableApplicationService = deployableApplicationService;
+        this.adapterService = adapterService;
         this.rirService = rirService;
         this.ctiService = ctiService;
         this.publicOrganisationService = publicOrganisationService;
@@ -113,6 +120,7 @@ public class ProviderManagementAspect {
         this.configurationTemplateService = configurationTemplateService;
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
         this.publicInteroperabilityRecordService = publicInteroperabilityRecordService;
+        this.sqaaasAssessmentService = sqaaasAssessmentService;
     }
 
     //region resource state
@@ -757,6 +765,37 @@ public class ProviderManagementAspect {
             rir.getResourceInteroperabilityRecord().put("interoperabilityRecordIds", Collections.singletonList(guideline.getId()));
             rirService.add(rir, "service", securityService.getAdminAccess());
         }
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))",
+            returning = "adapter"
+    )
+    public void performSqaAssessment(final AdapterBundle adapter) {
+        if (!"approved".equals(adapter.getStatus())) {
+            return;
+        }
+        String repo = adapter.getAdapter().get("repository").toString();
+        sqaaasAssessmentService.startAssessment(repo, "main") //TODO: fallback to master?
+                .thenApply(sqaaasAssessmentService::waitForCompletion)
+                .thenAccept(result -> {
+                    String url = result.path("meta").path("report_permalink").asText();
+                    String badge = result.path("repository").get(0).path("badge_status").asText();
+
+                    LinkedHashMap<String, Object> sqa = (LinkedHashMap<String, Object>) adapter.getAdapter().get("sqa");
+                    if (sqa == null) {
+                        sqa = new LinkedHashMap<>();
+                        adapter.getAdapter().put("sqa", sqa);
+                    }
+                    sqa.put("sqaURL", url);
+                    sqa.put("sqaBadge", badge);
+
+                    adapterService.update(adapter, "SQA Assessment", securityService.getAdminAccess());
+                })
+                .exceptionally(ex -> {
+                    ex.printStackTrace();
+                    return null;
+                });
     }
     //endregion
 }
