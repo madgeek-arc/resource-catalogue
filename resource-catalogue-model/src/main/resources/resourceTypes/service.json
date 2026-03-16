@@ -89,7 +89,7 @@
       "label": "Scientific Domain",
       "multivalued": true,
       "name": "scientific_domains",
-      "path": "$.service.scientificDomains[*]",
+      "path": "$.service.scientificDomains[*].scientificDomain",
       "type": "java.lang.String"
     },
     {
@@ -103,7 +103,7 @@
       "label": "Category",
       "multivalued": true,
       "name": "categories",
-      "path": "$.service.categories[*]",
+      "path": "$.service.categories[*].category",
       "type": "java.lang.String"
     },
     {

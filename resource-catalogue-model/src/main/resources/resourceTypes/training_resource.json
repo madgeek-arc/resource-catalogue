@@ -152,7 +152,7 @@
       "label": "Scientific Domain",
       "multivalued": true,
       "name": "scientific_domains",
-      "path": "$.trainingResource.scientificDomains[*]",
+      "path": "$.trainingResource.scientificDomains[*].scientificDomain",
       "type": "java.lang.String"
     },
     {
