@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
 import org.springframework.security.core.Authentication;
 
@@ -39,6 +40,14 @@ public interface PublicResourceService<T> extends ResourceCRUDService<T, Authent
      * @return {@link Browsing<T>}
      */
     Browsing<T> getAll(FacetFilter ff);
+
+    /**
+     * Return a Browsing of Highlighted Service results.
+     *
+     * @param ff FacetFilter
+     * @return {@link Browsing<T>}
+     */
+    Browsing<HighlightedResult<T>> searchServices(FacetFilter ff);
 
     /**
      *
