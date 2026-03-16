@@ -788,7 +788,13 @@ public class ProviderManagementAspect {
                         adapter.getAdapter().put("sqa", sqa);
                     }
                     sqa.put("sqaURL", url);
-                    sqa.put("sqaBadge", badge);
+                    if (badge.equalsIgnoreCase("bronze")) {
+                        sqa.put("sqaBadge", "sqa_badge-bronze");
+                    } else if (badge.equalsIgnoreCase("silver")) {
+                        sqa.put("sqaBadge", "sqa_badge-silver");
+                    } else {
+                        sqa.put("sqaBadge", "sqa_badge-gold");
+                    }
 
                     adapterService.update(adapter, "SQA Assessment", securityService.getAdminAccess());
                 })
