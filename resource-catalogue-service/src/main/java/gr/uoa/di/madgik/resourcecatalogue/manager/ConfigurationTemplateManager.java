@@ -92,13 +92,13 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     }
 
     @Override
-    public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, Authentication auth) {
+    public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String comment, Authentication auth) {
         ConfigurationTemplateBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Service
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(UserInfo.of(auth), null);
+        bundle.markUpdate(UserInfo.of(auth), comment);
 
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
@@ -150,11 +150,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     //region Not-Needed
     @Override
     public Browsing<ConfigurationTemplateBundle> getMy(FacetFilter filter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String comment, Authentication auth) {
         return null;
     }
 

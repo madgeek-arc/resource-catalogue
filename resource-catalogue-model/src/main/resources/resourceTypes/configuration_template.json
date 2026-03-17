@@ -110,7 +110,7 @@
   "name": "configuration_template",
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle"
   },
   "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

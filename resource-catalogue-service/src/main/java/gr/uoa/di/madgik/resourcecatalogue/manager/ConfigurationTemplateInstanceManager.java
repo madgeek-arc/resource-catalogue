@@ -88,13 +88,13 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     }
 
     @Override
-    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle bundle, Authentication auth) {
+    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle bundle, String comment, Authentication auth) {
         ConfigurationTemplateInstanceBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Service
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(UserInfo.of(auth), null);
+        bundle.markUpdate(UserInfo.of(auth), comment);
 
         // block user from updating resourceId
         if (!bundle.getConfigurationTemplateInstance().get("resourceId").equals(existing.getConfigurationTemplateInstance().get("resourceId")) &&
@@ -226,11 +226,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     //region Not-Used
     @Override
     public Browsing<ConfigurationTemplateInstanceBundle> getMy(FacetFilter filter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle bundle, String comment, Authentication auth) {
         return null;
     }
 
