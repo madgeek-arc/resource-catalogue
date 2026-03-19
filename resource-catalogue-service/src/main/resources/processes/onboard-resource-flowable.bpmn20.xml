@@ -38,7 +38,7 @@
 
     <!-- Set Catalogue Value (was script task: context put(resource, "catalogueId", "eosc")) -->
     <serviceTask id="Activity_1otm8rv" name="Set Catalogue Value"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+                 flowable:delegateExpression="${setKeyValueDelegate}">
       <extensionElements>
         <flowable:field name="variableName" stringValue="resource"/>
         <flowable:field name="key" stringValue="catalogueId"/>
@@ -66,7 +66,7 @@
 
     <!-- Mark Failure - Catalogue not approved -->
     <serviceTask id="Activity_101mfzm" name="Mark Failure - Catalogue"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
       <extensionElements>
         <flowable:field name="status" stringValue="FAILURE"/>
         <flowable:field name="code" stringValue="403"/>
@@ -118,7 +118,7 @@
 
     <!-- Onboard - Approve (status=approved, active=true) -->
     <serviceTask id="Activity_1lr0vvx" name="Onboard - Approve"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.OnboardResourceDelegate">
+                 flowable:delegateExpression="${onboardResourceDelegate}">
       <extensionElements>
         <flowable:field name="resourceName" stringValue="resource"/>
         <flowable:field name="status" stringValue="approved"/>
@@ -131,7 +131,7 @@
 
     <!-- Set Template Status = "pending template" on organisation -->
     <serviceTask id="Activity_1y14exa" name="Set Template Status"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+                 flowable:delegateExpression="${setKeyValueDelegate}">
       <extensionElements>
         <flowable:field name="variableName" stringValue="organisation"/>
         <flowable:field name="key" stringValue="templateStatus"/>
@@ -143,7 +143,7 @@
 
     <!-- Save Organisation (resourceName=organisation, resourceType=organisation) -->
     <serviceTask id="Activity_15om8qj" name="Save Organisation"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.UpdateResourceDelegate">
+                 flowable:delegateExpression="${updateResourceDelegate}">
       <extensionElements>
         <flowable:field name="resourceName" stringValue="organisation"/>
         <flowable:field name="resourceType" stringValue="organisation"/>
@@ -154,7 +154,7 @@
 
     <!-- Onboard - Pending (status=pending, active=false) -->
     <serviceTask id="Activity_1vb4twy" name="Onboard - Pending"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.OnboardResourceDelegate">
+                 flowable:delegateExpression="${onboardResourceDelegate}">
       <extensionElements>
         <flowable:field name="resourceName" stringValue="resource"/>
         <flowable:field name="status" stringValue="pending"/>
@@ -168,7 +168,7 @@
 
     <!-- Mark Failure - Organisation not eligible -->
     <serviceTask id="Activity_1a6x7qv" name="Mark Failure - Organisation"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
       <extensionElements>
         <flowable:field name="status" stringValue="FAILURE"/>
         <flowable:field name="code" stringValue="403"/>
@@ -187,7 +187,7 @@
 
     <!-- Set Audit State = "Not audited" -->
     <serviceTask id="Activity_1vdxr7y" name="Set Audit State"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+                 flowable:delegateExpression="${setKeyValueDelegate}">
       <extensionElements>
         <flowable:field name="variableName" stringValue="resource"/>
         <flowable:field name="key" stringValue="auditState"/>
@@ -203,7 +203,7 @@
 
     <!-- Save Resource (resourceType from process var) -->
     <serviceTask id="Activity_1euokmg" name="Save Resource"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.UpdateResourceDelegate">
+                 flowable:delegateExpression="${updateResourceDelegate}">
       <extensionElements>
         <flowable:field name="resourceName" stringValue="resource"/>
       </extensionElements>
@@ -215,7 +215,7 @@
 
     <!-- Mark Success -->
     <serviceTask id="Activity_0trchkm" name="Mark Success"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
       <extensionElements>
         <flowable:field name="status" stringValue="SUCCESS"/>
         <flowable:field name="code" stringValue="200"/>

@@ -36,7 +36,7 @@
     </serviceTask>
 
     <serviceTask id="Activity_1otm8rv" name="Set Catalogue Value"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+                 flowable:delegateExpression="${setKeyValueDelegate}">
       <extensionElements>
         <flowable:field name="variableName" stringValue="resource"/>
         <flowable:field name="key" stringValue="catalogueId"/>
@@ -63,7 +63,7 @@
     </sequenceFlow>
 
     <serviceTask id="Activity_101mfzm" name="Mark Failure - Catalogue"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
       <extensionElements>
         <flowable:field name="status" stringValue="FAILURE"/>
         <flowable:field name="code" stringValue="403"/>
@@ -103,7 +103,7 @@
     </sequenceFlow>
 
     <serviceTask id="Activity_1a6x7qv" name="Mark Failure - Organisation"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
       <extensionElements>
         <flowable:field name="status" stringValue="FAILURE"/>
         <flowable:field name="code" stringValue="403"/>
@@ -120,7 +120,7 @@
     <sequenceFlow id="Flow_19dxg20" sourceRef="Activity_1a6x7qv" targetRef="Event_05bf4c9"/>
 
     <serviceTask id="Activity_1lr0vvx" name="Onboard - Approved"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.OnboardResourceDelegate">
+                 flowable:delegateExpression="${onboardResourceDelegate}">
       <extensionElements>
         <flowable:field name="resourceName" stringValue="resource"/>
         <flowable:field name="status" stringValue="approved"/>
@@ -132,7 +132,7 @@
     </serviceTask>
 
     <serviceTask id="Activity_1vdxr7y" name="Set Audit State"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+                 flowable:delegateExpression="${setKeyValueDelegate}">
       <extensionElements>
         <flowable:field name="variableName" stringValue="resource"/>
         <flowable:field name="key" stringValue="auditState"/>
@@ -145,7 +145,7 @@
     <sequenceFlow id="Flow_0skdybj" sourceRef="Activity_1lr0vvx" targetRef="Activity_1vdxr7y"/>
 
     <serviceTask id="Activity_1euokmg" name="Save Resource"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.UpdateResourceDelegate">
+                 flowable:delegateExpression="${updateResourceDelegate}">
       <extensionElements>
         <flowable:field name="resourceName" stringValue="resource"/>
       </extensionElements>
@@ -156,7 +156,7 @@
     <sequenceFlow id="Flow_0zjya31" sourceRef="Activity_1vdxr7y" targetRef="Activity_1euokmg"/>
 
     <serviceTask id="Activity_0trchkm" name="Mark Success"
-                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
       <extensionElements>
         <flowable:field name="status" stringValue="SUCCESS"/>
         <flowable:field name="code" stringValue="200"/>
