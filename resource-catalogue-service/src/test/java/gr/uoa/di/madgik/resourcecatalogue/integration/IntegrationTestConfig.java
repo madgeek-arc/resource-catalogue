@@ -47,11 +47,19 @@ class IntegrationTestConfig {
 
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
+        // Registry datasource
         registry.add("registry.datasource.url", postgres::getJdbcUrl);
         registry.add("registry.datasource.username", postgres::getUsername);
         registry.add("registry.datasource.password", postgres::getPassword);
+
+        // Registry elastic
         registry.add("registry.elasticsearch.uris", elastic::getHttpHostAddress);
         registry.add("registry.elasticsearch.username", () -> "elastic");
         registry.add("registry.elasticsearch.password", () -> "password");
+
+        // Flowable datasource
+        registry.add("flowable.datasource.url", postgres::getJdbcUrl);
+        registry.add("flowable.datasource.username", postgres::getUsername);
+        registry.add("flowable.datasource.password", postgres::getPassword);
     }
 }
