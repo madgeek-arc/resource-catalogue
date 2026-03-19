@@ -57,7 +57,7 @@
     </exclusiveGateway>
 
     <sequenceFlow id="Flow_0r3bpfb" name="approved" sourceRef="Gateway_1cobda0" targetRef="Activity_1lr0vvx">
-      <conditionExpression xsi:type="tFormalExpression">${catalogue != null && catalogue['status'] == 'approved'}</conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression">${catalogue != null &amp;&amp; catalogue['status'] == 'approved'}</conditionExpression>
     </sequenceFlow>
 
     <sequenceFlow id="Flow_0p1meom" sourceRef="Gateway_1cobda0" targetRef="Activity_101mfzm">
