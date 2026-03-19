@@ -21,9 +21,9 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -35,7 +35,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
 public class ConfigurationTemplateManager extends ResourceCatalogueGenericManager<ConfigurationTemplateBundle>
@@ -115,8 +118,8 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     }
 
     @Override
-    public Paging<LinkedHashMap<String, Object>> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
-                                                                                  String interoperabilityRecordId) {
+    public Paging<ConfigurationTemplateBundle> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
+                                                                                String interoperabilityRecordId) {
         FacetFilter ff;
         if (params != null) {
             ff = FacetFilter.from(params);
