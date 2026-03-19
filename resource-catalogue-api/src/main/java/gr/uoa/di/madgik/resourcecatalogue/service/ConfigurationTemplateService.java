@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,55 +17,24 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplate;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
-import org.springframework.security.core.Authentication;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ConfigurationTemplate;
 import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 import java.util.Map;
 
-public interface ConfigurationTemplateService extends ResourceCatalogueService<ConfigurationTemplateBundle> {
-
-    /**
-     * Add a new Configuration Template on an existing Catalogue, providing the Catalogue's ID
-     *
-     * @param bundle                       Configuration Template Bundle
-     * @param catalogueId                  Catalogue ID
-     * @param auth                         Authentication
-     * @return {@link ConfigurationTemplateBundle}
-     */
-    ConfigurationTemplateBundle add(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth);
-
-    /**
-     * Update an Configuration Template of an existing Catalogue, providing its Catalogue ID
-     *
-     * @param bundle                       Configuration Template Bundle
-     * @param catalogueId                  Catalogue ID
-     * @param auth                         Authentication
-     * @return {@link ConfigurationTemplateBundle}
-     */
-    ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String catalogueId, Authentication auth);
-
-    /**
-     * Create a Public Configuration Template
-     *
-     * @param configurationTemplateBundle  Configuration Template
-     * @param auth                         Authentication
-     * @return {@link ConfigurationTemplateBundle}
-     */
-    ConfigurationTemplateBundle createPublicConfigurationTemplate(
-            ConfigurationTemplateBundle configurationTemplateBundle, Authentication auth);
+public interface ConfigurationTemplateService extends ResourceCatalogueGenericService<ConfigurationTemplateBundle> {
 
     /**
      * Return all Configuration Templates under a specific Interoperability Record ID
      *
-     * @param allRequestParams search parameters
+     * @param params                   search parameters
      * @param interoperabilityRecordId Interoperability Record ID
      * @return {@link Paging<ConfigurationTemplate>}
      */
-    Paging<ConfigurationTemplate> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> allRequestParams,
-                                                                   String interoperabilityRecordId);
+    Paging<ConfigurationTemplateBundle> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
+                                                                         String interoperabilityRecordId);
 
     /**
      * Return a mapping of Interoperability Record ID to Configuration Template list.

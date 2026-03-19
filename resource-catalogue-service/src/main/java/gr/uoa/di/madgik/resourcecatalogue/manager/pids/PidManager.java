@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class PidManager implements PidService {
     }
 
     @Override
-    public Bundle<?> get(String prefix, String suffix) {
+    public Bundle get(String prefix, String suffix) {
         String pid = prefix + "/" + suffix;
         String resourceType = catalogueProperties.getResourceTypeFromPrefix(prefix);
         if (resourceType != null) {
@@ -51,7 +51,7 @@ public class PidManager implements PidService {
             ff.setQuantity(10000);
             ff.setResourceType(resourceType);
             ff.addFilter("resource_internal_id", pid);
-            Browsing<Bundle<?>> browsing = genericResourceService.getResults(ff);
+            Browsing<Bundle> browsing = genericResourceService.getResults(ff);
             if (!browsing.getResults().isEmpty()) {
                 return browsing.getResults().getFirst();
             }

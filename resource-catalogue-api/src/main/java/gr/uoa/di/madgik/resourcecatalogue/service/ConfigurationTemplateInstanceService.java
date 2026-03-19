@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstance;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
-import org.springframework.security.core.Authentication;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
-public interface ConfigurationTemplateInstanceService extends ResourceCatalogueService<ConfigurationTemplateInstanceBundle> {
+public interface ConfigurationTemplateInstanceService
+        extends ResourceCatalogueGenericService<ConfigurationTemplateInstanceBundle> {
 
     /**
      * Return a List of ConfigurationTemplateInstances providing a resource ID
@@ -38,25 +39,15 @@ public interface ConfigurationTemplateInstanceService extends ResourceCatalogueS
      * @param id resource ID
      * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
      */
-    List<ConfigurationTemplateInstance> getByConfigurationTemplateId(String id);
+    List<LinkedHashMap<String, Object>> getByConfigurationTemplateId(String id);
 
     /**
      * Return the ConfigurationTemplateInstance providing its resource and ConfigurationTemplate IDs
      * or null
      *
      * @param resourceId resource ID
-     * @param ctId resource ID
+     * @param ctId       resource ID
      * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
      */
-    ConfigurationTemplateInstance getByResourceAndConfigurationTemplateId(String resourceId, String ctId);
-
-    /**
-     * Create a Public Configuration Template Instance
-     *
-     * @param configurationTemplateInstanceBundle Configuration Template Instance
-     * @param auth                                Authentication
-     * @return {@link ConfigurationTemplateInstanceBundle}
-     */
-    ConfigurationTemplateInstanceBundle createPublicConfigurationTemplateInstance(
-            ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication auth);
+    LinkedHashMap<String, Object> getByResourceAndConfigurationTemplateId(String resourceId, String ctId);
 }

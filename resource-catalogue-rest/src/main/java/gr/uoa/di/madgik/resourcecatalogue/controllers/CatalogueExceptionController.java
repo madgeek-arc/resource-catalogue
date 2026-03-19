@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -43,13 +44,21 @@ public class CatalogueExceptionController extends GenericExceptionController {
      * @return {@link ServerError}
      */
     @ExceptionHandler(value = HttpMessageNotReadableException.class, produces = MediaType.APPLICATION_JSON_VALUE)
-    protected ResponseEntity<ServerError> handleException(HttpServletRequest req, Exception ex) {
-        HttpStatusCode status = HttpStatus.BAD_REQUEST;
+    protected ResponseEntity<ServerError> handleException(HttpServletRequest req, HttpMessageNotReadableException ex) {
+        HttpStatusCode status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String message = ex.getMessage();
 
-        InvalidFormatException exception = (InvalidFormatException) ex.getCause();
-        String field = exception.getPathReference();
-        field = field.substring(field.indexOf("[")).replaceAll("\"", "");
-        String message = "Field %s: %s".formatted(field, exception.getOriginalMessage());
+        switch (ex.getCause()) {
+            case null -> {}
+            case InvalidFormatException exception -> {
+                status = HttpStatus.BAD_REQUEST;
+                String field = exception.getPathReference();
+                field = field.substring(field.indexOf("[")).replaceAll("\"", "");
+                message = "Field %s: %s".formatted(field, exception.getOriginalMessage());
+            }
+            default -> {}
+        }
+
         ServerError serverError = new ServerError(status, req, ex);
         serverError.setMessage(message);
         return ResponseEntity

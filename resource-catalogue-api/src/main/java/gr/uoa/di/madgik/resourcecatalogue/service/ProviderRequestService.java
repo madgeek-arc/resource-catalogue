@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.EmailMessage;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderRequest;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ProviderRequest;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;

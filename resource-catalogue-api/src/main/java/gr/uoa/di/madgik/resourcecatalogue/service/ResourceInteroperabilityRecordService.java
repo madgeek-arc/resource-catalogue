@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,54 +16,24 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecord;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import org.springframework.security.core.Authentication;
 
-public interface ResourceInteroperabilityRecordService extends ResourceCatalogueService<ResourceInteroperabilityRecordBundle> {
+import java.util.LinkedHashMap;
+
+public interface ResourceInteroperabilityRecordService
+        extends ResourceCatalogueGenericService<ResourceInteroperabilityRecordBundle> {
 
     /**
      * Add a new ResourceInteroperabilityRecord Bundle, related to the specific resource type
      *
-     * @param resourceInteroperabilityRecord ResourceInteroperabilityRecord Bundle
-     * @param resourceType                   Resource Type
-     * @param auth                           Authentication
+     * @param rir          ResourceInteroperabilityRecord Bundle
+     * @param resourceType Resource Type
+     * @param auth         Authentication
      * @return {@link ResourceInteroperabilityRecordBundle}
      */
-    ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecord,
+    ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle rir,
                                              String resourceType, Authentication auth);
-
-    /**
-     * Get the specific ResourceInteroperabilityRecord Bundle of the specific Catalogue
-     *
-     * @param resourceId  ResourceInteroperabilityRecord Bundle ID
-     * @param catalogueId Catalogue ID
-     * @return {@link ResourceInteroperabilityRecordBundle}
-     *
-     * @deprecated Since resourceId is unique, catalogueId can be safely removed. Replace with {@link #get(String)}.
-     */
-    @Deprecated(forRemoval = true)
-    ResourceInteroperabilityRecordBundle get(String resourceId, String catalogueId);
-
-    /**
-     * Validate the ResourceInteroperabilityRecord Bundle related to the specific resource type
-     *
-     * @param resourceInteroperabilityRecordBundle ResourceInteroperabilityRecord Bundle
-     * @param resourceType                         Resource Type
-     * @return {@link ResourceInteroperabilityRecordBundle}
-     */
-    ResourceInteroperabilityRecordBundle validate(
-            ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, String resourceType);
-
-    /**
-     * Create a Public ResourceInteroperabilityRecord Bundle
-     *
-     * @param resourceInteroperabilityRecordBundle ResourceInteroperabilityRecord Bundle
-     * @param auth                                 Authentication
-     * @return {@link ResourceInteroperabilityRecordBundle}
-     */
-    ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(
-            ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth);
 
     /**
      * Get a ResourceInteroperabilityRecord Bundle by its related resource ID
@@ -71,7 +41,16 @@ public interface ResourceInteroperabilityRecordService extends ResourceCatalogue
      * @param resourceId resource ID related to the specific ResourceInteroperabilityRecord Bundle
      * @return {@link ResourceInteroperabilityRecordBundle}
      */
-    ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId);
+    ResourceInteroperabilityRecordBundle getByResourceId(String resourceId);
+
+    /**
+     * Validate the ResourceInteroperabilityRecord Bundle related to the specific resource type
+     *
+     * @param bundle       ResourceInteroperabilityRecord Bundle
+     * @param resourceType Resource Type
+     * @return {@link ResourceInteroperabilityRecordBundle}
+     */
+    ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle bundle, String resourceType);
 
     /**
      * Check if there are any associated CTI with the specific Resource Interoperability Record.
@@ -79,15 +58,15 @@ public interface ResourceInteroperabilityRecordService extends ResourceCatalogue
      *
      * @param rir Resource Interoperability Record
      */
-    void checkAndRemoveCTI(ResourceInteroperabilityRecord rir);
+    void checkAndRemoveCTI(LinkedHashMap<String, Object> rir);
 
     /**
      * Check if there are any differences in the Guideline's list when updating a RIR.
      * If there are Guidelines removed, search and delete any associated CTI for the specific Service for each of those
      * Guidelines.
      *
-     * @param existingRIR Existing Resource Interoperability Record
-     * @param updatedRIR  Updated  Resource Interoperability Record
+     * @param existingRir Existing Resource Interoperability Record
+     * @param updatedRir  Updated  Resource Interoperability Record
      */
-    void checkAndRemoveCTI(ResourceInteroperabilityRecord existingRIR, ResourceInteroperabilityRecord updatedRIR);
+    void checkAndRemoveCTI(LinkedHashMap<String, Object> existingRir, LinkedHashMap<String, Object> updatedRir);
 }

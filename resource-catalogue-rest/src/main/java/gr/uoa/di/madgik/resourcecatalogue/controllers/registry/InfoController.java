@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,28 +43,28 @@ import java.util.Map;
 @Tag(name = "info", description = "Information about various resources in the Catalogue")
 public class InfoController {
 
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService providerService;
+    private final ServiceService serviceService;
+    private final OrganisationService organisationService;
     private final SecurityService securityService;
 
-    InfoController(ServiceBundleService<ServiceBundle> service, ProviderService provider, SecurityService securityService) {
-        this.serviceBundleService = service;
-        this.providerService = provider;
+    InfoController(ServiceService service, OrganisationService provider, SecurityService securityService) {
+        this.serviceService = service;
+        this.organisationService = provider;
         this.securityService = securityService;
     }
 
     @Hidden
     @Operation(summary = "Get the total number of active Providers and Services registered in the Catalogue.")
     @GetMapping(path = "numberOfProvidersAndServices", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Map<Object, Integer>> numberOfProvidersAndServices() {
         Map<Object, Integer> numberOfResources = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("active", true);
         ff.addFilter("published", false);
         Authentication authentication = securityService.getAdminAccess();
-        numberOfResources.put("providers", providerService.getAll(ff, authentication).getTotal());
-        numberOfResources.put("services", serviceBundleService.getAll(ff, authentication).getTotal());
+        numberOfResources.put("providers", organisationService.getAll(ff, authentication).getTotal());
+        numberOfResources.put("services", serviceService.getAll(ff, authentication).getTotal());
         return ResponseEntity.ok(numberOfResources);
     }
 

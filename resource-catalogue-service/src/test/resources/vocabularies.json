@@ -352,54 +352,6 @@
     "extras": {}
   },
   {
-    "id": "approved catalogue",
-    "name": "Approved Catalogue",
-    "description": "Approved Catalogue",
-    "parentId": null,
-    "type": "Catalogue state",
-    "extras": {}
-  },
-  {
-    "id": "pending catalogue",
-    "name": "Pending Catalogue",
-    "description": "Pending Catalogue",
-    "parentId": null,
-    "type": "Catalogue state",
-    "extras": {}
-  },
-  {
-    "id": "rejected catalogue",
-    "name": "Rejected Catalogue",
-    "description": "Rejected Catalogue",
-    "parentId": null,
-    "type": "Catalogue state",
-    "extras": {}
-  },
-  {
-    "id": "approved provider",
-    "name": "Approved Provider",
-    "description": "Approved Provider",
-    "parentId": null,
-    "type": "Provider state",
-    "extras": {}
-  },
-  {
-    "id": "pending provider",
-    "name": "Pending Provider",
-    "description": "Pending Provider",
-    "parentId": null,
-    "type": "Provider state",
-    "extras": {}
-  },
-  {
-    "id": "rejected provider",
-    "name": "Rejected Provider",
-    "description": "Rejected Provider",
-    "parentId": null,
-    "type": "Provider state",
-    "extras": {}
-  },
-  {
     "id": "approved template",
     "name": "Approved Template",
     "description": "Approved Template",
@@ -432,7 +384,7 @@
     "extras": {}
   },
   {
-    "id": "approved resource",
+    "id": "approved",
     "name": "Approved Resource",
     "description": "Approved Resource",
     "parentId": null,
@@ -440,7 +392,7 @@
     "extras": {}
   },
   {
-    "id": "pending resource",
+    "id": "pending",
     "name": "Pending Resource",
     "description": "Pending Resource",
     "parentId": null,
@@ -448,59 +400,11 @@
     "extras": {}
   },
   {
-    "id": "rejected resource",
+    "id": "rejected",
     "name": "Rejected Resource",
     "description": "Rejected Resource",
     "parentId": null,
     "type": "Resource state",
-    "extras": {}
-  },
-  {
-    "id": "approved datasource",
-    "name": "Approved Datasource",
-    "description": "Approved Datasource",
-    "parentId": null,
-    "type": "Datasource state",
-    "extras": {}
-  },
-  {
-    "id": "pending datasource",
-    "name": "Pending Datasource",
-    "description": "Pending Datasource",
-    "parentId": null,
-    "type": "Datasource state",
-    "extras": {}
-  },
-  {
-    "id": "rejected datasource",
-    "name": "Rejected Datasource",
-    "description": "Rejected Datasource",
-    "parentId": null,
-    "type": "Datasource state",
-    "extras": {}
-  },
-  {
-    "id": "approved interoperability record",
-    "name": "Approved Interoperability Record",
-    "description": "Approved Interoperability Record",
-    "parentId": null,
-    "type": "Interoperability Record state",
-    "extras": {}
-  },
-  {
-    "id": "pending interoperability record",
-    "name": "Pending Interoperability Record",
-    "description": "Pending Interoperability Record",
-    "parentId": null,
-    "type": "Interoperability Record state",
-    "extras": {}
-  },
-  {
-    "id": "rejected interoperability record",
-    "name": "Rejected Interoperability Record",
-    "description": "Rejected Interoperability Record",
-    "parentId": null,
-    "type": "Interoperability Record state",
     "extras": {}
   },
   {

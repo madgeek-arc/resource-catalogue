@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,44 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import org.springframework.security.core.Authentication;
 
-public interface AdapterService extends ResourceCatalogueService<AdapterBundle>, BundleOperations<AdapterBundle> {
-
-    /**
-     * @param adapter AdapterBundle
-     * @param auth    Authentication
-     * @return {@link AdapterBundle}
-     */
-    AdapterBundle add(AdapterBundle adapter, Authentication auth);
-
-    /**
-     * @param adapter     AdapterBundle
-     * @param catalogueId Catalogue ID
-     * @param auth        Authentication
-     * @return {@link AdapterBundle}
-     */
-    AdapterBundle add(AdapterBundle adapter, String catalogueId, Authentication auth);
-
-    /**
-     * @param adapter AdapterBundle
-     * @param comment comment
-     * @param auth    Authentication
-     * @return {@link AdapterBundle}
-     */
-    AdapterBundle update(AdapterBundle adapter, String comment, Authentication auth);
-
-    /**
-     * @param adapterBundle AdapterBundle
-     * @param catalogueId   Catalogue ID
-     * @param comment       comment
-     * @param auth          Authentication
-     * @return {@link AdapterBundle}
-     */
-    AdapterBundle update(AdapterBundle adapterBundle, String catalogueId, String comment, Authentication auth);
-
-    /**
-     * @param adapter AdapterBundle
-     */
-    void delete(AdapterBundle adapter);
+public interface AdapterService extends ResourceCatalogueGenericService<AdapterBundle>,
+        EOSCResourceService<AdapterBundle>, DraftService<AdapterBundle> {
 }

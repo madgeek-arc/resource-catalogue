@@ -1,7 +1,7 @@
 <p>Dear ${project} Onboarding Team,</p>
 <p>
     <#if bundle.templateStatus == "no template status">
-        <#if bundle.status == "pending provider">
+        <#if bundle.status == "pending">
             A new application by [${user.fullName}] – [${user.email}] has been received for registering
             [${bundle.provider.name}] - ([${bundle.provider.id}]) as a new ${project} Provider in
             ${project}.
@@ -10,7 +10,7 @@
             ${endpoint}/dashboard/${project?lower_case}/${bundle.provider.id}/info
             and approve or reject it.
         </#if>
-        <#if bundle.status == "approved provider">
+        <#if bundle.status == "approved">
             <#if bundle.active == true>
                 The application by [${user.fullName}] – [${user.email}] for registering
                 [${bundle.provider.name}] - ([${bundle.provider.id}]) has been approved.
@@ -25,7 +25,7 @@
                 ${endpoint}/dashboard/${project?lower_case}/${bundle.provider.id}/info.
             </#if>
         </#if>
-        <#if bundle.status == "rejected provider">
+        <#if bundle.status == "rejected">
             The application by [${user.fullName}] – [${user.email}] for registering
             [${bundle.provider.name}] - ([${bundle.provider.id}]) has been rejected.
             <br>

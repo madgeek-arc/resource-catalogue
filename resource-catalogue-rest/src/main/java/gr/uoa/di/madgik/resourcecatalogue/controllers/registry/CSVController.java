@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.User;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CSVService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -48,7 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 
 @Hidden
 @Profile("beyond")
@@ -58,78 +54,77 @@ import java.util.Objects;
 public class CSVController {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVController.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final ProviderService providerService;
+    private final ServiceService service;
+    private final OrganisationService organisationService;
     private final VocabularyService vocabularyService;
     private final CSVService csvService;
+    private final ServiceService serviceService;
 
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    CSVController(ServiceBundleService<ServiceBundle> service, ProviderService provider,
-                  VocabularyService vocabulary, CSVService csvService) {
-        this.serviceBundleService = service;
-        this.providerService = provider;
+    CSVController(ServiceService service, OrganisationService provider,
+                  VocabularyService vocabulary, CSVService csvService, ServiceService serviceService) {
+        this.service = service;
+        this.organisationService = provider;
         this.vocabularyService = vocabulary;
         this.csvService = csvService;
+        this.serviceService = serviceService;
     }
 
     @Hidden
-    @Operation(summary = "Downloads a csv file with Provider entries.")
+    @Operation(summary = "Downloads a csv file with Organisation entries.")
     @GetMapping(path = "providers", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<String> providersToCSV(@RequestParam(required = false) Boolean published,
                                                  @Parameter(hidden = true) Authentication auth,
                                                  HttpServletResponse response) {
-        Paging<ProviderBundle> providers = providerService.getAll(createFacetFilter(published), auth);
+        Paging<OrganisationBundle> providers = organisationService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listProvidersToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
-        logger.info("User {} downloaded Providers CSV list",
-                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase());
+        logger.info("Downloaded Providers CSV list");
         return ResponseEntity.ok(csvData);
     }
 
     @Hidden
     @Operation(summary = "Downloads a csv file with Service entries.")
     @GetMapping(path = "services", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<String> servicesToCSV(@RequestParam(required = false) Boolean published,
                                                 @Parameter(hidden = true) Authentication auth,
                                                 HttpServletResponse response) {
-        Paging<ServiceBundle> serviceBundles = serviceBundleService.getAll(createFacetFilter(published), auth);
+        Paging<ServiceBundle> serviceBundles = serviceService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listServicesToCSV(serviceBundles.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "services.csv");
-        logger.info("User {} downloaded Services CSV list",
-                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase());
+        logger.info("Downloaded Services CSV list");
         return ResponseEntity.ok(csvData);
     }
 
     @Hidden
     @Operation(summary = "Downloads a csv file with Vocabulary entries.")
     @GetMapping(path = "vocabularies", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<String> vocabulariesToCSV(@Parameter(hidden = true) Authentication auth,
                                                     HttpServletResponse response) {
         Paging<Vocabulary> vocabularies = vocabularyService.getAll(createFacetFilter(null), auth);
         String csvData = csvService.listVocabulariesToCSV(vocabularies.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "vocabularies.csv");
-        logger.info("User {} downloaded Vocabularies CSV list",
-                Objects.requireNonNull(User.of(auth)).getEmail().toLowerCase());
+        logger.info("Downloaded Vocabularies CSV list");
         return ResponseEntity.ok(csvData);
     }
 
     @Hidden
     @Operation(summary = "Downloads a csv file with the number of approved services per provider and country, before a specific date.")
     @GetMapping(path = "approvedServicesByProviderAndCountry", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public void numberOfServicesPerProviderCountryToCSV(@Parameter(description = "Before date (format yyyy-MM-dd)",
                                                                 example = "2023-01-01")
                                                         @RequestParam String date,
                                                         @Parameter(hidden = true) Authentication auth,
                                                         HttpServletResponse response) throws IOException {
         long timestamp = csvService.generateTimestampFromDate(date);
-        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(false), auth).getResults();
-        List<ServiceBundle> services = serviceBundleService.getAll(createFacetFilter(false), auth).getResults();
+        List<OrganisationBundle> providers = organisationService.getAll(createFacetFilter(false), auth).getResults();
+        List<ServiceBundle> services = serviceService.getAll(createFacetFilter(false), auth).getResults();
         String csv = csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services);
 
         // Set the response headers

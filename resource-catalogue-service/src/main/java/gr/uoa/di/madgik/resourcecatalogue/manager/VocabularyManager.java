@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -41,13 +41,13 @@ import java.util.stream.Collectors;
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private static final Logger logger = LoggerFactory.getLogger(VocabularyManager.class);
 
-    private final ProviderManager providerManager;
+    private final OrganisationManager providerManager;
 
     private final SecurityService securityService;
 
     private final IdCreator idCreator;
 
-    public VocabularyManager(@Lazy ProviderManager providerManager, @Lazy IdCreator idCreator, @Lazy SecurityService securityService) {
+    public VocabularyManager(@Lazy OrganisationManager providerManager, @Lazy IdCreator idCreator, @Lazy SecurityService securityService) {
         super(Vocabulary.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;
@@ -88,6 +88,25 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     public Vocabulary getParent(String id) {
         return get(get(id).getParentId());
     }
+
+    @Override
+    public List<Vocabulary> getChildren(String parentId) {
+        List<Vocabulary> children = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(maxQuantity);
+
+        List<Vocabulary> allVocs = getAll(ff).getResults();
+        for (Vocabulary vocabulary : allVocs) {
+            if (parentId.equals(vocabulary.getParentId())) {
+                children.add(vocabulary);
+            }
+        }
+
+        children.sort(Comparator.comparing(Vocabulary::getName));
+        return children;
+    }
+
 
     @Override
     public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
@@ -253,13 +272,13 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
         ff.addFilter("active", true);
-        ff.addFilter("status", "approved provider");
+        ff.addFilter("status", "approved");
         ff.addFilter("published", false);
-        List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<OrganisationBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<String> providerNames = new ArrayList<>();
-        for (ProviderBundle providerBundle : allActiveAndApprovedProviders) {
-            if (providerBundle.getProvider().isLegalEntity()) {
-                providerNames.add(providerBundle.getProvider().getName());
+        for (OrganisationBundle organisationBundle : allActiveAndApprovedProviders) {
+            if ((boolean) organisationBundle.getOrganisation().get("legalEntity")) {
+                providerNames.add((String) organisationBundle.getOrganisation().get("name"));
             }
         }
         for (Iterator<String> it = providerNames.iterator(); it.hasNext(); ) {

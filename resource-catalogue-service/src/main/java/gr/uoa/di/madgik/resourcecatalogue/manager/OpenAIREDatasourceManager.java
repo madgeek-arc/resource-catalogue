@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.dto.OpenAIREMetrics;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.OpenAIREDatasourceService;
@@ -35,10 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -53,8 +49,8 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     @Value("${openaire.ds.metrics:}")
     private String openaireMetrics;
 
-    private String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff) {
-        String[] pagination = createPagination(ff);
+    private String[] getOpenAIREDatasourcesAsJSON(FacetFilter ff, String keywordField) {
+        String[] pagination = createPagination(ff, keywordField);
         int page = Integer.parseInt(pagination[0]);
         int quantity = Integer.parseInt(pagination[1]);
         String ordering = pagination[2];
@@ -72,7 +68,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
         return new String[]{};
     }
 
-    private String[] createPagination(FacetFilter ff) {
+    private String[] createPagination(FacetFilter ff, String keywordField) {
         int page;
         int quantity = ff.getQuantity();
         if (ff.getFrom() >= quantity) {
@@ -95,8 +91,9 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
                 data = "{  \"id\": \"" + ff.getFilter().get("id") + "\"}";
             }
         }
+        if (keywordField == null) keywordField = "officialname";
         if (ff.getKeyword() != null && !ff.getKeyword().isEmpty()) {
-            data = "{  \"officialname\": \"" + ff.getKeyword() + "\"}";
+            data = "{\"" + keywordField + "\": \"" + ff.getKeyword() + "\"}";
         }
         return new String[]{Integer.toString(page), Integer.toString(quantity), ordering, data};
     }
@@ -119,10 +116,10 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
 
 
     @Override
-    public Datasource get(String id) {
+    public LinkedHashMap<String, Object> get(String id) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("id", id);
-        String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
+        String datasource = getOpenAIREDatasourcesAsJSON(ff, null)[1];
         if (datasource != null) {
             JSONObject obj = new JSONObject(datasource);
             JSONArray arr = obj.getJSONArray("datasourceInfo");
@@ -141,10 +138,19 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
     }
 
     @Override
-    public Map<Integer, List<Datasource>> getAll(FacetFilter ff) {
-        Map<Integer, List<Datasource>> datasourceMap = new HashMap<>();
-        List<Datasource> allDatasources = new ArrayList<>();
-        String[] datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff);
+    public Map<Integer, List<LinkedHashMap<String, Object>>> getAll(FacetFilter ff) {
+        Map<Integer, List<LinkedHashMap<String, Object>>> datasourceMap = new HashMap<>();
+        List<LinkedHashMap<String, Object>> allDatasources = new ArrayList<>();
+        String[] datasourcesAsJSON;
+        if (ff.getKeyword() != null && !ff.getKeyword().isEmpty()) {
+            datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff, "id");
+            if (datasourcesAsJSON.length == 0 || datasourcesAsJSON[0].equals("0")) {
+                datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff, "officialname");
+            }
+        } else {
+            datasourcesAsJSON = getOpenAIREDatasourcesAsJSON(ff, "officialname");
+        }
+
         int total = Integer.parseInt(datasourcesAsJSON[0]);
         String allOpenAIREDatasources = datasourcesAsJSON[1];
         if (allOpenAIREDatasources != null) {
@@ -154,7 +160,7 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
                 JSONObject map = arr.getJSONObject(i);
                 Gson gson = new Gson();
                 JsonElement jsonObj = gson.fromJson(String.valueOf(map), JsonElement.class);
-                Datasource datasource = transformOpenAIREToEOSCDatasource(jsonObj);
+                LinkedHashMap<String, Object> datasource = transformOpenAIREToEOSCDatasource(jsonObj);
                 if (datasource != null) {
                     allDatasources.add(datasource);
                 }
@@ -165,17 +171,17 @@ public class OpenAIREDatasourceManager implements OpenAIREDatasourceService {
         throw new CatalogueResourceNotFoundException("There are no OpenAIRE Datasources");
     }
 
-    private Datasource transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource) {
-        Datasource datasource = new Datasource();
+    private LinkedHashMap<String, Object> transformOpenAIREToEOSCDatasource(JsonElement openaireDatasource) {
+        LinkedHashMap<String, Object> datasource = new LinkedHashMap<>();
         String id = openaireDatasource.getAsJsonObject().get("id").getAsString().replaceAll("\"", "");
-        datasource.setId(id);
+        datasource.put("id", id);
         return datasource;
     }
 
     public String getRegisterBy(String openaireDatasourceID) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("id", openaireDatasourceID);
-        String datasource = getOpenAIREDatasourcesAsJSON(ff)[1];
+        String datasource = getOpenAIREDatasourcesAsJSON(ff, null)[1];
         String registerBy = null;
         if (datasource != null) {
             JSONObject obj = new JSONObject(datasource);

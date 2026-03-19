@@ -1,0 +1,129 @@
+[
+  {
+    "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+    "name": "Set Workflow Result: SUCCESS",
+    "id": "workflow-result-success-script",
+    "description": "Sets status/code/message for a successful workflow completion.",
+    "version": 1,
+    "appliesTo": ["bpmn:Task"],
+    "elementType": { "value": "bpmn:ScriptTask" },
+    "groups": [{ "id": "result", "label": "Result", "openByDefault": true }],
+    "properties": [
+      {
+        "label": "Script Expression",
+        "type": "Hidden",
+        "value": "={ status: status, code: code, message: message }",
+        "binding": { "type": "zeebe:script", "property": "expression" },
+        "group": "result"
+      },
+      {
+        "label": "Result Variable (internal)",
+        "type": "Hidden",
+        "value": "result",
+        "binding": { "type": "zeebe:script", "property": "resultVariable" },
+        "group": "result"
+      },
+
+      {
+        "label": "Status",
+        "type": "Hidden",
+        "value": "=\"SUCCESS\"",
+        "binding": { "type": "zeebe:input", "name": "status" },
+        "group": "result"
+      },
+      {
+        "label": "Code",
+        "type": "Hidden",
+        "value": "=0",
+        "binding": { "type": "zeebe:input", "name": "code" },
+        "group": "result"
+      },
+      {
+        "label": "Message",
+        "description": "Optional message stored in `message`.",
+        "type": "Text",
+        "optional": true,
+        "feel": "optional",
+        "value": "=\"Success\"",
+        "binding": { "type": "zeebe:input", "name": "message" },
+        "group": "result"
+      },
+
+      {
+        "label": "Output variable name",
+        "description": "Process variable that will contain the JSON result object.",
+        "type": "Hidden",
+        "value": "workflowResult",
+        "binding": { "type": "zeebe:output", "source": "=result" },
+        "constraints": { "notEmpty": true },
+        "group": "result"
+      }
+    ]
+  },
+
+  {
+    "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+    "name": "Set Workflow Result: FAILED",
+    "id": "workflow-result-failure-script",
+    "description": "Sets status/code/message for a failed workflow completion.",
+    "version": 1,
+    "appliesTo": ["bpmn:Task"],
+    "elementType": { "value": "bpmn:ScriptTask" },
+    "groups": [{ "id": "result", "label": "Result", "openByDefault": true }],
+    "properties": [
+      {
+        "label": "Script Expression",
+        "type": "Hidden",
+        "value": "={ status: status, code: code, message: message }",
+        "binding": { "type": "zeebe:script", "property": "expression" },
+        "group": "result"
+      },
+      {
+        "label": "Result Variable (internal)",
+        "type": "Hidden",
+        "value": "result",
+        "binding": { "type": "zeebe:script", "property": "resultVariable" },
+        "group": "result"
+      },
+
+      {
+        "label": "Status",
+        "type": "Hidden",
+        "value": "=\"FAILURE\"",
+        "binding": { "type": "zeebe:input", "name": "status" },
+        "group": "result"
+      },
+
+      {
+        "label": "Code",
+        "description": "Numeric failure code (e.g. 404, 400).",
+        "type": "Number",
+        "value": 400,
+        "binding": { "type": "zeebe:input", "name": "code" },
+        "constraints": { "notEmpty": true },
+        "group": "result"
+      },
+
+      {
+        "label": "Message",
+        "description": "Failure reason shown to the user.",
+        "type": "Text",
+        "feel": "optional",
+        "value": "=\"Operation failed\"",
+        "binding": { "type": "zeebe:input", "name": "message" },
+        "constraints": { "notEmpty": true },
+        "group": "result"
+      },
+
+      {
+        "label": "Output variable name",
+        "description": "Process variable that will contain the JSON result object.",
+        "type": "Hidden",
+        "value": "workflowResult",
+        "binding": { "type": "zeebe:output", "source": "=result" },
+        "constraints": { "notEmpty": true },
+        "group": "result"
+      }
+    ]
+  }
+]

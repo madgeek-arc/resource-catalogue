@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service.sync;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Provider;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.service.SynchronizerService;
 import jakarta.annotation.PostConstruct;
 import org.javatuples.Pair;

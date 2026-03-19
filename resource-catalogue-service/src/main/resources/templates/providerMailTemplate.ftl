@@ -1,7 +1,7 @@
 <p>Dear ${user.fullName},</p>
 <p>
     <#if bundle.templateStatus == "no template status">
-        <#if bundle.status == "pending provider">
+        <#if bundle.status == "pending">
             You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}]) as a
             new ${project} Provider in the ${project}.
             <br>
@@ -10,7 +10,7 @@
             <br>
             Thank you for your interest in becoming a member of the ${project}.
         </#if>
-        <#if bundle.status == "approved provider">
+        <#if bundle.status == "approved">
             <#if bundle.active == true>
                 You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}])
                 as a new ${project} Provider in the ${project}.
@@ -32,7 +32,7 @@
                 For any further clarifications please contact ${registrationEmail}.
             </#if>
         </#if>
-        <#if bundle.status == "rejected provider">
+        <#if bundle.status == "rejected">
             You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}]) as a
             new ${project} Provider in the ${project}.
             <br>

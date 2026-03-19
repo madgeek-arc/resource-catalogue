@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -78,7 +79,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/resourcesync/**").permitAll()
-                                .requestMatchers("/dump/", "/restore/", "/resources/**", "/resourceType/**",
+                                .requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
+                                .requestMatchers(
+                                        "/logs/**",
+                                        "/forms/**",
+                                        "/dump/",
+                                        "/restore/",
+                                        "/resources/**",
+                                        "/resourceType/**",
                                         "/search/**").hasAuthority("ROLE_ADMIN")
                                 .anyRequest().permitAll()
                 )
@@ -128,29 +136,19 @@ public class SecurityConfig {
                     // to one or more GrantedAuthority's and add it to mappedAuthorities
 
                     OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
-
-                    OidcIdToken idToken = oidcUserAuthority.getIdToken();
                     OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
-
-                    if (idToken != null && (catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))
-                            || catalogueProperties.getOnboardingTeam().contains(idToken.getClaims().get("email")))) {
-                        sub = idToken.getClaimAsString("sub");
-                        email = idToken.getClaimAsString("email");
-                    } else if (userInfo != null && (catalogueProperties.getAdmins().contains(userInfo.getEmail())
-                            || catalogueProperties.getOnboardingTeam().contains(userInfo.getEmail()))) {
+                    if (userInfo != null) {
                         sub = userInfo.getSubject();
                         email = userInfo.getEmail();
                     } else {
                         if (((OidcUserAuthority) authority).getAttributes() != null
-                                && ((OidcUserAuthority) authority).getAttributes().containsKey("email")
-                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email"))
-                                || catalogueProperties.getOnboardingTeam().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
+                                && ((OidcUserAuthority) authority).getAttributes().containsKey("email")) {
                             sub = ((OidcUserAuthority) authority).getAttributes().get("sub").toString();
                             email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
                         }
                     }
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
-                    logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
+                    logger.info("User mapped as '{}'", mappedAuthorities);
 
                 } else if (authority instanceof OAuth2UserAuthority) {
                     // Map the attributes found in userAttributes
@@ -165,7 +163,7 @@ public class SecurityConfig {
                         email = userAttributes.get("email").toString();
                     }
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
-                    logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
+                    logger.info("User mapped as '{}'", mappedAuthorities);
 
                 }
             });

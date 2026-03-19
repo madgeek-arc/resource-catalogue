@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,16 +89,6 @@ public class Metadata {
         ret.setModifiedAt(ret.getRegisteredAt());
         ret.setTerms(adminAcceptedTerms(userEmail));
         return ret;
-    }
-
-    public static Metadata createMetadata(String registeredBy, String originalId, String source, List<String> terms) {
-        Metadata metadata = new Metadata();
-        metadata.setRegisteredBy(registeredBy);
-        metadata.setRegisteredAt(String.valueOf(System.currentTimeMillis()));
-        metadata.setModifiedBy(registeredBy);
-        metadata.setModifiedAt(metadata.getRegisteredAt());
-        metadata.setTerms(terms);
-        return metadata;
     }
 
     public static List<String> adminAcceptedTerms(String userEmail) {

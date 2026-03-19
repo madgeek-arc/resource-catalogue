@@ -1,0 +1,84 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+  "name": "Resource Update",
+  "id": "update-resource-template",
+  "description": "Updates a resource in the DB.",
+  "version": 2,
+  "appliesTo": ["bpmn:Task"],
+  "elementType": { 
+    "value": "bpmn:ServiceTask" 
+  },
+  "groups": [
+    { "id": "exec", "label": "Execution" },
+    { "id": "io",   "label": "Inputs" }
+  ],
+  "properties": [
+    {
+      "label": "Job Type",
+      "type": "Hidden",
+      "value": "update-resource",
+      "binding": { "type": "zeebe:taskDefinition:type" },
+      "group": "exec"
+    },
+    {
+      "label": "Resource Variable Name",
+      "type": "String",
+      "value": "resource",
+      "binding": { "type": "zeebe:taskHeader", "key": "resourceName" },
+      "constraints": { "notEmpty": true },
+      "group": "exec"
+    },
+    {
+      "label": "Resource Type (preset)",
+      "description": "Select a fixed type, or choose '(Use expression)' to use the FEEL field below.",
+      "type": "Dropdown",
+      "choices": [
+        { "name": "(Use expression)", "value": "" },
+        { "name": "Adapter", "value": "adapter" },
+        { "name": "Catalogue", "value": "catalogue" },
+        { "name": "Configuration Template", "value": "configuration_template" },
+        { "name": "Configuration Template Instance", "value": "configuration_template_instance" },
+        { "name": "Datasource", "value": "datasource" },
+        { "name": "Deployable Application", "value": "deployable_application" },
+        { "name": "Helpdesk", "value": "helpdesk" },
+        { "name": "Interoperability Record", "value": "interoperability_record" },
+        { "name": "Monitoring", "value": "monitoring" },
+        { "name": "Organisation", "value": "organisation" },
+        { "name": "Resource Interoperability_record", "value": "resource_interoperability_record" },
+        { "name": "Service", "value": "service" },
+        { "name": "Training Resource", "value": "training_resource" },
+        { "name": "Vocabulary", "value": "vocabulary" }
+      ],
+      "value": "",
+      "binding": { "type": "zeebe:taskHeader", "key": "resourceType" },
+      "group": "exec"
+    },
+    {
+      "label": "Resource Type",
+      "description": "FEEL expression that evaluates to the resourceType string. Used only if preset is empty. Example: =resourceType",
+      "type": "String",
+      "feel": "optional",
+      "value": "=resourceType",
+      "binding": { "type": "zeebe:input", "name": "resourceType" },
+      "group": "exec"
+    },
+    {
+      "label": "Resource (input variable)",
+      "type": "String",
+      "feel": "required",
+      "binding": { "type": "zeebe:input", "name": "resourceName" },
+      "constraints": { "notEmpty": true },
+      "description": "FEEL expression resolving to the resource object (e.g. =resource)",
+      "group": "io"
+    },
+    {
+      "label": "Resource (output variable)",
+      "type": "String",
+      "binding": { "type": "zeebe:output", "source": "=resource" },
+      "value": "resource",
+      "description": "Process variable name that will hold the updated resource",
+      "constraints": { "notEmpty": true },
+      "group": "io"
+    }
+  ]
+}

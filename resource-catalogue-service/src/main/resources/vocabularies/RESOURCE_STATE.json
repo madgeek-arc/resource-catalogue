@@ -1,6 +1,6 @@
 [
   {
-    "id": "approved resource",
+    "id": "approved",
     "name": "Approved Resource",
     "description": "Approved Resource",
     "parentId": null,
@@ -8,7 +8,7 @@
     "extras": {}
   },
   {
-    "id": "pending resource",
+    "id": "pending",
     "name": "Pending Resource",
     "description": "Pending Resource",
     "parentId": null,
@@ -16,7 +16,7 @@
     "extras": {}
   },
   {
-    "id": "rejected resource",
+    "id": "rejected",
     "name": "Rejected Resource",
     "description": "Rejected Resource",
     "parentId": null,

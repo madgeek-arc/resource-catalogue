@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,20 +36,18 @@ import java.util.Objects;
 @Component
 public class RelationshipValidator {
 
-    private final ProviderService providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final OrganisationService organisationService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     @Autowired
-    public RelationshipValidator(
-            ProviderService providerService,
-            ServiceBundleService<ServiceBundle> serviceBundleService,
-            TrainingResourceService trainingResourceService,
-            InteroperabilityRecordService interoperabilityRecordService
-    ) {
-        this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+    public RelationshipValidator(OrganisationService organisationService,
+                                 ServiceService serviceService,
+                                 TrainingResourceService trainingResourceService,
+                                 InteroperabilityRecordService interoperabilityRecordService) {
+        this.organisationService = organisationService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
@@ -56,96 +55,70 @@ public class RelationshipValidator {
     //TODO: decide if we still want public IDs inside lower level resources
     public void checkRelatedResourceIDsConsistency(Object o) {
         String catalogueId = null;
-        List<String> resourceProviders = new ArrayList<>();
-        List<String> requiredResources = new ArrayList<>();
-        List<String> relatedResources = new ArrayList<>();
+        List<String> serviceProviders = new ArrayList<>();
         List<String> eoscRelatedServices = new ArrayList<>();
         List<String> interoperabilityRecordIds = new ArrayList<>();
         if (o != null) {
             if (o instanceof ServiceBundle) {
-                catalogueId = ((ServiceBundle) o).getService().getCatalogueId();
-                resourceProviders = ((ServiceBundle) o).getService().getResourceProviders();
-                requiredResources = ((ServiceBundle) o).getService().getRequiredResources();
-                relatedResources = ((ServiceBundle) o).getService().getRelatedResources();
+                catalogueId = ((ServiceBundle) o).getCatalogueId();
+                Object serviceProvidersObj = ((ServiceBundle) o).getService().get("serviceProviders");
+                if (serviceProvidersObj instanceof List<?>) {
+                    serviceProviders = (List<String>) serviceProvidersObj;
+                }
+            }
+            if (o instanceof DatasourceBundle) {
+                catalogueId = ((DatasourceBundle) o).getCatalogueId();
+                Object serviceProvidersObj = ((DatasourceBundle) o).getDatasource().get("serviceProviders");
+                if (serviceProvidersObj instanceof List<?>) {
+                    serviceProviders = (List<String>) serviceProvidersObj;
+                }
             }
             if (o instanceof TrainingResourceBundle) {
-                catalogueId = ((TrainingResourceBundle) o).getTrainingResource().getCatalogueId();
-                resourceProviders = ((TrainingResourceBundle) o).getTrainingResource().getResourceProviders();
-                eoscRelatedServices = ((TrainingResourceBundle) o).getTrainingResource().getEoscRelatedServices();
+                catalogueId = ((TrainingResourceBundle) o).getCatalogueId();
+                Object eoscRelatedServicesObj = ((TrainingResourceBundle) o).getTrainingResource().get("eoscRelatedServices");
+                if (eoscRelatedServicesObj instanceof List<?>) {
+                    eoscRelatedServices = (List<String>) eoscRelatedServicesObj;
+                }
             }
             if (o instanceof ResourceInteroperabilityRecordBundle) {
-                catalogueId = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getCatalogueId();
-                interoperabilityRecordIds = ((ResourceInteroperabilityRecordBundle) o).getResourceInteroperabilityRecord().getInteroperabilityRecordIds();
+                catalogueId = ((ResourceInteroperabilityRecordBundle) o).getCatalogueId();
+                Object interoperabilityRecordIdsObj = ((ResourceInteroperabilityRecordBundle) o)
+                        .getResourceInteroperabilityRecord().get("interoperabilityRecordIds");
+                if (interoperabilityRecordIdsObj instanceof List<?>) {
+                    interoperabilityRecordIds = (List<String>) interoperabilityRecordIdsObj;
+                }
             }
-            if (resourceProviders != null && !resourceProviders.isEmpty() && resourceProviders.stream().anyMatch(Objects::nonNull)) {
-                for (String resourceProvider : resourceProviders) {
-                    if (resourceProvider != null && !resourceProvider.isEmpty()) {
+            if (!serviceProviders.isEmpty() && serviceProviders.stream().anyMatch(Objects::nonNull)) {
+                for (String serviceProvider : serviceProviders) {
+                    if (serviceProvider != null && !serviceProvider.isEmpty()) {
                         try {
-                            providerService.get(resourceProvider, catalogueId, false);
+                            organisationService.get(serviceProvider, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
                             throw new ValidationException(String.format("Field [resourceProviders]: " +
                                             "There is no Provider with ID '%s' in the %s Catalogue.",
-                                    resourceProvider, catalogueId));
+                                    serviceProvider, catalogueId));
                         }
                     }
                 }
             }
-            if (requiredResources != null && !requiredResources.isEmpty() && requiredResources.stream().anyMatch(Objects::nonNull)) {
-                for (String requiredResource : requiredResources) {
-                    if (requiredResource != null && !requiredResource.isEmpty()) {
-                        try {
-                            serviceBundleService.get(requiredResource, catalogueId, false);
-                        } catch (CatalogueResourceNotFoundException e) {
-                            try {
-                                trainingResourceService.get(requiredResource, catalogueId, false);
-                            } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("Field [requiredResources]: " +
-                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue.",
-                                        requiredResource, catalogueId));
-                            }
-                        }
-                    }
-                }
-            }
-            if (relatedResources != null && !relatedResources.isEmpty() && relatedResources.stream().anyMatch(Objects::nonNull)) {
-                for (String relatedResource : relatedResources) {
-                    if (relatedResource != null && !relatedResource.isEmpty()) {
-                        try {
-                            serviceBundleService.get(relatedResource, catalogueId, false);
-                        } catch (CatalogueResourceNotFoundException e) {
-                            try {
-                                trainingResourceService.get(relatedResource, catalogueId, false);
-                            } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("Field [relatedResources]: " +
-                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue.",
-                                        relatedResource, catalogueId));
-                            }
-                        }
-                    }
-                }
-            }
-            if (eoscRelatedServices != null && !eoscRelatedServices.isEmpty() && eoscRelatedServices.stream().anyMatch(Objects::nonNull)) {
+            if (!eoscRelatedServices.isEmpty() && eoscRelatedServices.stream().anyMatch(Objects::nonNull)) {
                 for (String eoscRelatedService : eoscRelatedServices) {
                     if (eoscRelatedService != null && !eoscRelatedService.isEmpty()) {
                         try {
-                            serviceBundleService.get(eoscRelatedService, catalogueId, false);
+                            serviceService.get(eoscRelatedService, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
-                            try {
-                                trainingResourceService.get(eoscRelatedService, catalogueId, false);
-                            } catch (CatalogueResourceNotFoundException j) {
-                                throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
-                                                "There is no Service or Training Resource with ID '%s' in the %s Catalogue. ",
-                                        eoscRelatedService, catalogueId));
-                            }
+                            throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
+                                            "There is no Service with ID '%s' in the %s Catalogue. ",
+                                    eoscRelatedService, catalogueId));
                         }
                     }
                 }
             }
-            if (interoperabilityRecordIds != null && !interoperabilityRecordIds.isEmpty() && interoperabilityRecordIds.stream().anyMatch(Objects::nonNull)) {
+            if (!interoperabilityRecordIds.isEmpty() && interoperabilityRecordIds.stream().anyMatch(Objects::nonNull)) {
                 for (String interoperabilityRecordId : interoperabilityRecordIds) {
                     if (interoperabilityRecordId != null && !interoperabilityRecordId.isEmpty()) {
                         try {
-                            interoperabilityRecordService.get(interoperabilityRecordId, catalogueId, false);
+                            interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
                             throw new ValidationException(String.format("Field [interoperabilityRecordIds]: " +
                                             "There is no Interoperability Record with ID '%s' in the %s Catalogue.",

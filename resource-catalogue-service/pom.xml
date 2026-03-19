@@ -340,6 +340,11 @@
             <version>1.11.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter</artifactId>
+            <version>7.1.0</version>
+        </dependency>
 
     </dependencies>
 

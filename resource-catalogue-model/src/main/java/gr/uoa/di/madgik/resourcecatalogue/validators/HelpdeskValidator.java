@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.validators;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Helpdesk;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Helpdesk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.Errors;

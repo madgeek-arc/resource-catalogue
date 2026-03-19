@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,46 +18,47 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
 public class ResourceValidationUtils {
 
-    public static <T extends ServiceBundle> void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
-                                                                                                      ServiceBundleService<T> serviceBundleService,
-                                                                                                      String resourceType) {
-        T resourceBundle;
+    //TODO: unify those 2
+    public static void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
+                                                                            ServiceService serviceService,
+                                                                            String resourceType) {
+        ServiceBundle resourceBundle;
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists
-        resourceBundle = serviceBundleService.get(resourceId, catalogueId, false);
+        resourceBundle = serviceService.get(resourceId, catalogueId);
         // check if Service is Public
         if (resourceBundle.getMetadata().isPublished()) {
             throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));
         }
         // check if Service is Active + Approved
-        if (!resourceBundle.isActive() || !resourceBundle.getStatus().equals("approved resource")) {
+        if (!resourceBundle.isActive() || !resourceBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("%s with ID '%s' is not Approved and/or Active",
                     resourceType, resourceId), HttpStatus.CONFLICT);
         }
     }
 
     public static void checkIfResourceBundleIsActiveAndApprovedAndNotPublic(String resourceId, String catalogueId,
-                                                                            TrainingResourceService trainingResourceService,
+                                                                            DatasourceService datasourceService,
                                                                             String resourceType) {
-        TrainingResourceBundle trainingResourceBundle;
+        DatasourceBundle datasourceBundle;
         resourceType = StringUtils.capitalize(resourceType);
         // check if Resource exists
-        trainingResourceBundle = trainingResourceService.get(resourceId, catalogueId, false);
+        datasourceBundle = datasourceService.get(resourceId, catalogueId);
         // check if Service is Public
-        if (trainingResourceBundle.getMetadata().isPublished()) {
+        if (datasourceBundle.getMetadata().isPublished()) {
             throw new ValidationException(String.format("Please provide a non public %s ID.", resourceType));
         }
         // check if TR is Active + Approved
-        if (!trainingResourceBundle.isActive() || !trainingResourceBundle.getStatus().equals("approved resource")) {
+        if (!datasourceBundle.isActive() || !datasourceBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("%s with ID '%s' is not Approved and/or Active",
                     resourceType, resourceId), HttpStatus.CONFLICT);
         }

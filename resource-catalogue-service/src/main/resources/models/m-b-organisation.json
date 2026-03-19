@@ -1,0 +1,2156 @@
+{
+  "id": "m-b-organisation",
+  "name": "Organisation",
+  "description": null,
+  "notice": "Fields with (*) are mandatory and must be completed in order to submit this form. Leaving optional fields blank will remove the relevant heading from the published resource/provider profile.",
+  "type": null,
+  "subType": null,
+  "series": null,
+  "resourceType": "organisation",
+  "creationDate": "2026-01-27T16:34:25.001+00:00",
+  "createdBy": null,
+  "modificationDate": "2026-01-27T16:34:25.001+00:00",
+  "modifiedBy": null,
+  "sections": [
+    {
+      "id": "organisation",
+      "name": "organisation",
+      "description": null,
+      "subType": null,
+      "order": 0,
+      "subSections": [
+        {
+          "id": "Basic",
+          "name": "Basic",
+          "description": null,
+          "subType": null,
+          "order": 1,
+          "subSections": null,
+          "fields": [
+            {
+              "id": "id",
+              "name": "id",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Id",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "string",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 0,
+                  "visible": false,
+                  "hasBorder": false,
+                  "cssClasses": "uk-disabled",
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "name",
+              "name": "name",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Name",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "string",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Full Name of the Provider/Organisation offering Resources and acting as main contact point for the Resources.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": "Suggested length is 100 characters",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 1,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "abbreviation",
+              "name": "abbreviation",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Abbreviation",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "string",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Abbreviation of the Provider Name.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": "Suggested length is 30 characters",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "alternativePIDs",
+              "name": "alternativePIDs",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Alternative PIDs",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "composite",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
+                "multiplicity": true,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 3,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": [
+                {
+                  "id": "pid",
+                  "name": "pid",
+                  "parentId": "alternativePIDs",
+                  "parent": "alternativePIDs",
+                  "label": {
+                    "text": "PID",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 1,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "pidSchema",
+                  "name": "pidSchema",
+                  "parentId": "alternativePIDs",
+                  "parent": "alternativePIDs",
+                  "label": {
+                    "text": "PID Schema",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 2,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                }
+              ]
+            },
+            {
+              "id": "nodePID",
+              "name": "nodePID",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Node PID",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "vocabulary",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "url": "/api/vocabulary/types/Node",
+                  "idField": "id",
+                  "labelField": "name"
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "EOSC Node",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "website",
+              "name": "website",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Website",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "url",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "strictValidation": true
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Website with information about the Provider.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": "use http:// or https://",
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 6,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "country",
+              "name": "country",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Country",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "vocabulary",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "url": "/api/vocabulary/types/Country",
+                  "idField": "id",
+                  "labelField": "name"
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Country of incorporation or physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 5,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "legalEntity",
+              "name": "legalEntity",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Legal Entity",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "radio",
+                "defaultValue": null,
+                "values": [
+                  {
+                    "id": "true",
+                    "label": "true"
+                  },
+                  {
+                    "id": "false",
+                    "label": "false"
+                  }
+                ],
+                "properties": {},
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Is the Provider a Legal Entity?",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 7,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "legalStatus",
+              "name": "legalStatus",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Legal Status",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "vocabulary",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "url": "/api/vocabulary/types/Provider%20legal%20status",
+                  "idField": "id",
+                  "labelField": "name"
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": {
+                  "id": "legalEntity",
+                  "name": "legalEntity",
+                  "value": "true"
+                },
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Legal status of the Provider. The legal status is usually noted in the registration act/statutes. For independent legal entities this should be the legal status of the Provider. For embedded Providers this should be the legal status of the hosting legal entity.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 8,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "hostingLegalEntity",
+              "name": "hostingLegalEntity",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Hosting Legal Entity",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "vocabulary",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "url": "/api/vocabulary/types/Provider%20hosting%20legal%20entity",
+                  "idField": "id",
+                  "labelField": "name"
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "A Hosting Legal Entity (HLE) is an institution registered as an EOSC resource provider, that is a legal entity and agrees to be accountable for resources onboarded to EOSC. Resources may be onboarded by a resource provider which is not a legal entity, but only if the Hosting Legal Entity field includes one legal entity already registered as resource provider, if this has been agreed in advance with them.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 9,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            }
+          ]
+        },
+        {
+          "id": "Marketing",
+          "name": "Marketing",
+          "description": null,
+          "subType": null,
+          "order": 2,
+          "subSections": null,
+          "fields": [
+            {
+              "id": "description",
+              "name": "description",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Description",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "richText",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "A high-level description of the Provider in fairly non-technical terms, with the vision, mission, objectives, background, experience.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": "Suggested length is 1000 characters",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 1,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "logo",
+              "name": "logo",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Logo",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "url",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "strictValidation": true
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": "Link to the logo/visual identity of the Provider. Go to the Provider's website --> Right Click on the Provider's logo on the website --> Select 'Copy Image Link' --> Paste it in the field below.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": "use http:// or https://",
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "multimedia",
+              "name": "multimedia",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Multimedia",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "composite",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
+                "multiplicity": true,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 3,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": [
+                {
+                  "id": "multimediaURL",
+                  "name": "multimediaURL",
+                  "parentId": "multimedia",
+                  "parent": "multimedia",
+                  "label": {
+                    "text": "Multimedia URL",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "url",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "strictValidation": true
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "Links to video, slideshow, photos, screenshots with details of the Provider.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": "use http:// or https://",
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 1,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "multimediaName",
+                  "name": "multimediaName",
+                  "parentId": "multimedia",
+                  "parent": "multimedia",
+                  "label": {
+                    "text": "Multimedia Name",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "Short description of the Multimedia content.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": "Suggested length is 100 characters",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 2,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mainContact",
+          "name": "mainContact",
+          "description": null,
+          "subType": null,
+          "order": 4,
+          "subSections": null,
+          "fields": [
+            {
+              "id": "mainContact",
+              "name": "mainContact",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Main Contact",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "composite",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 1,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": [
+                {
+                  "id": "firstName",
+                  "name": "firstName",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
+                  "label": {
+                    "text": "First Name",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "The first name of the main contact.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": true,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 1,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "lastName",
+                  "name": "lastName",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
+                  "label": {
+                    "text": "Last Name",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "The last name of the main contact.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": true,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 2,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "email",
+                  "name": "email",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
+                  "label": {
+                    "text": "Email",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "email",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "pattern": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "Email of the main contact.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": true,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 3,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "PIDs",
+                  "name": "PIDs",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
+                  "label": {
+                    "text": "PIDs",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "composite",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {},
+                    "multiplicity": true,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 4,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": [
+                    {
+                      "id": "mainContactPID",
+                      "name": "mainContactPID",
+                      "parentId": "PIDs",
+                      "parent": "PIDs",
+                      "label": {
+                        "text": "Main Contact PID",
+                        "cssClasses": null,
+                        "style": null,
+                        "showLess": false
+                      },
+                      "accessPath": null,
+                      "kind": null,
+                      "typeInfo": {
+                        "vocabulary": null,
+                        "type": "string",
+                        "defaultValue": null,
+                        "values": null,
+                        "properties": {
+                          "minLength": null,
+                          "maxLength": null
+                        },
+                        "multiplicity": false,
+                        "prefill": null
+                      },
+                      "includedInSnippet": false,
+                      "deprecated": false,
+                      "form": {
+                        "dependsOn": null,
+                        "affects": null,
+                        "group": null,
+                        "description": {
+                          "text": "Uniquely identifies an individual or legal entity, according to various schemes.",
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "suggestion": {
+                          "text": null,
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "placeholder": null,
+                        "mandatory": true,
+                        "immutable": true,
+                        "display": {
+                          "placement": null,
+                          "order": 1,
+                          "visible": true,
+                          "hasBorder": false,
+                          "cssClasses": null,
+                          "style": null
+                        }
+                      },
+                      "display": null,
+                      "subFields": []
+                    },
+                    {
+                      "id": "mainContactPIDScheme",
+                      "name": "mainContactPIDScheme",
+                      "parentId": "PIDs",
+                      "parent": "PIDs",
+                      "label": {
+                        "text": "Main Contact PID Scheme",
+                        "cssClasses": null,
+                        "style": null,
+                        "showLess": false
+                      },
+                      "accessPath": null,
+                      "kind": null,
+                      "typeInfo": {
+                        "vocabulary": null,
+                        "type": "string",
+                        "defaultValue": null,
+                        "values": null,
+                        "properties": {
+                          "minLength": null,
+                          "maxLength": null
+                        },
+                        "multiplicity": false,
+                        "prefill": null
+                      },
+                      "includedInSnippet": false,
+                      "deprecated": false,
+                      "form": {
+                        "dependsOn": null,
+                        "affects": null,
+                        "group": null,
+                        "description": {
+                          "text": "Uniquely identifies the organizational affiliation of the main contact.",
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "suggestion": {
+                          "text": null,
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "placeholder": null,
+                        "mandatory": true,
+                        "immutable": true,
+                        "display": {
+                          "placement": null,
+                          "order": 2,
+                          "visible": true,
+                          "hasBorder": false,
+                          "cssClasses": null,
+                          "style": null
+                        }
+                      },
+                      "display": null,
+                      "subFields": []
+                    }
+                  ]
+                },
+                {
+                  "id": "affiliations",
+                  "name": "affiliations",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
+                  "label": {
+                    "text": "Affiliations",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "composite",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {},
+                    "multiplicity": true,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 5,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": [
+                    {
+                      "id": "affiliationName",
+                      "name": "affiliationName",
+                      "parentId": "affiliations",
+                      "parent": "affiliations",
+                      "label": {
+                        "text": "Affiliation Name",
+                        "cssClasses": null,
+                        "style": null,
+                        "showLess": false
+                      },
+                      "accessPath": null,
+                      "kind": null,
+                      "typeInfo": {
+                        "vocabulary": null,
+                        "type": "string",
+                        "defaultValue": null,
+                        "values": null,
+                        "properties": {
+                          "minLength": null,
+                          "maxLength": null
+                        },
+                        "multiplicity": false,
+                        "prefill": null
+                      },
+                      "includedInSnippet": false,
+                      "deprecated": false,
+                      "form": {
+                        "dependsOn": null,
+                        "affects": null,
+                        "group": null,
+                        "description": {
+                          "text": "The organizational or institutional affiliation of the main contact.",
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "suggestion": {
+                          "text": null,
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "placeholder": null,
+                        "mandatory": true,
+                        "immutable": true,
+                        "display": {
+                          "placement": null,
+                          "order": 1,
+                          "visible": true,
+                          "hasBorder": false,
+                          "cssClasses": null,
+                          "style": null
+                        }
+                      },
+                      "display": null,
+                      "subFields": []
+                    },
+                    {
+                      "id": "affiliationIdentifier",
+                      "name": "affiliationIdentifier",
+                      "parentId": "affiliations",
+                      "parent": "affiliations",
+                      "label": {
+                        "text": "Affiliation Identifier",
+                        "cssClasses": null,
+                        "style": null,
+                        "showLess": false
+                      },
+                      "accessPath": null,
+                      "kind": null,
+                      "typeInfo": {
+                        "vocabulary": null,
+                        "type": "composite",
+                        "defaultValue": null,
+                        "values": null,
+                        "properties": {
+                          "minLength": null,
+                          "maxLength": null
+                        },
+                        "multiplicity": false,
+                        "prefill": null
+                      },
+                      "includedInSnippet": false,
+                      "deprecated": false,
+                      "form": {
+                        "dependsOn": null,
+                        "affects": null,
+                        "group": null,
+                        "description": {
+                          "text": "Uniquely identifies the organizational affiliation of the main contact.",
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "suggestion": {
+                          "text": null,
+                          "cssClasses": null,
+                          "style": null,
+                          "showLess": false
+                        },
+                        "placeholder": null,
+                        "mandatory": false,
+                        "immutable": true,
+                        "display": {
+                          "placement": null,
+                          "order": 2,
+                          "visible": true,
+                          "hasBorder": false,
+                          "cssClasses": null,
+                          "style": null
+                        }
+                      },
+                      "display": null,
+                      "subFields": [
+                        {
+                          "id": "mainContactID",
+                          "name": "mainContactID",
+                          "parentId": "affiliationIdentifier",
+                          "parent": "affiliationIdentifier",
+                          "label": {
+                            "text": "Main Contact ID",
+                            "cssClasses": null,
+                            "style": null,
+                            "showLess": false
+                          },
+                          "accessPath": null,
+                          "kind": null,
+                          "typeInfo": {
+                            "vocabulary": null,
+                            "type": "string",
+                            "defaultValue": null,
+                            "values": null,
+                            "properties": {
+                              "minLength": null,
+                              "maxLength": null
+                            },
+                            "multiplicity": false,
+                            "prefill": null
+                          },
+                          "includedInSnippet": false,
+                          "deprecated": false,
+                          "form": {
+                            "dependsOn": null,
+                            "affects": null,
+                            "group": null,
+                            "description": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "suggestion": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "placeholder": null,
+                            "mandatory": true,
+                            "immutable": true,
+                            "display": {
+                              "placement": null,
+                              "order": 1,
+                              "visible": true,
+                              "hasBorder": false,
+                              "cssClasses": null,
+                              "style": null
+                            }
+                          },
+                          "display": null,
+                          "subFields": []
+                        },
+                        {
+                          "id": "mainContactType",
+                          "name": "mainContactType",
+                          "parentId": "affiliationIdentifier",
+                          "parent": "affiliationIdentifier",
+                          "label": {
+                            "text": "Main Contact Type",
+                            "cssClasses": null,
+                            "style": null,
+                            "showLess": false
+                          },
+                          "accessPath": null,
+                          "kind": null,
+                          "typeInfo": {
+                            "vocabulary": null,
+                            "type": "string",
+                            "defaultValue": null,
+                            "values": null,
+                            "properties": {
+                              "minLength": null,
+                              "maxLength": null
+                            },
+                            "multiplicity": false,
+                            "prefill": null
+                          },
+                          "includedInSnippet": false,
+                          "deprecated": false,
+                          "form": {
+                            "dependsOn": null,
+                            "affects": null,
+                            "group": null,
+                            "description": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "suggestion": {
+                              "text": null,
+                              "cssClasses": null,
+                              "style": null,
+                              "showLess": false
+                            },
+                            "placeholder": null,
+                            "mandatory": true,
+                            "immutable": true,
+                            "display": {
+                              "placement": null,
+                              "order": 2,
+                              "visible": true,
+                              "hasBorder": false,
+                              "cssClasses": null,
+                              "style": null
+                            }
+                          },
+                          "display": null,
+                          "subFields": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "mainContactRole",
+                  "name": "mainContactRole",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
+                  "label": {
+                    "text": "Main Contact Role",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "vocabulary",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "url": "/api/vocabulary/types/Credit",
+                      "idField": "id",
+                      "labelField": "name"
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 6,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "publicContacts",
+          "name": "publicContacts",
+          "parentId": null,
+          "parent": null,
+          "label": {
+            "text": "Public Contacts",
+            "cssClasses": null,
+            "style": null,
+            "showLess": false
+          },
+          "accessPath": null,
+          "kind": null,
+          "typeInfo": {
+            "vocabulary": null,
+            "type": "email",
+            "defaultValue": null,
+            "values": null,
+            "properties": {
+              "minLength": null,
+              "maxLength": null
+            },
+            "multiplicity": true,
+            "prefill": null
+          },
+          "includedInSnippet": false,
+          "deprecated": false,
+          "form": {
+            "dependsOn": null,
+            "affects": null,
+            "group": null,
+            "description": {
+              "text": "List of public contact emails.",
+              "cssClasses": null,
+              "style": null,
+              "showLess": false
+            },
+            "suggestion": {
+              "text": null,
+              "cssClasses": null,
+              "style": null,
+              "showLess": false
+            },
+            "placeholder": null,
+            "mandatory": true,
+            "immutable": true,
+            "display": {
+              "placement": null,
+              "order": 5,
+              "visible": true,
+              "hasBorder": false,
+              "cssClasses": null,
+              "style": null
+            }
+          },
+          "display": null,
+          "subFields": []
+        },
+        {
+          "id": "Admins",
+          "name": "Admins",
+          "description": null,
+          "subType": null,
+          "order": 6,
+          "subSections": null,
+          "fields": [
+            {
+              "id": "users",
+              "name": "users",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Administrators",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "composite",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
+                "multiplicity": true,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "An administrator has full edit privileges for the provider’s information via the web and the API (add a new service, update information regarding the provider’s organization and services, activate or delete a service, add or remove administrators and issue tokens for API use).",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": false,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 1,
+                  "visible": true,
+                  "hasBorder": true,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": [
+                {
+                  "id": "userId",
+                  "name": "id",
+                  "parentId": "users",
+                  "parent": "users",
+                  "label": {
+                    "text": "Id",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 0,
+                      "visible": false,
+                      "hasBorder": false,
+                      "cssClasses": "uk-disabled",
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "userName",
+                  "name": "name",
+                  "parentId": "users",
+                  "parent": "users",
+                  "label": {
+                    "text": "First Name",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "First Name of the Provider's administrator.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": true,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 1,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "userSurname",
+                  "name": "surname",
+                  "parentId": "users",
+                  "parent": "users",
+                  "label": {
+                    "text": "Last Name",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "string",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "minLength": null,
+                      "maxLength": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "Last Name of the Provider's administrator.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": true,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 2,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
+                  "id": "userEmail",
+                  "name": "email",
+                  "parentId": "users",
+                  "parent": "users",
+                  "label": {
+                    "text": "Email",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "email",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "pattern": null
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": "Email of the Provider's administrator.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": "Use this email when you login in AAI for gaining administrator privileges for your provider.",
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": true,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 3,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "fields": null
+    }
+  ],
+  "configuration": {
+    "prefillable": false,
+    "importFrom": null
+  },
+  "locked": true,
+  "active": true
+}

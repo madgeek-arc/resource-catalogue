@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,21 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import com.google.gson.JsonArray;
-import gr.uoa.di.madgik.resourcecatalogue.domain.MonitoringBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import gr.uoa.di.madgik.resourcecatalogue.dto.MonitoringStatus;
-import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-public interface MonitoringService extends ResourceCatalogueService<MonitoringBundle> {
+public interface MonitoringService {
 
-    /**
-     * Creates a new Monitoring
-     *
-     * @param monitoring   MonitoringBundle
-     * @param resourceType String Resource Type
-     * @param auth         Authentication
-     * @return {@link MonitoringBundle}
-     */
-    MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth);
+//    /**
+//     * Creates a new Monitoring
+//     *
+//     * @param monitoring   MonitoringBundle
+//     * @param resourceType String Resource Type
+//     * @param auth         Authentication
+//     * @return {@link MonitoringBundle}
+//     */
+//    MonitoringBundle add(MonitoringBundle monitoring, String resourceType, Authentication auth);
 
     /**
      * Returns all the available Service Types
@@ -43,54 +39,45 @@ public interface MonitoringService extends ResourceCatalogueService<MonitoringBu
      */
     List<Vocabulary> getAvailableServiceTypes();
 
-    /**
-     * Retrieve {@link MonitoringBundle} for a catalogue specific resource.
-     *
-     * @param serviceId   String Service ID
-     * @param catalogueId String Catalogue ID
-     * @return {@link MonitoringBundle}
-     */
-    MonitoringBundle get(String serviceId, String catalogueId);
+//    /**
+//     * Retrieve {@link MonitoringBundle} for a catalogue specific resource.
+//     *
+//     * @param serviceId   String Service ID
+//     * @param catalogueId String Catalogue ID
+//     * @return {@link MonitoringBundle}
+//     */
+//    MonitoringBundle get(String serviceId, String catalogueId);
 
-    /**
-     * Validates the given Monitoring
-     *
-     * @param monitoringBundle MonitoringBundle
-     * @param resourceType     String Resource Type
-     * @return {@link MonitoringBundle}
-     */
-    MonitoringBundle validate(MonitoringBundle monitoringBundle, String resourceType);
+//    /**
+//     * Validates the given Monitoring
+//     *
+//     * @param monitoringBundle MonitoringBundle
+//     * @param resourceType     String Resource Type
+//     * @return {@link MonitoringBundle}
+//     */
+//    MonitoringBundle validate(MonitoringBundle monitoringBundle, String resourceType);
 
-    /**
-     * @param monitoringBundle MonitoringBundle
-     * @param auth             Authentication
-     */
-    void updateBundle(MonitoringBundle monitoringBundle, Authentication auth);
-
-    /**
-     * Creates a Public version of the specific Monitoring
-     *
-     * @param monitoringBundle MonitoringBundle
-     * @param auth             Authentication
-     * @return {@link MonitoringBundle}
-     */
-    MonitoringBundle createPublicResource(MonitoringBundle monitoringBundle, Authentication auth);
+//    /**
+//     * @param monitoringBundle MonitoringBundle
+//     * @param auth             Authentication
+//     */
+//    void updateBundle(MonitoringBundle monitoringBundle, Authentication auth);
 
 
     // Argo GRNET Monitoring Status methods
 
-    /**
-     * Returns a list of Monitoring's Availability Object
-     *
-     * @param results JsonArray Results
-     * @return {@link List<MonitoringStatus>}
-     */
-    List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results);
-
-    /**
-     * @param url   endpoint of Monitoring service
-     * @param field results or statuses
-     * @return
-     */
-    List<MonitoringStatus> getAvailabilityOrStatus(String url, String field);
+//    /**
+//     * Returns a list of Monitoring's Availability Object
+//     *
+//     * @param results JsonArray Results
+//     * @return {@link List<MonitoringStatus>}
+//     */
+//    List<MonitoringStatus> createMonitoringAvailabilityObject(JsonArray results);
+//
+//    /**
+//     * @param url   endpoint of Monitoring service
+//     * @param field results or statuses
+//     * @return
+//     */
+//    List<MonitoringStatus> getAvailabilityOrStatus(String url, String field);
 }
