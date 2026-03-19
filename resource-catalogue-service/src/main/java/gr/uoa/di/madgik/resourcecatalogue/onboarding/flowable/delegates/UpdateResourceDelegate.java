@@ -48,14 +48,13 @@ public class UpdateResourceDelegate implements JavaDelegate {
             throw new IllegalStateException("resourceType is required for update-resource task");
         }
 
-        Map<String, Object> vars = new HashMap<>();
-        execution.getVariables().forEach(vars::put);
+        Map<String, Object> vars = new HashMap<>(execution.getVariables());
 
         Bundle resource = resourceBundleHelper.getResourceBundle(vars, rName);
         logger.info("Running task 'update-resource' | resourceType: {}, resourceName: {}, id: {}",
                 rType, rName, resource.getId());
 
-        // Validation is disabled by design (same as Camunda version)
+        // Validation is disabled by design // TODO: probably enable again now that code is synchronous?
         Bundle updated;
         try {
             updated = genericResourceService.update(rType, resource.getId(), resource, false);

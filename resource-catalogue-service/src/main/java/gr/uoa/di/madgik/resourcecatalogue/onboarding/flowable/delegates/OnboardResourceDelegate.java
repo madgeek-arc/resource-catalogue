@@ -49,8 +49,7 @@ public class OnboardResourceDelegate implements JavaDelegate {
         logger.info("Running task 'resource-onboard' | resourceName: {}, status: {}, active: {}",
                 rName, statusVal, activeVal);
 
-        Map<String, Object> vars = new HashMap<>();
-        execution.getVariables().forEach(vars::put);
+        Map<String, Object> vars = new HashMap<>(execution.getVariables());
 
         Bundle bundle = resourceBundleHelper.getResourceBundle(vars, rName);
         UserInfo user = resourceBundleHelper.getUserInfo(vars);

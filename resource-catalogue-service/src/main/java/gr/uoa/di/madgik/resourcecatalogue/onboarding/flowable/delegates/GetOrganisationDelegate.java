@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.ResourceBundleHelper;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
@@ -34,7 +35,7 @@ public class GetOrganisationDelegate implements JavaDelegate {
         if (orgId == null || orgId.isBlank()) {
             throw new IllegalStateException("resourceOwner is null or empty in resource payload");
         }
-        var org = genericResourceService.<gr.uoa.di.madgik.resourcecatalogue.domain.Bundle>get("organisation", orgId);
+        Bundle org = genericResourceService.get("organisation", orgId);
         Map<String, Object> vars = new HashMap<>();
         resourceBundleHelper.putResourceBundle(vars, org, "organisation");
         execution.setVariable("organisation", vars.get("organisation"));

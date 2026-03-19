@@ -3,12 +3,14 @@ package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class FlowableWorkflowService {
+@Primary
+public class FlowableWorkflowService implements WorkflowService {
 
     private static final Logger logger = LoggerFactory.getLogger(FlowableWorkflowService.class);
 
@@ -47,10 +50,10 @@ public class FlowableWorkflowService {
         helper.putResourceBundle(vars, bundle);
         helper.putUserInfo(vars, UserInfo.of(authentication));
 
-        ProcessInstance pi = runtimeService.startProcessInstanceByKey(bpmnProcess, vars);
+        ProcessInstance process = runtimeService.startProcessInstanceByKey(bpmnProcess, vars);
 
         Map<String, Object> resultVars = historyService.createHistoricVariableInstanceQuery()
-                .processInstanceId(pi.getId())
+                .processInstanceId(process.getId())
                 .list()
                 .stream()
                 .collect(Collectors.toMap(
