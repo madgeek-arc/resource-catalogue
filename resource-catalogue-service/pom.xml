@@ -341,9 +341,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>io.camunda</groupId>
-            <artifactId>camunda-spring-boot-starter</artifactId>
-            <version>8.8.13</version>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter</artifactId>
+            <version>7.1.0</version>
         </dependency>
 
     </dependencies>
