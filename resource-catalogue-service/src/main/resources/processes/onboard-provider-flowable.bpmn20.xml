@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://flowable.org/bpmn">
+
+  <process id="onboard-provider-flowable" name="Onboard Organisation" isExecutable="true">
+
+    <startEvent id="StartEvent_OnboardProvider" name="Start Organisation Onboard">
+      <outgoing>Flow_1cnsxh6</outgoing>
+    </startEvent>
+
+    <exclusiveGateway id="Gateway_0ux95fk" name="Check if Organisation is owned by a Catalogue">
+      <incoming>Flow_1cnsxh6</incoming>
+      <outgoing>Flow_13cl7fo</outgoing>
+      <outgoing>Flow_07azb67</outgoing>
+    </exclusiveGateway>
+
+    <sequenceFlow id="Flow_1cnsxh6" sourceRef="StartEvent_OnboardProvider" targetRef="Gateway_0ux95fk"/>
+
+    <sequenceFlow id="Flow_13cl7fo" name="catalogueId is not null" sourceRef="Gateway_0ux95fk" targetRef="Activity_1ewiokm">
+      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] != null}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_07azb67" name="catalogueId is null" sourceRef="Gateway_0ux95fk" targetRef="Activity_1otm8rv">
+      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] == null || resource['catalogueId'].equals('') || 'eosc'.equals(resource['catalogueId'])}</conditionExpression>
+    </sequenceFlow>
+
+    <serviceTask id="Activity_1ewiokm" name="Get Catalogue"
+                 flowable:delegateExpression="${getCatalogueDelegate}">
+      <incoming>Flow_13cl7fo</incoming>
+      <outgoing>Flow_0pjxq7p</outgoing>
+    </serviceTask>
+
+    <serviceTask id="Activity_1otm8rv" name="Set Catalogue Value"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+      <extensionElements>
+        <flowable:field name="variableName" stringValue="resource"/>
+        <flowable:field name="key" stringValue="catalogueId"/>
+        <flowable:field name="value" stringValue="eosc"/>
+      </extensionElements>
+      <incoming>Flow_07azb67</incoming>
+      <outgoing>Flow_124o2b5</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_0pjxq7p" sourceRef="Activity_1ewiokm" targetRef="Gateway_1cobda0"/>
+
+    <exclusiveGateway id="Gateway_1cobda0" name="Check if Catalogue is Approved">
+      <incoming>Flow_0pjxq7p</incoming>
+      <outgoing>Flow_0r3bpfb</outgoing>
+      <outgoing>Flow_14qjd44</outgoing>
+    </exclusiveGateway>
+
+    <sequenceFlow id="Flow_0r3bpfb" name="approved" sourceRef="Gateway_1cobda0" targetRef="Activity_setStatusApproved">
+      <conditionExpression xsi:type="tFormalExpression">${catalogue != null &amp;&amp; catalogue['status'] == 'approved'}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_14qjd44" name="not approved" sourceRef="Gateway_1cobda0" targetRef="Event_1or4xu0">
+      <conditionExpression xsi:type="tFormalExpression">${catalogue == null || catalogue['status'] == null || catalogue['status'] != 'approved'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- End if catalogue not approved (no failure result set - matches original behaviour) -->
+    <endEvent id="Event_1or4xu0">
+      <incoming>Flow_14qjd44</incoming>
+    </endEvent>
+
+    <!-- Set Template Status = "approved template" on resource (organisation is stored as "resource") -->
+    <serviceTask id="Activity_setStatusApproved" name="Set Template Status Approved"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+      <extensionElements>
+        <flowable:field name="variableName" stringValue="resource"/>
+        <flowable:field name="key" stringValue="templateStatus"/>
+        <flowable:field name="value" stringValue="approved template"/>
+      </extensionElements>
+      <incoming>Flow_0r3bpfb</incoming>
+      <outgoing>Flow_15ogdc1</outgoing>
+    </serviceTask>
+
+    <!-- Onboard - Approve (status=approved, active=true) -->
+    <serviceTask id="Activity_1lr0vvx" name="Onboard - Approve"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.OnboardResourceDelegate">
+      <extensionElements>
+        <flowable:field name="resourceName" stringValue="resource"/>
+        <flowable:field name="status" stringValue="approved"/>
+        <flowable:field name="active" stringValue="true"/>
+      </extensionElements>
+      <incoming>Flow_15ogdc1</incoming>
+      <outgoing>Flow_17iczd4</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_15ogdc1" sourceRef="Activity_setStatusApproved" targetRef="Activity_1lr0vvx"/>
+
+    <!-- Set Template Status = "no template status" on resource -->
+    <serviceTask id="Activity_1y14exa" name="Set Template Status No Status"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+      <extensionElements>
+        <flowable:field name="variableName" stringValue="resource"/>
+        <flowable:field name="key" stringValue="templateStatus"/>
+        <flowable:field name="value" stringValue="no template status"/>
+      </extensionElements>
+      <incoming>Flow_124o2b5</incoming>
+      <outgoing>Flow_15zby76</outgoing>
+    </serviceTask>
+
+    <!-- Onboard - Pending (status=pending, active=false) -->
+    <serviceTask id="Activity_1vb4twy" name="Onboard - Pending"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.OnboardResourceDelegate">
+      <extensionElements>
+        <flowable:field name="resourceName" stringValue="resource"/>
+        <flowable:field name="status" stringValue="pending"/>
+      </extensionElements>
+      <incoming>Flow_15zby76</incoming>
+      <outgoing>Flow_0lii30e</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_124o2b5" sourceRef="Activity_1otm8rv" targetRef="Activity_1y14exa"/>
+    <sequenceFlow id="Flow_15zby76" sourceRef="Activity_1y14exa" targetRef="Activity_1vb4twy"/>
+
+    <!-- Set Audit State = "Not audited" -->
+    <serviceTask id="Activity_07f9m3j" name="Set Audit State"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+      <extensionElements>
+        <flowable:field name="variableName" stringValue="resource"/>
+        <flowable:field name="key" stringValue="auditState"/>
+        <flowable:field name="value" stringValue="Not audited"/>
+      </extensionElements>
+      <incoming>Flow_0lii30e</incoming>
+      <incoming>Flow_17iczd4</incoming>
+      <outgoing>Flow_1q1wtm2</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_0lii30e" sourceRef="Activity_1vb4twy" targetRef="Activity_07f9m3j"/>
+    <sequenceFlow id="Flow_17iczd4" sourceRef="Activity_1lr0vvx" targetRef="Activity_07f9m3j"/>
+
+    <!-- Save Organisation (stored as "resource", type="organisation") -->
+    <serviceTask id="Activity_1fn2t4q" name="Save Organisation"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.UpdateResourceDelegate">
+      <extensionElements>
+        <flowable:field name="resourceName" stringValue="resource"/>
+        <flowable:field name="resourceType" stringValue="organisation"/>
+      </extensionElements>
+      <incoming>Flow_1q1wtm2</incoming>
+      <outgoing>Flow_091jq6x</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_1q1wtm2" sourceRef="Activity_07f9m3j" targetRef="Activity_1fn2t4q"/>
+
+    <endEvent id="Event_0uivhin">
+      <incoming>Flow_091jq6x</incoming>
+    </endEvent>
+
+    <sequenceFlow id="Flow_091jq6x" sourceRef="Activity_1fn2t4q" targetRef="Event_0uivhin"/>
+
+  </process>
+</definitions>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://flowable.org/bpmn">
+
+  <process id="onboard-guideline-flowable" isExecutable="true">
+
+    <startEvent id="StartEvent_OnboardResource" name="Start Resource Onboard">
+      <outgoing>Flow_091g5el</outgoing>
+    </startEvent>
+
+    <!-- First gateway: check for illegal name -->
+    <exclusiveGateway id="Gateway_1yi00kg">
+      <incoming>Flow_091g5el</incoming>
+      <outgoing>Flow_0iqb7nu</outgoing>
+      <outgoing>Flow_0z3uyfs</outgoing>
+    </exclusiveGateway>
+
+    <sequenceFlow id="Flow_091g5el" sourceRef="StartEvent_OnboardResource" targetRef="Gateway_1yi00kg"/>
+
+    <sequenceFlow id="Flow_0iqb7nu" name="Illegal name" sourceRef="Gateway_1yi00kg" targetRef="Activity_101mfzm">
+      <conditionExpression xsi:type="tFormalExpression">${resource['payload'] != null &amp;&amp; 'EOSC Monitoring: Architecture and Interoperability Guidelines'.equals(resource['payload']['name'])}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_0z3uyfs" name="Name exists" sourceRef="Gateway_1yi00kg" targetRef="Gateway_0ux95fk">
+      <conditionExpression xsi:type="tFormalExpression">${resource['payload'] != null &amp;&amp; resource['payload']['name'] != null &amp;&amp; !resource['payload']['name'].empty}</conditionExpression>
+    </sequenceFlow>
+
+    <exclusiveGateway id="Gateway_0ux95fk" name="Check if Resource is owned by a Catalogue">
+      <incoming>Flow_0z3uyfs</incoming>
+      <outgoing>Flow_13cl7fo</outgoing>
+      <outgoing>Flow_07azb67</outgoing>
+    </exclusiveGateway>
+
+    <sequenceFlow id="Flow_13cl7fo" name="catalogueId is not null" sourceRef="Gateway_0ux95fk" targetRef="Activity_1ewiokm">
+      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] != null}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_07azb67" name="no catalogue" sourceRef="Gateway_0ux95fk" targetRef="Activity_1otm8rv">
+      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] == null || resource['catalogueId'].equals('') || 'eosc'.equals(resource['catalogueId'])}</conditionExpression>
+    </sequenceFlow>
+
+    <serviceTask id="Activity_1ewiokm" name="Get Catalogue"
+                 flowable:delegateExpression="${getCatalogueDelegate}">
+      <incoming>Flow_13cl7fo</incoming>
+      <outgoing>Flow_0pjxq7p</outgoing>
+    </serviceTask>
+
+    <serviceTask id="Activity_1otm8rv" name="Set Catalogue Value"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+      <extensionElements>
+        <flowable:field name="variableName" stringValue="resource"/>
+        <flowable:field name="key" stringValue="catalogueId"/>
+        <flowable:field name="value" stringValue="eosc"/>
+      </extensionElements>
+      <incoming>Flow_07azb67</incoming>
+      <outgoing>Flow_1b9ungf</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_0pjxq7p" sourceRef="Activity_1ewiokm" targetRef="Gateway_1cobda0"/>
+
+    <exclusiveGateway id="Gateway_1cobda0" name="Check if Catalogue is Approved">
+      <incoming>Flow_0pjxq7p</incoming>
+      <outgoing>Flow_0r3bpfb</outgoing>
+      <outgoing>Flow_0p1meom</outgoing>
+    </exclusiveGateway>
+
+    <sequenceFlow id="Flow_0r3bpfb" name="approved" sourceRef="Gateway_1cobda0" targetRef="Activity_1lr0vvx">
+      <conditionExpression xsi:type="tFormalExpression">${catalogue != null &amp;&amp; catalogue['status'] == 'approved'}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_0p1meom" name="not approved" sourceRef="Gateway_1cobda0" targetRef="Activity_101mfzm">
+      <conditionExpression xsi:type="tFormalExpression">${catalogue == null || catalogue['status'] != 'approved'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- Mark Failure - Catalogue not approved or illegal name -->
+    <serviceTask id="Activity_101mfzm" name="Mark Failure - Catalogue/Name"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+      <extensionElements>
+        <flowable:field name="status" stringValue="FAILURE"/>
+        <flowable:field name="code" stringValue="403"/>
+        <flowable:field name="message" stringValue="Catalogue is not eligible to onboard a resource."/>
+      </extensionElements>
+      <incoming>Flow_0p1meom</incoming>
+      <incoming>Flow_0iqb7nu</incoming>
+      <outgoing>Flow_0f5rjas</outgoing>
+    </serviceTask>
+
+    <endEvent id="Event_1dw2hiy">
+      <incoming>Flow_0f5rjas</incoming>
+    </endEvent>
+
+    <sequenceFlow id="Flow_0f5rjas" sourceRef="Activity_101mfzm" targetRef="Event_1dw2hiy"/>
+
+    <serviceTask id="Activity_0vagvot" name="Get Organisation"
+                 flowable:delegateExpression="${getOrganisationDelegate}">
+      <incoming>Flow_1b9ungf</incoming>
+      <outgoing>Flow_0sojgzr</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_1b9ungf" sourceRef="Activity_1otm8rv" targetRef="Activity_0vagvot"/>
+    <sequenceFlow id="Flow_0sojgzr" sourceRef="Activity_0vagvot" targetRef="Gateway_0a1sz4u"/>
+
+    <exclusiveGateway id="Gateway_0a1sz4u" name="Check Organisation Status">
+      <incoming>Flow_0sojgzr</incoming>
+      <outgoing>Flow_1ff3515</outgoing>
+      <outgoing>Flow_1o7p270</outgoing>
+    </exclusiveGateway>
+
+    <sequenceFlow id="Flow_1ff3515" name="not approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1a6x7qv">
+      <conditionExpression xsi:type="tFormalExpression">${organisation['status'] != 'approved'}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_1o7p270" name="approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_0fof8ny">
+      <conditionExpression xsi:type="tFormalExpression">${organisation['status'] == 'approved'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- Onboard - Approved (from catalogue path) -->
+    <serviceTask id="Activity_1lr0vvx" name="Onboard - Approved"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.OnboardResourceDelegate">
+      <extensionElements>
+        <flowable:field name="resourceName" stringValue="resource"/>
+        <flowable:field name="status" stringValue="approved"/>
+        <flowable:field name="active" stringValue="true"/>
+      </extensionElements>
+      <incoming>Flow_0r3bpfb</incoming>
+      <outgoing>Flow_0skdybj</outgoing>
+    </serviceTask>
+
+    <!-- Onboard - Pending with active=true (guideline specific) -->
+    <serviceTask id="Activity_0fof8ny" name="Onboard - Pending"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.OnboardResourceDelegate">
+      <extensionElements>
+        <flowable:field name="resourceName" stringValue="resource"/>
+        <flowable:field name="status" stringValue="pending"/>
+        <flowable:field name="active" stringValue="true"/>
+      </extensionElements>
+      <incoming>Flow_1o7p270</incoming>
+      <outgoing>Flow_1ut3wy5</outgoing>
+    </serviceTask>
+
+    <!-- Mark Failure - Organisation not approved -->
+    <serviceTask id="Activity_1a6x7qv" name="Mark Failure - Organisation"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+      <extensionElements>
+        <flowable:field name="status" stringValue="FAILURE"/>
+        <flowable:field name="code" stringValue="403"/>
+        <flowable:field name="message" stringValue="Organisation is not eligible to onboard a resource."/>
+      </extensionElements>
+      <incoming>Flow_1ff3515</incoming>
+      <outgoing>Flow_19dxg20</outgoing>
+    </serviceTask>
+
+    <endEvent id="Event_05bf4c9">
+      <incoming>Flow_19dxg20</incoming>
+      <incoming>Flow_0udute6</incoming>
+    </endEvent>
+
+    <sequenceFlow id="Flow_19dxg20" sourceRef="Activity_1a6x7qv" targetRef="Event_05bf4c9"/>
+
+    <!-- Set Audit State -->
+    <serviceTask id="Activity_1vdxr7y" name="Set Audit State"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.SetKeyValueDelegate">
+      <extensionElements>
+        <flowable:field name="variableName" stringValue="resource"/>
+        <flowable:field name="key" stringValue="auditState"/>
+        <flowable:field name="value" stringValue="Not audited"/>
+      </extensionElements>
+      <incoming>Flow_0skdybj</incoming>
+      <incoming>Flow_1ut3wy5</incoming>
+      <outgoing>Flow_0zjya31</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_0skdybj" sourceRef="Activity_1lr0vvx" targetRef="Activity_1vdxr7y"/>
+    <sequenceFlow id="Flow_1ut3wy5" sourceRef="Activity_0fof8ny" targetRef="Activity_1vdxr7y"/>
+
+    <!-- Save Resource -->
+    <serviceTask id="Activity_1euokmg" name="Save Resource"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.UpdateResourceDelegate">
+      <extensionElements>
+        <flowable:field name="resourceName" stringValue="resource"/>
+      </extensionElements>
+      <incoming>Flow_0zjya31</incoming>
+      <outgoing>Flow_1fbt47z</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_0zjya31" sourceRef="Activity_1vdxr7y" targetRef="Activity_1euokmg"/>
+
+    <!-- Mark Success -->
+    <serviceTask id="Activity_0trchkm" name="Mark Success"
+                 flowable:class="gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates.MarkWorkflowResultDelegate">
+      <extensionElements>
+        <flowable:field name="status" stringValue="SUCCESS"/>
+        <flowable:field name="code" stringValue="200"/>
+        <flowable:field name="message" stringValue="Success"/>
+      </extensionElements>
+      <incoming>Flow_1fbt47z</incoming>
+      <outgoing>Flow_0udute6</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_1fbt47z" sourceRef="Activity_1euokmg" targetRef="Activity_0trchkm"/>
+    <sequenceFlow id="Flow_0udute6" sourceRef="Activity_0trchkm" targetRef="Event_05bf4c9"/>
+
+  </process>
+</definitions>
