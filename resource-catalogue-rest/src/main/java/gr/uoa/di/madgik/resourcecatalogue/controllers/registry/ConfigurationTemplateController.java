@@ -159,7 +159,7 @@ public class ConfigurationTemplateController {
                                                                       @PathVariable String suffix,
                                                                       @Parameter(hidden = true)
                                                                       @RequestParam MultiValueMap<String, Object> params) {
-        Paging<LinkedHashMap<String, Object>> paging = service.getAllByInteroperabilityRecordId(params, prefix + "/" + suffix);
+        Paging<ConfigurationTemplateBundle> paging = service.getAllByInteroperabilityRecordId(params, prefix + "/" + suffix);
         return ResponseEntity.ok(paging);
     }
 
