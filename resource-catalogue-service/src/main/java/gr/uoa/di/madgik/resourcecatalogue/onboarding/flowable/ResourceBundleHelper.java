@@ -51,7 +51,7 @@ public class ResourceBundleHelper {
     }
 
     public void putUserInfo(Map<String, Object> vars, UserInfo user) {
-        vars.put("user", user);
+        vars.put("user", mapper.convertValue(user, new TypeReference<Map<String, Object>>() {}));
     }
 
     @SuppressWarnings("unchecked")
