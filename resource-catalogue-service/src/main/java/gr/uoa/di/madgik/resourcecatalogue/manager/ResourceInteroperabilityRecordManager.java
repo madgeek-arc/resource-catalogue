@@ -22,8 +22,9 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -47,7 +48,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
     private final ServiceService serviceService;
-    private final TrainingResourceService trainingResourceService;
+    private final DatasourceService datasourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
@@ -60,7 +61,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     private String catalogueId;
 
     public ResourceInteroperabilityRecordManager(ServiceService serviceService,
-                                                 TrainingResourceService trainingResourceService,
+                                                 DatasourceService datasourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
                                                  IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator,
@@ -70,7 +71,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
                                                  ConfigurationTemplateInstanceService ctiService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
         this.serviceService = serviceService;
-        this.trainingResourceService = trainingResourceService;
+        this.datasourceService = datasourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
@@ -153,10 +154,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")) {
             ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceService, resourceType);
-        } else if (resourceType.equals("training_resource")) { //TODO: probably remove
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
+        } else if (resourceType.equals("datasource")) {
+            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceService, resourceType);
         } else {
-            throw new ValidationException("Field 'resourceType' should be either 'service' or 'training_resource'");
+            throw new ValidationException("Field 'resourceType' should be either 'service' or 'datasource'");
         }
         return checkIfEachInteroperabilityRecordIsApproved(bundle);
     }
@@ -220,13 +221,13 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
 
     private void deleteCTI(String resourceId, Set<String> guidelineIds) {
         for (String guidelineId : guidelineIds) {
-            List<LinkedHashMap<String, Object>> ctList = ctService.getAllByInteroperabilityRecordId(null,
+            List<ConfigurationTemplateBundle> ctList = ctService.getAllByInteroperabilityRecordId(null,
                     guidelineId).getResults();
             if (ctList == null || ctList.isEmpty()) {
                 continue;
             }
-            for (LinkedHashMap<String, Object> ct : ctList) {
-                LinkedHashMap<String, Object> cti = ctiService.getByResourceAndConfigurationTemplateId(resourceId, (String) ct.get("id"));
+            for (ConfigurationTemplateBundle ct : ctList) {
+                LinkedHashMap<String, Object> cti = ctiService.getByResourceAndConfigurationTemplateId(resourceId, ct.getId());
                 if (cti != null) {
                     try {
                         ConfigurationTemplateInstanceBundle ctiBundle = ctiService.get((String) cti.get("id"));

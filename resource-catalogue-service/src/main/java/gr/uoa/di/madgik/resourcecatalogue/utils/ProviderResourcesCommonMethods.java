@@ -19,8 +19,9 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Adapter;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Catalogue;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Provider;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
@@ -96,14 +97,6 @@ public class ProviderResourcesCommonMethods {
             Set<User> users = catalogue.getUsers() == null ? new HashSet<>() : new HashSet<>(catalogue.getUsers());
             users.add(authUser);
             catalogue.setUsers(new ArrayList<>(users));
-        } else if (object instanceof Provider provider) {
-            Set<User> users = provider.getUsers() == null ? new HashSet<>() : new HashSet<>(provider.getUsers());
-            users.add(authUser);
-            provider.setUsers(new ArrayList<>(users));
-        } else if (object instanceof Adapter adapter) {
-            Set<User> users = adapter.getAdmins() == null ? new HashSet<>() : new HashSet<>(adapter.getAdmins());
-            users.add(authUser);
-            adapter.setAdmins(new ArrayList<>(users));
         }
     }
 

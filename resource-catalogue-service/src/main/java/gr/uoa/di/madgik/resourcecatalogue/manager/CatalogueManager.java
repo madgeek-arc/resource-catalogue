@@ -48,7 +48,7 @@ import java.util.List;
 public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueBundle> implements CatalogueService {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogueManager.class);
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final ProviderResourcesCommonMethods commonMethods;
 
@@ -60,7 +60,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
 
     //FIXME: REFACTOR CONCERNING HOW WE MOVE ON
     public CatalogueManager(IdCreator idCreator,
-                            @Lazy ProviderService providerService,
+                            @Lazy OrganisationService organisationService,
                             @Lazy ServiceService serviceService,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,
@@ -68,7 +68,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
 //                            EmailService emailService,
                             GenericResourceService genericResourceService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
@@ -198,7 +198,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
 
         // Delete Catalogue along with all its related Resources
         logger.info("Deleting all Catalogue's Providers...");
-        deleteCatalogueResources(id, providerService, securityService.getAdminAccess());
+        deleteCatalogueResources(id, organisationService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Services...");
         deleteCatalogueResources(id, serviceService, securityService.getAdminAccess());

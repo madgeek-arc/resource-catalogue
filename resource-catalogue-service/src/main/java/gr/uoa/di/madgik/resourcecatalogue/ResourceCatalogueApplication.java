@@ -16,12 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue;
 
-import io.camunda.client.annotation.Deployment;
+import org.flowable.spring.boot.FlowableJpaAutoConfiguration;
+import org.flowable.spring.boot.eventregistry.EventRegistryAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
-@Deployment(resources = { "classpath:*.bpmn" })
+@SpringBootApplication(exclude = {EventRegistryAutoConfiguration.class, FlowableJpaAutoConfiguration.class})
 public class ResourceCatalogueApplication {
 
     public static void main(String[] args) {

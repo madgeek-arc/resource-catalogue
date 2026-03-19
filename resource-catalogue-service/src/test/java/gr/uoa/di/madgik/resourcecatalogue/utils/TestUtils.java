@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,9 +40,9 @@ public class TestUtils {
 //        return bundle;
 //    }
 
-    public static ProviderBundle createProviderBundle() {
-        ProviderBundle bundle = new ProviderBundle();
-        bundle.setProvider(createProvider());
+    public static OrganisationBundle createProviderBundle() {
+        OrganisationBundle bundle = new OrganisationBundle();
+        bundle.setOrganisation(createProvider());
         return bundle;
     }
 

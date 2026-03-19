@@ -51,14 +51,14 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
      * Test to verify that the ID generation process consistently produces unique IDs.
      * <p>
      * This test ensures that when generating a large number of IDs (10,000 in this case)
-     * for a single resource type ("provider"), all IDs are unique and do not overlap.
+     * for a single resource type ("organisation"), all IDs are unique and do not overlap.
      * <p>
      * This test is important for validating that the ID creation logic is robust and
      * does not produce duplicates under normal conditions.
      */
     @Test
     void generateUniqueIds() {
-        IntStream.range(0, 10).forEach(i -> idCreator.generate("provider"));
+        IntStream.range(0, 10).forEach(i -> idCreator.generate("organisation"));
     }
 
     /**

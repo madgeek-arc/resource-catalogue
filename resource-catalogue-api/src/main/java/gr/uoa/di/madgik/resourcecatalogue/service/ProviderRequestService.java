@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.EmailMessage;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderRequest;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ProviderRequest;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;

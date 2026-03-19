@@ -20,7 +20,7 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -159,7 +159,7 @@ public class ConfigurationTemplateController {
                                                                       @PathVariable String suffix,
                                                                       @Parameter(hidden = true)
                                                                       @RequestParam MultiValueMap<String, Object> params) {
-        Paging<LinkedHashMap<String, Object>> paging = service.getAllByInteroperabilityRecordId(params, prefix + "/" + suffix);
+        Paging<ConfigurationTemplateBundle> paging = service.getAllByInteroperabilityRecordId(params, prefix + "/" + suffix);
         return ResponseEntity.ok(paging);
     }
 

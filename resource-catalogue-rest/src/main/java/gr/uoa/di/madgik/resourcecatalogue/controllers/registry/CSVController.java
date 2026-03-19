@@ -19,7 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.CSVService;
@@ -55,7 +55,7 @@ public class CSVController {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVController.class);
     private final ServiceService service;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final VocabularyService vocabularyService;
     private final CSVService csvService;
     private final ServiceService serviceService;
@@ -63,23 +63,23 @@ public class CSVController {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    CSVController(ServiceService service, ProviderService provider,
+    CSVController(ServiceService service, OrganisationService provider,
                   VocabularyService vocabulary, CSVService csvService, ServiceService serviceService) {
         this.service = service;
-        this.providerService = provider;
+        this.organisationService = provider;
         this.vocabularyService = vocabulary;
         this.csvService = csvService;
         this.serviceService = serviceService;
     }
 
     @Hidden
-    @Operation(summary = "Downloads a csv file with Provider entries.")
+    @Operation(summary = "Downloads a csv file with Organisation entries.")
     @GetMapping(path = "providers", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<String> providersToCSV(@RequestParam(required = false) Boolean published,
                                                  @Parameter(hidden = true) Authentication auth,
                                                  HttpServletResponse response) {
-        Paging<ProviderBundle> providers = providerService.getAll(createFacetFilter(published), auth);
+        Paging<OrganisationBundle> providers = organisationService.getAll(createFacetFilter(published), auth);
         String csvData = csvService.listProvidersToCSV(providers.getResults());
         response.setHeader("Content-disposition", "attachment; filename=" + "providers.csv");
         logger.info("Downloaded Providers CSV list");
@@ -123,7 +123,7 @@ public class CSVController {
                                                         @Parameter(hidden = true) Authentication auth,
                                                         HttpServletResponse response) throws IOException {
         long timestamp = csvService.generateTimestampFromDate(date);
-        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(false), auth).getResults();
+        List<OrganisationBundle> providers = organisationService.getAll(createFacetFilter(false), auth).getResults();
         List<ServiceBundle> services = serviceService.getAll(createFacetFilter(false), auth).getResults();
         String csv = csvService.computeApprovedServicesBeforeTimestampAndGenerateCSV(timestamp, providers, services);
 

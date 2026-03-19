@@ -17,8 +17,7 @@ public class SqaaasAssessmentService {
 
     @Async
     public CompletableFuture<String> startAssessment(String repoUrl, String branch) {
-        String pipelineId = runner.createPipelineAndRun(repoUrl, branch);
-        return CompletableFuture.completedFuture(pipelineId);
+        return CompletableFuture.completedFuture(runner.createPipelineAndRun(repoUrl, branch));
     }
 
     public JsonNode getStatus(String pipelineId) {
@@ -27,5 +26,23 @@ public class SqaaasAssessmentService {
 
     public JsonNode getOutput(String pipelineId) {
         return runner.getOutput(pipelineId);
+    }
+
+    public JsonNode waitForCompletion(String pipelineId) {
+        while (true) {
+            JsonNode status = runner.getStatus(pipelineId);
+            String buildStatus = status.get("build_status").asText();
+
+            if ("SUCCESS".equalsIgnoreCase(buildStatus)) {
+                return runner.getOutput(pipelineId);
+            }
+
+            try {
+                Thread.sleep(30000); // check every 30s
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

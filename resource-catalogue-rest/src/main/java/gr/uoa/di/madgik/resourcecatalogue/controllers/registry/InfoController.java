@@ -18,7 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -44,12 +44,12 @@ import java.util.Map;
 public class InfoController {
 
     private final ServiceService serviceService;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final SecurityService securityService;
 
-    InfoController(ServiceService service, ProviderService provider, SecurityService securityService) {
+    InfoController(ServiceService service, OrganisationService provider, SecurityService securityService) {
         this.serviceService = service;
-        this.providerService = provider;
+        this.organisationService = provider;
         this.securityService = securityService;
     }
 
@@ -63,7 +63,7 @@ public class InfoController {
         ff.addFilter("active", true);
         ff.addFilter("published", false);
         Authentication authentication = securityService.getAdminAccess();
-        numberOfResources.put("providers", providerService.getAll(ff, authentication).getTotal());
+        numberOfResources.put("providers", organisationService.getAll(ff, authentication).getTotal());
         numberOfResources.put("services", serviceService.getAll(ff, authentication).getTotal());
         return ResponseEntity.ok(numberOfResources);
     }

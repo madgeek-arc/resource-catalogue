@@ -27,10 +27,8 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
@@ -52,7 +50,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
     private final GenericResourceService genericResourceService;
@@ -64,7 +62,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    public DatasourceManager(ProviderService providerService,
+    public DatasourceManager(OrganisationService organisationService,
                              @Lazy VocabularyService vocabularyService,
                              @Lazy ProviderResourcesCommonMethods commonMethods,
                              OpenAIREDatasourceManager openAIREDatasourceManager,
@@ -74,7 +72,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                              RelationshipValidator relationshipValidator,
                              WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
         this.genericResourceService = genericResourceService;
@@ -124,7 +122,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     private void checkAndResetDatasourceOnboarding(DatasourceBundle datasource, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (datasource.getStatus().equals(vocabularyService.get("rejected").getId())) {
@@ -132,7 +130,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                 datasource.setStatus(vocabularyService.get("pending").getId());
                 datasource.setActive(false);
                 provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(provider, "system update", auth);
+                organisationService.update(provider, "system update", auth);
             }
         }
     }
@@ -166,7 +164,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     private void updateProviderTemplateStatus(DatasourceBundle datasource, String status, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         switch (status) {
             case "pending":
@@ -181,14 +179,14 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
             default:
                 break;
         }
-        providerService.update(provider, "system update", auth);
+        organisationService.update(provider, "system update", auth);
     }
 
     @Override
     public DatasourceBundle setActive(String id, Boolean active, Authentication auth) {
         DatasourceBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getDatasource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) existing.getDatasource().get("resourceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Datasource, as its Provider is inactive", HttpStatus.CONFLICT);
@@ -218,7 +216,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         DatasourceBundle datasource = get(id);
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
@@ -323,7 +321,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     @Override
     public DatasourceBundle finalizeDraft(DatasourceBundle datasource, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) datasource.getDatasource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {

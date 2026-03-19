@@ -18,10 +18,10 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -35,7 +35,7 @@ import java.util.List;
 @Service("publicTrainingResourceManager")
 public class PublicTrainingResourceService extends AbstractPublicResourceManager<TrainingResourceBundle> {
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
 
@@ -43,11 +43,11 @@ public class PublicTrainingResourceService extends AbstractPublicResourceManager
                                          JmsService jmsService,
                                          PidIssuer pidIssuer,
                                          FacetLabelService facetLabelService,
-                                         ProviderService providerService,
+                                         OrganisationService organisationService,
                                          ServiceService serviceService,
                                          TrainingResourceService trainingResourceService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
     }
@@ -60,7 +60,7 @@ public class PublicTrainingResourceService extends AbstractPublicResourceManager
     @Override
     public void updateIdsToPublic(TrainingResourceBundle bundle) {
         // Resource Owner
-        ProviderBundle provider = providerService.get(
+        OrganisationBundle provider = organisationService.get(
                 (String) bundle.getTrainingResource().get("resourceOwner"),
                 bundle.getCatalogueId()
         );

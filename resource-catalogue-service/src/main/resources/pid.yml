@@ -1,7 +1,7 @@
 ## PID Properties ##
 catalogue:
   resources:
-    provider:
+    organisation:
       resolve-endpoints:
       pid-issuer:
         url:

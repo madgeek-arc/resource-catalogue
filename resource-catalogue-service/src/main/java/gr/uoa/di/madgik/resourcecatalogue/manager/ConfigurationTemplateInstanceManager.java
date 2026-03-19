@@ -16,13 +16,14 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -40,7 +41,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         implements ConfigurationTemplateInstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceManager.class);
-    private final ConfigurationTemplateInstanceService service;
     private final ResourceInteroperabilityRecordService rirService;
 
     private final ConfigurationTemplateService configService;
@@ -60,7 +60,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
                                                 GenericResourceService genericResourceService,
                                                 VocabularyService vocabularyService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
-        this.service = service;
         this.configService = configService;
         this.rirService = rirService;
         this.securityService = securityService;
@@ -75,26 +74,27 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
 
     @Override
     public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle cti, Authentication auth) {
-        checkResourceIdAndConfigurationTemplateIdConsistency(cti, auth);
-        validateInstanceAgainstTemplate(cti);
+//        checkResourceIdAndConfigurationTemplateIdConsistency(cti, auth);
+//        validateInstanceAgainstTemplate(cti);
 
         cti.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         cti.setActive(true);
         cti.setCatalogueId(this.catalogueId);
         this.createIdentifiers(cti, getResourceTypeName(), false);
         cti.setId(cti.getIdentifiers().getOriginalId());
-        ConfigurationTemplateInstanceBundle ret = genericResourceService.add(getResourceTypeName(), cti);
+        //FIXME: should pass validation
+        ConfigurationTemplateInstanceBundle ret = genericResourceService.add(getResourceTypeName(), cti, false);
         return ret;
     }
 
     @Override
-    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle bundle, Authentication auth) {
+    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle bundle, String comment, Authentication auth) {
         ConfigurationTemplateInstanceBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Service
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(UserInfo.of(auth), null);
+        bundle.markUpdate(UserInfo.of(auth), comment);
 
         // block user from updating resourceId
         if (!bundle.getConfigurationTemplateInstance().get("resourceId").equals(existing.getConfigurationTemplateInstance().get("resourceId")) &&
@@ -111,7 +111,8 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         }
 
         try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
+            //FIXME: should pass validation
+            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -128,7 +129,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         List<ConfigurationTemplateInstanceBundle> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
-        List<ConfigurationTemplateInstanceBundle> list = service.getAll(ff, null).getResults();
+        List<ConfigurationTemplateInstanceBundle> list = getAll(ff, null).getResults();
         for (ConfigurationTemplateInstanceBundle bundle : list) {
             if (bundle.getConfigurationTemplateInstance().get("resourceId").equals(id)) {
                 ret.add(bundle);
@@ -142,7 +143,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);
-        List<ConfigurationTemplateInstanceBundle> list = service.getAll(ff, null).getResults();
+        List<ConfigurationTemplateInstanceBundle> list = getAll(ff, null).getResults();
         for (ConfigurationTemplateInstanceBundle bundle : list) {
             if (bundle.getConfigurationTemplateInstance().get("configurationTemplateId").equals(id)) {
                 ret.add(bundle.getConfigurationTemplateInstance());
@@ -157,9 +158,13 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         ff.addFilter("published", false);
         ff.addFilter("resource_id", resourceId);
         ff.addFilter("configuration_template_id", ctId);
-        List<ConfigurationTemplateInstanceBundle> list = service.getAll(ff, null).getResults();
+
+        List<?> list = getAll(ff, null).getResults();
         if (!list.isEmpty()) {
-            return list.getFirst().getConfigurationTemplateInstance();
+            ObjectMapper mapper = new ObjectMapper();
+            ConfigurationTemplateInstanceBundle bundle =
+                    mapper.convertValue(list.get(0), ConfigurationTemplateInstanceBundle.class);
+            return bundle.getConfigurationTemplateInstance();
         }
         return null;
     }
@@ -189,7 +194,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         }
 
         // check if a Configuration Template Implementation with the same resourceId, configurationTemplateId already exists
-        List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundleList = service.getAll(createFacetFilter(), auth).getResults();
+        List<ConfigurationTemplateInstanceBundle> configurationTemplateInstanceBundleList = getAll(createFacetFilter(), auth).getResults();
         for (ConfigurationTemplateInstanceBundle ctiBundle : configurationTemplateInstanceBundleList) {
             if (ctiBundle.getConfigurationTemplateInstance().get("resourceId").equals(resourceId) &&
                     ctiBundle.getConfigurationTemplateInstance().get("configurationTemplateId").equals(configurationTemplateId)) {
@@ -221,11 +226,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     //region Not-Used
     @Override
     public Browsing<ConfigurationTemplateInstanceBundle> getMy(FacetFilter filter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle bundle, String comment, Authentication auth) {
         return null;
     }
 

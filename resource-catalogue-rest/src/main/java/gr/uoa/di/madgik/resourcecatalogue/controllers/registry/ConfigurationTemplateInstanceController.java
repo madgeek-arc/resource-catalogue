@@ -20,7 +20,7 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,17 +45,16 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "configurationTemplateInstance", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "configuration template instance")
-public class ConfigurationTemplateInstanceController {
+public class ConfigurationTemplateInstanceController
+        extends ResourceCatalogueGenericController<ConfigurationTemplateInstanceBundle, ConfigurationTemplateInstanceService> {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceController.class);
-
-    private final ConfigurationTemplateInstanceService service;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService service) {
-        this.service = service;
+    ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService service) {
+        super(service, "Configuration Template Instance");
     }
 
     @Operation(summary = "Returns the Configuration Template Instance with the given id.")

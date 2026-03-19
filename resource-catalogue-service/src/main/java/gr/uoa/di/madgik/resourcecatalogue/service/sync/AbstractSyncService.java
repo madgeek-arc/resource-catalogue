@@ -16,10 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service.sync;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Datasource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Provider;
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Provider;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.TrainingResource;
 import gr.uoa.di.madgik.resourcecatalogue.service.SynchronizerService;
 import jakarta.annotation.PostConstruct;
 import org.javatuples.Pair;

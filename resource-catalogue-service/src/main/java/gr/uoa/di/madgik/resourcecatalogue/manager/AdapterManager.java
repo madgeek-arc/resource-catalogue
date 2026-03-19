@@ -25,7 +25,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
@@ -48,7 +48,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private final OIDCSecurityService securityService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -60,12 +60,12 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                           ProviderResourcesCommonMethods commonMethods,
                           IdCreator idCreator,
                           GenericResourceService genericResourceService,
-                          ProviderService providerService) {
+                          OrganisationService organisationService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
         this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
     }
 
     @Override
@@ -118,7 +118,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     public AdapterBundle setActive(String id, Boolean active, Authentication auth) {
         AdapterBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getAdapter().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) existing.getAdapter().get("resourceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Adapter, as its Provider is inactive",
@@ -149,7 +149,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         AdapterBundle adapter = get(id);
-        ProviderBundle provider = providerService.get((String) adapter.getAdapter().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) adapter.getAdapter().get("resourceOwner"),
                 adapter.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Adapters", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME

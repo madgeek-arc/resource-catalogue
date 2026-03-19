@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Adapter;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 //        if (t instanceof CatalogueBundle) {
 //            modifyCatalogueBundle(t, auth);
 //        }
-        if (t instanceof ProviderBundle) {
+        if (t instanceof OrganisationBundle) {
             modifyProviderBundle(t, auth);
         } else if (t instanceof Adapter) {
             modifyAdapterBundle(t, auth);
@@ -102,8 +103,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyDatasourceBundle(t, auth);
         } else if (t instanceof TrainingResourceBundle) {
             modifyTrainingResourceBundle(t, auth);
-        } else if (t instanceof DeployableSoftwareBundle) {
-            modifyDeployableSoftwareBundle(t, auth);
+        } else if (t instanceof DeployableApplicationBundle) {
+            modifyDeployableApplicationBundle(t, auth);
         } else if (t instanceof InteroperabilityRecordBundle) {
             modifyInteroperabilityRecordBundle(t, auth);
         } else if (t instanceof LoggingInfo) {
@@ -128,29 +129,29 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
     @SuppressWarnings("unchecked")
     private void modifyProviderBundle(T bundle, Authentication auth) {
-        modifyLoggingInfoList((T) ((ProviderBundle) bundle).getLoggingInfo());
-        modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestOnboardingInfo());
+        modifyLoggingInfoList((T) ((OrganisationBundle) bundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.hasAdminAccess(auth, ((ProviderBundle) bundle).getId())) {
-            ((ProviderBundle) bundle).getProvider().put("email", null);
-            ((ProviderBundle) bundle).getProvider().put("users", null);
-            ((ProviderBundle) bundle).getMetadata().setTerms(null);
+        if (!this.securityService.hasAdminAccess(auth, ((OrganisationBundle) bundle).getId())) {
+            ((OrganisationBundle) bundle).getOrganisation().put("email", null);
+            ((OrganisationBundle) bundle).getOrganisation().put("users", null);
+            ((OrganisationBundle) bundle).getMetadata().setTerms(null);
         }
     }
 
     @SuppressWarnings("unchecked")
     private void modifyAdapterBundle(T bundle, Authentication auth) {
-        modifyLoggingInfoList((T) ((ProviderBundle) bundle).getLoggingInfo());
-        modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((ProviderBundle) bundle).getLatestOnboardingInfo());
+        modifyLoggingInfoList((T) ((OrganisationBundle) bundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.hasAdminAccess(auth, ((ProviderBundle) bundle).getId())) {
-            ((ProviderBundle) bundle).getProvider().put("email", null);
-            ((ProviderBundle) bundle).getProvider().put("users", null);
-            ((ProviderBundle) bundle).getMetadata().setTerms(null);
+        if (!this.securityService.hasAdminAccess(auth, ((OrganisationBundle) bundle).getId())) {
+            ((OrganisationBundle) bundle).getOrganisation().put("email", null);
+            ((OrganisationBundle) bundle).getOrganisation().put("users", null);
+            ((OrganisationBundle) bundle).getMetadata().setTerms(null);
         }
     }
 
@@ -194,15 +195,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private void modifyDeployableSoftwareBundle(T deployableSoftwareBundle, Authentication auth) {
-        modifyLoggingInfoList((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLoggingInfo());
-        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestAuditInfo());
-        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestUpdateInfo());
-        modifyLoggingInfo((T) ((DeployableSoftwareBundle) deployableSoftwareBundle).getLatestOnboardingInfo());
+    private void modifyDeployableApplicationBundle(T deployableApplicationBundle, Authentication auth) {
+        modifyLoggingInfoList((T) ((DeployableApplicationBundle) deployableApplicationBundle).getLoggingInfo());
+        modifyLoggingInfo((T) ((DeployableApplicationBundle) deployableApplicationBundle).getLatestAuditInfo());
+        modifyLoggingInfo((T) ((DeployableApplicationBundle) deployableApplicationBundle).getLatestUpdateInfo());
+        modifyLoggingInfo((T) ((DeployableApplicationBundle) deployableApplicationBundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.isResourceAdmin(auth, ((DeployableSoftwareBundle) deployableSoftwareBundle).getId())) {
-            ((DeployableSoftwareBundle) deployableSoftwareBundle).getDeployableSoftware().put("email", null);
-            ((DeployableSoftwareBundle) deployableSoftwareBundle).getMetadata().setTerms(null);
+        if (!this.securityService.isResourceAdmin(auth, ((DeployableApplicationBundle) deployableApplicationBundle).getId())) {
+            ((DeployableApplicationBundle) deployableApplicationBundle).getDeployableApplication().put("email", null);
+            ((DeployableApplicationBundle) deployableApplicationBundle).getMetadata().setTerms(null);
         }
     }
 

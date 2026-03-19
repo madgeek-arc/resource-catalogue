@@ -17,10 +17,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.springframework.stereotype.Service;
@@ -31,15 +31,15 @@ import java.util.List;
 @Service("publicServiceManager")
 public class PublicServiceService extends AbstractPublicResourceManager<ServiceBundle> {
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
 
     public PublicServiceService(GenericResourceService genericResourceService,
                                 JmsService jmsService,
                                 PidIssuer pidIssuer,
                                 FacetLabelService facetLabelService,
-                                ProviderService providerService) {
+                                OrganisationService organisationService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
-        this.providerService = providerService;
+        this.organisationService = organisationService;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class PublicServiceService extends AbstractPublicResourceManager<ServiceB
     @Override
     public void updateIdsToPublic(ServiceBundle service) {
         // Resource Owner
-        ProviderBundle provider = providerService.get(
+        OrganisationBundle provider = organisationService.get(
                 (String) service.getService().get("resourceOwner"),
                 service.getCatalogueId()
         );
@@ -62,7 +62,7 @@ public class PublicServiceService extends AbstractPublicResourceManager<ServiceB
             List<String> updatedServiceProviders = new ArrayList<>();
             for (Object providerObj : providersList) {
                 if (providerObj instanceof String providerId) {
-                    ProviderBundle bundle = providerService.get(providerId, service.getCatalogueId());
+                    OrganisationBundle bundle = organisationService.get(providerId, service.getCatalogueId());
                     updatedServiceProviders.add(bundle.getIdentifiers().getPid());
                 }
             }

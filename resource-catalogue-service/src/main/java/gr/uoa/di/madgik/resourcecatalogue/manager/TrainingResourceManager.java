@@ -28,12 +28,10 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -49,13 +47,13 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     private static final Logger logger = LoggerFactory.getLogger(TrainingResourceManager.class);
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
     private final WorkflowService workflowService;
 
-    public TrainingResourceManager(ProviderService providerService,
+    public TrainingResourceManager(OrganisationService organisationService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    VocabularyService vocabularyService,
                                    @Lazy ProviderResourcesCommonMethods commonMethods,
@@ -63,7 +61,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
                                    GenericResourceService genericResourceService,
                                    WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
@@ -99,7 +97,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     }
 
     private void checkAndResetServiceOnboarding(TrainingResourceBundle trainingResource, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (trainingResource.getStatus().equals(vocabularyService.get("rejected").getId())) {
@@ -107,7 +105,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
                 trainingResource.setStatus(vocabularyService.get("pending").getId());
                 trainingResource.setActive(false);
                 provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                providerService.update(provider, "system update", auth);
+                organisationService.update(provider, "system update", auth);
             }
         }
     }
@@ -141,7 +139,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     }
 
     private void updateProviderTemplateStatus(TrainingResourceBundle trainingResource, String status, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         switch (status) {
             case "pending":
@@ -156,14 +154,14 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
             default:
                 break;
         }
-        providerService.update(provider, "system update", auth);
+        organisationService.update(provider, "system update", auth);
     }
 
     @Override
     public TrainingResourceBundle setActive(String id, Boolean active, Authentication auth) {
         TrainingResourceBundle existing = get(id);
 
-        ProviderBundle provider = providerService.get((String) existing.getTrainingResource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) existing.getTrainingResource().get("resourceOwner"),
                 existing.getCatalogueId());
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Training Resource, as its Provider is inactive", HttpStatus.CONFLICT);
@@ -193,7 +191,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         TrainingResourceBundle trainingResource = get(id);
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Training Resources", provider.getId());
 //        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResource, provider); //FIXME
@@ -268,7 +266,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     @Override
     public TrainingResourceBundle finalizeDraft(TrainingResourceBundle trainingResource, Authentication auth) {
-        ProviderBundle provider = providerService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
+        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         UserInfo user = UserInfo.of(auth);
         if (provider.getTemplateStatus().equals("approved template")) {

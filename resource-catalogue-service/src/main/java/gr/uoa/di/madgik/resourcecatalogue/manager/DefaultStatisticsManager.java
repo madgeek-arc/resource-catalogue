@@ -22,13 +22,13 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.service.Analytics;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.StatisticsService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.joda.time.DateTime;
@@ -54,7 +54,7 @@ public class DefaultStatisticsManager implements StatisticsService {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultStatisticsManager.class);
     private final Analytics analyticsService;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final SearchService searchService;
     private final ParserService parserService;
     private final ServiceManager serviceBundleManager;
@@ -65,12 +65,12 @@ public class DefaultStatisticsManager implements StatisticsService {
     private int maxQuantity;
 
     DefaultStatisticsManager(Analytics analyticsService,
-                             ProviderService providerService,
+                             OrganisationService organisationService,
                              SearchService searchService, ParserService parserService,
                              DataSource dataSource,
                              ServiceManager serviceBundleManager, VocabularyService vocabularyService) {
         this.analyticsService = analyticsService;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.searchService = searchService;
         this.parserService = parserService;
         this.serviceBundleManager = serviceBundleManager;
@@ -420,9 +420,9 @@ public class DefaultStatisticsManager implements StatisticsService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
 
-        for (ProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
+        for (OrganisationBundle organisationBundle : organisationService.getAll(ff, null).getResults()) {
             Set<String> countries = new HashSet<>();
-            String country = (String) providerBundle.getProvider().get("country");
+            String country = (String) organisationBundle.getOrganisation().get("country");
             if (country.equalsIgnoreCase("WW")) {
                 countries.addAll(Arrays.asList(world));
             } else if (country.equalsIgnoreCase("EU")) {
@@ -430,7 +430,7 @@ public class DefaultStatisticsManager implements StatisticsService {
             } else {
                 countries.add(country);
             }
-            providerCountries.put(providerBundle.getId(), countries);
+            providerCountries.put(organisationBundle.getId(), countries);
         }
         return providerCountries;
     }

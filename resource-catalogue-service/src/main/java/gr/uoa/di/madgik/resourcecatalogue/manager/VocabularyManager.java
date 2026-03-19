@@ -22,7 +22,7 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -41,13 +41,13 @@ import java.util.stream.Collectors;
 public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
     private static final Logger logger = LoggerFactory.getLogger(VocabularyManager.class);
 
-    private final ProviderManager providerManager;
+    private final OrganisationManager providerManager;
 
     private final SecurityService securityService;
 
     private final IdCreator idCreator;
 
-    public VocabularyManager(@Lazy ProviderManager providerManager, @Lazy IdCreator idCreator, @Lazy SecurityService securityService) {
+    public VocabularyManager(@Lazy OrganisationManager providerManager, @Lazy IdCreator idCreator, @Lazy SecurityService securityService) {
         super(Vocabulary.class);
         this.providerManager = providerManager;
         this.idCreator = idCreator;
@@ -274,11 +274,11 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.addFilter("active", true);
         ff.addFilter("status", "approved");
         ff.addFilter("published", false);
-        List<ProviderBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<OrganisationBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
         List<String> providerNames = new ArrayList<>();
-        for (ProviderBundle providerBundle : allActiveAndApprovedProviders) {
-            if ((boolean) providerBundle.getProvider().get("legalEntity")) {
-                providerNames.add((String) providerBundle.getProvider().get("name"));
+        for (OrganisationBundle organisationBundle : allActiveAndApprovedProviders) {
+            if ((boolean) organisationBundle.getOrganisation().get("legalEntity")) {
+                providerNames.add((String) organisationBundle.getOrganisation().get("name"));
             }
         }
         for (Iterator<String> it = providerNames.iterator(); it.hasNext(); ) {

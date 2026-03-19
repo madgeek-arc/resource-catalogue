@@ -3,9 +3,9 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -70,6 +70,17 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         ff.addFilter("published", true);
         Browsing<T> browsing = genericResourceService.getResults(ff);
         //TODO: test if we need this
+        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
+            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+        }
+        return browsing;
+    }
+
+    @Override
+    public Browsing<HighlightedResult<T>> searchServices(FacetFilter ff) {
+        ff.setResourceType(getResourceTypeName());
+        ff.addFilter("published", true);
+        Browsing<HighlightedResult<T>> browsing = genericResourceService.getHighlightedResults(ff);
         if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }

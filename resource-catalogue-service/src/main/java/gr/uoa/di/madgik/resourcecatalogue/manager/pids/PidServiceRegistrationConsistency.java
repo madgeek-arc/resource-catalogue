@@ -39,31 +39,31 @@ public class PidServiceRegistrationConsistency {
 
     private final PidIssuer pidIssuer;
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
-    private final DeployableSoftwareService deployableSoftwareService;
+    private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     private final SecurityService securityService;
 
     public PidServiceRegistrationConsistency(PidIssuer pidIssuer,
-                                             ProviderService providerService,
+                                             OrganisationService organisationService,
                                              ServiceService serviceService,
                                              DatasourceService datasourceService,
                                              TrainingResourceService trainingResourceService,
                                              InteroperabilityRecordService interoperabilityRecordService,
-                                             DeployableSoftwareService deployableSoftwareService,
+                                             DeployableApplicationService deployableApplicationService,
                                              AdapterService adapterService,
                                              SecurityService securityService) {
         this.pidIssuer = pidIssuer;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
-        this.deployableSoftwareService = deployableSoftwareService;
+        this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.securityService = securityService;
@@ -73,22 +73,22 @@ public class PidServiceRegistrationConsistency {
 //    @Scheduled(initialDelay = 0, fixedRate = 6000)
 //    @Scheduled(cron = "0 0 0 * * *")
     protected void postUnregisteredResourcesToPIDService() {
-        List<ProviderBundle> allPublicProviders = providerService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<OrganisationBundle> allPublicProviders = organisationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<ServiceBundle> allPublicServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<DatasourceBundle> allPublicDatasources = datasourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allPublicTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
-        List<DeployableSoftwareBundle> allPublicDS = deployableSoftwareService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<DeployableApplicationBundle> allPublicDS = deployableApplicationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allPublicIG = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<AdapterBundle> allPublicAdapters = adapterService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
 
         logger.info("PID Service registration consistency");
         // check consistency for Providers
-        for (ProviderBundle providerBundle : allPublicProviders) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(providerBundle.getId());
+        for (OrganisationBundle organisationBundle : allPublicProviders) {
+            HttpStatusCode httpStatusCode = getResourceFromPidService(organisationBundle.getId());
             if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                 if (pidServiceEnabled) {
-                    logger.info("Posting Provider with id {} to PID service", providerBundle.getId());
-                    pidIssuer.postPID(providerBundle.getId(), null);
+                    logger.info("Posting Provider with id {} to PID service", organisationBundle.getId());
+                    pidIssuer.postPID(organisationBundle.getId(), null);
                 }
             }
         }
@@ -137,13 +137,13 @@ public class PidServiceRegistrationConsistency {
             }
         }
 
-        // check consistency for Deployable Software
-        for (DeployableSoftwareBundle deployableSoftwareBundle : allPublicDS) {
-            HttpStatusCode httpStatusCode = getResourceFromPidService(deployableSoftwareBundle.getId());
+        // check consistency for Deployable Application
+        for (DeployableApplicationBundle deployableApplicationBundle : allPublicDS) {
+            HttpStatusCode httpStatusCode = getResourceFromPidService(deployableApplicationBundle.getId());
             if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                 if (pidServiceEnabled) {
-                    logger.info("Posting Deployable Software with id {} to PID service", deployableSoftwareBundle.getId());
-                    pidIssuer.postPID(deployableSoftwareBundle.getId(), null);
+                    logger.info("Posting Deployable Application with id {} to PID service", deployableApplicationBundle.getId());
+                    pidIssuer.postPID(deployableApplicationBundle.getId(), null);
                 }
             }
         }

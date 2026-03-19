@@ -110,7 +110,7 @@
       "label": "License",
       "multivalued": false,
       "name": "license",
-      "path": "$.adapter.license",
+      "path": "$.adapter.license.licenseName",
       "type": "java.lang.String"
     },
     {

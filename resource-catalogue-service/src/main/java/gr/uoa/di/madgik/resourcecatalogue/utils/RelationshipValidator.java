@@ -23,7 +23,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +36,17 @@ import java.util.Objects;
 @Component
 public class RelationshipValidator {
 
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     @Autowired
-    public RelationshipValidator(ProviderService providerService,
+    public RelationshipValidator(OrganisationService organisationService,
                                  ServiceService serviceService,
                                  TrainingResourceService trainingResourceService,
                                  InteroperabilityRecordService interoperabilityRecordService) {
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
@@ -92,7 +92,7 @@ public class RelationshipValidator {
                 for (String serviceProvider : serviceProviders) {
                     if (serviceProvider != null && !serviceProvider.isEmpty()) {
                         try {
-                            providerService.get(serviceProvider, catalogueId);
+                            organisationService.get(serviceProvider, catalogueId);
                         } catch (CatalogueResourceNotFoundException e) {
                             throw new ValidationException(String.format("Field [resourceProviders]: " +
                                             "There is no Provider with ID '%s' in the %s Catalogue.",

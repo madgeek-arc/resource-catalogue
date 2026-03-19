@@ -21,9 +21,9 @@ import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -35,7 +35,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
 public class ConfigurationTemplateManager extends ResourceCatalogueGenericManager<ConfigurationTemplateBundle>
@@ -43,7 +46,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateManager.class);
     private final ProviderResourcesCommonMethods commonMethods;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
@@ -53,14 +56,14 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
 
     public ConfigurationTemplateManager(IdCreator idCreator,
                                         ProviderResourcesCommonMethods commonMethods,
-                                        ProviderService providerService,
+                                        OrganisationService organisationService,
                                         InteroperabilityRecordService interoperabilityRecordService,
                                         SecurityService securityService,
                                         GenericResourceService genericResourceService,
                                         VocabularyService vocabularyService) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
         this.commonMethods = commonMethods;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.vocabularyService = vocabularyService;
         this.genericResourceService = genericResourceService;
@@ -74,12 +77,12 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     public ConfigurationTemplateBundle add(ConfigurationTemplateBundle ct, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(
                 (String) ct.getConfigurationTemplate().get("interoperabilityRecordId"), catalogueId);
-        ProviderBundle providerBundle = providerService.get(
+        OrganisationBundle organisationBundle = organisationService.get(
                 (String) interoperabilityRecordBundle.getInteroperabilityRecord().get("resourceOwner"),
                 interoperabilityRecordBundle.getCatalogueId());
-        if (!providerBundle.getStatus().equals("approved")) {
+        if (!organisationBundle.getStatus().equals("approved")) {
             throw new ResourceException(String.format("The Provider ID '%s' you provided is not yet approved",
-                    providerBundle.getId()), HttpStatus.CONFLICT);
+                    organisationBundle.getId()), HttpStatus.CONFLICT);
         }
 
         ct.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
@@ -92,13 +95,13 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     }
 
     @Override
-    public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, Authentication auth) {
+    public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String comment, Authentication auth) {
         ConfigurationTemplateBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Service
         if (bundle.equals(existing)) {
             return bundle;
         }
-        bundle.markUpdate(UserInfo.of(auth), null);
+        bundle.markUpdate(UserInfo.of(auth), comment);
 
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
@@ -115,8 +118,8 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     }
 
     @Override
-    public Paging<LinkedHashMap<String, Object>> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
-                                                                                  String interoperabilityRecordId) {
+    public Paging<ConfigurationTemplateBundle> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
+                                                                                String interoperabilityRecordId) {
         FacetFilter ff;
         if (params != null) {
             ff = FacetFilter.from(params);
@@ -150,11 +153,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     //region Not-Needed
     @Override
     public Browsing<ConfigurationTemplateBundle> getMy(FacetFilter filter, Authentication authentication) {
-        return null;
-    }
-
-    @Override
-    public ConfigurationTemplateBundle update(ConfigurationTemplateBundle bundle, String comment, Authentication auth) {
         return null;
     }
 

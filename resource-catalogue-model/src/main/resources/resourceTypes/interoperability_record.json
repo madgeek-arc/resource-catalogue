@@ -65,6 +65,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "License",
+      "multivalued": false,
+      "name": "license",
+      "path": "$.interoperabilityRecord.license.licenseName",
+      "type": "java.lang.String"
+    },
+    {
       "label": null,
       "multivalued": false,
       "name": "registeredBy",

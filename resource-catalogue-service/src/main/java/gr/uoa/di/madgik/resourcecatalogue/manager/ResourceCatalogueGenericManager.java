@@ -86,7 +86,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     // TODO: transfer to bpmn
-    protected void onboard(Bundle bundle, ProviderBundle provider, Authentication auth) {
+    protected void onboard(Bundle bundle, OrganisationBundle provider, Authentication auth) {
         String catalogueId = bundle.getCatalogueId();
         UserInfo user = UserInfo.of(auth);
         if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
@@ -171,7 +171,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     public Browsing<T> getMyResources(FacetFilter filter, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", false); // A Draft Provider cannot have resources
-        List<T> providers = getMyProviders(ff, auth, "provider").getResults();
+        List<T> providers = getMyProviders(ff, auth, "organisation").getResults();
         if (providers.isEmpty()) {
             return new Browsing<>();
         }
@@ -330,8 +330,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         if (bundle.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
         }
-        ProviderBundle providerBundle = genericResourceService.get("provider", resourceOwner);
-        if (providerBundle.isSuspended() && !suspend) {
+        OrganisationBundle organisationBundle = genericResourceService.get("organisation", resourceOwner);
+        if (organisationBundle.isSuspended() && !suspend) {
             throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
                     HttpStatus.CONFLICT);
         }

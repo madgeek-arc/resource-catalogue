@@ -42,7 +42,7 @@
 //
 //    @Async
 //    @AfterReturning(pointcut = "(execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AbstractServiceBundleManager.updateEOSCIFGuidelines" +
-//            "(String, String, java.util.List<gr.uoa.di.madgik.resourcecatalogue.domain.EOSCIFGuidelines>, org.springframework.security.core.Authentication)))",
+//            "(String, String, java.util.List<gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.EOSCIFGuidelines>, org.springframework.security.core.Authentication)))",
 //            returning = "serviceBundle")
 //    public void updatePublicResourceAfterResourceExtrasUpdate(ServiceBundle serviceBundle) {
 //        publicServiceManager.update(serviceBundle, null);
