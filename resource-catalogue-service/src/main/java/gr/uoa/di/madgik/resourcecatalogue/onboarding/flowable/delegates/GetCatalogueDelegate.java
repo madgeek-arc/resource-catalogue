@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
-import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.ResourceBundleHelper;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.WorkflowVariableMapper;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
@@ -17,11 +17,11 @@ public class GetCatalogueDelegate implements JavaDelegate {
     private static final Logger logger = LoggerFactory.getLogger(GetCatalogueDelegate.class);
 
     private final GenericResourceService genericResourceService;
-    private final ResourceBundleHelper resourceBundleHelper;
+    private final WorkflowVariableMapper workflowVariableMapper;
 
-    public GetCatalogueDelegate(GenericResourceService genericResourceService, ResourceBundleHelper resourceBundleHelper) {
+    public GetCatalogueDelegate(GenericResourceService genericResourceService, WorkflowVariableMapper workflowVariableMapper) {
         this.genericResourceService = genericResourceService;
-        this.resourceBundleHelper = resourceBundleHelper;
+        this.workflowVariableMapper = workflowVariableMapper;
     }
 
     @Override
@@ -36,6 +36,6 @@ public class GetCatalogueDelegate implements JavaDelegate {
                 catalogue = genericResourceService.get("catalogue", catalogueId);
             } catch (Exception ignore) {}
         }
-        execution.setVariable("catalogue", catalogue != null ? resourceBundleHelper.toMap(catalogue) : null);
+        execution.setVariable("catalogue", catalogue != null ? workflowVariableMapper.toMap(catalogue) : null);
     }
 }

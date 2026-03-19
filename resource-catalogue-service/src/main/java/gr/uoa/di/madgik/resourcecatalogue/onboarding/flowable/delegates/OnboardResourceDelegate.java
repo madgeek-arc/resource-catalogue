@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
-import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.ResourceBundleHelper;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.WorkflowVariableMapper;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.common.engine.api.delegate.Expression;
 import org.flowable.engine.delegate.JavaDelegate;
@@ -21,7 +21,7 @@ public class OnboardResourceDelegate implements JavaDelegate {
 
     private static final Logger logger = LoggerFactory.getLogger(OnboardResourceDelegate.class);
 
-    private final ResourceBundleHelper resourceBundleHelper;
+    private final WorkflowVariableMapper workflowVariableMapper;
 
     // Injected via <flowable:field> in BPMN
     private Expression resourceName;
@@ -29,8 +29,8 @@ public class OnboardResourceDelegate implements JavaDelegate {
     private Expression active;
     private Expression comment;
 
-    public OnboardResourceDelegate(ResourceBundleHelper resourceBundleHelper) {
-        this.resourceBundleHelper = resourceBundleHelper;
+    public OnboardResourceDelegate(WorkflowVariableMapper workflowVariableMapper) {
+        this.workflowVariableMapper = workflowVariableMapper;
     }
 
     public void setResourceName(Expression resourceName) { this.resourceName = resourceName; }
@@ -51,10 +51,10 @@ public class OnboardResourceDelegate implements JavaDelegate {
 
         Map<String, Object> vars = new HashMap<>(execution.getVariables());
 
-        Bundle bundle = resourceBundleHelper.getResourceBundle(vars, rName);
-        UserInfo user = resourceBundleHelper.getUserInfo(vars);
+        Bundle bundle = workflowVariableMapper.getResourceBundle(vars, rName);
+        UserInfo user = workflowVariableMapper.getUserInfo(vars);
         bundle.markOnboard(statusVal, activeVal, user, commentVal);
-        resourceBundleHelper.putResourceBundle(vars, bundle, rName);
+        workflowVariableMapper.putResourceBundle(vars, bundle, rName);
 
         execution.setVariable(rName, vars.get(rName));
         execution.setVariable(rName + "_class", vars.get(rName + "_class"));

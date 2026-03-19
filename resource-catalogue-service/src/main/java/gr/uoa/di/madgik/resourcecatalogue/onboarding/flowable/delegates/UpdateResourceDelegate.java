@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.ResourceBundleHelper;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.WorkflowVariableMapper;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.common.engine.api.delegate.Expression;
 import org.flowable.engine.delegate.JavaDelegate;
@@ -21,15 +21,15 @@ public class UpdateResourceDelegate implements JavaDelegate {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateResourceDelegate.class);
 
-    private final ResourceBundleHelper resourceBundleHelper;
+    private final WorkflowVariableMapper workflowVariableMapper;
     private final GenericResourceService genericResourceService;
 
     // Injected via <flowable:field> in BPMN
     private Expression resourceName;
     private Expression resourceType;
 
-    public UpdateResourceDelegate(ResourceBundleHelper resourceBundleHelper, GenericResourceService genericResourceService) {
-        this.resourceBundleHelper = resourceBundleHelper;
+    public UpdateResourceDelegate(WorkflowVariableMapper workflowVariableMapper, GenericResourceService genericResourceService) {
+        this.workflowVariableMapper = workflowVariableMapper;
         this.genericResourceService = genericResourceService;
     }
 
@@ -50,7 +50,7 @@ public class UpdateResourceDelegate implements JavaDelegate {
 
         Map<String, Object> vars = new HashMap<>(execution.getVariables());
 
-        Bundle resource = resourceBundleHelper.getResourceBundle(vars, rName);
+        Bundle resource = workflowVariableMapper.getResourceBundle(vars, rName);
         logger.info("Running task 'update-resource' | resourceType: {}, resourceName: {}, id: {}",
                 rType, rName, resource.getId());
 
@@ -61,7 +61,7 @@ public class UpdateResourceDelegate implements JavaDelegate {
         } catch (NoSuchFieldException | java.lang.reflect.InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException("Failed to update resource of type '" + rType + "' with id '" + resource.getId() + "'", e);
         }
-        resourceBundleHelper.putResourceBundle(vars, updated, rName);
+        workflowVariableMapper.putResourceBundle(vars, updated, rName);
 
         execution.setVariable(rName, vars.get(rName));
         execution.setVariable(rName + "_class", vars.get(rName + "_class"));

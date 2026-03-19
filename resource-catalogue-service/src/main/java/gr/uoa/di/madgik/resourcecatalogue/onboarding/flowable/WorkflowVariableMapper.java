@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class ResourceBundleHelper {
+public class WorkflowVariableMapper {
 
     private final ObjectMapper mapper;
 
-    public ResourceBundleHelper(ObjectMapper mapper) {
+    public WorkflowVariableMapper(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 

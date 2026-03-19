@@ -27,11 +27,11 @@ public class FlowableWorkflowService implements WorkflowService {
 
     private final RuntimeService runtimeService;
     private final HistoryService historyService;
-    private final ResourceBundleHelper helper;
+    private final WorkflowVariableMapper helper;
 
     public FlowableWorkflowService(RuntimeService runtimeService,
                                    HistoryService historyService,
-                                   ResourceBundleHelper helper) {
+                                   WorkflowVariableMapper helper) {
         this.runtimeService = runtimeService;
         this.historyService = historyService;
         this.helper = helper;

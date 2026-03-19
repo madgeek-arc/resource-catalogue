@@ -2,7 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.ResourceBundleHelper;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.WorkflowVariableMapper;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
@@ -18,11 +18,11 @@ public class GetOrganisationDelegate implements JavaDelegate {
     private static final Logger logger = LoggerFactory.getLogger(GetOrganisationDelegate.class);
 
     private final GenericResourceService genericResourceService;
-    private final ResourceBundleHelper resourceBundleHelper;
+    private final WorkflowVariableMapper workflowVariableMapper;
 
-    public GetOrganisationDelegate(GenericResourceService genericResourceService, ResourceBundleHelper resourceBundleHelper) {
+    public GetOrganisationDelegate(GenericResourceService genericResourceService, WorkflowVariableMapper workflowVariableMapper) {
         this.genericResourceService = genericResourceService;
-        this.resourceBundleHelper = resourceBundleHelper;
+        this.workflowVariableMapper = workflowVariableMapper;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class GetOrganisationDelegate implements JavaDelegate {
         }
         Bundle org = genericResourceService.get("organisation", orgId);
         Map<String, Object> vars = new HashMap<>();
-        resourceBundleHelper.putResourceBundle(vars, org, "organisation");
+        workflowVariableMapper.putResourceBundle(vars, org, "organisation");
         execution.setVariable("organisation", vars.get("organisation"));
         execution.setVariable("organisation_class", vars.get("organisation_class"));
     }
