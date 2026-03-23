@@ -34,7 +34,9 @@ public class GetCatalogueDelegate implements JavaDelegate {
         if (catalogueId != null && !catalogueId.isBlank()) {
             try {
                 catalogue = genericResourceService.get("catalogue", catalogueId);
-            } catch (Exception ignore) {}
+            } catch (Exception e) {
+                logger.error("Running task 'get-catalogue' failed.", e);
+            }
         }
         execution.setVariable("catalogue", catalogue != null ? workflowVariableMapper.toMap(catalogue) : null);
     }
