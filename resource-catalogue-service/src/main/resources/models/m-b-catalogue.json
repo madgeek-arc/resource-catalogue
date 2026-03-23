@@ -117,7 +117,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "Full Name of the Provider/Organisation offering Resources and acting as main contact point for the Resources.",
+                  "text": "Name of the resource",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false

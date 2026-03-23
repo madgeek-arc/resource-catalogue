@@ -175,7 +175,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "Abbreviation of the Provider Name.",
+                  "text": "Acronym or short name of the organisation.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -230,7 +230,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": null,
+                  "text": "Other persistent identifiers.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -406,7 +406,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "EOSC Node",
+                  "text": "Node the organisation is contributing to.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -422,7 +422,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 2,
+                  "order": 4,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -463,7 +463,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "Website with information about the Provider.",
+                  "text": "Website of the organisation.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -479,7 +479,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 6,
+                  "order": 5,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -522,7 +522,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "Country of incorporation or physical location of the Provider or its coordinating centre in the case of distributed, virtual, and mobile Providers.",
+                  "text": "Country of incorporation or Physical location of the organisation or its coordinating centre in the case of distributed, virtual, and mobile providers.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -538,7 +538,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 5,
+                  "order": 6,
                   "visible": true,
                   "hasBorder": false,
                   "cssClasses": null,
@@ -649,7 +649,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "Legal status of the Provider. The legal status is usually noted in the registration act/statutes. For independent legal entities this should be the legal status of the Provider. For embedded Providers this should be the legal status of the hosting legal entity.",
+                  "text": "Legal status of the Organisation. The legal status is usually noted in the registration act/statutes. For independent legal entities (1) - legal status of the Provider. For embedded organisations (2) - legal status of the hosting legal entity.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -708,7 +708,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "A Hosting Legal Entity (HLE) is an institution registered as an EOSC resource provider, that is a legal entity and agrees to be accountable for resources onboarded to EOSC. Resources may be onboarded by a resource provider which is not a legal entity, but only if the Hosting Legal Entity field includes one legal entity already registered as resource provider, if this has been agreed in advance with them.",
+                  "text": "Name of the organisation/institution legally hosting (housing) the provider/research infrastructure or its coordinating centre. A distinction is made between: (1) research infrastructures that are self-standing and have a defined and distinct legal entity, (2) research infrastructures that are embedded into another institution which is a legal entity (such as a university, a research organisation, etc.). If (1) - name of the research infrastructure, If (2) - name of the hosting organisation.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -773,7 +773,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "A high-level description of the Provider in fairly non-technical terms, with the vision, mission, objectives, background, experience.",
+                  "text": "A high-level description of the Organisation in fairly non-technical terms, with the vision, mission, objectives, background, experience.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -830,13 +830,13 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": null,
+                  "text": "Link to the logo/visual identity of the Organisation.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
                 },
                 "suggestion": {
-                  "text": "Link to the logo/visual identity of the Provider. Go to the Provider's website --> Right Click on the Provider's logo on the website --> Select 'Copy Image Link' --> Paste it in the field below.",
+                  "text": "Right Click on the Provider's logo on the website --> Select 'Copy Image Link' --> Paste it in the field below.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -885,7 +885,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": null,
+                  "text": "Link to video, slideshow, photos, screenshots with details of the Organisation.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -941,7 +941,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": "Links to video, slideshow, photos, screenshots with details of the Provider.",
+                      "text": "URL to the multimedia resource.",
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -999,7 +999,7 @@
                     "affects": null,
                     "group": null,
                     "description": {
-                      "text": "Short description of the Multimedia content.",
+                      "text": "Name of the multimedia resource.",
                       "cssClasses": null,
                       "style": null,
                       "showLess": false
@@ -1030,11 +1030,11 @@
           ]
         },
         {
-          "id": "mainContact",
-          "name": "mainContact",
+          "id": "Contact",
+          "name": "Contact",
           "description": null,
           "subType": null,
-          "order": 4,
+          "order": 3,
           "subSections": null,
           "fields": [
             {
@@ -1265,6 +1265,65 @@
                   "subFields": []
                 },
                 {
+                  "id": "role",
+                  "name": "role",
+                  "parentId": "mainContact",
+                  "parent": "mainContact",
+                  "label": {
+                    "text": "Main Contact Role",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "vocabulary",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "url": "/api/vocabulary/types/Credit",
+                      "idField": "id",
+                      "labelField": "name"
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 4,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
                   "id": "PIDs",
                   "name": "PIDs",
                   "parentId": "mainContact",
@@ -1311,7 +1370,7 @@
                       "placement": null,
                       "order": 4,
                       "visible": true,
-                      "hasBorder": false,
+                      "hasBorder": true,
                       "cssClasses": null,
                       "style": null
                     }
@@ -1483,7 +1542,7 @@
                       "placement": null,
                       "order": 5,
                       "visible": true,
-                      "hasBorder": false,
+                      "hasBorder": true,
                       "cssClasses": null,
                       "style": null
                     }
@@ -1724,127 +1783,68 @@
                       ]
                     }
                   ]
-                },
-                {
-                  "id": "mainContactRole",
-                  "name": "mainContactRole",
-                  "parentId": "mainContact",
-                  "parent": "mainContact",
-                  "label": {
-                    "text": "Main Contact Role",
-                    "cssClasses": null,
-                    "style": null,
-                    "showLess": false
-                  },
-                  "accessPath": null,
-                  "kind": null,
-                  "typeInfo": {
-                    "vocabulary": null,
-                    "type": "vocabulary",
-                    "defaultValue": null,
-                    "values": null,
-                    "properties": {
-                      "url": "/api/vocabulary/types/Credit",
-                      "idField": "id",
-                      "labelField": "name"
-                    },
-                    "multiplicity": false,
-                    "prefill": null
-                  },
-                  "includedInSnippet": false,
-                  "deprecated": false,
-                  "form": {
-                    "dependsOn": null,
-                    "affects": null,
-                    "group": null,
-                    "description": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "suggestion": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "placeholder": null,
-                    "mandatory": false,
-                    "immutable": true,
-                    "display": {
-                      "placement": null,
-                      "order": 6,
-                      "visible": true,
-                      "hasBorder": false,
-                      "cssClasses": null,
-                      "style": null
-                    }
-                  },
-                  "display": null,
-                  "subFields": []
                 }
               ]
+            },
+            {
+              "id": "publicContacts",
+              "name": "publicContacts",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Public Contacts",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "email",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
+                "multiplicity": true,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "List of public contact emails.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
             }
           ]
-        },
-        {
-          "id": "publicContacts",
-          "name": "publicContacts",
-          "parentId": null,
-          "parent": null,
-          "label": {
-            "text": "Public Contacts",
-            "cssClasses": null,
-            "style": null,
-            "showLess": false
-          },
-          "accessPath": null,
-          "kind": null,
-          "typeInfo": {
-            "vocabulary": null,
-            "type": "email",
-            "defaultValue": null,
-            "values": null,
-            "properties": {
-              "minLength": null,
-              "maxLength": null
-            },
-            "multiplicity": true,
-            "prefill": null
-          },
-          "includedInSnippet": false,
-          "deprecated": false,
-          "form": {
-            "dependsOn": null,
-            "affects": null,
-            "group": null,
-            "description": {
-              "text": "List of public contact emails.",
-              "cssClasses": null,
-              "style": null,
-              "showLess": false
-            },
-            "suggestion": {
-              "text": null,
-              "cssClasses": null,
-              "style": null,
-              "showLess": false
-            },
-            "placeholder": null,
-            "mandatory": true,
-            "immutable": true,
-            "display": {
-              "placement": null,
-              "order": 5,
-              "visible": true,
-              "hasBorder": false,
-              "cssClasses": null,
-              "style": null
-            }
-          },
-          "display": null,
-          "subFields": []
         },
         {
           "id": "Admins",

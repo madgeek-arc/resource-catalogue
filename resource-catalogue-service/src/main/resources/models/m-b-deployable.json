@@ -1,12 +1,12 @@
 {
   "id": "m-b-deployable",
-  "name": "Deployable Software",
+  "name": "Deployable Application",
   "description": null,
   "notice": "Fields with (*) are mandatory and must be completed in order to submit this form. Leaving optional fields blank will remove the relevant heading from the published resource/provider profile.",
   "type": null,
   "subType": null,
   "series": null,
-  "resourceType": "deployable_software",
+  "resourceType": "deployable_application",
   "creationDate": "2026-01-27T16:34:45.928+00:00",
   "createdBy": null,
   "modificationDate": "2026-01-27T16:34:45.928+00:00",
@@ -14,7 +14,7 @@
   "sections": [
     {
       "id": "deployable",
-      "name": "deployableSoftware",
+      "name": "deployableApplication",
       "description": null,
       "subType": null,
       "order": 0,
@@ -117,7 +117,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "Full Name of the Provider/Organisation offering Resources and acting as main contact point for the Resources.",
+                  "text": "Name of the resource",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -229,7 +229,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": null,
+                  "text": "Other persistent identifiers.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -405,7 +405,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "EOSC Node",
+                  "text": "Node the resource belongs to.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -510,7 +510,7 @@
                   }
                 ],
                 "properties": {
-                  "formatToString": false
+                  "formatToString": true
                 },
                 "multiplicity": false,
                 "prefill": null
@@ -580,7 +580,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "One of the EOSC entities we have identified in EOSC Beyond.",
+                  "text": "Type of the resource. One among: Service, DataSource, Adapter, InteroperabilityGuidelines, TrainingMaterial, DeployableApplication",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -639,7 +639,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "The name (or abbreviation) of the organisation that manages or delivers the Service, or that coordinates Service delivery in a federated scenario.",
+                  "text": "The organisation that manages or delivers the Resource.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -745,7 +745,7 @@
                   "minLength": null,
                   "maxLength": null
                 },
-                "multiplicity": true,
+                "multiplicity": false,
                 "prefill": null
               },
               "includedInSnippet": false,
@@ -1328,6 +1328,65 @@
                   "subFields": []
                 },
                 {
+                  "id": "role",
+                  "name": "role",
+                  "parentId": "creators",
+                  "parent": "creators",
+                  "label": {
+                    "text": "Creator Role",
+                    "cssClasses": null,
+                    "style": null,
+                    "showLess": false
+                  },
+                  "accessPath": null,
+                  "kind": null,
+                  "typeInfo": {
+                    "vocabulary": null,
+                    "type": "vocabulary",
+                    "defaultValue": null,
+                    "values": null,
+                    "properties": {
+                      "url": "/api/vocabulary/types/Credit",
+                      "idField": "id",
+                      "labelField": "name"
+                    },
+                    "multiplicity": false,
+                    "prefill": null
+                  },
+                  "includedInSnippet": false,
+                  "deprecated": false,
+                  "form": {
+                    "dependsOn": null,
+                    "affects": null,
+                    "group": null,
+                    "description": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "suggestion": {
+                      "text": null,
+                      "cssClasses": null,
+                      "style": null,
+                      "showLess": false
+                    },
+                    "placeholder": null,
+                    "mandatory": false,
+                    "immutable": true,
+                    "display": {
+                      "placement": null,
+                      "order": 4,
+                      "visible": true,
+                      "hasBorder": false,
+                      "cssClasses": null,
+                      "style": null
+                    }
+                  },
+                  "display": null,
+                  "subFields": []
+                },
+                {
                   "id": "PIDs",
                   "name": "PIDs",
                   "parentId": "creators",
@@ -1374,7 +1433,7 @@
                       "placement": null,
                       "order": 4,
                       "visible": true,
-                      "hasBorder": false,
+                      "hasBorder": true,
                       "cssClasses": null,
                       "style": null
                     }
@@ -1546,7 +1605,7 @@
                       "placement": null,
                       "order": 5,
                       "visible": true,
-                      "hasBorder": false,
+                      "hasBorder": true,
                       "cssClasses": null,
                       "style": null
                     }
@@ -1787,127 +1846,68 @@
                       ]
                     }
                   ]
-                },
-                {
-                  "id": "creatorRole",
-                  "name": "creatorRole",
-                  "parentId": "creators",
-                  "parent": "creators",
-                  "label": {
-                    "text": "Creator Role",
-                    "cssClasses": null,
-                    "style": null,
-                    "showLess": false
-                  },
-                  "accessPath": null,
-                  "kind": null,
-                  "typeInfo": {
-                    "vocabulary": null,
-                    "type": "vocabulary",
-                    "defaultValue": null,
-                    "values": null,
-                    "properties": {
-                      "url": "/api/vocabulary/types/Credit",
-                      "idField": "id",
-                      "labelField": "name"
-                    },
-                    "multiplicity": false,
-                    "prefill": null
-                  },
-                  "includedInSnippet": false,
-                  "deprecated": false,
-                  "form": {
-                    "dependsOn": null,
-                    "affects": null,
-                    "group": null,
-                    "description": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "suggestion": {
-                      "text": null,
-                      "cssClasses": null,
-                      "style": null,
-                      "showLess": false
-                    },
-                    "placeholder": null,
-                    "mandatory": false,
-                    "immutable": true,
-                    "display": {
-                      "placement": null,
-                      "order": 6,
-                      "visible": true,
-                      "hasBorder": false,
-                      "cssClasses": null,
-                      "style": null
-                    }
-                  },
-                  "display": null,
-                  "subFields": []
                 }
               ]
+            },
+            {
+              "id": "publicContacts",
+              "name": "publicContacts",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Public Contacts",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "email",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
+                "multiplicity": true,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "List of public contact emails.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": null,
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 4,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
             }
           ]
-        },
-        {
-          "id": "publicContacts",
-          "name": "publicContacts",
-          "parentId": null,
-          "parent": null,
-          "label": {
-            "text": "Public Contacts",
-            "cssClasses": null,
-            "style": null,
-            "showLess": false
-          },
-          "accessPath": null,
-          "kind": null,
-          "typeInfo": {
-            "vocabulary": null,
-            "type": "email",
-            "defaultValue": null,
-            "values": null,
-            "properties": {
-              "minLength": null,
-              "maxLength": null
-            },
-            "multiplicity": true,
-            "prefill": null
-          },
-          "includedInSnippet": false,
-          "deprecated": false,
-          "form": {
-            "dependsOn": null,
-            "affects": null,
-            "group": null,
-            "description": {
-              "text": "List of public contact emails.",
-              "cssClasses": null,
-              "style": null,
-              "showLess": false
-            },
-            "suggestion": {
-              "text": null,
-              "cssClasses": null,
-              "style": null,
-              "showLess": false
-            },
-            "placeholder": null,
-            "mandatory": true,
-            "immutable": true,
-            "display": {
-              "placement": null,
-              "order": 4,
-              "visible": true,
-              "hasBorder": false,
-              "cssClasses": null,
-              "style": null
-            }
-          },
-          "display": null,
-          "subFields": []
         },
         {
           "id": "Maturity",
@@ -1999,7 +1999,7 @@
                   }
                 ],
                 "properties": {
-                  "formatToString": false
+                  "formatToString": true
                 },
                 "multiplicity": false,
                 "prefill": null
