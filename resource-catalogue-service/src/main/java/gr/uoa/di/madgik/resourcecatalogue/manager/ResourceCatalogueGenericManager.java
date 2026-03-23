@@ -85,37 +85,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         bundle.setIdentifiers(identifiers);
     }
 
-    // TODO: transfer to bpmn
-    protected void onboard(Bundle bundle, OrganisationBundle provider, Authentication auth) {
-        String catalogueId = bundle.getCatalogueId();
-        UserInfo user = UserInfo.of(auth);
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
-            if (provider.getTemplateStatus().equals("approved template")) {
-                bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-                bundle.setActive(true);
-            } else {
-                bundle.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-            }
-            bundle.setCatalogueId(this.catalogueId);
-            this.createIdentifiers(bundle, getResourceTypeName(), false);
-            bundle.setId(bundle.getIdentifiers().getOriginalId());
-        } else {
-            bundle.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-//            commonMethods.validateCatalogueId(catalogueId); //FIXME
-
-            this.createIdentifiers(bundle, getResourceTypeName(), true);
-        }
-        bundle.setAuditState(Auditable.NOT_AUDITED);
-    }
-
-    protected void onboardingValidation(T bundle) {
-        logger.warn("Onboarding Validator: remove me when catalogue validation is implemented.");
-//        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
-        //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
-//        VocabularyValidationUtils.validateCategories();
-//        VocabularyValidationUtils.validateScientificDomains();
-    }
-
     //TODO: we don't need this
     @Override
     public T get(String id) {
@@ -256,7 +225,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     public T add(T bundle, Authentication auth) {
         createIdentifiers(bundle);
         T ret = genericResourceService.add(getResourceTypeName(), bundle);
-        onboardingValidation(bundle);
         try {
             ret = workflowService.onboard(getResourceTypeName(), ret, auth);
             ret = genericResourceService.update(getResourceTypeName(), ret.getId(), ret); // adds logging info - possibly replace with generic update
