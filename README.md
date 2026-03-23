@@ -296,7 +296,6 @@ catalogue.resources.monitoring.id-prefix=monitoring
 catalogue.resources.organisation.id-prefix=organisation
 catalogue.resources.resource-interoperability-record.id-prefix=resource_interoperability_record
 catalogue.resources.service.id-prefix=service
-catalogue.resources.tool.id-prefix=tool
 catalogue.resources.training_resource.id-prefix=training_resource
 catalogue.resources.vocabulary-curation.id-prefix=vocabulary_curation
 ## Email Notification Properties ##
@@ -331,6 +330,32 @@ pid.service.enabled=false
 
 ## OpenAIRE Datasource Properties ##
 openaire.ds.api=https://beta.services.openaire.eu/
+
+## Monitoring Properties ##
+argo.grnet.monitoring.service.types=
+argo.grnet.monitoring.availability=
+argo.grnet.monitoring.status=
+argo.grnet.monitoring.token=
+
+## Helpdesk ##
+helpdesk.enabled=true
+helpdesk.endpoint=
+
+## Accounting ##
+accounting.enabled=true
+accounting.project-id=
+accounting.endpoint=
+accounting.client-id=
+accounting.client-secret=
+accounting.token-endpoint=
+
+
+########################
+##  Other Properties  ##
+########################
+
+## SQAaaS ##
+sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
 ```
 
 ### PID Properties Example
@@ -346,7 +371,7 @@ configurations under the auth block.
 ## PID Properties ##
 catalogue:
   resources:
-    provider:
+    organisation:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -358,6 +383,17 @@ catalogue:
           client-key:
           client-cert:
     service:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    datasource:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -401,7 +437,7 @@ catalogue:
           self-signed-cert:
           client-key:
           client-cert:
-    deployable-software:
+    deployable-application:
       resolve-endpoints:
       pid-issuer:
         url:

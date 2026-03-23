@@ -23,6 +23,17 @@ catalogue:
           self-signed-cert:
           client-key:
           client-cert:
+    datasource:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
     training-resource:
       resolve-endpoints:
       pid-issuer:
@@ -56,7 +67,7 @@ catalogue:
           self-signed-cert:
           client-key:
           client-cert:
-    deployable-software:
+    deployable-application:
       resolve-endpoints:
       pid-issuer:
         url:
