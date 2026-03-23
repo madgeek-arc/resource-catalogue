@@ -317,7 +317,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     @Override
     public ServiceBundle addDraft(ServiceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
-        bundle.setCatalogueId(catalogueId);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 

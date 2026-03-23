@@ -208,7 +208,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     @Override
     public InteroperabilityRecordBundle addDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
-        bundle.setCatalogueId(catalogueId);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 

@@ -418,7 +418,6 @@ public class InteroperabilityRecordController
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
     }
@@ -441,7 +440,7 @@ public class InteroperabilityRecordController
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> guideline,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) guideline.get("id");
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         bundle.setInteroperabilityRecord(guideline);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Interoperability Record with id '{}'", id);
@@ -455,7 +454,7 @@ public class InteroperabilityRecordController
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         service.deleteDraft(bundle);
     }
 
@@ -465,7 +464,7 @@ public class InteroperabilityRecordController
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> guideline,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) guideline.get("id");
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         bundle.setInteroperabilityRecord(guideline);
 
         logger.info("Finalizing Draft Interoperability Record with id '{}'", id);

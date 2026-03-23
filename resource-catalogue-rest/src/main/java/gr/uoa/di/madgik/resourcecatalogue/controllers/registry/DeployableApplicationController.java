@@ -369,7 +369,6 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
     }
@@ -390,7 +389,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> deployableApplication,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) deployableApplication.get("id");
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         bundle.setDeployableApplication(deployableApplication);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Deployable Application with id '{}'", id);
@@ -403,7 +402,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         service.deleteDraft(bundle);
     }
 
@@ -412,7 +411,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> deployableApplication,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) deployableApplication.get("id");
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         bundle.setDeployableApplication(deployableApplication);
 
         logger.info("Finalizing Draft Deployable Application with id '{}'", id);

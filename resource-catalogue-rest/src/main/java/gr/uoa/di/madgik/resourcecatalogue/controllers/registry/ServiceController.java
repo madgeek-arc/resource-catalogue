@@ -427,7 +427,6 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
     }
@@ -450,7 +449,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) serviceMap.get("id");
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         bundle.setService(serviceMap);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Service with id '{}'", id);
@@ -464,7 +463,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         service.deleteDraft(bundle);
     }
 
@@ -474,7 +473,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) serviceMap.get("id");
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         bundle.setService(serviceMap);
 
         logger.info("Finalizing Draft Service with id '{}'", id);

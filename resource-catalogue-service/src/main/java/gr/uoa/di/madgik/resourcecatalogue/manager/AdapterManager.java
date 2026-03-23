@@ -183,7 +183,6 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     @Override
     public AdapterBundle addDraft(AdapterBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
-        bundle.setCatalogueId(catalogueId);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
         commonMethods.addAuthenticatedUser(bundle.getAdapter(), auth);

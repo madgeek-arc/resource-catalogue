@@ -360,7 +360,6 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
     }
@@ -381,7 +380,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> adapter,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) adapter.get("id");
-        AdapterBundle bundle = service.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id);
         bundle.setAdapter(adapter);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Adapter with id '{}'", id);
@@ -394,7 +393,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        AdapterBundle bundle = service.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id);
         service.deleteDraft(bundle);
     }
 
@@ -403,7 +402,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> adapter,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) adapter.get("id");
-        AdapterBundle bundle = service.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id);
         bundle.setAdapter(adapter);
 
         logger.info("Finalizing Draft Adapter with id '{}'", id);

@@ -440,7 +440,6 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
     }
@@ -461,7 +460,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> datasource,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) datasource.get("id");
-        DatasourceBundle bundle = service.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id);
         bundle.setDatasource(datasource);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Datasource with id '{}'", id);
@@ -474,7 +473,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id);
         service.deleteDraft(bundle);
     }
 
@@ -483,7 +482,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> datasource,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) datasource.get("id");
-        DatasourceBundle bundle = service.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id);
         bundle.setDatasource(datasource);
 
         logger.info("Finalizing Draft Datasource with id '{}'", id);

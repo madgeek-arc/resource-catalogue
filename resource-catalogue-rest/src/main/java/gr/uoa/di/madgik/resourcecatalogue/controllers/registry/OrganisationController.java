@@ -377,7 +377,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> provider,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) provider.get("id");
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         bundle.setOrganisation(provider);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Provider with id '{}'", id);
@@ -390,7 +390,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         service.deleteDraft(bundle);
     }
 
@@ -399,7 +399,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> provider,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) provider.get("id");
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         bundle.setOrganisation(provider);
 
         logger.info("Finalizing Draft Provider with id '{}'", id);

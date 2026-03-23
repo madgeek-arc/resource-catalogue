@@ -295,7 +295,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     @Override
     public DatasourceBundle addDraft(DatasourceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
-        bundle.setCatalogueId(catalogueId);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 

@@ -339,7 +339,6 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     @Override
     public OrganisationBundle addDraft(OrganisationBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
-        bundle.setCatalogueId(catalogueId);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
         commonMethods.addAuthenticatedUser(bundle.getOrganisation(), auth);

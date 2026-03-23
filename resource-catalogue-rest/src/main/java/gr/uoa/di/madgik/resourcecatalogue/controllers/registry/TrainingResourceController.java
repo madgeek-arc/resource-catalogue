@@ -367,7 +367,6 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("draft", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);
     }
@@ -388,7 +387,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) trainingResource.get("id");
-        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        TrainingResourceBundle bundle = service.get(id);
         bundle.settTrainingResource(trainingResource);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Training Resource with id '{}'", id);
@@ -401,7 +400,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        TrainingResourceBundle bundle = service.get(id);
         service.deleteDraft(bundle);
     }
 
@@ -410,7 +409,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) trainingResource.get("id");
-        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        TrainingResourceBundle bundle = service.get(id);
         bundle.settTrainingResource(trainingResource);
 
         logger.info("Finalizing Draft Training Resource with id '{}'", id);

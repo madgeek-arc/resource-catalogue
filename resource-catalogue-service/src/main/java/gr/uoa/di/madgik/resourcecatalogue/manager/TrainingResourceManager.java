@@ -240,7 +240,6 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     @Override
     public TrainingResourceBundle addDraft(TrainingResourceBundle bundle, Authentication auth) {
         bundle.markDraft(auth, null);
-        bundle.setCatalogueId(catalogueId);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
