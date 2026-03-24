@@ -51,7 +51,7 @@
 //    @Autowired
 //    ProviderService providerService;
 //    @Autowired
-//    DraftResourceService<ProviderBundle> draftProviderService;
+//    DraftResourceService<OrganisationBundle> draftProviderService;
 //    @Autowired
 //    ServiceService serviceService;
 //    @Autowired
@@ -109,15 +109,15 @@
 //
 //    private void addEmailsFromProviders(Set<String> emails, FacetFilter facetFilter, Authentication adminAccess,
 //                                        Boolean includeContacts) {
-//        List<ProviderBundle> allProviders = providerService.getAll(facetFilter, adminAccess).getResults();
+//        List<OrganisationBundle> allProviders = providerService.getAll(facetFilter, adminAccess).getResults();
 //        allProviders.addAll(draftProviderService.getAll(facetFilter, adminAccess).getResults());
 //
-//        for (ProviderBundle providerBundle : allProviders) {
-//            emails.addAll(providerBundle.getProvider().getUsers()
+//        for (OrganisationBundle OrganisationBundle : allProviders) {
+//            emails.addAll(OrganisationBundle.getProvider().getUsers()
 //                    .stream().map(User::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
 //            if (includeContacts != null && includeContacts) {
-//                emails.add(providerBundle.getProvider().getMainContact().getEmail().toLowerCase());
-//                emails.addAll(providerBundle.getProvider().getPublicContacts()
+//                emails.add(OrganisationBundle.getProvider().getMainContact().getEmail().toLowerCase());
+//                emails.addAll(OrganisationBundle.getProvider().getPublicContacts()
 //                        .stream().map(ProviderPublicContact::getEmail).map(String::toLowerCase).collect(Collectors.toSet()));
 //            }
 //        }

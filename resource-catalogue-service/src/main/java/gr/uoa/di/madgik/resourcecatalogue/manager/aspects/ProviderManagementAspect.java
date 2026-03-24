@@ -269,7 +269,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(final OrganisationBundle bundle) {
         logger.trace("Sending Registration emails");
         if (!bundle.getMetadata().isPublished() && bundle.getCatalogueId().equals(catalogueId)) {
-//            emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "providerManager"); //FIXME
+//            emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "providerManager"); //FIXME
         }
     }
 
@@ -279,7 +279,7 @@ public class ProviderManagementAspect {
         OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
+//        emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "serviceBundleManager"); //FIXME
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
@@ -288,7 +288,7 @@ public class ProviderManagementAspect {
         OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
+//        emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "serviceBundleManager"); //FIXME
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
@@ -297,7 +297,7 @@ public class ProviderManagementAspect {
         OrganisationBundle provider = organisationService.get((String) training.getTrainingResource().get("resourceOwner"),
                 training.getCatalogueId());
         logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
+//        emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "serviceBundleManager"); //FIXME
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))",
@@ -306,7 +306,7 @@ public class ProviderManagementAspect {
         OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
                 deployableApplication.getCatalogueId());
         logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(providerBundle, "serviceBundleManager"); //FIXME
+//        emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "serviceBundleManager"); //FIXME
     }
     //endregion
 

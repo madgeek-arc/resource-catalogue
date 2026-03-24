@@ -16,12 +16,13 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service.sync;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class ServiceSync extends AbstractSyncService<gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Service> {
+public class ServiceSync extends AbstractSyncService<ServiceBundle> {
 
     public ServiceSync(@Value("${sync.host:}") String host,
                        @Value("${sync.token.filepath:}") String filename,

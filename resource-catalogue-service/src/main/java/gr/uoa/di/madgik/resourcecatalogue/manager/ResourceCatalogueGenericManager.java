@@ -306,15 +306,15 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
         //TODO: enable if Catalogues return.
 //        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
-//        if (bundle instanceof ProviderBundle) {
+//        if (bundle instanceof OrganisationBundle) {
 //            if (catalogueBundle.isSuspended() && !suspend) {
 //                throw new ResourceException("You cannot unsuspend a Provider when its Catalogue is suspended",
 //                        HttpStatus.CONFLICT);
 //            }
 //        } else {
 //            if (providerId != null && !providerId.isEmpty()) {
-//                ProviderBundle providerBundle = providerService.get(providerId, catalogueId);
-//                if ((catalogueBundle.isSuspended() || providerBundle.isSuspended()) && !suspend) {
+//                OrganisationBundle OrganisationBundle = providerService.get(providerId, catalogueId);
+//                if ((catalogueBundle.isSuspended() || OrganisationBundle.isSuspended()) && !suspend) {
 //                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
 //                            HttpStatus.CONFLICT);
 //                }

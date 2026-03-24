@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 
 import java.util.LinkedHashMap;
@@ -37,7 +36,7 @@ public interface ConfigurationTemplateInstanceService
      * Return a List of ConfigurationTemplateInstances providing a ConfigurationTemplate ID
      *
      * @param id resource ID
-     * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
+     * @return {@link List}&lt;{@link }&gt;
      */
     List<LinkedHashMap<String, Object>> getByConfigurationTemplateId(String id);
 
@@ -47,7 +46,7 @@ public interface ConfigurationTemplateInstanceService
      *
      * @param resourceId resource ID
      * @param ctId       resource ID
-     * @return {@link List}&lt;{@link ConfigurationTemplateInstance}&gt;
+     * @return {@link List}&lt;{@link }&gt;
      */
     LinkedHashMap<String, Object> getByResourceAndConfigurationTemplateId(String resourceId, String ctId);
 }

@@ -18,7 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ConfigurationTemplate;
 import org.springframework.util.MultiValueMap;
 
 import java.util.List;
@@ -31,7 +30,7 @@ public interface ConfigurationTemplateService extends ResourceCatalogueGenericSe
      *
      * @param params                   search parameters
      * @param interoperabilityRecordId Interoperability Record ID
-     * @return {@link Paging<ConfigurationTemplate>}
+     * @return {@link Paging<ConfigurationTemplateBundle>}
      */
     Paging<ConfigurationTemplateBundle> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
                                                                          String interoperabilityRecordId);

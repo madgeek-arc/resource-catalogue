@@ -16,10 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service.sync;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Datasource;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Provider;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.TrainingResource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.SynchronizerService;
 import jakarta.annotation.PostConstruct;
 import org.javatuples.Pair;
@@ -39,7 +39,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Service
-public abstract class AbstractSyncService<T extends Identifiable> implements SynchronizerService<T> {
+public abstract class AbstractSyncService <T extends Bundle> implements SynchronizerService<T> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractSyncService.class);
     private static boolean isInitialized = false;
 
@@ -167,11 +167,11 @@ public abstract class AbstractSyncService<T extends Identifiable> implements Syn
         try {
             // Determine the correct verification endpoint
             uri = switch (t) {
-                case Provider provider ->
+                case OrganisationBundle provider ->
                         host + controller + "/verifyProvider/" + t.getId() + "?active=true&status=approved%20provider";
-                case TrainingResource trainingResource ->
+                case TrainingResourceBundle trainingResource ->
                         host + controller + "/verifyTrainingResource/" + t.getId() + "?active=true&status=approved%20resource";
-                case Datasource datasource ->
+                case DatasourceBundle datasource ->
                         host + controller + "/verifyDatasource/" + t.getId() + "?active=true&status=approved%20resource";
                 default ->
                         host + controller + "/verifyResource/" + t.getId() + "?active=true&status=approved%20resource";

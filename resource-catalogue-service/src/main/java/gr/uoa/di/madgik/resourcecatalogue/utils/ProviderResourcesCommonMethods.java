@@ -19,9 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Adapter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Catalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Provider;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceInteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
@@ -74,7 +71,7 @@ public class ProviderResourcesCommonMethods {
         }
     }
 
-    public void addAuthenticatedUser(Object object, Authentication auth) {
+    public <T> void addAuthenticatedUser(T object, Authentication auth) {
         User authUser = User.of(auth);
         if (object instanceof LinkedHashMap<?, ?> raw) {
             @SuppressWarnings("unchecked")
@@ -93,10 +90,6 @@ public class ProviderResourcesCommonMethods {
             }
             users.add(authUser);
             payload.put("users", new ArrayList<>(users));
-        } else if (object instanceof Catalogue catalogue) {
-            Set<User> users = catalogue.getUsers() == null ? new HashSet<>() : new HashSet<>(catalogue.getUsers());
-            users.add(authUser);
-            catalogue.setUsers(new ArrayList<>(users));
         }
     }
 

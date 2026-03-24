@@ -157,10 +157,10 @@
 //    //FIXME
 //    private String getOnboardingTeamSubject(ProviderBundle providerBundle) {
 //        return null;
-////        if (providerBundle.getTemplateStatus().equals("no template status")) {
-////            return getSubjectForResourceOnboarding(providerBundle, true, false);
+////        if (organisationBundle.getTemplateStatus().equals("no template status")) {
+////            return getSubjectForResourceOnboarding(organisationBundle, true, false);
 ////        } else {
-////            return getSubjectForResourceOnboarding(providerBundle, true, true);
+////            return getSubjectForResourceOnboarding(organisationBundle, true, true);
 ////        }
 //    }
 //
@@ -170,12 +170,12 @@
 ////    }
 //
 //    //FIXME
-//    private String getProviderAdminsSubject(ProviderBundle providerBundle) {
+//    private String getProviderAdminsSubject(OrganisationBundle organisationBundle) {
 //        return null;
-////        if (providerBundle.getTemplateStatus().equals("no template status")) {
-////            return getSubjectForResourceOnboarding(providerBundle, false, false);
+////        if (organisationBundle.getTemplateStatus().equals("no template status")) {
+////            return getSubjectForResourceOnboarding(organisationBundle, false, false);
 ////        } else {
-////            return getSubjectForResourceOnboarding(providerBundle, false, true);
+////            return getSubjectForResourceOnboarding(organisationBundle, false, true);
 ////        }
 //    }
 //
@@ -187,22 +187,22 @@
 //
 //    //FIXME
 ////    @Async
-////    public void sendOnboardingEmailsToProviderAdmins(ProviderBundle providerBundle, String afterReturningFrom) {
+////    public void sendOnboardingEmailsToProviderAdmins(OrganisationBundle organisationBundle, String afterReturningFrom) {
 ////        EmailBasicInfo emailBasicInfoUser = initializeEmail("providerMailTemplate.ftl",
-////                providerBundle, null, null);
+////                organisationBundle, null, null);
 ////        EmailBasicInfo emailBasicInfoAdmin = initializeEmail("registrationTeamMailTemplate.ftl",
-////                providerBundle, null, null);
+////                organisationBundle, null, null);
 ////
 ////        Bundle<?> template;
 ////        switch (afterReturningFrom) {
 ////            case "serviceBundleManager":
-////                template = serviceBundleManager.getResourceBundles(providerBundle.getId(),
+////                template = serviceBundleManager.getResourceBundles(organisationBundle.getId(),
 ////                        securityService.getAdminAccess()).getFirst();
 ////                updateRootAccordingToResourceType(template, emailBasicInfoUser);
 ////                emailBasicInfoUser.updateRoot("resourceType", "resource");
 ////                break;
 ////            case "trainingResourceManager":
-////                template = trainingResourceManager.getResourceBundles(providerBundle.getId(),
+////                template = trainingResourceManager.getResourceBundles(organisationBundle.getId(),
 ////                        securityService.getAdminAccess()).getFirst();
 ////                updateRootAccordingToResourceType(template, emailBasicInfoUser);
 ////                emailBasicInfoUser.updateRoot("resourceType", "training-resource");
@@ -214,7 +214,7 @@
 ////        emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
 ////
 ////        // Get User Info (the one that registered the resource or the first in the Provider Admin list)
-////        Optional<User> registeredUser = providerBundle.getLoggingInfo().stream()
+////        Optional<User> registeredUser = organisationBundle.getLoggingInfo().stream()
 ////                .filter(loggingInfo -> LoggingInfo.ActionType.REGISTERED.getKey().equals(loggingInfo.getActionType()))
 ////                .findFirst()
 ////                .map(loggingInfo -> {

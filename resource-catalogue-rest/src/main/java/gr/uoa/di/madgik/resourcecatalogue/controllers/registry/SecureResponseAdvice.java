@@ -18,7 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Adapter;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import org.slf4j.Logger;
@@ -94,8 +93,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 //            modifyCatalogueBundle(t, auth);
 //        }
         if (t instanceof OrganisationBundle) {
-            modifyProviderBundle(t, auth);
-        } else if (t instanceof Adapter) {
+            modifyOrganisationBundle(t, auth);
+        } else if (t instanceof AdapterBundle) {
             modifyAdapterBundle(t, auth);
         } else if (t instanceof ServiceBundle) {
             modifyServiceBundle(t, auth);
@@ -128,7 +127,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 //    }
 
     @SuppressWarnings("unchecked")
-    private void modifyProviderBundle(T bundle, Authentication auth) {
+    private void modifyOrganisationBundle(T bundle, Authentication auth) {
         modifyLoggingInfoList((T) ((OrganisationBundle) bundle).getLoggingInfo());
         modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestAuditInfo());
         modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestUpdateInfo());

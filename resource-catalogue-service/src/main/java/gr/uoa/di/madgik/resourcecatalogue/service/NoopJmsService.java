@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.validators;
+package gr.uoa.di.madgik.resourcecatalogue.service;
 
-public class ValidationMessagesUtils {
+import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-    public static String mandatoryField(String field) {
-        return String.format("Field '%s' is mandatory", field);
+@Service
+public class NoopJmsService implements JmsService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NoopJmsService.class);
+
+    public NoopJmsService() {
     }
 
-    private ValidationMessagesUtils() {
+    public void convertAndSendTopic(String messageDestination, Object message) {
+        logger.debug("No-op");
     }
+
+    public void convertAndSendQueue(String messageDestination, Object message) {
+        logger.debug("No-op");
+    }
+
 }

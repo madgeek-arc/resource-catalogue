@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +43,7 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
     void setUp() {
         resourceTypes = Arrays.stream(ResourceTypes.values())
                 .map(resourceType -> resourceType.name().toLowerCase())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

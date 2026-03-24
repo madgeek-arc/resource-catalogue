@@ -218,8 +218,8 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 //            throw new ValidationException(String.format("You cannot move Service with id [%s] to another Provider as it" +
 //                    "is not yet Approved", serviceBundle.getId()));
 //        }
-//        ProviderBundle newProvider = providerService.get(newProviderId, auth);
-//        ProviderBundle oldProvider = providerService.get(serviceBundle.getService().getCatalogueId(),
+//        OrganisationBundle newProvider = providerService.get(newProviderId, auth);
+//        OrganisationBundle oldProvider = providerService.get(serviceBundle.getService().getCatalogueId(),
 //                serviceBundle.getService().getResourceOrganisation(), auth);
 //
 //        // check that the 2 Providers co-exist under the same Catalogue

@@ -17,7 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,14 +32,13 @@ import java.util.List;
 
 public class TestUtils {
 
-    //FIXME
-//    public static CatalogueBundle createCatalogueBundle() {
-//        CatalogueBundle bundle = new CatalogueBundle();
-//        bundle.setCatalogue(createCatalogue());
-//        return bundle;
-//    }
+    public static CatalogueBundle createCatalogueBundle() {
+        CatalogueBundle bundle = new CatalogueBundle();
+        bundle.setCatalogue(createCatalogue());
+        return bundle;
+    }
 
-    public static OrganisationBundle createProviderBundle() {
+    public static OrganisationBundle createOrganisationBundle() {
         OrganisationBundle bundle = new OrganisationBundle();
         bundle.setOrganisation(createProvider());
         return bundle;
@@ -48,38 +46,37 @@ public class TestUtils {
 
     public static ServiceBundle createServiceBundle() {
         ServiceBundle bundle = new ServiceBundle();
-//        bundle.setService(createService()); //FIXME
+        bundle.setService(createService());
         return bundle;
     }
 
-    //FIXME
-//    public static DatasourceBundle createDatasourceBundle() {
-//        DatasourceBundle bundle = new DatasourceBundle();
-//        bundle.setDatasource(createDatasource());
-//        return bundle;
-//    }
-//
-//    public static TrainingResourceBundle createTrainingResourceBundle() {
-//        TrainingResourceBundle bundle = new TrainingResourceBundle();
-//        bundle.setTrainingResource(createTrainingResource());
-//        return bundle;
-//    }
+    public static DatasourceBundle createDatasourceBundle() {
+        DatasourceBundle bundle = new DatasourceBundle();
+        bundle.setDatasource(createDatasource());
+        return bundle;
+    }
 
-    public static Catalogue createCatalogue() {
-        Catalogue catalogue = new Catalogue();
-        catalogue.setAbbreviation("EOSC");
-        catalogue.setName("EOSC");
-        catalogue.setWebsite(createURL());
-        catalogue.setLegalEntity(false);
-        catalogue.setInclusionCriteria(createURL());
-        catalogue.setValidationProcess(createURL());
-        catalogue.setEndOfLife("Test End Of Life");
-        catalogue.setDescription("Test Description");
-        catalogue.setScope("Test Scope");
-        catalogue.setLogo(createURL());
-        catalogue.setLocation(createProviderLocation());
+    public static TrainingResourceBundle createTrainingResourceBundle() {
+        TrainingResourceBundle bundle = new TrainingResourceBundle();
+        bundle.settTrainingResource(createTrainingResource());
+        return bundle;
+    }
+
+    public static LinkedHashMap<String, Object> createCatalogue() {
+        LinkedHashMap<String, Object> catalogue = new LinkedHashMap<>();
+        catalogue.put("abbreviation", "EOSC");
+        catalogue.put("name", "EOSC");
+        catalogue.put("website", createURL());
+        catalogue.put("legalEntity", false);
+        catalogue.put("inclusionCriteria", createURL());
+        catalogue.put("validationProcess", createURL());
+        catalogue.put("endOfLife", "Test End Of Life");
+        catalogue.put("description", "Test Description");
+        catalogue.put("scope", "Test Scope");
+        catalogue.put("logo", createURL());
+        catalogue.put("location", createProviderLocation());
 //        catalogue.setMainContact(createProviderMainContact());
-        catalogue.setPublicContacts(createProviderPublicContacts());
+        catalogue.put("publicContacts", createProviderPublicContacts());
 //        catalogue.setUsers(createUsers());
         return catalogue;
     }
@@ -99,59 +96,59 @@ public class TestUtils {
         return provider;
     }
 
-    public static Service createService() {
-        Service service = new Service();
-        service.setAbbreviation("Test Abbreviation");
-        service.setName("Test Service");
-        service.setResourceOrganisation("11.1111/abc123");
-        service.setWebpage(createURL());
-        service.setDescription("Test Description");
-        service.setTagline("Test Tagline");
-        service.setLogo(createURL());
-        service.setScientificDomains(createScientificDomains());
-        service.setCategories(createCategories());
-        service.setTargetUsers(List.of("target_user-businesses", "target_user-funders"));
-        service.setGeographicalAvailabilities(List.of("AD", "AE"));
-        service.setLanguageAvailabilities(List.of("en", "es"));
-        service.setMainContact(createServiceMainContact());
-        service.setPublicContacts(createServicePublicContacts());
-        service.setHelpdeskEmail("helpdesk@email.com");
-        service.setSecurityContactEmail("security@email.com");
-        service.setTrl("trl-9");
-        service.setTermsOfUse(createURL());
-        service.setPrivacyPolicy(createURL());
-        service.setOrderType("order_type-fully_open_access");
+    public static LinkedHashMap<String, Object> createService() {
+        LinkedHashMap<String, Object> service = new LinkedHashMap<>();
+        service.put("abbreviation", "Test Abbreviation");
+        service.put("name", "Test Service");
+        service.put("resourceOrganisation", "11.1111/abc123");
+        service.put("webpage", createURL());
+        service.put("description", "Test Description");
+        service.put("tagline", "Test Tagline");
+        service.put("logo", createURL());
+        service.put("scientificDomains", createScientificDomains());
+        service.put("categories", createCategories());
+        service.put("targetUsers", List.of("target_user-businesses", "target_user-funders"));
+        service.put("geographicalAvailabilities", List.of("AD", "AE"));
+        service.put("languageAvailabilities", List.of("en", "es"));
+        service.put("mainContact", createServiceMainContact());
+        service.put("publicContacts", createServicePublicContacts());
+        service.put("helpdeskEmail", "helpdesk@email.com");
+        service.put("securityContactEmail", "security@email.com");
+        service.put("trl", "trl-9");
+        service.put("termsOfUse", createURL());
+        service.put("privacyPolicy", createURL());
+        service.put("orderType", "order_type-fully_open_access");
         return service;
     }
 
-    public static Datasource createDatasource() {
-        Datasource datasource = new Datasource();
-        datasource.setServiceId("dat/abc123");
-        datasource.setCatalogueId("eosc");
-        datasource.setJurisdiction("ds_jurisdiction-global");
-        datasource.setDatasourceClassification("ds_classification-repository");
-        datasource.setResearchEntityTypes(List.of("ds_research_entity_type-research_data",
+    public static LinkedHashMap<String, Object> createDatasource() {
+        LinkedHashMap<String, Object> datasource = new LinkedHashMap<>();
+        datasource.put("serviceId", "dat/abc123");
+        datasource.put("catalogueId", "eosc");
+        datasource.put("jurisdiction", "ds_jurisdiction-global");
+        datasource.put("datasourceClassification", "ds_classification-repository");
+        datasource.put("researchEntityTypes", List.of("ds_research_entity_type-research_data",
                 "ds_research_entity_type-research_software"));
-        datasource.setThematic(false);
+        datasource.put("thematic", false);
         return datasource;
     }
 
-    public static TrainingResource createTrainingResource() {
-        TrainingResource trainingResource = new TrainingResource();
-        trainingResource.setTitle("Test Training Resource");
-        trainingResource.setResourceOrganisation("11.1111/abc123");
-        trainingResource.setAuthors(List.of("Joe Doe", "Foo Bar"));
-        trainingResource.setUrl(createURL());
-        trainingResource.setLicense("Test License");
-        trainingResource.setAccessRights("tr_access_right-open_access");
-        trainingResource.setVersionDate(new Date(1674858000000L));
-        trainingResource.setTargetGroups(List.of("target_user-businesses", "target_user-funders"));
-        trainingResource.setLearningOutcomes(List.of("outcome1", "outcome2"));
-        trainingResource.setExpertiseLevel("tr_expertise_level-advanced");
-        trainingResource.setLanguages(List.of("en", "es"));
-        trainingResource.setGeographicalAvailabilities(List.of("AD", "AE"));
-        trainingResource.setScientificDomains(createScientificDomains());
-        trainingResource.setContact(createServiceMainContact());
+    public static LinkedHashMap<String, Object> createTrainingResource() {
+        LinkedHashMap<String, Object> trainingResource = new LinkedHashMap<>();
+        trainingResource.put("title", "Test Training Resource");
+        trainingResource.put("resourceOrganisation", "11.1111/abc123");
+        trainingResource.put("authors", List.of("Joe Doe", "Foo Bar"));
+        trainingResource.put("url", createURL());
+        trainingResource.put("license", "Test License");
+        trainingResource.put("accessRights", "tr_access_right-open_access");
+        trainingResource.put("versionDate", new Date(1674858000000L));
+        trainingResource.put("targetGroups", List.of("target_user-businesses", "target_user-funders"));
+        trainingResource.put("learningOutcomes", List.of("outcome1", "outcome2"));
+        trainingResource.put("expertiseLevel", "tr_expertise_level-advanced");
+        trainingResource.put("languages", List.of("en", "es"));
+        trainingResource.put("geographicalAvailabilities", List.of("AD", "AE"));
+        trainingResource.put("scientificDomains", createScientificDomains());
+        trainingResource.put("contact", createServiceMainContact());
         return trainingResource;
     }
 
@@ -163,12 +160,12 @@ public class TestUtils {
         }
     }
 
-    private static ProviderLocation createProviderLocation() {
-        ProviderLocation location = new ProviderLocation();
-        location.setStreetNameAndNumber("Test Street Name 1");
-        location.setPostalCode("12345");
-        location.setCity("Test City");
-        location.setCountry("AD");
+    private static LinkedHashMap<String, Object> createProviderLocation() {
+        LinkedHashMap<String, Object> location = new LinkedHashMap<>();
+        location.put("streetNameAndNumber", "Test Street Name 1");
+        location.put("postalCode", "12345");
+        location.put("city", "Test City");
+        location.put("country", "AD");
         return location;
     }
 
@@ -180,11 +177,11 @@ public class TestUtils {
         return contact;
     }
 
-    private static List<ProviderPublicContact> createProviderPublicContacts() {
-        ProviderPublicContact contact1 = new ProviderPublicContact();
-        ProviderPublicContact contact2 = new ProviderPublicContact();
-        contact1.setEmail("public1@email.com");
-        contact2.setEmail("public2@email.com");
+    private static List<LinkedHashMap<String, Object>> createProviderPublicContacts() {
+        LinkedHashMap<String, Object> contact1 = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> contact2 = new LinkedHashMap<>();
+        contact1.put("email", "public1@email.com");
+        contact2.put("email", "public2@email.com");
         return List.of(contact1, contact2);
     }
 
@@ -200,32 +197,32 @@ public class TestUtils {
         return List.of(user1, user2);
     }
 
-    private static List<ServiceProviderDomain> createScientificDomains() {
-        ServiceProviderDomain scientificDomain = new ServiceProviderDomain();
-        scientificDomain.setScientificDomain("scientific_domain-agricultural_sciences");
-        scientificDomain.setScientificSubdomain("scientific_subdomain-agricultural_sciences-agricultural_biotechnology");
+    private static List<LinkedHashMap<String, Object>> createScientificDomains() {
+        LinkedHashMap<String, Object> scientificDomain = new LinkedHashMap<>();
+        scientificDomain.put("scientificDomain", "scientific_domain-agricultural_sciences");
+        scientificDomain.put("scientificSubdomain", "scientific_subdomain-agricultural_sciences-agricultural_biotechnology");
         return List.of(scientificDomain);
     }
 
-    private static List<ServiceCategory> createCategories() {
-        ServiceCategory serviceCategory = new ServiceCategory();
-        serviceCategory.setCategory("category-access_physical_and_eInfrastructures-compute");
-        serviceCategory.setSubcategory("subcategory-access_physical_and_eInfrastructures-compute-container_management");
+    private static List<LinkedHashMap<String, Object>> createCategories() {
+        LinkedHashMap<String, Object> serviceCategory = new LinkedHashMap<>();
+        serviceCategory.put("category", "category-access_physical_and_eInfrastructures-compute");
+        serviceCategory.put("subcategory", "subcategory-access_physical_and_eInfrastructures-compute-container_management");
         return List.of(serviceCategory);
     }
 
-    private static ServiceMainContact createServiceMainContact() {
-        ServiceMainContact contact = new ServiceMainContact();
-        contact.setFirstName("MainContact FirstName");
-        contact.setEmail("main@email.com");
+    private static LinkedHashMap<String, Object> createServiceMainContact() {
+        LinkedHashMap<String, Object> contact = new LinkedHashMap<>();
+        contact.put("firstName", "MainContact FirstName");
+        contact.put("email", "main@email.com");
         return contact;
     }
 
-    private static List<ServicePublicContact> createServicePublicContacts() {
-        ServicePublicContact contact1 = new ServicePublicContact();
-        ServicePublicContact contact2 = new ServicePublicContact();
-        contact1.setEmail("public1@email.com");
-        contact2.setEmail("public2@email.com");
+    private static List<LinkedHashMap<String, Object>> createServicePublicContacts() {
+        LinkedHashMap<String, Object> contact1 = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> contact2 = new LinkedHashMap<>();
+        contact1.put("email", "public1@email.com");
+        contact2.put("email", "public2@email.com");
         return List.of(contact1, contact2);
     }
 

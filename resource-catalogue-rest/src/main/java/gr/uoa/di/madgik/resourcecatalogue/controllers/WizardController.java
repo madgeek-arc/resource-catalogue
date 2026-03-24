@@ -23,10 +23,6 @@ import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.Catalogue;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ProviderLocation;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ProviderMainContact;
-import gr.uoa.di.madgik.resourcecatalogue.domain.deprecated.ProviderPublicContact;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import io.swagger.v3.oas.annotations.Operation;
@@ -229,12 +225,9 @@ public class WizardController {
     @Operation(summary = "Create main Catalogue")
     @GetMapping("/step3")
     public String createCatalogue(Model model) {
-        Catalogue catalogue = new Catalogue();
+        CatalogueBundle catalogue = new CatalogueBundle();
+        catalogue.setPayload(new LinkedHashMap<>());
         catalogue.setId(catalogueId);
-        catalogue.setLocation(new ProviderLocation());
-        catalogue.setMainContact(new ProviderMainContact());
-        catalogue.setPublicContacts(new ArrayList<>(List.of(new ProviderPublicContact())));
-        catalogue.setUsers(new ArrayList<>(List.of(new User())));
 
         // Get countries as Map (ID -> Name)
         Map<String, String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY)

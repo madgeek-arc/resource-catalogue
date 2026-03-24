@@ -164,7 +164,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     public ResponseEntity<OrganisationBundle> addBundle(@RequestBody OrganisationBundle provider,
                                                         @Parameter(hidden = true) Authentication auth) {
         OrganisationBundle bundle = service.add(provider, auth);
-        logger.info("Added ProviderBundle with id '{}'", bundle.getId());
+        logger.info("Added OrganisationBundle with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle, HttpStatus.CREATED);
     }
 
@@ -342,7 +342,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
                                                               @RequestParam String providerId,
                                                               @RequestParam String newCatalogueId,
                                                               @Parameter(hidden = true) Authentication auth) {
-//        NewProviderBundle bundle = migrationService.changeProviderCatalogue(providerId, catalogueId, newCatalogueId, auth);
+//        OrganisationBundle bundle = migrationService.changeProviderCatalogue(providerId, catalogueId, newCatalogueId, auth);
 //        return ResponseEntity.ok(bundle);
         return null;
     }

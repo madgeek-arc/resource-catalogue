@@ -280,13 +280,13 @@ public class CatalogueController {
         return new ResponseEntity<>(organisationService.get(providerId, catalogueId).getOrganisation(), HttpStatus.OK);
     }
 
-    @Operation(description = "Returns the ProviderBundle of the specific Catalogue with the given id.")
+    @Operation(description = "Returns the OrganisationBundle of the specific Catalogue with the given id.")
     @GetMapping(path = {
             "{catalogueId}/provider/bundle/{providerId}",
             "{catalogueId}/organisation/bundle/{providerId}"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId)")
-    public ResponseEntity<OrganisationBundle> getCatalogueProviderBundle(@PathVariable String catalogueId,
+    public ResponseEntity<OrganisationBundle> getCatalogueOrganisationBundle(@PathVariable String catalogueId,
                                                                          @PathVariable String providerId,
                                                                          @SuppressWarnings("unused")
                                                                          @Parameter(hidden = true) Authentication auth) {
@@ -318,7 +318,7 @@ public class CatalogueController {
             "{catalogueId}/organisation/bundle/all"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
-    public ResponseEntity<Paging<OrganisationBundle>> getAllCatalogueProviderBundles(@PathVariable String catalogueId,
+    public ResponseEntity<Paging<OrganisationBundle>> getAllCatalogueOrganisationBundles(@PathVariable String catalogueId,
                                                                                      @Parameter(hidden = true)
                                                                                      @RequestParam MultiValueMap<String, Object> params,
                                                                                      @SuppressWarnings("unused")
@@ -370,7 +370,7 @@ public class CatalogueController {
             "{catalogueId}/organisation/bundle"
     })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<OrganisationBundle> addCatalogueProviderBundle(@RequestBody OrganisationBundle provider,
+    public ResponseEntity<OrganisationBundle> addCatalogueOrganisationBundle(@RequestBody OrganisationBundle provider,
                                                                          @PathVariable String catalogueId,
                                                                          @Parameter(hidden = true) Authentication auth) {
         provider.setCatalogueId(catalogueId);
@@ -403,7 +403,7 @@ public class CatalogueController {
             "{catalogueId}/bundle/organisation"
     })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<OrganisationBundle> updateCatalogueProviderBundle(@RequestBody OrganisationBundle provider,
+    public ResponseEntity<OrganisationBundle> updateCatalogueOrganisationBundle(@RequestBody OrganisationBundle provider,
                                                                             @RequestParam(required = false) String comment,
                                                                             @Parameter(hidden = true) Authentication auth) {
         OrganisationBundle bundle = organisationService.update(provider, comment, auth);
