@@ -265,14 +265,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     @Override
     public TrainingResourceBundle finalizeDraft(TrainingResourceBundle trainingResource, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
-                trainingResource.getCatalogueId());
-        UserInfo user = UserInfo.of(auth);
-        if (provider.getTemplateStatus().equals("approved template")) {
-            trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else {
-            trainingResource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        }
+        trainingResource = workflowService.onboard(getResourceTypeName(), trainingResource, auth);
         trainingResource = update(trainingResource, auth);
 
         return trainingResource;

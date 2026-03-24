@@ -269,14 +269,7 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
 
     @Override
     public DeployableApplicationBundle finalizeDraft(DeployableApplicationBundle deployableApplication, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
-                deployableApplication.getCatalogueId());
-        UserInfo user = UserInfo.of(auth);
-        if (provider.getTemplateStatus().equals("approved template")) {
-            deployableApplication.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else {
-            deployableApplication.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        }
+        deployableApplication = workflowService.onboard(getResourceTypeName(), deployableApplication, auth);
         deployableApplication = update(deployableApplication, auth);
 
         return deployableApplication;

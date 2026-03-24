@@ -342,14 +342,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     @Override
     public ServiceBundle finalizeDraft(ServiceBundle service, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
-                service.getCatalogueId());
-        UserInfo user = UserInfo.of(auth);
-        if (provider.getTemplateStatus().equals("approved template")) {
-            service.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else {
-            service.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        }
+        service = workflowService.onboard(getResourceTypeName(), service, auth);
         service = update(service, auth);
 
         return service;

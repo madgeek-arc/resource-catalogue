@@ -234,14 +234,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     @Override
     public InteroperabilityRecordBundle finalizeDraft(InteroperabilityRecordBundle guideline, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
-                guideline.getCatalogueId());
-        UserInfo user = UserInfo.of(auth);
-        if (provider.getTemplateStatus().equals("approved template")) {
-            guideline.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else {
-            guideline.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        }
+        guideline = workflowService.onboard(getResourceTypeName(), guideline, auth);
         guideline = update(guideline, auth);
 
         return guideline;

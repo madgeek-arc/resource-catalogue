@@ -320,14 +320,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     @Override
     public DatasourceBundle finalizeDraft(DatasourceBundle datasource, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
-        UserInfo user = UserInfo.of(auth);
-        if (provider.getTemplateStatus().equals("approved template")) {
-            datasource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else {
-            datasource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        }
+        datasource = workflowService.onboard(getResourceTypeName(), datasource, auth);
         datasource = update(datasource, auth);
 
         return datasource;

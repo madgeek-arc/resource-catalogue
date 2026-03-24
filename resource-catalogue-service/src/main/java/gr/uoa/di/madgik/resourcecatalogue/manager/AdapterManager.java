@@ -209,8 +209,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
 
     @Override
     public AdapterBundle finalizeDraft(AdapterBundle adapter, Authentication auth) {
-        UserInfo user = UserInfo.of(auth);
-        adapter.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
+        adapter = workflowService.onboard(getResourceTypeName(), adapter, auth);
         adapter = update(adapter, auth);
 
         return adapter;
