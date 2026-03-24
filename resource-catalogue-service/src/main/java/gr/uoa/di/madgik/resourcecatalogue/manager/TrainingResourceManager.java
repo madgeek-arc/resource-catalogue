@@ -235,40 +235,4 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         return null;
     }
     //endregion
-
-    //region Drafts
-    @Override
-    public TrainingResourceBundle addDraft(TrainingResourceBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-
-        TrainingResourceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public TrainingResourceBundle updateDraft(TrainingResourceBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            TrainingResourceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteDraft(TrainingResourceBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public TrainingResourceBundle finalizeDraft(TrainingResourceBundle trainingResource, Authentication auth) {
-        trainingResource = workflowService.onboard(getResourceTypeName(), trainingResource, auth);
-        trainingResource = update(trainingResource, auth);
-
-        return trainingResource;
-    }
-    //endregion
 }

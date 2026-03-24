@@ -312,40 +312,4 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         return null;
     }
     //endregion
-
-    //region Drafts
-    @Override
-    public ServiceBundle addDraft(ServiceBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-
-        ServiceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public ServiceBundle updateDraft(ServiceBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            ServiceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteDraft(ServiceBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public ServiceBundle finalizeDraft(ServiceBundle service, Authentication auth) {
-        service = workflowService.onboard(getResourceTypeName(), service, auth);
-        service = update(service, auth);
-
-        return service;
-    }
-    //endregion
 }

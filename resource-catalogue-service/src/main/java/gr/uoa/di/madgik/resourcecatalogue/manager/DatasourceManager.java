@@ -290,40 +290,4 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         return found;
     }
     //endregion
-
-    //region Drafts
-    @Override
-    public DatasourceBundle addDraft(DatasourceBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-
-        DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public DatasourceBundle updateDraft(DatasourceBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            DatasourceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteDraft(DatasourceBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public DatasourceBundle finalizeDraft(DatasourceBundle datasource, Authentication auth) {
-        datasource = workflowService.onboard(getResourceTypeName(), datasource, auth);
-        datasource = update(datasource, auth);
-
-        return datasource;
-    }
-    //endregion
 }

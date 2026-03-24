@@ -369,6 +369,36 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                 resourcesBrowsing.getFacets());
     }
 
+    @Override
+    public T addDraft(T bundle, Authentication auth) {
+        bundle.markDraft(auth, null);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
+        bundle.setId(bundle.getIdentifiers().getOriginalId());
+
+        return genericResourceService.add(getResourceTypeName(), bundle, false);
+    }
+
+    @Override
+    public T updateDraft(T bundle, Authentication auth) {
+        bundle.markUpdate(UserInfo.of(auth), null);
+        try {
+            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public void deleteDraft(T bundle) {
+        genericResourceService.delete(getResourceTypeName(), bundle.getId());
+    }
+
+    @Override
+    public T finalizeDraft(T t, Authentication auth) {
+        t = workflowService.onboard(getResourceTypeName(), t, auth);
+        return update(t, auth);
+    }
+
     //region unused
     @Override
     public String createId(T bundle) {

@@ -338,38 +338,9 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     //region Drafts
     @Override
     public OrganisationBundle addDraft(OrganisationBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
         commonMethods.addAuthenticatedUser(bundle.getOrganisation(), auth);
 
-        OrganisationBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public OrganisationBundle updateDraft(OrganisationBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            OrganisationBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @Override
-    public void deleteDraft(OrganisationBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public OrganisationBundle finalizeDraft(OrganisationBundle bundle, Authentication auth) {
-        bundle = workflowService.onboard(getResourceTypeName(), bundle, auth);
-        bundle = update(bundle, auth);
-
-//        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
-        return bundle;
+        return super.addDraft(bundle, auth);
     }
     //endregion
 }

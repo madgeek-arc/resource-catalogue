@@ -239,40 +239,4 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
         return null;
     }
     //endregion
-
-    //region Drafts
-    @Override
-    public DeployableApplicationBundle addDraft(DeployableApplicationBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-
-        DeployableApplicationBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public DeployableApplicationBundle updateDraft(DeployableApplicationBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            DeployableApplicationBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteDraft(DeployableApplicationBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public DeployableApplicationBundle finalizeDraft(DeployableApplicationBundle deployableApplication, Authentication auth) {
-        deployableApplication = workflowService.onboard(getResourceTypeName(), deployableApplication, auth);
-        deployableApplication = update(deployableApplication, auth);
-
-        return deployableApplication;
-    }
-    //endregion
 }
