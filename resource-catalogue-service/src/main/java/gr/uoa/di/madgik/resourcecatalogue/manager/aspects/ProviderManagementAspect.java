@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.controllers.registry.sqaaas.SqaaasAssessmentService;
@@ -776,32 +777,48 @@ public class ProviderManagementAspect {
             return;
         }
         String repo = adapter.getAdapter().get("repository").toString();
-        sqaaasAssessmentService.startAssessment(repo, "main") //TODO: fallback to master?
+        sqaaasAssessmentService.startAssessment(repo, "main")
                 .thenApply(sqaaasAssessmentService::waitForCompletion)
-                .thenAccept(result -> {
-                    String url = result.path("meta").path("report_permalink").asText();
-                    String badge = result.path("repository").get(0).path("badge_status").asText();
-
-                    LinkedHashMap<String, Object> sqa = (LinkedHashMap<String, Object>) adapter.getAdapter().get("sqa");
-                    if (sqa == null) {
-                        sqa = new LinkedHashMap<>();
-                        adapter.getAdapter().put("sqa", sqa);
-                    }
-                    sqa.put("sqaURL", url);
-                    if (badge.equalsIgnoreCase("bronze")) {
-                        sqa.put("sqaBadge", "sqa_badge-bronze");
-                    } else if (badge.equalsIgnoreCase("silver")) {
-                        sqa.put("sqaBadge", "sqa_badge-silver");
-                    } else {
-                        sqa.put("sqaBadge", "sqa_badge-gold");
-                    }
-
-                    adapterService.update(adapter, "SQA Assessment", securityService.getAdminAccess());
-                })
+                .thenAccept(result -> handleSqaResult(adapter, result))
                 .exceptionally(ex -> {
-                    ex.printStackTrace();
+                    logger.error("SQA assessment failed for branch 'main' on repo: {}", repo);
+                    logger.info("Retrying SQA assessment with fallback branch 'master'...");
+                    sqaaasAssessmentService.startAssessment(repo, "master")
+                            .thenApply(sqaaasAssessmentService::waitForCompletion)
+                            .thenAccept(result -> {
+                                logger.info("SQA assessment succeeded with branch 'master'");
+                                handleSqaResult(adapter, result);
+                            })
+                            .exceptionally(ex2 -> {
+                                logger.info("SQA assessment ALSO failed for branch 'master'");
+                                ex2.printStackTrace();
+                                return null;
+                            });
                     return null;
                 });
+    }
+
+    private void handleSqaResult(AdapterBundle adapter, JsonNode result) {
+        String url = result.path("meta").path("report_permalink").asText();
+        String badge = result.path("repository").get(0).path("badge_status").asText();
+
+        LinkedHashMap<String, Object> sqa = (LinkedHashMap<String, Object>) adapter.getAdapter().get("sqa");
+
+        if (sqa == null) {
+            sqa = new LinkedHashMap<>();
+            adapter.getAdapter().put("sqa", sqa);
+        }
+
+        sqa.put("sqaURL", url);
+        if (badge.equalsIgnoreCase("bronze")) {
+            sqa.put("sqaBadge", "sqa_badge-bronze");
+        } else if (badge.equalsIgnoreCase("silver")) {
+            sqa.put("sqaBadge", "sqa_badge-silver");
+        } else {
+            sqa.put("sqaBadge", "sqa_badge-gold");
+        }
+
+        adapterService.update(adapter, "SQA Assessment", securityService.getAdminAccess());
     }
     //endregion
 }
