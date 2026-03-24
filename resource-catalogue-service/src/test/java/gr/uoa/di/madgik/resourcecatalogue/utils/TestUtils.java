@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -77,7 +78,7 @@ public class TestUtils {
         catalogue.put("logo", createURL());
         catalogue.put("location", createProviderLocation());
 //        catalogue.setMainContact(createProviderMainContact());
-        catalogue.put("publicContacts", createProviderPublicContacts());
+        catalogue.put("publicContacts", createCataloguePublicContacts());
 //        catalogue.setUsers(createUsers());
         return catalogue;
     }
@@ -91,10 +92,10 @@ public class TestUtils {
         provider.put("country", "AD");
         provider.put("legalEntity", "false");
         provider.put("description", "Test Description");
-        provider.put("nodePID", "Node");
+        provider.put("nodePID", "node-sandbox");
         provider.put("logo", createURL());
-        provider.put("mainContact", createProviderMainContact());
-        provider.put("publicContacts", List.of());
+        provider.put("mainContact", createMainContact());
+        provider.put("publicContacts", createPublicContacts());
 //        provider.put("users", createUsers());
         return provider;
     }
@@ -175,22 +176,27 @@ public class TestUtils {
         return location;
     }
 
-    private static LinkedHashMap<String, Object> createProviderMainContact() {
+    private static LinkedHashMap<String, Object> createMainContact() {
         LinkedHashMap<String, Object> contact = new LinkedHashMap<>();
         contact.put("firstName", "FirstName");
         contact.put("lastName", "LastName");
         contact.put("email", "main@email.com");
-        contact.put("role", "security contact");
-        contact.put("PIDs", null);
         return contact;
     }
 
-    private static List<LinkedHashMap<String, Object>> createProviderPublicContacts() {
+    private static List<LinkedHashMap<String, Object>> createPublicContacts() {
         LinkedHashMap<String, Object> contact1 = new LinkedHashMap<>();
         LinkedHashMap<String, Object> contact2 = new LinkedHashMap<>();
         contact1.put("email", "public1@email.com");
         contact2.put("email", "public2@email.com");
         return List.of(contact1, contact2);
+    }
+
+    private static List<String> createCataloguePublicContacts() {
+        List<String> publicContacts = new ArrayList<>();
+        publicContacts.add("public1@email.com");
+        publicContacts.add("public2@email.com");
+        return publicContacts;
     }
 
     private static List<LinkedHashMap<String, Object>> createUsers() {

@@ -497,5 +497,13 @@
     "parentId": null,
     "type": "Technology readiness level",
     "extras": {}
+  },
+  {
+    "id": "node-sandbox",
+    "name": "Sandbox",
+    "description": "Sandbox",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
   }
 ]
