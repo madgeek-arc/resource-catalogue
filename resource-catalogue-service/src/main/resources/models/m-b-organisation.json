@@ -1625,10 +1625,6 @@
                         "type": "composite",
                         "defaultValue": null,
                         "values": null,
-                        "properties": {
-                          "minLength": null,
-                          "maxLength": null
-                        },
                         "multiplicity": false,
                         "prefill": null
                       },
@@ -1804,10 +1800,6 @@
                 "type": "email",
                 "defaultValue": null,
                 "values": null,
-                "properties": {
-                  "minLength": null,
-                  "maxLength": null
-                },
                 "multiplicity": true,
                 "prefill": null
               },

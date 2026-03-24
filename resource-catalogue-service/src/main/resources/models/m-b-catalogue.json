@@ -215,7 +215,7 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "vocabulary": "NODE",
+                "vocabulary": null,
                 "type": "vocabulary",
                 "defaultValue": null,
                 "values": null,
@@ -396,7 +396,7 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "vocabulary": "PROVIDER_LEGAL_STATUS",
+                "vocabulary": null,
                 "type": "vocabulary",
                 "defaultValue": null,
                 "values": null,
@@ -460,7 +460,7 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "vocabulary": "PROVIDER_HOSTING_LEGAL_ENTITY",
+                "vocabulary": null,
                 "type": "vocabulary",
                 "defaultValue": null,
                 "values": null,
@@ -1107,7 +1107,7 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "vocabulary": "SCIENTIFIC_DOMAIN",
+                    "vocabulary": null,
                     "type": "vocabulary",
                     "defaultValue": null,
                     "values": null,
@@ -1167,7 +1167,7 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "vocabulary": "SCIENTIFIC_SUBDOMAIN",
+                    "vocabulary": null,
                     "type": "vocabulary",
                     "defaultValue": null,
                     "values": null,
@@ -1587,7 +1587,7 @@
                   "accessPath": null,
                   "kind": null,
                   "typeInfo": {
-                    "vocabulary": "COUNTRY",
+                    "vocabulary": null,
                     "type": "vocabulary",
                     "defaultValue": null,
                     "values": null,
@@ -2361,7 +2361,7 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "vocabulary": "COUNTRY",
+                "vocabulary": null,
                 "type": "vocabulary",
                 "defaultValue": null,
                 "values": null,
@@ -2479,7 +2479,7 @@
               "accessPath": null,
               "kind": null,
               "typeInfo": {
-                "vocabulary": "PROVIDER_NETWORK",
+                "vocabulary": null,
                 "type": "vocabulary",
                 "defaultValue": null,
                 "values": null,

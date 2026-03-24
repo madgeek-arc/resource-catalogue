@@ -100,7 +100,7 @@
               "kind": null,
               "typeInfo": {
                 "vocabulary": null,
-                "type": "string",
+                "type": "vocabulary",
                 "defaultValue": null,
                 "values": null,
                 "properties": {
