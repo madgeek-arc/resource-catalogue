@@ -54,7 +54,6 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
     private final OrganisationService organisationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
-    private final WorkflowService workflowService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -68,11 +67,10 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
                                         @Lazy ProviderResourcesCommonMethods commonMethods,
                                         GenericResourceService genericResourceService,
                                         WorkflowService workflowService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
-        this.workflowService = workflowService;
     }
 
     @Override

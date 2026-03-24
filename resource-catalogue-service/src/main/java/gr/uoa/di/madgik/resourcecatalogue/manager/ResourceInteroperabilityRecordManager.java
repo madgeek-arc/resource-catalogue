@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
@@ -68,8 +69,9 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
                                                  GenericResourceService genericResourceService,
                                                  VocabularyService vocabularyService,
                                                  ConfigurationTemplateService ctService,
-                                                 ConfigurationTemplateInstanceService ctiService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+                                                 ConfigurationTemplateInstanceService ctiService,
+                                                 WorkflowService workflowService) {
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;

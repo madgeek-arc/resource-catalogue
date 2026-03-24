@@ -28,6 +28,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -60,8 +61,9 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                           ProviderResourcesCommonMethods commonMethods,
                           IdCreator idCreator,
                           GenericResourceService genericResourceService,
-                          OrganisationService organisationService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+                          OrganisationService organisationService,
+                          WorkflowService workflowService) {
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;

@@ -55,7 +55,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
-    private final WorkflowService workflowService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -71,13 +70,12 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                              SecurityService securityService,
                              RelationshipValidator relationshipValidator,
                              WorkflowService workflowService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
-        this.workflowService = workflowService;
     }
 
     @Override

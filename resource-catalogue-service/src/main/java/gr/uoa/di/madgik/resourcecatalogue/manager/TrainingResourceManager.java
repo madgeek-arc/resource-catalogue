@@ -51,7 +51,6 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
-    private final WorkflowService workflowService;
 
     public TrainingResourceManager(OrganisationService organisationService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
@@ -60,12 +59,11 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
                                    @Lazy RelationshipValidator relationshipValidator,
                                    GenericResourceService genericResourceService,
                                    WorkflowService workflowService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
-        this.workflowService = workflowService;
     }
 
     @Override

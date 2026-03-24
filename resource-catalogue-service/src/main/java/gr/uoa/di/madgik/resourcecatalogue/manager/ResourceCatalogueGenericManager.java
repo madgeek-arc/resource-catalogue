@@ -43,9 +43,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     protected final SecurityService securityService;
     protected final VocabularyService vocabularyService;
     protected final IdCreator idCreator;
+    protected final WorkflowService workflowService;
 
-    @Autowired
-    protected WorkflowService workflowService;
     @Value("${catalogue.id}")
     protected String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
@@ -53,14 +52,16 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     protected abstract String getResourceTypeName();
 
-    public ResourceCatalogueGenericManager(GenericResourceService genericResourceService,
+    protected ResourceCatalogueGenericManager(GenericResourceService genericResourceService,
                                            IdCreator idCreator,
                                            SecurityService securityService,
-                                           VocabularyService vocabularyService) {
+                                           VocabularyService vocabularyService,
+                                           WorkflowService workflowService) {
         this.genericResourceService = genericResourceService;
         this.idCreator = idCreator;
         this.securityService = securityService;
         this.vocabularyService = vocabularyService;
+        this.workflowService = workflowService;
     }
 
     public void createIdentifiers(Bundle bundle) {

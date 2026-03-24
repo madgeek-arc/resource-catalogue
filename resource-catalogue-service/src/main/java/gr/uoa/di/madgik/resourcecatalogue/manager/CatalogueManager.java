@@ -28,6 +28,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
@@ -66,8 +67,9 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
                             @Lazy VocabularyService vocabularyService,
                             @Lazy ProviderResourcesCommonMethods commonMethods,
 //                            EmailService emailService,
-                            GenericResourceService genericResourceService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+                            GenericResourceService genericResourceService,
+                            WorkflowService workflowService) {
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.commonMethods = commonMethods;

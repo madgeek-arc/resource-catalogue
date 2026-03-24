@@ -54,7 +54,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
-    private final WorkflowService workflowService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -71,12 +70,11 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           @Lazy RelationshipValidator relationshipValidator,
                           ModelService modelService,
                           WorkflowService workflowService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService; // for providers
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
-        this.workflowService = workflowService;
     }
 
     @Override

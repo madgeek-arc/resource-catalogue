@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
@@ -58,8 +59,9 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
                                                 SecurityService securityService, IdCreator idCreator,
                                                 ProviderResourcesCommonMethods commonMethods,
                                                 GenericResourceService genericResourceService,
-                                                VocabularyService vocabularyService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+                                                VocabularyService vocabularyService,
+                                                WorkflowService workflowService) {
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.configService = configService;
         this.rirService = rirService;
         this.securityService = securityService;

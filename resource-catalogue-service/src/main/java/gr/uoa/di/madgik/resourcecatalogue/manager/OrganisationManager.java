@@ -63,7 +63,6 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     private final ServiceService serviceService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final OrganisationCascadeLifecycleManager cascadeLifecycleService;
-    private final WorkflowService workflowService;
 
     @Autowired
     @Lazy
@@ -81,12 +80,11 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
                                SecurityService securityService,
                                OrganisationCascadeLifecycleManager cascadeLifecycleService,
                                WorkflowService workflowService) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.genericResourceService = genericResourceService;
         this.serviceService = serviceService;
         this.commonMethods = commonMethods;
         this.cascadeLifecycleService = cascadeLifecycleService;
-        this.workflowService = workflowService;
     }
 
     @Override

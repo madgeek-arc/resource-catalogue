@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
@@ -69,8 +70,9 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
                                         SecurityService securityService,
                                         GenericResourceService genericResourceService,
                                         VocabularyService vocabularyService,
-                                        WebClient.Builder webClientBuilder) {
-        super(genericResourceService, idCreator, securityService, vocabularyService);
+                                        WebClient.Builder webClientBuilder,
+                                        WorkflowService workflowService) {
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.commonMethods = commonMethods;
         this.organisationService = organisationService;
         this.interoperabilityRecordService = interoperabilityRecordService;
