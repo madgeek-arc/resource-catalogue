@@ -235,47 +235,4 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         return null;
     }
     //endregion
-
-    //region Drafts
-    @Override
-    public TrainingResourceBundle addDraft(TrainingResourceBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-
-        TrainingResourceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public TrainingResourceBundle updateDraft(TrainingResourceBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            TrainingResourceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteDraft(TrainingResourceBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public TrainingResourceBundle finalizeDraft(TrainingResourceBundle trainingResource, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
-                trainingResource.getCatalogueId());
-        UserInfo user = UserInfo.of(auth);
-        if (provider.getTemplateStatus().equals("approved template")) {
-            trainingResource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else {
-            trainingResource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        }
-        trainingResource = update(trainingResource, auth);
-
-        return trainingResource;
-    }
-    //endregion
 }

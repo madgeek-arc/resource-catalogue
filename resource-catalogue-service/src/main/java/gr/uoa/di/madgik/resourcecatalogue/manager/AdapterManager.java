@@ -178,42 +178,4 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         return resources;
     }
     //endregion
-
-    //region Drafts
-    @Override
-    public AdapterBundle addDraft(AdapterBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-        commonMethods.addAuthenticatedUser(bundle.getAdapter(), auth);
-
-        AdapterBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public AdapterBundle updateDraft(AdapterBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            AdapterBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteDraft(AdapterBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public AdapterBundle finalizeDraft(AdapterBundle adapter, Authentication auth) {
-        UserInfo user = UserInfo.of(auth);
-        adapter.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        adapter = update(adapter, auth);
-
-        return adapter;
-    }
-    //endregion
 }

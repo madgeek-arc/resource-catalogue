@@ -203,48 +203,4 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         }
     }
     //endregion
-
-    //region Drafts
-    @Override
-    public InteroperabilityRecordBundle addDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-
-        InteroperabilityRecordBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public InteroperabilityRecordBundle updateDraft(InteroperabilityRecordBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            InteroperabilityRecordBundle ret = genericResourceService.update(getResourceTypeName(),
-                    bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteDraft(InteroperabilityRecordBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public InteroperabilityRecordBundle finalizeDraft(InteroperabilityRecordBundle guideline, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
-                guideline.getCatalogueId());
-        UserInfo user = UserInfo.of(auth);
-        if (provider.getTemplateStatus().equals("approved template")) {
-            guideline.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else {
-            guideline.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        }
-        guideline = update(guideline, auth);
-
-        return guideline;
-    }
-    //endregion
 }

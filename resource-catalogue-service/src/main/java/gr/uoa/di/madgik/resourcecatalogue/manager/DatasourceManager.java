@@ -290,47 +290,4 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         return found;
     }
     //endregion
-
-    //region Drafts
-    @Override
-    public DatasourceBundle addDraft(DatasourceBundle bundle, Authentication auth) {
-        bundle.markDraft(auth, null);
-        this.createIdentifiers(bundle, getResourceTypeName(), false);
-        bundle.setId(bundle.getIdentifiers().getOriginalId());
-
-        DatasourceBundle ret = genericResourceService.add(getResourceTypeName(), bundle, false);
-        return ret;
-    }
-
-    @Override
-    public DatasourceBundle updateDraft(DatasourceBundle bundle, Authentication auth) {
-        bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            DatasourceBundle ret = genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-            return ret;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteDraft(DatasourceBundle bundle) {
-        genericResourceService.delete(getResourceTypeName(), bundle.getId());
-    }
-
-    @Override
-    public DatasourceBundle finalizeDraft(DatasourceBundle datasource, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
-        UserInfo user = UserInfo.of(auth);
-        if (provider.getTemplateStatus().equals("approved template")) {
-            datasource.markOnboard(vocabularyService.get("approved").getId(), true, user, null);
-        } else {
-            datasource.markOnboard(vocabularyService.get("pending").getId(), false, user, null);
-        }
-        datasource = update(datasource, auth);
-
-        return datasource;
-    }
-    //endregion
 }
