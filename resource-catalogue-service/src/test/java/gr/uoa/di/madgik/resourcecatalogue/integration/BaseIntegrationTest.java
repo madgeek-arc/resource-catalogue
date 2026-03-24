@@ -18,6 +18,8 @@ package gr.uoa.di.madgik.resourcecatalogue.integration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gr.uoa.di.madgik.catalogue.service.ModelService;
+import gr.uoa.di.madgik.catalogue.ui.domain.Model;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
@@ -28,8 +30,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 //TODO: find a way to load application context only once
@@ -44,6 +49,9 @@ public abstract class BaseIntegrationTest {
     @Autowired
     VocabularyService vocabularyService;
 
+    @Autowired
+    ModelService modelService;
+
     @BeforeAll
     void loadVocabulariesFromFile() throws IOException {
         if (vocabularyService.getAll(new FacetFilter()).getTotal() == 0) {
@@ -56,6 +64,24 @@ public abstract class BaseIntegrationTest {
                         }
                 );
                 vocabularyService.addBulk(vocabularies, null);
+            }
+        }
+    }
+
+    @BeforeAll
+    void loadModelsFromResources() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(getClass().getClassLoader());
+        Resource[] resources = resolver.getResources("classpath*:models/*.json");
+
+        for (Resource resource : resources) {
+            try (InputStream inputStream = resource.getInputStream()) {
+                Model model = objectMapper.readValue(inputStream, Model.class);
+                try {
+                    modelService.get(model.getId());
+                } catch (gr.uoa.di.madgik.registry.exception.ResourceNotFoundException e) {
+                    modelService.add(model);
+                }
             }
         }
     }

@@ -40,7 +40,7 @@ public class TestUtils {
 
     public static OrganisationBundle createOrganisationBundle() {
         OrganisationBundle bundle = new OrganisationBundle();
-        bundle.setOrganisation(createProvider());
+        bundle.setOrganisation(createOrganisation());
         return bundle;
     }
 
@@ -64,6 +64,7 @@ public class TestUtils {
 
     public static LinkedHashMap<String, Object> createCatalogue() {
         LinkedHashMap<String, Object> catalogue = new LinkedHashMap<>();
+        catalogue.put("id", "eosc");
         catalogue.put("abbreviation", "EOSC");
         catalogue.put("name", "EOSC");
         catalogue.put("website", createURL());
@@ -81,26 +82,29 @@ public class TestUtils {
         return catalogue;
     }
 
-    public static LinkedHashMap<String, Object> createProvider() {
+    public static LinkedHashMap<String, Object> createOrganisation() {
         LinkedHashMap<String, Object> provider = new LinkedHashMap<>();
+        provider.put("id", "test-provider");
         provider.put("name", "Test Provider");
         provider.put("abbreviation", "Test Abbreviation");
         provider.put("website", createURL());
         provider.put("country", "AD");
         provider.put("legalEntity", "false");
         provider.put("description", "Test Description");
+        provider.put("nodePID", "Node");
         provider.put("logo", createURL());
-        provider.put("scientificDomains", createScientificDomains());
         provider.put("mainContact", createProviderMainContact());
-        provider.put("users", createUsers());
+        provider.put("publicContacts", List.of());
+//        provider.put("users", createUsers());
         return provider;
     }
 
     public static LinkedHashMap<String, Object> createService() {
         LinkedHashMap<String, Object> service = new LinkedHashMap<>();
+        service.put("id", "test-service");
         service.put("abbreviation", "Test Abbreviation");
         service.put("name", "Test Service");
-        service.put("resourceOrganisation", "11.1111/abc123");
+        service.put("resourceOwner", "11.1111/abc123");
         service.put("webpage", createURL());
         service.put("description", "Test Description");
         service.put("tagline", "Test Tagline");
@@ -123,6 +127,7 @@ public class TestUtils {
 
     public static LinkedHashMap<String, Object> createDatasource() {
         LinkedHashMap<String, Object> datasource = new LinkedHashMap<>();
+        datasource.put("id", "test-datasource");
         datasource.put("serviceId", "dat/abc123");
         datasource.put("catalogueId", "eosc");
         datasource.put("jurisdiction", "ds_jurisdiction-global");
@@ -135,8 +140,9 @@ public class TestUtils {
 
     public static LinkedHashMap<String, Object> createTrainingResource() {
         LinkedHashMap<String, Object> trainingResource = new LinkedHashMap<>();
+        trainingResource.put("id", "test-training-resource");
         trainingResource.put("title", "Test Training Resource");
-        trainingResource.put("resourceOrganisation", "11.1111/abc123");
+        trainingResource.put("resourceOwner", "11.1111/abc123");
         trainingResource.put("authors", List.of("Joe Doe", "Foo Bar"));
         trainingResource.put("url", createURL());
         trainingResource.put("license", "Test License");
@@ -171,9 +177,11 @@ public class TestUtils {
 
     private static LinkedHashMap<String, Object> createProviderMainContact() {
         LinkedHashMap<String, Object> contact = new LinkedHashMap<>();
-        contact.put("mainFirstName", "FirstName");
-        contact.put("mainLastName", "LastName");
-        contact.put("mainEmail", "main@email.com");
+        contact.put("firstName", "FirstName");
+        contact.put("lastName", "LastName");
+        contact.put("email", "main@email.com");
+        contact.put("role", "security contact");
+        contact.put("PIDs", null);
         return contact;
     }
 

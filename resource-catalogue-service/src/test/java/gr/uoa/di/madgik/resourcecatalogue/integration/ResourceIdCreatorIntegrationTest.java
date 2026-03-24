@@ -16,14 +16,13 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
-import gr.uoa.di.madgik.registry.service.ResourceTypeService;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceTypes;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceIdCreator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -34,15 +33,14 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private ResourceIdCreator idCreator;
     @Autowired
-    private ResourceTypeService resourceTypeService;
+    private CatalogueProperties catalogueProperties;
 
-    private List<String> excludedResourceTypes;
     private List<String> resourceTypes;
 
     @BeforeAll
     void setUp() {
-        resourceTypes = Arrays.stream(ResourceTypes.values())
-                .map(resourceType -> resourceType.name().toLowerCase())
+        resourceTypes = catalogueProperties.getResources().keySet().stream()
+                .map(ResourceTypes::toString)
                 .toList();
     }
 

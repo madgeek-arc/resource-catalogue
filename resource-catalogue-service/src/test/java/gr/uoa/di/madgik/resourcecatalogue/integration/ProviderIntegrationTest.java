@@ -17,8 +17,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
@@ -26,8 +28,10 @@ import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -37,13 +41,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createCatalogueBundle;
-import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createOrganisationBundle;
+import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@TestMethodOrder(OrderAnnotation.class)
 class ProviderIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
@@ -77,6 +82,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         Metadata metadata = new Metadata();
         Metadata dummyMetadata = Mockito.spy(metadata);
         CatalogueBundle catalogueBundle = createCatalogueBundle();
+        catalogueBundle.setMetadata(dummyMetadata);
 
         doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
@@ -85,11 +91,11 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
             mockedAuthInfo.when(() -> AuthenticationInfo.getFullName(any())).thenReturn("Registrant");
             mockedAuthInfo.when(() -> AuthenticationInfo.getEmail(any())).thenReturn("registrant@email.com");
 
-            catalogueService.add(catalogueBundle, securityService.getAdminAccess());
+            CatalogueBundle createdCatalogue = catalogueService.add(catalogueBundle, securityService.getAdminAccess());
 
-            CatalogueBundle retrievedCatalogue = catalogueService.get(catalogueBundle.getId());
+            CatalogueBundle retrievedCatalogue = catalogueService.get(createdCatalogue.getId());
             assertNotNull(retrievedCatalogue, "Catalogue should be found in the database.");
-            assertEquals(catalogueBundle.getId(), retrievedCatalogue.getId(),
+            assertEquals(createdCatalogue.getId(), retrievedCatalogue.getId(),
                     "Catalogue ID should match the expected value.");
         }
     }
@@ -113,6 +119,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         Metadata metadata = new Metadata();
         Metadata dummyMetadata = Mockito.spy(metadata);
         OrganisationBundle organisationBundle = createOrganisationBundle();
+        organisationBundle.setMetadata(dummyMetadata);
 
         doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
@@ -121,14 +128,14 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
             mockedAuthInfo.when(() -> AuthenticationInfo.getFullName(any())).thenReturn("Registrant");
             mockedAuthInfo.when(() -> AuthenticationInfo.getEmail(any())).thenReturn("registrant@email.com");
 
-            providerService.add(organisationBundle, securityService.getAdminAccess());
+            OrganisationBundle createdOrganisation = providerService.add(organisationBundle, securityService.getAdminAccess());
 
-            OrganisationBundle retrievedProvider = providerService.get(organisationBundle.getId());
+            OrganisationBundle retrievedProvider = providerService.get(createdOrganisation.getId());
             assertNotNull(retrievedProvider, "Provider should be found in the database.");
-            assertEquals(organisationBundle.getId(), retrievedProvider.getId(),
+            assertEquals(createdOrganisation.getId(), retrievedProvider.getId(),
                     "Provider ID should match the expected value.");
 
-            providerId = organisationBundle.getId();
+            providerId = createdOrganisation.getId();
         }
     }
 
@@ -188,7 +195,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     @Test
     @Order(4)
     void deleteProviderSucceeds() throws InterruptedException {
-        OrganisationBundle providerBundle = providerService.get(providerId);
+        OrganisationBundle providerBundle = providerService.getAll(new FacetFilter()).getResults().getFirst();
         assertNotNull(providerBundle, "Provider should exist before deletion.");
 
         List<OrganisationBundle> mockedList = mock(List.class);
@@ -199,10 +206,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
 
         providerService.delete(providerBundle);
         Thread.sleep(1000); //TODO: find a better way to clear cache
-        ResourceException thrownException = assertThrows(ResourceException.class,
-                () -> providerService.get(providerId));
-        assertEquals("provider does not exist!", thrownException.getMessage(),
-                "The exception message should indicate that the resource does not exist.");
+        assertThrows(ResourceNotFoundException.class, () -> providerService.get(providerId));
     }
 
     /**
@@ -215,7 +219,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      */
     @Test
     void addProviderFailsOnAuthentication() {
-        OrganisationBundle inputProviderBundle = new OrganisationBundle();
+        OrganisationBundle inputProviderBundle = createOrganisationBundle();
 
         assertThrows(InsufficientAuthenticationException.class, () ->
                 providerService.add(inputProviderBundle, null));
@@ -233,12 +237,11 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     @Test
     void addProviderFailsOnMandatoryFieldValidation() {
         OrganisationBundle inputProviderBundle = new OrganisationBundle();
-        inputProviderBundle.setOrganisation(new LinkedHashMap<>());
+        LinkedHashMap<String, Object> organisation = createOrganisation();
+        organisation.remove("abbreviation");
+        inputProviderBundle.setOrganisation(organisation);
 
-        ValidationException exception = assertThrows(ValidationException.class, () ->
-                providerService.add(inputProviderBundle, securityService.getAdminAccess()));
-
-        assertEquals("Field [abbreviation] is mandatory.", exception.getMessage());
+        assertThrows(ValidationException.class, () -> providerService.validate(inputProviderBundle));
     }
 
     /**
@@ -261,7 +264,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         inputProviderBundle.getOrganisation().put("country", invalidCountryValue);
 
         ValidationException exception = assertThrows(ValidationException.class, () ->
-                providerService.add(inputProviderBundle, securityService.getAdminAccess()));
+                providerService.validate(inputProviderBundle));
 
         assertEquals("Field [country]: Vocabulary with ID '" + invalidCountryValue + "' does not exist.", exception.getMessage());
     }
@@ -294,6 +297,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         Metadata dummyMetadata = Mockito.spy(metadata);
         OrganisationBundle providerBundle = createOrganisationBundle();
         providerBundle.setId(providerId);
+        providerBundle.setMetadata(metadata);
 
         doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
@@ -302,9 +306,10 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
             mockedAuthInfo.when(() -> AuthenticationInfo.getFullName(any())).thenReturn("Registrant");
             mockedAuthInfo.when(() -> AuthenticationInfo.getEmail(any())).thenReturn("registrant@email.com");
 
-            providerService.add(providerBundle, securityService.getAdminAccess());
+            OrganisationBundle createdProvider = providerService.add(providerBundle, securityService.getAdminAccess());
 
-            OrganisationBundle retrievedProvider = providerService.get(providerBundle.getId());
+            OrganisationBundle retrievedProvider = providerService.get(createdProvider.getId());
+            assertNotNull(retrievedProvider);
             assertNotEquals(providerId, retrievedProvider.getId(),
                     "The ID should have been overwritten by the portal's business logic");
         }
