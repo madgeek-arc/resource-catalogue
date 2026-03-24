@@ -24,21 +24,23 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @org.springframework.stereotype.Service("configurationTemplateManager")
 public class ConfigurationTemplateManager extends ResourceCatalogueGenericManager<ConfigurationTemplateBundle>
@@ -50,9 +52,15 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
+    private final WebClient webClient;
 
     @Value("${catalogue.id}")
     private String catalogueId;
+
+    @Value("${argo.grnet.monitoring.token:}")
+    private String monitoringToken;
+    @Value("${argo.grnet.monitoring.service.types:}")
+    private String monitoringServiceTypes;
 
     public ConfigurationTemplateManager(IdCreator idCreator,
                                         ProviderResourcesCommonMethods commonMethods,
@@ -60,13 +68,15 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
                                         InteroperabilityRecordService interoperabilityRecordService,
                                         SecurityService securityService,
                                         GenericResourceService genericResourceService,
-                                        VocabularyService vocabularyService) {
+                                        VocabularyService vocabularyService,
+                                        WebClient.Builder webClientBuilder) {
         super(genericResourceService, idCreator, securityService, vocabularyService);
         this.commonMethods = commonMethods;
         this.organisationService = organisationService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.vocabularyService = vocabularyService;
         this.genericResourceService = genericResourceService;
+        this.webClient = webClientBuilder.build();
     }
 
     public String getResourceTypeName() {
@@ -148,6 +158,52 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
             ret.computeIfAbsent(igId, k -> new ArrayList<>()).add(ctId);
         }
         return ret;
+    }
+
+    // Old Monitoring Service Types
+    public List<Vocabulary> getAvailableServiceTypes() {
+        String response = callMonitoringApi(monitoringServiceTypes, monitoringToken);
+        if (response == null || response.isEmpty()) return Collections.emptyList();
+
+        JSONObject obj = new JSONObject(response);
+        JSONArray array = obj.getJSONArray("data");
+        return createServiceTypeVocabularyList(array);
+    }
+
+    private String callMonitoringApi(String url, String token) {
+        return webClient.get()
+                .uri(url)
+                .header("accept", "application/json")
+                .header("Content-Type", "application/json")
+                .header("x-api-key", token)
+                .retrieve()
+                .onStatus(status -> !status.is2xxSuccessful(), clientResponse -> Mono.empty())
+                .bodyToMono(String.class)
+                .onErrorResume(e -> Mono.empty())
+                .block();
+    }
+
+    private List<Vocabulary> createServiceTypeVocabularyList(JSONArray array) {
+        List<Vocabulary> serviceTypeList = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            String date = array.getJSONObject(i).get("date").toString();
+            String name = array.getJSONObject(i).get("name").toString();
+            String title = array.getJSONObject(i).get("title").toString();
+            String description = array.getJSONObject(i).get("description").toString();
+            JSONArray tagsArray = array.getJSONObject(i).getJSONArray("tags");
+            List<String> tags = new ArrayList<>();
+            for (int j = 0; j < tagsArray.length(); j++) {
+                tags.add(tagsArray.getString(j));
+            }
+            String tagsString = String.join(",", tags);
+            Map<String, String> extras = new HashMap<>();
+            extras.put("date", date);
+            extras.put("tags", tagsString);
+            Vocabulary vocabulary = new Vocabulary(name, description, description, null,
+                    "external-monitoring_service_type", extras);
+            serviceTypeList.add(vocabulary);
+        }
+        return serviceTypeList;
     }
 
     //region Not-Needed

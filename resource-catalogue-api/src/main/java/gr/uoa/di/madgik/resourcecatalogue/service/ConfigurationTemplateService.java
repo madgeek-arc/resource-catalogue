@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import org.springframework.util.MultiValueMap;
 
 import java.util.List;
@@ -41,4 +42,12 @@ public interface ConfigurationTemplateService extends ResourceCatalogueGenericSe
      * @return {@link Map}
      */
     Map<String, List<String>> getInteroperabilityRecordIdToConfigurationTemplateListMap();
+
+
+    /**
+     * Returns all the available Service Types
+     *
+     * @return {@link List<Vocabulary>}
+     */
+    List<Vocabulary> getAvailableServiceTypes();
 }

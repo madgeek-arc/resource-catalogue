@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -168,5 +169,12 @@ public class ConfigurationTemplateController {
     @GetMapping(path = "/interoperabilityRecordIdToConfigurationTemplateListMap")
     public Map<String, List<String>> interoperabilityRecordIdToConfigurationTemplateListMap() {
         return service.getInteroperabilityRecordIdToConfigurationTemplateListMap();
+    }
+
+    //extras
+    @Operation(summary = "Returns all the available Monitoring serviceTypes")
+    @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Vocabulary>> getAvailableServiceTypes() {
+        return new ResponseEntity<>(service.getAvailableServiceTypes(), HttpStatus.OK);
     }
 }
