@@ -97,6 +97,9 @@
     "active" : {
       "type" : "boolean"
     },
+    "auditState" : {
+      "type" : "string"
+    },
     "draft" : {
       "type" : "boolean"
     },
@@ -112,6 +115,9 @@
     "latestUpdateInfo" : {
       "$ref" : "#/$defs/LoggingInfo"
     },
+    "legacy" : {
+      "type" : "boolean"
+    },
     "loggingInfo" : {
       "type" : "array",
       "items" : {
@@ -123,6 +129,9 @@
     },
     "migrationStatus" : {
       "$ref" : "#/$defs/MigrationStatus"
+    },
+    "status" : {
+      "type" : "string"
     },
     "suspended" : {
       "type" : "boolean"

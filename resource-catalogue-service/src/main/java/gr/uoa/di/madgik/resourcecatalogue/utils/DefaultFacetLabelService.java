@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.registry.domain.Facet;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Value;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.apache.commons.collections.list.TreeList;
 import org.slf4j.Logger;
@@ -37,15 +37,15 @@ import java.util.*;
 public class DefaultFacetLabelService implements FacetLabelService {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultFacetLabelService.class);
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final VocabularyService vocabularyService;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    DefaultFacetLabelService(ProviderService providerService,
+    DefaultFacetLabelService(OrganisationService organisationService,
                              VocabularyService vocabularyService) {
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.vocabularyService = vocabularyService;
     }
 
@@ -109,9 +109,9 @@ public class DefaultFacetLabelService implements FacetLabelService {
         ff.setQuantity(maxQuantity);
 //        ff.addFilter("active", "true");
         // TODO: get all final providers (after deduplication process)
-        List<ProviderBundle> allProviders = providerService.getAll(ff, null).getResults();
+        List<OrganisationBundle> allProviders = organisationService.getAll(ff, null).getResults();
         Map<String, String> providerNames = new TreeMap<>();
-        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), p.getProvider().getName()));
+        allProviders.forEach(p -> providerNames.putIfAbsent(p.getId(), (String) p.getOrganisation().get("name")));
 
         Map<String, Vocabulary> allVocabularies = vocabularyService.getVocabulariesMap();
 
@@ -134,8 +134,8 @@ public class DefaultFacetLabelService implements FacetLabelService {
             for (Value value : facet.getValues()) {
 
                 switch (facet.getField()) {
-                    case "resource_providers":
-                    case "resource_organisation":
+                    case "service_providers":
+                    case "resource_owner":
                         value.setLabel(providerNames.get(value.getValue()));
                         break;
 

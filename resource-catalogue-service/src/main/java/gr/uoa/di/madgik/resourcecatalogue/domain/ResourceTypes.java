@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,22 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
+//TODO: decouple from LOT1 - tool
+//TODO: remove test related resource types
 public enum ResourceTypes {
     ADAPTER,
     CONFIGURATION_TEMPLATE,
     CONFIGURATION_TEMPLATE_INSTANCE,
     DATASOURCE,
-    DEPLOYABLE_SERVICE,
+    DEPLOYABLE_APPLICATION,
     HELPDESK,
     INTEROPERABILITY_RECORD,
     MONITORING,
-    PROVIDER,
+    PROVIDER, //TODO: LOT1 specific
+    ORGANISATION,
     RESOURCE_INTEROPERABILITY_RECORD,
     SERVICE,
-    TOOL,
+    TOOL, //TODO: LOT1 specific
     TRAINING_RESOURCE,
     VOCABULARY_CURATION;
 

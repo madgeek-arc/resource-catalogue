@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.Objects;
 
 public class Identifiers {
 
@@ -57,5 +59,17 @@ public class Identifiers {
 
     public void setPid(String pid) {
         this.pid = pid;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Identifiers that = (Identifiers) o;
+        return Objects.equals(originalId, that.originalId) && Objects.equals(pid, that.pid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(originalId, pid);
     }
 }

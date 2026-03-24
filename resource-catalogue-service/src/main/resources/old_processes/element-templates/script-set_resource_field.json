@@ -1,0 +1,64 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+  "name": "Set Resource's Field (Script Task)",
+  "id": "set-key-value-script",
+  "description": "Updates a resource's field.",
+  "version": 1,
+  "appliesTo": ["bpmn:Task"],
+  "elementType": {
+    "value": "bpmn:ScriptTask"
+  },
+  "groups": [
+    { "id": "data", "label": "Data" }
+  ],
+  "properties": [
+    {
+      "label": "Script Expression",
+      "type": "Hidden",
+      "value": "=context put(resource, key, value)",
+      "binding": { "type": "zeebe:script", "property": "expression" },
+      "group": "data"
+    },
+    {
+      "label": "Result Variable (internal)",
+      "type": "Hidden",
+      "value": "resource",
+      "binding": { "type": "zeebe:script", "property": "resultVariable" },
+      "group": "data"
+    },
+    {
+      "label": "Resource (input mapping source)",
+      "description": "FEEL expression that resolves to the resource object (e.g. =resource).",
+      "type": "String",
+      "value": "=resource",
+      "binding": { "type": "zeebe:input", "name": "resource" },
+      "constraints": { "notEmpty": true },
+      "group": "data"
+    },
+    {
+      "label": "Key",
+      "type": "String",
+      "binding": { "type": "zeebe:input", "name": "key" },
+      "value": "",
+      "constraints": { "notEmpty": true },
+      "group": "data"
+    },
+    {
+      "label": "Value",
+      "type": "String",
+      "binding": { "type": "zeebe:input", "name": "value" },
+      "value": "",
+      "constraints": { "notEmpty": true },
+      "group": "data"
+    },
+    {
+      "label": "Write back to variable",
+      "description": "Process variable name to store the updated resource into (output mapping target).",
+      "type": "String",
+      "value": "resource",
+      "binding": { "type": "zeebe:output", "source": "=resource" },
+      "constraints": { "notEmpty": true },
+      "group": "data"
+    }
+  ]
+}

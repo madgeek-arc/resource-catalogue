@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 
@@ -30,7 +30,7 @@ public interface CSVService {
      * @param list Provider list
      * @return {@link String}
      */
-    String listProvidersToCSV(List<ProviderBundle> list);
+    String listProvidersToCSV(List<OrganisationBundle> list);
 
     /**
      * Create a CSV from a list of Services
@@ -65,6 +65,6 @@ public interface CSVService {
      * @return The CSV as String.
      */
     String computeApprovedServicesBeforeTimestampAndGenerateCSV(long timestamp,
-                                                              List<ProviderBundle> providers,
-                                                              List<ServiceBundle> services) throws IOException;
+                                                                List<OrganisationBundle> providers,
+                                                                List<ServiceBundle> services) throws IOException;
 }

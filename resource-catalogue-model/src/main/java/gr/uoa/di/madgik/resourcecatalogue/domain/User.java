@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,10 @@ public class User implements Identifiable {
             user.surname = principal.getAttribute("family_name");
         } else if (auth instanceof AdminAuthentication) {
             logger.trace("internal admin access");
+            user.id = "system";
+            user.email = "system";
+            user.name = "system";
+            user.surname = "system";
         } else if (auth.isAuthenticated()) {
             logger.warn("Authenticated User has missing information: {}", auth);
             return null;

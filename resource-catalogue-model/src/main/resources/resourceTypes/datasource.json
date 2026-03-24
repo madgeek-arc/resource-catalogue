@@ -9,17 +9,38 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Service ID",
-      "multivalued": false,
-      "name": "service_id",
-      "path": "$.datasource.serviceId",
-      "type": "java.lang.String"
-    },
-    {
       "label": "Catalogue ID",
       "multivalued": false,
       "name": "catalogue_id",
-      "path": "$.datasource.catalogueId",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.datasource.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Service Name",
+      "multivalued": false,
+      "name": "name",
+      "path": "$.datasource.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Description",
+      "multivalued": false,
+      "name": "description",
+      "path": "$.datasource.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.datasource.alternativePIDs[*].pid",
       "type": "java.lang.String"
     },
     {
@@ -28,6 +49,160 @@
       "name": "node",
       "path": "$.datasource.node",
       "type": "java.lang.String"
+    },
+    {
+      "label": "Type",
+      "multivalued": false,
+      "name": "entity_type",
+      "path": "$.datasource.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Resource Owner",
+      "multivalued": false,
+      "name": "resource_owner",
+      "path": "$.datasource.resourceOwner",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Service Provider",
+      "multivalued": true,
+      "name": "service_providers",
+      "path": "$.datasource.serviceProviders[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Webpage",
+      "multivalued": false,
+      "name": "webpage",
+      "path": "$.datasource.webpage",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Logo",
+      "multivalued": false,
+      "name": "logo",
+      "path": "$.datasource.logo",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Scientific Domain",
+      "multivalued": true,
+      "name": "scientific_domains",
+      "path": "$.datasource.scientificDomains[*].scientificDomain",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Scientific Subdomain",
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "path": "$.datasource.scientificDomains[*].scientificSubdomain",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Category",
+      "multivalued": true,
+      "name": "categories",
+      "path": "$.datasource.categories[*].category",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Subcategory",
+      "multivalued": true,
+      "name": "subcategories",
+      "path": "$.datasource.categories[*].subcategory",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Tag",
+      "multivalued": true,
+      "name": "tags",
+      "path": "$.datasource.tags[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Jurisdiction",
+      "multivalued": false,
+      "name": "jurisdiction",
+      "path": "$.datasource.jurisdiction[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "TRL",
+      "multivalued": false,
+      "name": "trl",
+      "path": "$.datasource.trl",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Terms of Use",
+      "multivalued": false,
+      "name": "terms_of_use",
+      "path": "$.datasource.termsOfUse",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Privacy Policy",
+      "multivalued": false,
+      "name": "privacy_policy",
+      "path": "$.datasource.privacyPolicy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Access Policy",
+      "multivalued": false,
+      "name": "access_policy",
+      "path": "$.datasource.accessPolicy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Order Type",
+      "multivalued": false,
+      "name": "order_type",
+      "path": "$.datasource.orderType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Order",
+      "multivalued": false,
+      "name": "order_link",
+      "path": "$.datasource.order",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Contact",
+      "multivalued": true,
+      "name": "contacts",
+      "path": "$.datasource.contact.email",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Submission Policy URL",
+      "multivalued": false,
+      "name": "submission_policy_url",
+      "path": "$.datasource.submissionPolicyUrl",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Preservation Policy URL",
+      "multivalued": false,
+      "name": "preservation_policy_url",
+      "path": "$.datasource.preservationPolicyUrl",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Version Control",
+      "multivalued": false,
+      "name": "version_control",
+      "path": "$.datasource.versionControl",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "label": "Thematic",
+      "multivalued": false,
+      "name": "thematic",
+      "path": "$.datasource.thematic",
+      "type": "java.lang.Boolean"
     },
     {
       "label": null,
@@ -48,14 +223,14 @@
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.lang.String"
+      "type": "java.util.Date"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.lang.String"
+      "type": "java.util.Date"
     },
     {
       "label": null,
@@ -69,6 +244,34 @@
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditActionType",
+      "path": "$.latestAuditInfo.actionType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditDate",
+      "path": "$.latestAuditInfo.date",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditType",
+      "path": "$.latestAuditInfo.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "latestAuditUserEmail",
+      "path": "$.latestAuditInfo.userEmail",
       "type": "java.lang.String"
     },
     {
@@ -144,6 +347,14 @@
       "type": "java.lang.Boolean"
     },
     {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "draft",
+      "path": "$.draft",
+      "type": "java.lang.Boolean"
+    },
+    {
       "label": null,
       "multivalued": false,
       "name": "status",
@@ -151,22 +362,30 @@
       "type": "java.lang.String"
     },
     {
-      "defaultValue": "false",
       "label": null,
       "multivalued": false,
-      "name": "draft",
-      "path": "$.draft",
-      "type": "java.lang.Boolean"
+      "name": "audit_state",
+      "path": "$.auditState",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "originalOpenAIREId",
+      "path": "$.originalOpenAIREId",
+      "type": "java.lang.String"
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
-    "resourceTypes"
+    "resourceTypes",
+    "eoscServices",
+    "eoscResources"
   ],
   "name": "datasource",
   "payloadType": "json",
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle"
   },
-  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+  "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

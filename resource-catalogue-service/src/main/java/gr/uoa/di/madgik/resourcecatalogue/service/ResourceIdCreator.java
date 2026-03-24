@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,7 @@ public class ResourceIdCreator implements IdCreator {
         if (id == null || id.isEmpty()) {
             throw new ValidationException("ID cannot be null or empty");
         }
+        //TODO: warning instead of throw error
         if (id.length() > 50) {
             throw new ValidationException("ID is too long; max 50 characters allowed.");
         }

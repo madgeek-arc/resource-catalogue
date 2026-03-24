@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.unit;
 
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -31,12 +31,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceUnitTest {
+class ServiceUnitTest {
 
     @Mock
     private Authentication auth;
     @Mock
-    private ServiceBundleService<ServiceBundle> serviceBundleService;
+    private ServiceService serviceService;
 
     /**
      * Test to verify the successful addition of a valid service using the {@code add} method.
@@ -50,24 +50,24 @@ public class ServiceUnitTest {
      * </ul>
      */
     @Test
-    public void addServiceSuccess() {
+    void addServiceSuccess() {
         ServiceBundle inputServiceBundle = createServiceBundle();
         ServiceBundle expectedServiceBundle = createServiceBundle();
 
-        when(serviceBundleService.add(inputServiceBundle, auth)).thenReturn(expectedServiceBundle);
-        ServiceBundle result = serviceBundleService.add(inputServiceBundle, auth);
+        when(serviceService.add(inputServiceBundle, auth)).thenReturn(expectedServiceBundle);
+        ServiceBundle result = serviceService.add(inputServiceBundle, auth);
 
         assertNotNull(result);
         assertEquals(expectedServiceBundle, result);
-        assertEquals("Test Service", result.getService().getName(),
+        assertEquals("Test Service", result.getService().get("name"),
                 "Service name should be 'Test Service'");
-        verify(serviceBundleService, times(1)).add(inputServiceBundle, auth);
+        verify(serviceService, times(1)).add(inputServiceBundle, auth);
     }
 
     /**
      * Tests the successful update of a service using the ServiceBundleService.
      * <p>
-     * This test verifies that the {@code update} method of the {@link ServiceBundleService}:
+     * This test verifies that the {@code update} method of the {@link ServiceService}:
      * <ul>
      *   <li>Returns the expected updated {@link ServiceBundle}.</li>
      *   <li>Ensures the service's properties (e.g., name) are updated correctly.</li>
@@ -77,27 +77,27 @@ public class ServiceUnitTest {
      * @throws ResourceNotFoundException if the service to be updated does not exist
      */
     @Test
-    public void updateServiceSuccess() {
+    void updateServiceSuccess() {
         ServiceBundle inputServiceBundle = createServiceBundle();
         ServiceBundle expectedServiceBundle = createServiceBundle();
-        expectedServiceBundle.getService().setName("Updated Test Service");
+        expectedServiceBundle.getService().put("name", "Updated Test Service");
 
-        when(serviceBundleService.update(inputServiceBundle, auth)).thenReturn(expectedServiceBundle);
-        ServiceBundle result = serviceBundleService.update(inputServiceBundle, auth);
+        when(serviceService.update(inputServiceBundle, auth)).thenReturn(expectedServiceBundle);
+        ServiceBundle result = serviceService.update(inputServiceBundle, auth);
 
         assertNotNull(result);
         assertEquals(expectedServiceBundle, result);
 
-        assertEquals("Updated Test Service", result.getService().getName(), "Service name should be " +
+        assertEquals("Updated Test Service", result.getService().get("name"), "Service name should be " +
                 "'Updated Test Service'");
 
-        verify(serviceBundleService, times(1)).update(inputServiceBundle, auth);
+        verify(serviceService, times(1)).update(inputServiceBundle, auth);
     }
 
     /**
      * Tests the successful deletion of a service using the ServiceBundleService.
      * <p>
-     * This test verifies that the {@code delete} method of the {@link ServiceBundleService}:
+     * This test verifies that the {@code delete} method of the {@link ServiceService}:
      * <ul>
      *   <li>Is called exactly once with the correct service ID and authentication.</li>
      *   <li>Does not throw any exceptions for a valid deletion request.</li>
@@ -106,13 +106,13 @@ public class ServiceUnitTest {
      * @throws ResourceNotFoundException if the service to be deleted does not exist
      */
     @Test
-    public void deleteServiceSuccess() {
+    void deleteServiceSuccess() {
         ServiceBundle inputServiceBundle = createServiceBundle();
 
-        doNothing().when(serviceBundleService).delete(inputServiceBundle);
-        serviceBundleService.delete(inputServiceBundle);
+        doNothing().when(serviceService).delete(inputServiceBundle);
+        serviceService.delete(inputServiceBundle);
 
-        verify(serviceBundleService, times(1)).delete(inputServiceBundle);
+        verify(serviceService, times(1)).delete(inputServiceBundle);
     }
 
 }

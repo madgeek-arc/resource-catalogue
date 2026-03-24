@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,16 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import java.util.Objects;
+import java.util.LinkedHashMap;
 
-public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord> {
+public class InteroperabilityRecordBundle extends Bundle {
 
-    private String status;
-
-    private String auditState;
-
-    public InteroperabilityRecordBundle() {
+    public LinkedHashMap<String, Object> getInteroperabilityRecord() {
+        return this.getPayload();
     }
 
-    public InteroperabilityRecordBundle(InteroperabilityRecord interoperabilityRecord) {
-        this.setInteroperabilityRecord(interoperabilityRecord);
-        this.setMetadata(null);
-    }
-
-    public InteroperabilityRecordBundle(InteroperabilityRecord interoperabilityRecord, Metadata metadata) {
-        this.setInteroperabilityRecord(interoperabilityRecord);
-        this.setMetadata(metadata);
+    public void setInteroperabilityRecord(LinkedHashMap<String, Object> payload) {
+        this.setPayload(payload);
     }
 
     @Override
@@ -45,43 +36,5 @@ public class InteroperabilityRecordBundle extends Bundle<InteroperabilityRecord>
     @Override
     public void setId(String id) {
         super.setId(id);
-    }
-
-    public InteroperabilityRecord getInteroperabilityRecord() {
-        return this.getPayload();
-    }
-
-    public void setInteroperabilityRecord(InteroperabilityRecord interoperabilityRecord) {
-        this.setPayload(interoperabilityRecord);
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getAuditState() {
-        return auditState;
-    }
-
-    public void setAuditState(String auditState) {
-        this.auditState = auditState;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        InteroperabilityRecordBundle that = (InteroperabilityRecordBundle) o;
-        return Objects.equals(status, that.status) && Objects.equals(auditState, that.auditState);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), status, auditState);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,106 +16,82 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
+import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import org.apache.commons.beanutils.BeanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 @Service("publicAdapterManager")
-public class PublicAdapterService extends ResourceCatalogueManager<AdapterBundle> implements ResourceCRUDService<AdapterBundle, Authentication> {
-    private static final Logger logger = LoggerFactory.getLogger(PublicProviderService.class);
-    private final JmsService jmsService;
-    private final PidIssuer pidIssuer;
-    private final FacetLabelService facetLabelService;
+public class PublicAdapterService extends AbstractPublicResourceManager<AdapterBundle> {
 
-    @Value("${pid.service.enabled}")
-    private boolean pidServiceEnabled;
+    private final ServiceService serviceService;
+    private final DatasourceService datasourceService;
+    private final InteroperabilityRecordService guidelineService;
 
-    public PublicAdapterService(JmsService jmsService,
+    public PublicAdapterService(GenericResourceService genericResourceService,
+                                JmsService jmsService,
                                 PidIssuer pidIssuer,
-                                FacetLabelService facetLabelService) {
-        super(AdapterBundle.class);
-        this.jmsService = jmsService;
-        this.pidIssuer = pidIssuer;
-        this.facetLabelService = facetLabelService;
+                                FacetLabelService facetLabelService,
+                                ServiceService serviceService,
+                                DatasourceService datasourceService,
+                                InteroperabilityRecordService guidelineService) {
+        super(genericResourceService, jmsService, pidIssuer, facetLabelService);
+        this.serviceService = serviceService;
+        this.datasourceService = datasourceService;
+        this.guidelineService = guidelineService;
     }
 
     @Override
-    public String getResourceTypeName() {
+    protected String getResourceTypeName() {
         return "adapter";
     }
 
-    @Override
-    public Browsing<AdapterBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
-        Browsing<AdapterBundle> browsing = super.getAll(facetFilter, authentication);
-        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
-            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+    //TODO: test me
+    @SuppressWarnings("unchecked")
+    public void updateIdsToPublic(AdapterBundle adapter) {
+        Map<String, Object> adapterMap = adapter.getAdapter();
+        if (adapterMap == null) {
+            return;
         }
-        return browsing;
-    }
-
-    @Override
-    public AdapterBundle add(AdapterBundle adapterBundle, Authentication authentication) {
-        String lowerLevelAdapterId = adapterBundle.getId();
-        adapterBundle.setId(adapterBundle.getIdentifiers().getPid());
-        adapterBundle.getMetadata().setPublished(true);
-
-        //POST PID
-        if (pidServiceEnabled) {
-            logger.info("Posting Adapter with id {} to PID service", adapterBundle.getId());
-            pidIssuer.postPID(adapterBundle.getId(), null);
+        Object linkedResourceObj = adapterMap.get("linkedResource");
+        if (!(linkedResourceObj instanceof Map)) {
+            return;
         }
 
-        AdapterBundle ret;
-        logger.info("Adapter '{}' is being published with id '{}'", lowerLevelAdapterId, adapterBundle.getId());
-        ret = super.add(adapterBundle, null);
-        jmsService.convertAndSendTopic("adapter.create", adapterBundle);
-        return ret;
-    }
-
-    @Override
-    public AdapterBundle update(AdapterBundle adapterBundle, Authentication authentication) {
-        AdapterBundle published = super.get(adapterBundle.getIdentifiers().getPid(),
-                adapterBundle.getAdapter().getCatalogueId(), true);
-        AdapterBundle ret = super.get(adapterBundle.getIdentifiers().getPid(),
-                adapterBundle.getAdapter().getCatalogueId(), true);
-        try {
-            BeanUtils.copyProperties(ret, adapterBundle);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.info("Could not copy properties.");
+        Map<String, Object> linkedResource = (Map<String, Object>) linkedResourceObj;
+        Object typeObj = linkedResource.get("type");
+        Object idObj = linkedResource.get("id");
+        if (!(typeObj instanceof String) || !(idObj instanceof String)) {
+            return;
         }
+        String type = (String) typeObj;
+        String id = (String) idObj;
 
-        ret.setIdentifiers(published.getIdentifiers());
-        ret.setId(published.getId());
-        ret.getMetadata().setPublished(true);
-        logger.info("Updating public Adapter with id '{}'", ret.getId());
-        ret = super.update(ret, null);
-        jmsService.convertAndSendTopic("adapter.update", ret);
-        return ret;
-    }
-
-    @Override
-    public void delete(AdapterBundle adapterBundle) {
-        try {
-            AdapterBundle publicAdapterBundle = get(adapterBundle.getIdentifiers().getPid(),
-                    adapterBundle.getAdapter().getCatalogueId(), true);
-            logger.info("Deleting public Adapter with id '{}'", publicAdapterBundle.getId());
-            super.delete(publicAdapterBundle);
-            jmsService.convertAndSendTopic("adapter.delete", publicAdapterBundle);
-        } catch (CatalogueResourceNotFoundException ignore) {
+        String publicId;
+        switch (type.toLowerCase()) {
+            case "service" -> {
+                ServiceBundle service = serviceService.get(id, adapter.getCatalogueId());
+                publicId = service.getIdentifiers().getPid();
+            }
+            case "datasource" -> {
+                DatasourceBundle datasource = datasourceService.get(id, adapter.getCatalogueId());
+                publicId = datasource.getIdentifiers().getPid();
+            }
+            default -> {
+                InteroperabilityRecordBundle guideline = guidelineService.get(id, adapter.getCatalogueId());
+                publicId = guideline.getIdentifiers().getPid();
+            }
         }
+        linkedResource.put("id", publicId);
     }
-
 }

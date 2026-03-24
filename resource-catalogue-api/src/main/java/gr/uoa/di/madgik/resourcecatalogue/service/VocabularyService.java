@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ public interface VocabularyService extends ResourceService<Vocabulary> {
      * @return {@link Vocabulary}
      */
     Vocabulary getParent(String id);
+
+    /**
+     *
+     * @param parentId Parent Vocabulary ID
+     * @return {@link List<Vocabulary>}
+     */
+    List<Vocabulary> getChildren(String parentId);
 
     /**
      * Get all Vocabularies by type in a Map.

@@ -29,6 +29,10 @@
             
       <xs:element name="active" type="xs:boolean"/>
             
+      <xs:element minOccurs="0" name="auditState" type="xs:string"/>
+            
+      <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
+            
       <xs:element name="draft" type="xs:boolean"/>
             
       <xs:element minOccurs="0" name="id" type="xs:string"/>
@@ -48,6 +52,8 @@
       <xs:element minOccurs="0" name="metadata" type="metadata"/>
             
       <xs:element minOccurs="0" name="migrationStatus" type="migrationStatus"/>
+            
+      <xs:element minOccurs="0" name="status" type="xs:string"/>
             
       <xs:element name="suspended" type="xs:boolean"/>
           
@@ -447,11 +453,7 @@ It is also possible to select Not a legal entity.]]></xs:documentation>
                 
         <xs:sequence>
                     
-          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
-                    
           <xs:element minOccurs="0" name="catalogue" type="catalogue"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
                     
           <xs:element maxOccurs="unbounded" minOccurs="0" name="transferContactInformation" nillable="true" type="contactInfoTransfer"/>
                   
@@ -653,8 +655,6 @@ Criteria for submitting content to the repository as well as product preparation
           </xs:element>
                     
           <xs:element name="softwareRepository" type="xs:boolean"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
         </xs:sequence>
               
@@ -755,8 +755,6 @@ Criteria for submitting content to the repository as well as product preparation
       <xs:extension base="bundle">
                 
         <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
                     
           <xs:element minOccurs="0" name="helpdesk" type="helpdesk"/>
                   
@@ -1065,11 +1063,7 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
                 
         <xs:sequence>
                     
-          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
-                    
           <xs:element minOccurs="0" name="interoperabilityRecord" type="interoperabilityRecord"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
         </xs:sequence>
               
@@ -1128,8 +1122,6 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
       <xs:extension base="bundle">
                 
         <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
                     
           <xs:element minOccurs="0" name="monitoring" type="monitoring"/>
                   
@@ -1358,11 +1350,7 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
                 
         <xs:sequence>
                     
-          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
-                    
           <xs:element minOccurs="0" name="provider" type="provider"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
                     
           <xs:element minOccurs="0" name="templateStatus" type="xs:string"/>
                     
@@ -1401,28 +1389,6 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscIFGuidelines" nillable="true" type="eoscifGuidelines"/>
           
     </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="resourceHistory">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="metadata">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="coreVersionId" type="xs:string"/>
-                    
-          <xs:element minOccurs="0" name="version" type="xs:string"/>
-                    
-          <xs:element name="versionChange" type="xs:boolean"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
       
   </xs:complexType>
     
@@ -1966,13 +1932,9 @@ infrastructures.]]></xs:documentation>
                 
         <xs:sequence>
                     
-          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
-                    
           <xs:element minOccurs="0" name="resourceExtras" type="resourceExtras"/>
                     
           <xs:element minOccurs="0" name="service" type="service"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
                   
         </xs:sequence>
               
@@ -2155,10 +2117,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:extension base="bundle">
                 
         <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="auditState" type="xs:string"/>
-                    
-          <xs:element minOccurs="0" name="status" type="xs:string"/>
                     
           <xs:element minOccurs="0" name="trainingResource" type="trainingResource"/>
                   
@@ -2460,8 +2418,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
             
       <xs:enumeration value="UPDATED"/>
             
-      <xs:enumeration value="UPDATED_VERSION"/>
-            
       <xs:enumeration value="ACTIVATED"/>
             
       <xs:enumeration value="DEACTIVATED"/>
@@ -2670,17 +2626,9 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
             
       <xs:enumeration value="MARKETPLACE_LOCATION"/>
             
-      <xs:enumeration value="CATALOGUE_STATE"/>
-            
-      <xs:enumeration value="PROVIDER_STATE"/>
-            
       <xs:enumeration value="RESOURCE_STATE"/>
             
-      <xs:enumeration value="DATASOURCE_STATE"/>
-            
       <xs:enumeration value="TEMPLATE_STATE"/>
-            
-      <xs:enumeration value="INTEROPERABILITY_RECORD_STATE"/>
             
       <xs:enumeration value="DS_RESEARCH_ENTITY_TYPE"/>
             

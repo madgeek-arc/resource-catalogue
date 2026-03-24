@@ -66,36 +66,18 @@
         }
       },
       "additionalProperties" : false
-    },
-    "MigrationStatus" : {
-      "type" : "object",
-      "properties" : {
-        "comments" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "migrationDate" : {
-          "type" : "string"
-        },
-        "modelVersion" : {
-          "type" : "string"
-        },
-        "modified" : {
-          "type" : "string"
-        },
-        "resolutionDate" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
     }
   },
   "type" : "object",
   "properties" : {
     "active" : {
       "type" : "boolean"
+    },
+    "auditState" : {
+      "type" : "string"
+    },
+    "catalogueId" : {
+      "type" : "string"
     },
     "draft" : {
       "type" : "boolean"
@@ -112,6 +94,9 @@
     "latestUpdateInfo" : {
       "$ref" : "#/$defs/LoggingInfo"
     },
+    "legacy" : {
+      "type" : "boolean"
+    },
     "loggingInfo" : {
       "type" : "array",
       "items" : {
@@ -120,9 +105,6 @@
     },
     "metadata" : {
       "$ref" : "#/$defs/Metadata"
-    },
-    "migrationStatus" : {
-      "$ref" : "#/$defs/MigrationStatus"
     },
     "originalOpenAIREId" : {
       "type" : "string"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import gr.uoa.di.madgik.resourcecatalogue.annotation.FieldValidation;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.xml.bind.annotation.XmlTransient;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
 
 import java.beans.Transient;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-public abstract class Bundle<T extends Identifiable> implements Identifiable {
+public class Bundle {
 
-    @Schema(hidden = true)
-    @XmlTransient
-    @FieldValidation
-    private T payload;
+    private LinkedHashMap<String, Object> payload = new LinkedHashMap<>();
 
     private Metadata metadata;
 
@@ -39,11 +36,11 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     private boolean draft;
 
+    private boolean legacy;
+
     private Identifiers identifiers;
 
-    private MigrationStatus migrationStatus;
-
-    private List<LoggingInfo> loggingInfo;
+    private List<LoggingInfo> loggingInfo = new ArrayList<>();
 
     private LoggingInfo latestAuditInfo;
 
@@ -51,28 +48,218 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
 
     private LoggingInfo latestUpdateInfo;
 
+    private String status;
+    private String auditState;
+
+    private String catalogueId;
+
     public Bundle() {
     }
 
-    @Override
-    public String getId() {
-        return payload.getId();
+    public void markOnboard(String status, boolean active, UserInfo user, String comment) {
+        if (!Objects.equals(status, this.status)) { // status changed
+            this.setStatus(status);
+
+            this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+            LoggingInfo onboardingInfo;
+            if (loggingInfo.isEmpty() ||
+                    (loggingInfo.stream().anyMatch(
+                            info -> LoggingInfo.Types.DRAFT.getKey().equals(info.getType())) &&
+                            loggingInfo.stream().noneMatch(
+                                    info -> LoggingInfo.Types.ONBOARD.getKey().equals(info.getType()))
+                    )
+            ) {
+                onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REGISTERED.getKey(), comment
+                );
+                this.setLatestOnboardingInfo(onboardingInfo);
+                this.getLoggingInfo().add(onboardingInfo);
+                this.setDraft(false);
+            }
+
+            if (status.toLowerCase().contains("approved")) {
+                onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.APPROVED.getKey(), comment
+                );
+                this.setLatestOnboardingInfo(onboardingInfo);
+                this.getLoggingInfo().add(onboardingInfo);
+            } else if (status.toLowerCase().contains("rejected")) {
+                onboardingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user, LoggingInfo.Types.ONBOARD.getKey(),
+                        LoggingInfo.ActionType.REJECTED.getKey(), comment
+                );
+                this.setLatestOnboardingInfo(onboardingInfo);
+                this.getLoggingInfo().add(onboardingInfo);
+            }
+        }
+        markActive(active, user);
     }
 
-    @Override
-    public void setId(String id) {
-        if (this.payload != null) {
-            this.payload.setId(id);
+    public void markUpdate(UserInfo user, String comment) {
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+        LoggingInfo updateInfo;
+        updateInfo = LoggingInfo.createLoggingInfoEntry(
+                user,
+                LoggingInfo.Types.UPDATE.getKey(),
+                LoggingInfo.ActionType.UPDATED.getKey(),
+                comment
+        );
+        this.setLatestUpdateInfo(updateInfo);
+        this.getLoggingInfo().add(updateInfo);
+        this.determineAuditState();
+    }
+
+    public void markActive(boolean active, UserInfo user) {
+        if (active != this.active) {
+            this.setActive(active);
+            this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+
+            LoggingInfo info;
+            LoggingInfo.ActionType type = LoggingInfo.ActionType.DEACTIVATED;
+            if (active) {
+                type = LoggingInfo.ActionType.ACTIVATED;
+            }
+            try {
+                info = LoggingInfo.createLoggingInfoEntry(
+                        user,
+                        LoggingInfo.Types.UPDATE.getKey(),
+                        type.getKey(),
+                        null
+                );
+            } catch (InsufficientAuthenticationException e) {
+                info = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
+            }
+            this.loggingInfo.add(info);
+            this.latestUpdateInfo = info;
         }
     }
 
+    public void markAudit(String comment, LoggingInfo.ActionType actionType, Authentication auth) {
+        String state;
+        UserInfo user = UserInfo.of(auth);
+        switch (actionType) {
+            case VALID -> state = Auditable.VALID;
+            case INVALID -> state = Auditable.INVALID_AND_NOT_UPDATED;
+            default -> throw new IllegalArgumentException("Unhandled action type " + actionType.getKey());
+        }
+        this.setAuditState(state);
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+
+        LoggingInfo loggingInfo;
+
+        loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                user,
+                LoggingInfo.Types.AUDIT.getKey(),
+                actionType.getKey(),
+                comment
+        );
+        this.loggingInfo.add(loggingInfo);
+
+        // latestAuditInfo
+        this.setLatestAuditInfo(loggingInfo);
+    }
+
+    public void markSuspend(boolean suspend, Authentication auth) {
+        if (suspend != this.suspended) {
+            UserInfo user = UserInfo.of(auth);
+            this.setSuspended(suspend);
+            this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+
+            LoggingInfo loggingInfo;
+            if (suspend) {
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user,
+                        LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.SUSPENDED.getKey(),
+                        null
+                );
+            } else {
+                loggingInfo = LoggingInfo.createLoggingInfoEntry(
+                        user,
+                        LoggingInfo.Types.UPDATE.getKey(),
+                        LoggingInfo.ActionType.UNSUSPENDED.getKey(),
+                        null
+                );
+            }
+            this.loggingInfo.add(loggingInfo);
+            this.setLatestUpdateInfo(loggingInfo);
+        }
+    }
+
+    private void determineAuditState() {
+        List<LoggingInfo> sorted = new ArrayList<>(this.loggingInfo);
+        sorted.sort(Comparator.comparing(LoggingInfo::getDate).reversed());
+        boolean hasBeenAudited = false;
+        boolean hasBeenUpdatedAfterAudit = false;
+        String auditActionType = "";
+        int auditIndex = -1;
+        for (LoggingInfo loggingInfo : sorted) {
+            auditIndex++;
+            if (loggingInfo.getType().equals(LoggingInfo.Types.AUDIT.getKey())) {
+                hasBeenAudited = true;
+                auditActionType = loggingInfo.getActionType();
+                break;
+            }
+        }
+        // update after audit
+        if (hasBeenAudited) {
+            for (int i = 0; i < auditIndex; i++) {
+                if (sorted.get(i).getType().equals(LoggingInfo.Types.UPDATE.getKey())) {
+                    hasBeenUpdatedAfterAudit = true;
+                    break;
+                }
+            }
+        }
+
+        String auditState;
+        if (!hasBeenAudited) {
+            auditState = Auditable.NOT_AUDITED;
+        } else if (!hasBeenUpdatedAfterAudit) {
+            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
+                    Auditable.INVALID_AND_NOT_UPDATED :
+                    Auditable.VALID;
+        } else {
+            auditState = auditActionType.equals(LoggingInfo.ActionType.INVALID.getKey()) ?
+                    Auditable.INVALID_AND_UPDATED :
+                    Auditable.VALID;
+        }
+
+        this.auditState = auditState;
+    }
+
+    public void markDraft(Authentication auth, String comment) {
+        UserInfo user = UserInfo.of(auth);
+
+        this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
+        LoggingInfo draftInfo;
+        if (loggingInfo.isEmpty()) {
+            draftInfo = LoggingInfo.createLoggingInfoEntry(
+                    user, LoggingInfo.Types.DRAFT.getKey(),
+                    LoggingInfo.ActionType.CREATED.getKey(), comment
+            );
+            this.setLatestOnboardingInfo(draftInfo);
+            this.getLoggingInfo().add(draftInfo);
+        }
+        this.draft = true;
+    }
+
+    public String getId() {
+        return this.getPayload().get("id").toString();
+    }
+
+    public void setId(String id) {
+        this.getPayload().put("id", id);
+    }
+
     @Transient
-    public T getPayload() {
+    public LinkedHashMap<String, Object> getPayload() {
         return payload;
     }
 
     @Transient
-    protected void setPayload(T payload) {
+    public void setPayload(LinkedHashMap<String, Object> payload) {
         this.payload = payload;
     }
 
@@ -108,20 +295,20 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.draft = draft;
     }
 
+    public boolean isLegacy() {
+        return legacy;
+    }
+
+    public void setLegacy(boolean legacy) {
+        this.legacy = legacy;
+    }
+
     public Identifiers getIdentifiers() {
         return identifiers;
     }
 
     public void setIdentifiers(Identifiers identifiers) {
         this.identifiers = identifiers;
-    }
-
-    public MigrationStatus getMigrationStatus() {
-        return migrationStatus;
-    }
-
-    public void setMigrationStatus(MigrationStatus migrationStatus) {
-        this.migrationStatus = migrationStatus;
     }
 
     public List<LoggingInfo> getLoggingInfo() {
@@ -156,32 +343,27 @@ public abstract class Bundle<T extends Identifiable> implements Identifiable {
         this.latestUpdateInfo = latestUpdateInfo;
     }
 
-    @Override
-    public String toString() {
-        return "Bundle{" +
-                "payload=" + payload +
-                ", metadata=" + metadata +
-                ", active=" + active +
-                ", suspended=" + suspended +
-                ", draft=" + draft +
-                ", identifiers=" + identifiers +
-                ", migrationStatus=" + migrationStatus +
-                ", loggingInfo=" + loggingInfo +
-                ", latestAuditInfo=" + latestAuditInfo +
-                ", latestOnboardingInfo=" + latestOnboardingInfo +
-                ", latestUpdateInfo=" + latestUpdateInfo +
-                '}';
+    public String getStatus() {
+        return this.status;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Bundle<?> bundle)) return false;
-        return active == bundle.active && suspended == bundle.suspended && draft == bundle.draft && Objects.equals(payload, bundle.payload) && Objects.equals(metadata, bundle.metadata) && Objects.equals(identifiers, bundle.identifiers) && Objects.equals(migrationStatus, bundle.migrationStatus) && Objects.equals(loggingInfo, bundle.loggingInfo) && Objects.equals(latestAuditInfo, bundle.latestAuditInfo) && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo) && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo);
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(payload, metadata, active, suspended, draft, identifiers, migrationStatus, loggingInfo, latestAuditInfo, latestOnboardingInfo, latestUpdateInfo);
+    public String getAuditState() {
+        return auditState;
+    }
+
+    public void setAuditState(String auditState) {
+        this.auditState = auditState;
+    }
+
+    public String getCatalogueId() {
+        return catalogueId;
+    }
+
+    public void setCatalogueId(String catalogueId) {
+        this.catalogueId = catalogueId;
     }
 }

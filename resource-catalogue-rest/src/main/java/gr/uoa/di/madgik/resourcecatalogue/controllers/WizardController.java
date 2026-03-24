@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import io.swagger.v3.oas.annotations.Operation;
@@ -86,7 +86,7 @@ public class WizardController {
             });
 
             if (!vocabularies.isEmpty()) {
-                String type = vocabularies.get(0).getType();
+                String type = vocabularies.getFirst().getType();
                 int countInJson = vocabularies.size();
                 int countInDb = vocabularyService.getByType(Vocabulary.Type.fromString(type)).size();
                 boolean fullyPosted = countInDb >= countInJson;
@@ -225,12 +225,9 @@ public class WizardController {
     @Operation(summary = "Create main Catalogue")
     @GetMapping("/step3")
     public String createCatalogue(Model model) {
-        Catalogue catalogue = new Catalogue();
+        CatalogueBundle catalogue = new CatalogueBundle();
+        catalogue.setPayload(new LinkedHashMap<>());
         catalogue.setId(catalogueId);
-        catalogue.setLocation(new ProviderLocation());
-        catalogue.setMainContact(new ProviderMainContact());
-        catalogue.setPublicContacts(new ArrayList<>(List.of(new ProviderPublicContact())));
-        catalogue.setUsers(new ArrayList<>(List.of(new User())));
 
         // Get countries as Map (ID -> Name)
         Map<String, String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY)
@@ -249,20 +246,22 @@ public class WizardController {
     }
 
     @PostMapping("/step3/loadCatalogue")
-    public String loadCatalogue(@ModelAttribute Catalogue catalogue, Model model) {
+    public String loadCatalogue(@ModelAttribute LinkedHashMap<String, Object> catalogue, Model model) {
         try {
-            logger.info("Loading main Catalogue with ID [{}]", catalogue.getId());
-            addCatalogue(new CatalogueBundle(catalogue));
+            logger.info("Loading main Catalogue with ID [{}]", catalogue.get("id"));
+            CatalogueBundle bundle = new CatalogueBundle();
+            bundle.setCatalogue(catalogue);
+            addCatalogue(bundle);
             model.addAttribute("successMessage", "Catalogue saved successfully! You can now close the tab!");
 
 //            return "redirect:/wizard/step4";
         } catch (Exception e) {
-            logger.error("Failed to save Catalogue [{}]: {}", catalogue.getId(), e.getMessage());
+            logger.error("Failed to save Catalogue [{}]: {}", catalogue.get("id"), e.getMessage());
             model.addAttribute("errorMessage", "Error saving catalogue: " + e.getMessage());
             model.addAttribute("catalogue", catalogue);
         }
 
-        model.addAttribute("id", catalogue.getId());
+        model.addAttribute("id", catalogue.get("id"));
         model.addAttribute("homepage", homepage);
         return "wizard-step3";
     }
@@ -273,7 +272,7 @@ public class WizardController {
         List<LoggingInfo> loggingInfoList = createLoggingInfoList();
         catalogue.setLoggingInfo(loggingInfoList);
         catalogue.setActive(true);
-        catalogue.setStatus(vocabularyService.get("approved catalogue").getId());
+        catalogue.setStatus(vocabularyService.get("approved").getId());
         catalogue.setAuditState(Auditable.NOT_AUDITED);
 
         // latestOnboardingInfo

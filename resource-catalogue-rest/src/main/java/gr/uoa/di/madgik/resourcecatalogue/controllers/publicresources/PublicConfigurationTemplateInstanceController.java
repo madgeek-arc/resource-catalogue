@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstance;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,86 +34,71 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Profile("beyond")
 @RestController
-@RequestMapping
+@RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public configuration template instance")
 public class PublicConfigurationTemplateInstanceController {
 
-    private final ConfigurationTemplateInstanceService service;
-    private final GenericResourceService genericResourceService;
+    private final PublicResourceService<ConfigurationTemplateInstanceBundle> service;
 
-
-    PublicConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService service,
-                                                  GenericResourceService genericResourceService) {
+    PublicConfigurationTemplateInstanceController(PublicResourceService<ConfigurationTemplateInstanceBundle> service) {
         this.service = service;
-        this.genericResourceService = genericResourceService;
     }
 
     @Operation(description = "Returns the Public Configuration Template Instance with the given id.")
-    @GetMapping(path = "public/configurationTemplateInstance/{prefix}/{suffix}",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'")
-                                 @PathVariable("prefix") String prefix,
-                                 @Parameter(description = "The right part of the ID after the '/'")
-                                 @PathVariable("suffix") String suffix) {
+    @GetMapping(path = "public/configurationTemplateInstance/{prefix}/{suffix}")
+    public ResponseEntity<?> get(@PathVariable String prefix,
+                                 @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id, null, true);
-        if (bundle.getMetadata().isPublished()) {
+        ConfigurationTemplateInstanceBundle bundle = service.get(id, null);
+        if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getConfigurationTemplateInstance(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Configuration Template Instance does not consist a Public entity"));
+                "The specific Configuration Template Instance is not active"));
     }
 
-    @GetMapping(path = "public/configurationTemplateInstance/bundle/{prefix}/{suffix}",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
-    public ResponseEntity<?> getBundle(@Parameter(description = "The left part of the ID before the '/'")
-                                       @PathVariable("prefix") String prefix,
-                                       @Parameter(description = "The right part of the ID after the '/'")
-                                       @PathVariable("suffix") String suffix) {
+    @GetMapping(path = "public/configurationTemplateInstance/bundle/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<?> getBundle(@PathVariable String prefix,
+                                       @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id, null, true);
-        if (bundle.getMetadata().isPublished()) {
-            return new ResponseEntity<>(bundle, HttpStatus.OK);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Configuration Template Instance Bundle does not consist a Public entity"));
+        ConfigurationTemplateInstanceBundle bundle = service.get(id, null);
+        return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
     @Operation(description = "Get a list of all Public Configuration Template Instances in the Catalogue, based on a set of filters.")
     @BrowseParameters
-    @GetMapping(path = "public/configurationTemplateInstance/all",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Paging<ConfigurationTemplateInstance>> getAll(@Parameter(hidden = true)
+    @GetMapping(path = "public/configurationTemplateInstance/all")
+    public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
 
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("configuration_template_instance");
-        ff.addFilter("published", true);
-        Paging<ConfigurationTemplateInstance> paging = genericResourceService.getResults(ff)
-                .map(r -> ((ConfigurationTemplateInstanceBundle) r).getPayload());
-        return ResponseEntity.ok(paging);
+        ff.addFilter("active", true);
+        Paging<ConfigurationTemplateInstanceBundle> paging = service.getAll(ff);
+        return ResponseEntity.ok(paging.map(ConfigurationTemplateInstanceBundle::getConfigurationTemplateInstance));
     }
 
     @BrowseParameters
-    @GetMapping(path = "public/configurationTemplateInstance/bundle/all",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_EPOT')")
+    @GetMapping(path = "public/configurationTemplateInstance/bundle/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                                     @RequestParam MultiValueMap<String, Object> params,
-                                                                                     @Parameter(hidden = true) Authentication auth) {
+                                                                                     @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", true);
-        Paging<ConfigurationTemplateInstanceBundle> paging = service.getAll(ff, auth);
-        List<ConfigurationTemplateInstanceBundle> list = new LinkedList<>(paging.getResults());
-        Paging<ConfigurationTemplateInstanceBundle> ret = new Paging<>(paging.getTotal(), paging.getFrom(),
-                paging.getTo(), list, paging.getFacets());
-        return new ResponseEntity<>(ret, HttpStatus.OK);
+        ff.addFilter("active", true);
+        Paging<ConfigurationTemplateInstanceBundle> paging = service.getAll(ff);
+        return ResponseEntity.ok(paging);
+    }
+
+    @Hidden
+    @PostMapping(path = "public/configurationTemplateInstance/add")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ConfigurationTemplateInstanceBundle> createPublicCTI(@RequestBody ConfigurationTemplateInstanceBundle bundle,
+                                                                               @Parameter(hidden = true) Authentication auth) {
+        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }

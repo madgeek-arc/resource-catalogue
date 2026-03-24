@@ -9,150 +9,24 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.service.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Service Name",
       "multivalued": false,
       "name": "name",
       "path": "$.service.name",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Node",
-      "multivalued": false,
-      "name": "node",
-      "path": "$.service.node",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Abbreviation",
-      "multivalued": false,
-      "name": "abbreviation",
-      "path": "$.service.abbreviation",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Resource Organisation",
-      "multivalued": false,
-      "name": "resource_organisation",
-      "path": "$.service.resourceOrganisation",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Resource Provider",
-      "multivalued": true,
-      "name": "resource_providers",
-      "path": "$.service.resourceProviders[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Alternative Identifier Value",
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "path": "$.service.alternativeIdentifiers[*].value",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Category",
-      "multivalued": true,
-      "name": "categories",
-      "path": "$.service.categories[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Subcategory",
-      "multivalued": true,
-      "name": "subcategories",
-      "path": "$.service.categories[*].subcategory",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Scientific Domain",
-      "multivalued": true,
-      "name": "scientific_domains",
-      "path": "$.service.scientificDomains[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Scientific Subdomain",
-      "multivalued": true,
-      "name": "scientific_subdomains",
-      "path": "$.service.scientificDomains[*].scientificSubdomain",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Target User",
-      "multivalued": true,
-      "name": "target_users",
-      "path": "$.service.targetUsers[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Access Type",
-      "multivalued": true,
-      "name": "access_types",
-      "path": "$.service.accessTypes[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Access Mode",
-      "multivalued": true,
-      "name": "access_modes",
-      "path": "$.service.accessModes[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Language Availability",
-      "multivalued": true,
-      "name": "language_availabilities",
-      "path": "$.service.languageAvailabilities[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Geographical Availability",
-      "multivalued": true,
-      "name": "geographical_availabilities",
-      "path": "$.service.geographicalAvailabilities[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Resource Geographic Location",
-      "multivalued": true,
-      "name": "resource_geographic_locations",
-      "path": "$.service.resourceGeographicLocations[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "TRL",
-      "multivalued": false,
-      "name": "trl",
-      "path": "$.service.trl",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Life Cycle Status",
-      "multivalued": false,
-      "name": "life_cycle_status",
-      "path": "$.service.lifeCycleStatus",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.service.catalogueId",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Funding Body",
-      "multivalued": true,
-      "name": "funding_body",
-      "path": "$.service.fundingBody[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Funding Program",
-      "multivalued": true,
-      "name": "funding_programs",
-      "path": "$.service.fundingPrograms[*]",
       "type": "java.lang.String"
     },
     {
@@ -163,17 +37,80 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Tagline",
-      "multivalued": false,
-      "name": "tagline",
-      "path": "$.service.tagline",
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.service.alternativePIDs[*].pid",
       "type": "java.lang.String"
     },
     {
-      "label": "Open Source Technology",
+      "label": "Node",
+      "multivalued": false,
+      "name": "node",
+      "path": "$.service.node",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Type",
+      "multivalued": false,
+      "name": "entity_type",
+      "path": "$.service.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Resource Owner",
+      "multivalued": false,
+      "name": "resource_owner",
+      "path": "$.service.resourceOwner",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Service Provider",
       "multivalued": true,
-      "name": "open_source_technologies",
-      "path": "$.service.openSourceTechnologies[*]",
+      "name": "service_providers",
+      "path": "$.service.serviceProviders[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Webpage",
+      "multivalued": false,
+      "name": "webpage",
+      "path": "$.service.webpage",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Logo",
+      "multivalued": false,
+      "name": "logo",
+      "path": "$.service.logo",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Scientific Domain",
+      "multivalued": true,
+      "name": "scientific_domains",
+      "path": "$.service.scientificDomains[*].scientificDomain",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Scientific Subdomain",
+      "multivalued": true,
+      "name": "scientific_subdomains",
+      "path": "$.service.scientificDomains[*].scientificSubdomain",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Category",
+      "multivalued": true,
+      "name": "categories",
+      "path": "$.service.categories[*].category",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Subcategory",
+      "multivalued": true,
+      "name": "subcategories",
+      "path": "$.service.categories[*].subcategory",
       "type": "java.lang.String"
     },
     {
@@ -184,24 +121,38 @@
       "type": "java.lang.String"
     },
     {
-      "label": null,
+      "label": "Jurisdiction",
       "multivalued": false,
-      "name": "horizontalService",
-      "path": "$.service.horizontalService",
-      "type": "java.lang.Boolean"
-    },
-    {
-      "label": "Service Category",
-      "multivalued": true,
-      "name": "service_categories",
-      "path": "$.service.serviceCategories[*]",
+      "name": "jurisdiction",
+      "path": "$.service.jurisdiction[*]",
       "type": "java.lang.String"
     },
     {
-      "label": "Marketplace Location",
-      "multivalued": true,
-      "name": "marketplace_locations",
-      "path": "$.service.marketplaceLocations[*]",
+      "label": "TRL",
+      "multivalued": false,
+      "name": "trl",
+      "path": "$.service.trl",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Terms of Use",
+      "multivalued": false,
+      "name": "terms_of_use",
+      "path": "$.service.termsOfUse",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Privacy Policy",
+      "multivalued": false,
+      "name": "privacy_policy",
+      "path": "$.service.privacyPolicy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Access Policy",
+      "multivalued": false,
+      "name": "access_policy",
+      "path": "$.service.accessPolicy",
       "type": "java.lang.String"
     },
     {
@@ -209,6 +160,20 @@
       "multivalued": false,
       "name": "order_type",
       "path": "$.service.orderType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Order",
+      "multivalued": false,
+      "name": "order_link",
+      "path": "$.service.order",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Contact",
+      "multivalued": true,
+      "name": "contacts",
+      "path": "$.service.contact.email",
       "type": "java.lang.String"
     },
     {
@@ -230,14 +195,14 @@
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.lang.String"
+      "type": "java.util.Date"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.lang.String"
+      "type": "java.util.Date"
     },
     {
       "label": null,
@@ -379,12 +344,13 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "services"
+    "eoscServices",
+    "eoscResources"
   ],
   "name": "service",
   "payloadType": "json",
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle"
   },
-  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+  "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

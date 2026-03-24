@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.ServiceConfig;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
-import org.jetbrains.annotations.NotNull;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +36,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @SpringBootTest
@@ -47,10 +48,10 @@ public class ServiceProviderRegistrationIT {
     private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRegistrationIT.class);
 
     @Autowired
-    ProviderService providerService;
+    OrganisationService providerService;
 
     @Autowired
-    ServiceBundleService<ServiceBundle> serviceBundleService;
+    ServiceService serviceService;
 
     @Autowired
     SecurityService securityService;
@@ -58,7 +59,7 @@ public class ServiceProviderRegistrationIT {
 
     @Test
     public void addInvalidProviderTest() throws MalformedURLException {
-        ProviderBundle provider = null;
+        OrganisationBundle provider = null;
         try {
             provider = addProvider("*&*");
         } catch (ServiceException e) {
@@ -72,7 +73,7 @@ public class ServiceProviderRegistrationIT {
     @Test
     public void addUpdateAndDeleteProvider() throws MalformedURLException {
         String providerId = "wp6";
-        ProviderBundle provider;
+        OrganisationBundle provider;
         ServiceBundle serviceBundle;
 
         try {
@@ -84,15 +85,16 @@ public class ServiceProviderRegistrationIT {
 
             providerService.verify(providerId, "pending template submission", true, securityService.getAdminAccess());
 
-            serviceBundle = new ServiceBundle(createService("WP4_TestService", provider.getProvider()));
+            serviceBundle = new ServiceBundle();
+            serviceBundle.setService(createService("WP4_TestService", provider.getId()));
 
-            serviceBundle = serviceBundleService.addResource(serviceBundle, securityService.getAdminAccess());
+            serviceBundle = serviceService.add(serviceBundle, securityService.getAdminAccess());
 
             assert serviceBundle != null;
 
             providerService.verify(providerId, "rejected template", false, securityService.getAdminAccess());
 
-            serviceBundleService.updateResource(serviceBundle, "woof", securityService.getAdminAccess());
+            serviceService.update(serviceBundle, "woof", securityService.getAdminAccess());
 
             providerService.verify(providerId, "approved", true, securityService.getAdminAccess());
             providerService.verify(providerId, "approved", false, securityService.getAdminAccess());
@@ -101,110 +103,112 @@ public class ServiceProviderRegistrationIT {
         } catch (RuntimeException e) {
             logger.error("ERROR", e);
         } finally {
-            provider = providerService.get(providerId, securityService.getAdminAccess());
+            provider = providerService.get(providerId);
             logger.info("Deleting provider with id: '{}'", provider.getId());
             providerService.delete(provider);
         }
 
     }
 
-    private ProviderBundle addProvider(String id) throws MalformedURLException {
+    private OrganisationBundle addProvider(String id) throws MalformedURLException {
         List<String> providerTypes = new ArrayList<>();
         providerTypes.add("provider_type-single_sited");
         providerTypes.add("provider_type-distributed");
 
-        List<ServiceProviderDomain> providerScientificSubdomains = new ArrayList<>();
-        ServiceProviderDomain serviceProviderDomain = new ServiceProviderDomain();
-        serviceProviderDomain.setScientificDomain("provider_scientific_subdomain-agronomy_forestry_plant_breeding_centres");
-        serviceProviderDomain.setScientificSubdomain("provider_scientific_subdomain-animal_facilities");
+        List<LinkedHashMap<String, Object>> providerScientificSubdomains = new ArrayList<>();
+        LinkedHashMap<String, Object> serviceProviderDomain = new LinkedHashMap<>();
+        serviceProviderDomain.put("scientificDomain", "provider_scientific_subdomain-agronomy_forestry_plant_breeding_centres");
+        serviceProviderDomain.put("scientificSubdomain", "provider_scientific_subdomain-animal_facilities");
         providerScientificSubdomains.add(serviceProviderDomain);
 
-        ProviderLocation providerLocation = new ProviderLocation();
-        providerLocation.setCity("Athens");
-        providerLocation.setStreetNameAndNumber("Epidayrou 6");
-        providerLocation.setPostalCode("12345");
-        providerLocation.setRegion("Attica");
+        LinkedHashMap<String, Object> providerLocation = new LinkedHashMap<>();
+        providerLocation.put("city", "Athens");
+        providerLocation.put("streetNameAndNumber", "Epidayrou 6");
+        providerLocation.put("postalCode", "12345");
+        providerLocation.put("region", "Attica");
 
-        ProviderMainContact mainContact = new ProviderMainContact();
-        mainContact.setPhone("0101010101");
-        mainContact.setEmail("maincontact@gmail.com");
-        mainContact.setFirstName("MainName");
-        mainContact.setLastName("MainSurname");
-        mainContact.setPosition("Manager");
+        LinkedHashMap<String, Object> mainContact = new LinkedHashMap<>();
+        mainContact.put("phone", "0101010101");
+        mainContact.put("mainEmail", "maincontact@gmail.com");
+        mainContact.put("mainFirstName", "MainName");
+        mainContact.put("mainLastName", "MainSurname");
+        mainContact.put("position", "Manager");
 
-        List<ProviderPublicContact> publicContacts = getProviderPublicContacts();
+        List<LinkedHashMap<String, Object>> publicContacts = getProviderPublicContacts();
 
-        List<User> users = new ArrayList<>();
-        User user = new User();
-        user.setEmail("asdf@gmail.com");
-        user.setId("");
-        user.setName("Kostakis");
-        user.setSurname("Spyrakis");
+        List<LinkedHashMap<String, Object>> users = new ArrayList<>();
+        LinkedHashMap<String, Object> user = new LinkedHashMap<>();
+        user.put("email", "asdf@gmail.com");
+        user.put("id", "");
+        user.put("userName", "Kostakis");
+        user.put("userSurname", "Spyrakis");
         users.add(user);
 
-        Provider provider = new Provider();
-        provider.setId(id);
-        provider.setName("WP4_TestProvider");
-        provider.setAbbreviation("WP4");
-        provider.setWebsite(URI.create("http://wp4.testprovider.com").toURL());
-        provider.setDescription("Jtest for PDT WP4 v2.00 01/10/19");
-        provider.setLogo(URI.create("https://wp4.testprovider.logo.com").toURL());
-        provider.setStructureTypes(providerTypes);
-        provider.setScientificDomains(providerScientificSubdomains);
-        provider.setLifeCycleStatus("provider_life_cycle_status-under_construction");
-        provider.setLocation(providerLocation);
-        provider.setMainContact(mainContact);
-        provider.setPublicContacts(publicContacts);
-        provider.setUsers(users);
+        LinkedHashMap<String, Object> provider = new LinkedHashMap<>();
+        provider.put("name", "WP4_TestProvider");
+        provider.put("abbreviation", "WP4");
+        provider.put("website", URI.create("http://wp4.testprovider.com").toURL());
+        provider.put("description", "Jtest for PDT WP4 v2.00 01/10/19");
+        provider.put("logo", URI.create("https://wp4.testprovider.logo.com").toURL());
+        provider.put("structureTypes", providerTypes);
+        provider.put("scientificDomains", providerScientificSubdomains);
+        provider.put("lifeCycleStatus", "provider_life_cycle_status-under_construction");
+        provider.put("location", providerLocation);
+        provider.put("mainContact", mainContact);
+        provider.put("publicContacts", publicContacts);
+        provider.put("users", users);
 
-        return providerService.add(new ProviderBundle(provider), securityService.getAdminAccess());
+        OrganisationBundle bundle = new OrganisationBundle();
+        bundle.setId(id);
+        bundle.setOrganisation(provider);
+        return providerService.add(bundle, securityService.getAdminAccess());
     }
 
-    private static @NotNull List<ProviderPublicContact> getProviderPublicContacts() {
-        ProviderPublicContact contact1 = new ProviderPublicContact();
-        contact1.setEmail("contact1@gmail.com");
-        contact1.setFirstName("FirstName1");
-        contact1.setLastName("LastName1");
-        contact1.setPhone("0123456789");
-        ProviderPublicContact contact2 = new ProviderPublicContact();
-        contact2.setEmail("contact2@gmail.com");
-        contact2.setFirstName("FirstName1");
-        contact2.setLastName("LastName1");
-        contact2.setPhone("9876543210");
-        List<ProviderPublicContact> publicContacts = new ArrayList<>();
+    private static List<LinkedHashMap<String, Object>> getProviderPublicContacts() {
+        LinkedHashMap<String, Object> contact1 = new LinkedHashMap<>();
+        contact1.put("email", "contact1@gmail.com");
+        contact1.put("firstName", "FirstName1");
+        contact1.put("lastName", "LastName1");
+        contact1.put("phone", "0123456789");
+        LinkedHashMap<String, Object> contact2 = new LinkedHashMap<>();
+        contact2.put("email", "contact2@gmail.com");
+        contact2.put("firstName", "FirstName1");
+        contact2.put("lastName", "LastName1");
+        contact2.put("phone", "9876543210");
+        List<LinkedHashMap<String, Object>> publicContacts = new ArrayList<>();
         publicContacts.add(contact1);
         publicContacts.add(contact2);
         return publicContacts;
     }
 
-    private ProviderBundle updateProvider(String id) throws MalformedURLException, ResourceNotFoundException {
+    private OrganisationBundle updateProvider(String id) throws MalformedURLException, ResourceNotFoundException {
         // get provider
-        ProviderBundle provider = providerService.get(id);
+        OrganisationBundle provider = providerService.get(id);
 
         // update provider
-        provider.getProvider().setName("WP4_Test UPDATED");
-        provider.getProvider().setAbbreviation("WP4UPDATED");
-        provider.getProvider().setWebsite(URI.create("http://wp4.test.updated.com").toURL());
-        provider.getProvider().setDescription("Jtest for PDT WP4 v2.00 01/10/19 UPDATED");
-        provider.getProvider().setLogo(URI.create("https://wp4.testprovider.logo.updated.com").toURL());
-        provider.getProvider().setLifeCycleStatus("provider_life_cycle_status-being_upgraded");
-        provider.getProvider().getLocation().setCountry("EU");
+        provider.getOrganisation().put("name", "WP4_Test UPDATED");
+        provider.getOrganisation().put("abbreviation", "WP4UPDATED");
+        provider.getOrganisation().put("website", URI.create("http://wp4.test.updated.com").toURL());
+        provider.getOrganisation().put("description", "Jtest for PDT WP4 v2.00 01/10/19 UPDATED");
+        provider.getOrganisation().put("logo", URI.create("https://wp4.testprovider.logo.updated.com").toURL());
+        provider.getOrganisation().put("lifeCycleStatus", "provider_life_cycle_status-being_upgraded");
+        ((LinkedHashMap<String, Object>) provider.getOrganisation().get("location")).put("country", "EU");
 
         return providerService.update(provider, securityService.getAdminAccess());
     }
 
 
-    public Service createService(String serviceName, Provider provider) throws MalformedURLException {
-        List<ServiceProviderDomain> scientificSubdomains = new ArrayList<>();
-        ServiceProviderDomain serviceProviderDomain = new ServiceProviderDomain();
-        serviceProviderDomain.setScientificDomain("scientific_subdomain-natural_sciences-mathematics");
-        serviceProviderDomain.setScientificSubdomain("scientific_subdomain-natural_sciences-computer_sciences");
+    public LinkedHashMap<String, Object> createService(String serviceName, String providerId) throws MalformedURLException {
+        List<LinkedHashMap<String, Object>> scientificSubdomains = new ArrayList<>();
+        LinkedHashMap<String, Object> serviceProviderDomain = new LinkedHashMap<>();
+        serviceProviderDomain.put("scientificDomain", "scientific_subdomain-natural_sciences-mathematics");
+        serviceProviderDomain.put("scientificSubdomain", "scientific_subdomain-natural_sciences-computer_sciences");
         scientificSubdomains.add(serviceProviderDomain);
 
-        List<ServiceCategory> subcategories = new ArrayList<>();
-        ServiceCategory serviceCategory = new ServiceCategory();
-        serviceCategory.setCategory("category-access_physical_and_eInfrastructures-instrument_and_equipment");
-        serviceCategory.setSubcategory("subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer");
+        List<LinkedHashMap<String, Object>> subcategories = new ArrayList<>();
+        LinkedHashMap<String, Object> serviceCategory = new LinkedHashMap<>();
+        serviceCategory.put("category", "category-access_physical_and_eInfrastructures-instrument_and_equipment");
+        serviceCategory.put("subcategory", "subcategory-access_physical_and_eInfrastructures-instrument_and_equipment-spectrometer");
         subcategories.add(serviceCategory);
 
         List<String> targetUsers = new ArrayList<>();
@@ -219,36 +223,36 @@ public class ServiceProviderRegistrationIT {
         places.add("GR");
         places.add("FR");
 
-        List<ServicePublicContact> contacts = getServicePublicContacts();
+        List<LinkedHashMap<String, Object>> contacts = getServicePublicContacts();
 
-        Service service = new Service();
-        service.setName(serviceName);
-        service.setWebpage(URI.create("https:wp4.testservice.com").toURL());
-        service.setDescription("Jtest for SDT WP4 v2.00 01/10/19");
-        service.setLogo(URI.create("https:wp4.testservice.logo.com").toURL());
-        service.setResourceOrganisation(provider.getId());
-        service.setScientificDomains(scientificSubdomains);
-        service.setCategories(subcategories);
-        service.setTargetUsers(targetUsers);
-        service.setLanguageAvailabilities(languages);
-        service.setGeographicalAvailabilities(places);
-        service.setPublicContacts(contacts);
+        LinkedHashMap<String, Object> service = new LinkedHashMap<>();
+        service.put("name", serviceName);
+        service.put("webpage", URI.create("https:wp4.testservice.com").toURL());
+        service.put("description", "Jtest for SDT WP4 v2.00 01/10/19");
+        service.put("logo", URI.create("https:wp4.testservice.logo.com").toURL());
+        service.put("resourceOrganisation", providerId);
+        service.put("scientificDomains", scientificSubdomains);
+        service.put("categories", subcategories);
+        service.put("targetUsers", targetUsers);
+        service.put("languageAvailabilities", languages);
+        service.put("geographicalAvailabilities", places);
+        service.put("publicContacts", contacts);
 
         return service;
     }
 
-    private static @NotNull List<ServicePublicContact> getServicePublicContacts() {
-        ServicePublicContact contact1 = new ServicePublicContact();
-        contact1.setEmail("contact1@gmail.com");
-        contact1.setFirstName("FirstName1");
-        contact1.setLastName("LastName1");
-        contact1.setPhone("0123456789");
-        ServicePublicContact contact2 = new ServicePublicContact();
-        contact2.setEmail("contact2@gmail.com");
-        contact2.setFirstName("FirstName1");
-        contact2.setLastName("LastName1");
-        contact2.setPhone("9876543210");
-        List<ServicePublicContact> contacts = new ArrayList<>();
+    private static List<LinkedHashMap<String, Object>> getServicePublicContacts() {
+        LinkedHashMap<String, Object> contact1 = new LinkedHashMap<>();
+        contact1.put("email", "contact1@gmail.com");
+        contact1.put("firstName", "FirstName1");
+        contact1.put("lastName", "LastName1");
+        contact1.put("phone", "0123456789");
+        LinkedHashMap<String, Object> contact2 = new LinkedHashMap<>();
+        contact2.put("email", "contact2@gmail.com");
+        contact2.put("firstName", "FirstName1");
+        contact2.put("lastName", "LastName1");
+        contact2.put("phone", "9876543210");
+        List<LinkedHashMap<String, Object>> contacts = new ArrayList<>();
         contacts.add(contact1);
         contacts.add(contact2);
         return contacts;

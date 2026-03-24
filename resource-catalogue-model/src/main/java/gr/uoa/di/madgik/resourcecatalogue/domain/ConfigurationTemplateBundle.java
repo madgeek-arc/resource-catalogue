@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,16 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-public class ConfigurationTemplateBundle extends Bundle<ConfigurationTemplate> {
+import java.util.LinkedHashMap;
 
-    public ConfigurationTemplateBundle() {
+public class ConfigurationTemplateBundle extends Bundle {
+
+    public LinkedHashMap<String, Object> getConfigurationTemplate() {
+        return this.getPayload();
     }
 
-    public ConfigurationTemplateBundle(ConfigurationTemplate configurationTemplate) {
-        this.setConfigurationTemplate(configurationTemplate);
-        this.setMetadata(null);
-    }
-
-    public ConfigurationTemplateBundle(ConfigurationTemplate configurationTemplate, Metadata metadata) {
-        this.setConfigurationTemplate(configurationTemplate);
-        this.setMetadata(metadata);
+    public void setConfigurationTemplate(LinkedHashMap<String, Object> payload) {
+        this.setPayload(payload);
     }
 
     @Override
@@ -40,13 +37,4 @@ public class ConfigurationTemplateBundle extends Bundle<ConfigurationTemplate> {
     public void setId(String id) {
         super.setId(id);
     }
-
-    public ConfigurationTemplate getConfigurationTemplate() {
-        return this.getPayload();
-    }
-
-    public void setConfigurationTemplate(ConfigurationTemplate configurationTemplate) {
-        this.setPayload(configurationTemplate);
-    }
 }
-

@@ -32,6 +32,14 @@
     "extras": {}
   },
   {
+    "id": "node-envri",
+    "name": "ENVRI",
+    "description": "ENVRI",
+    "parentId": null,
+    "type": "Node",
+    "extras": {}
+  },
+  {
     "id": "node-eosc_pl",
     "name": "EOSC PL",
     "description": "EOSC PL",

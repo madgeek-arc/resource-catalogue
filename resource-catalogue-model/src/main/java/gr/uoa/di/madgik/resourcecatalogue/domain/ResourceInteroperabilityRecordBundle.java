@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,25 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-public class ResourceInteroperabilityRecordBundle extends Bundle<ResourceInteroperabilityRecord> {
+import java.util.LinkedHashMap;
 
-    public ResourceInteroperabilityRecordBundle() {
-    }
+public class ResourceInteroperabilityRecordBundle extends Bundle {
 
-    public ResourceInteroperabilityRecordBundle(ResourceInteroperabilityRecord resourceInteroperabilityRecord) {
-        this.setResourceInteroperabilityRecord(resourceInteroperabilityRecord);
-        this.setMetadata(null);
-    }
-
-    public ResourceInteroperabilityRecordBundle(ResourceInteroperabilityRecord resourceInteroperabilityRecord, Metadata metadata) {
-        this.setResourceInteroperabilityRecord(resourceInteroperabilityRecord);
-        this.setMetadata(metadata);
-    }
-
-    public ResourceInteroperabilityRecord getResourceInteroperabilityRecord() {
+    public LinkedHashMap<String, Object> getResourceInteroperabilityRecord() {
         return this.getPayload();
     }
 
-    public void setResourceInteroperabilityRecord(ResourceInteroperabilityRecord resourceInteroperabilityRecord) {
-        this.setPayload(resourceInteroperabilityRecord);
+    public void setResourceInteroperabilityRecord(LinkedHashMap<String, Object> payload) {
+        this.setPayload(payload);
+    }
+
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        super.setId(id);
     }
 }
