@@ -37,3 +37,7 @@ hs_err_pid*
 **/*.properties
 **/*.yml
 **/*.yaml
+
+
+# extras
+log4j2.xml
