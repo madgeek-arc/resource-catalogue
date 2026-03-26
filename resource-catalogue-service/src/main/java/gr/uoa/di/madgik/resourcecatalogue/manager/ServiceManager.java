@@ -54,6 +54,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
+    private final EmailService emailService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -69,12 +70,14 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           GenericResourceService genericResourceService,
                           @Lazy RelationshipValidator relationshipValidator,
                           ModelService modelService,
+                          EmailService emailService,
                           WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService; // for providers
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
+        this.emailService = emailService;
     }
 
     @Override
@@ -205,7 +208,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
-//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
+        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider);
     }
 
     //FIXME

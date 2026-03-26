@@ -55,6 +55,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     private final OrganisationService organisationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
+    private final EmailService emailService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -65,11 +66,13 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          ProviderResourcesCommonMethods commonMethods,
                                          GenericResourceService genericResourceService,
+                                         EmailService emailService,
                                          WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -159,7 +162,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
                 guideline.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Interoperability Records", provider.getId());
-//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
+        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(guideline, provider);
     }
 
     @Override

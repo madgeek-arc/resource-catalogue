@@ -20,6 +20,7 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -43,16 +44,16 @@ public class PostProcessingAspect {
 
     private final Map<String, Consumer<Object>> aspectRegistry = new HashMap<>();
     private final VocabularyService vocabularyService;
-//    private final EmailService emailService;
+    private final EmailService emailService;
     private final GenericResourceService genericResourceService;
 
 
     //TODO: one class per aspect else it will get messy
     public PostProcessingAspect(VocabularyService vocabularyService,
-//                                EmailService emailService,
+                                EmailService emailService,
                                 GenericResourceService genericResourceService) {
         this.vocabularyService = vocabularyService;
-//        this.emailService = emailService;
+        this.emailService = emailService;
         this.genericResourceService = genericResourceService;
         aspectRegistry.put("HostingLegalEntityVocabularyUpdate", obj -> {
             if (!(obj instanceof OrganisationBundle bundle)) {
@@ -170,7 +171,7 @@ public class PostProcessingAspect {
 
     private void sendEmailsForAdminDifferences(OrganisationBundle updatedProvider, OrganisationBundle existingProvider) {
         List<List<String>> differences = calculateDifferences(updatedProvider, existingProvider);
-        sendEmailsToProviderAdmins(differences);
+        sendEmailsToProviderAdmins(differences, updatedProvider, existingProvider);
     }
 
     private List<List<String>> calculateDifferences(OrganisationBundle updatedProvider, OrganisationBundle existingProvider) {
@@ -201,12 +202,17 @@ public class PostProcessingAspect {
         return emails;
     }
 
-    private void sendEmailsToProviderAdmins(List<List<String>> differences) {
-        if (!differences.getFirst().isEmpty()) {
-//            emailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded); //TODO: fix & enable
+    private void sendEmailsToProviderAdmins(List<List<String>> differences, OrganisationBundle updatedProvider,
+                                            OrganisationBundle existingProvider) {
+
+        List<String> adminsAdded = differences.get(0);
+        List<String> adminsDeleted = differences.get(1);
+
+        if (!adminsAdded.isEmpty()) {
+            emailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded);
         }
-        if (!differences.getLast().isEmpty()) {
-//            emailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted); //TODO: fix & enable
+        if (!adminsDeleted.isEmpty()) {
+            emailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted);
         }
     }
 

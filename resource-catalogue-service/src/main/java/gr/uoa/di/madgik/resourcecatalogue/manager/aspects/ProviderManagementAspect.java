@@ -73,6 +73,7 @@ public class ProviderManagementAspect {
     private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordService;
     private final SqaaasAssessmentService sqaaasAssessmentService;
+    private final EmailService emailService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -98,7 +99,8 @@ public class ProviderManagementAspect {
                                     SecurityService securityService, ConfigurationTemplateService configurationTemplateService,
                                     ConfigurationTemplateInstanceService configurationTemplateInstanceService,
                                     PublicInteroperabilityRecordService publicInteroperabilityRecordService,
-                                    SqaaasAssessmentService sqaaasAssessmentService) {
+                                    SqaaasAssessmentService sqaaasAssessmentService,
+                                    EmailService emailService) {
         this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
@@ -122,6 +124,7 @@ public class ProviderManagementAspect {
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
         this.publicInteroperabilityRecordService = publicInteroperabilityRecordService;
         this.sqaaasAssessmentService = sqaaasAssessmentService;
+        this.emailService = emailService;
     }
 
     //region resource state
@@ -262,7 +265,7 @@ public class ProviderManagementAspect {
     }
     //endregion
 
-    //region registration emails
+    //region registration and other emails
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.finalizeDraft(..))",
@@ -270,7 +273,7 @@ public class ProviderManagementAspect {
     public void providerRegistrationEmails(final OrganisationBundle bundle) {
         logger.trace("Sending Registration emails");
         if (!bundle.getMetadata().isPublished() && bundle.getCatalogueId().equals(catalogueId)) {
-//            emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "providerManager"); //FIXME
+           emailService.sendOnboardingEmailsToProviderAdmins(bundle, "providerManager");
         }
     }
 
@@ -280,7 +283,7 @@ public class ProviderManagementAspect {
         OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
                 service.getCatalogueId());
         logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "serviceBundleManager"); //FIXME
+        emailService.sendOnboardingEmailsToProviderAdmins(provider, "serviceManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
@@ -289,7 +292,7 @@ public class ProviderManagementAspect {
         OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "serviceBundleManager"); //FIXME
+        emailService.sendOnboardingEmailsToProviderAdmins(provider, "datasourceManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
@@ -298,7 +301,7 @@ public class ProviderManagementAspect {
         OrganisationBundle provider = organisationService.get((String) training.getTrainingResource().get("resourceOwner"),
                 training.getCatalogueId());
         logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "serviceBundleManager"); //FIXME
+        emailService.sendOnboardingEmailsToProviderAdmins(provider, "trainingResourceManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))",
@@ -307,7 +310,14 @@ public class ProviderManagementAspect {
         OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
                 deployableApplication.getCatalogueId());
         logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToProviderAdmins(OrganisationBundle, "serviceBundleManager"); //FIXME
+        emailService.sendOnboardingEmailsToProviderAdmins(provider, "deployableApplicationManager");
+    }
+
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.add(..))",
+            returning = "organisation")
+    public void sendEmailsToNewlyAddedProviderAdmins(final OrganisationBundle organisation) {
+        logger.trace("Sending emails to newly added Organisation Admins");
+        emailService.sendEmailsToNewlyAddedProviderAdmins(organisation, null);
     }
     //endregion
 
@@ -706,16 +716,6 @@ public class ProviderManagementAspect {
         }
     }
     //endregion
-
-
-    //FIXME
-//    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..)) " +
-//            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.add(..))",
-//            returning = "catalogueBundle")
-//    public void catalogueRegistrationEmails(final CatalogueBundle catalogueBundle) {
-//        logger.trace("Sending Registration emails");
-//        emailService.sendOnboardingEmailsToCatalogueAdmins(catalogueBundle);
-//    }
 
     //region extras
     @Async

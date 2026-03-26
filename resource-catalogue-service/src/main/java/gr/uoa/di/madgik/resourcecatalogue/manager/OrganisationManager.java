@@ -96,12 +96,10 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     @Override
     public OrganisationBundle add(OrganisationBundle bundle, Authentication auth) {
         return super.add(bundle, auth);
-//        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
     }
 
     @Override
-//    @TriggersAspects({"HostingLegalEntityVocabularyUpdate", "AfterProviderUpdateEmails"})
-    @TriggersAspects({"HostingLegalEntityVocabularyUpdate"})
+    @TriggersAspects({"HostingLegalEntityVocabularyUpdate", "AfterProviderUpdateEmails"})
     public OrganisationBundle update(OrganisationBundle bundle, String comment, Authentication auth) {
         OrganisationBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Organisation
@@ -122,7 +120,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     @Override
     @Transactional // if deleteAllRelatedResources() fails, this should also fail
-//    @TriggersAspects({"AfterProviderDeletionEmails"})
+    @TriggersAspects({"AfterProviderDeletionEmails"})
     public void delete(OrganisationBundle bundle) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // block Public Organisation deletion
