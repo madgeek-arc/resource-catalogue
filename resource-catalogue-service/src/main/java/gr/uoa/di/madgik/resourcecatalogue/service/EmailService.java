@@ -95,147 +95,43 @@ public class EmailService {
         this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
     }
 
-    // sendEmailsFromTemplate
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, String userRole) {
-        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), userRole);
-    }
-
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, List<String> cc, String userRole) {
-        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), cc, userRole);
-    }
-
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails, String userRole) {
-        sendMailsFromTemplate(templateName, root, subject, emails, null, userRole);
-    }
-
-    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> to, List<String> cc, String userRole) {
-        if (to == null || to.isEmpty()) {
-            logger.error("emails empty or null");
-            return;
-        }
-        try (StringWriter out = new StringWriter()) {
-            Template temp = cfg.getTemplate(templateName);
-            temp.process(root, out);
-            String mailBody = out.getBuffer().toString();
-
-            if (userRole.equalsIgnoreCase("onboarding-team")) {
-                mailService.sendMail(to, subject, mailBody);
-            }
-
-            if (enableAdminNotifications && userRole.equalsIgnoreCase("admin")) {
-                if (cc != null && !cc.isEmpty()) {
-                    mailService.sendMail(to, cc, subject, mailBody);
-                } else {
-                    mailService.sendMail(to, subject, mailBody);
-                }
-            }
-            if (enableProviderNotifications && userRole.equalsIgnoreCase("provider")) {
-                mailService.sendMail(to, subject, mailBody);
-            }
-            logger.info("\nRecipients: {}\nCC: {}\nTitle: {}\nMail body: \n{}", String.join(", ", to), cc, subject, mailBody);
-
-        } catch (IOException e) {
-            logger.error("Error finding mail template '{}'", templateName, e);
-        } catch (TemplateException e) {
-            logger.error("ERROR", e);
-        } catch (MessagingException e) {
-            logger.error("Could not send mail", e);
-        }
-    }
-
-    // onboarding
-    private String getOnboardingTeamSubject(CatalogueBundle catalogueBundle) {
-        return getSubjectForResourceOnboarding(catalogueBundle, true, false);
-    }
-
-    private String getOnboardingTeamSubject(OrganisationBundle organisationBundle) {
-        if (organisationBundle.getTemplateStatus().equals("no template status")) {
-            return getSubjectForResourceOnboarding(organisationBundle, true, false);
-        } else {
-            return getSubjectForResourceOnboarding(organisationBundle, true, true);
-        }
-    }
-
-    private String getCatalogueAdminsSubject(CatalogueBundle catalogueBundle) {
-        return getSubjectForResourceOnboarding(catalogueBundle, false, false);
-    }
-
-    private String getProviderAdminsSubject(OrganisationBundle organisationBundle) {
-        if (organisationBundle.getTemplateStatus().equals("no template status")) {
-            return getSubjectForResourceOnboarding(organisationBundle, false, false);
-        } else {
-            return getSubjectForResourceOnboarding(organisationBundle, false, true);
-        }
-    }
-
-    private String getProviderAdminsSubjectForInteroperabilityRecordOnboarding(
-            InteroperabilityRecordBundle interoperabilityRecordBundle) {
-        return getSubjectForResourceOnboarding(interoperabilityRecordBundle, false, false);
-    }
-
+    //region mail functionalities
     @Async
-    public void sendOnboardingEmailsToProviderAdmins(OrganisationBundle organisationBundle, String afterReturningFrom) {
-        EmailService.EmailBasicInfo emailBasicInfoUser = initializeEmail("providerMailTemplate.ftl",
-                organisationBundle, null, null);
-        EmailService.EmailBasicInfo emailBasicInfoAdmin = initializeEmail("registrationTeamMailTemplate.ftl",
-                organisationBundle, null, null);
+    public void sendOnboardingEmailsToProviderAdmins(OrganisationBundle organisationBundle,
+                                                     String afterReturningFrom) {
+        EmailService.EmailBasicInfo emailBasicInfoUser =
+                initializeEmail("providerMailTemplate.ftl", organisationBundle, null, null);
 
-        Bundle template;
-        switch (afterReturningFrom) {
-            case "serviceManager":
-                template = serviceManager.getTemplate(organisationBundle.getId(), securityService.getAdminAccess());
-                updateRootAccordingToResourceType(template, emailBasicInfoUser);
-                break;
-            case "datasourceManager":
-                template = datasourceManager.getTemplate(organisationBundle.getId(), securityService.getAdminAccess());
-                updateRootAccordingToResourceType(template, emailBasicInfoUser);
-                break;
-            case "trainingResourceManager":
-                template = trainingResourceManager.getTemplate(organisationBundle.getId(),
-                        securityService.getAdminAccess());
-                updateRootAccordingToResourceType(template, emailBasicInfoUser);
-                break;
-            case "deployableApplicationManager":
-                template = deployableApplicationManager.getTemplate(organisationBundle.getId(),
-                        securityService.getAdminAccess());
-                updateRootAccordingToResourceType(template, emailBasicInfoUser);
-                break;
-            case "providerManager":
-            default:
-                break;
-        }
+        EmailService.EmailBasicInfo emailBasicInfoAdmin =
+                initializeEmail("registrationTeamMailTemplate.ftl", organisationBundle, null, null);
+
+        resolveTemplateAndUpdateRoot(afterReturningFrom, organisationBundle, emailBasicInfoUser);
         emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
 
-        // Get User Info (the one that registered the resource)
-        Optional<User> registeredUser = organisationBundle.getLoggingInfo().stream()
-                .filter(loggingInfo -> LoggingInfo.ActionType.REGISTERED.getKey().equals(loggingInfo.getActionType()))
-                .findFirst()
-                .map(loggingInfo -> {
-                    User user = new User();
-                    user.setEmail(Optional.ofNullable(loggingInfo.getUserEmail())
-                            .filter(email -> !email.isEmpty())
-                            .map(String::toLowerCase)
-                            .orElse("no email provided"));
-
-                    String[] nameParts = Optional.ofNullable(loggingInfo.getUserFullName())
-                            .filter(name -> !name.isEmpty())
-                            .map(fullName -> fullName.split(" "))
-                            .orElse(new String[]{"Unknown", "Unknown"});
-
-                    user.setName(nameParts[0]);
-                    user.setSurname(nameParts.length > 1 ? nameParts[1] : "Unknown");
-
-                    return user;
-                });
+        User registeredUser = extractRegisteredUser(organisationBundle);
         emailBasicInfoAdmin.updateRoot("user", registeredUser);
 
-        sendMailsFromTemplate("registrationTeamMailTemplate.ftl", emailBasicInfoAdmin.getRoot(),
-                emailBasicInfoAdmin.getSubject(), registrationEmail, "onboarding-team");
+        sendMailsFromTemplate(
+                "registrationTeamMailTemplate.ftl",
+                emailBasicInfoAdmin.getRoot(),
+                emailBasicInfoAdmin.getSubject(),
+                registrationEmail,
+                "onboarding-team"
+        );
 
-        for (User user : (List<User>) organisationBundle.getOrganisation().get("users")) {
+        List<User> users = deduplicateUsersByEmail(
+                securityService.getProviderUsers(organisationBundle.getId())
+        );
+
+        for (User user : users) {
             emailBasicInfoUser.updateRoot("user", user);
-            sendMailsFromTemplate("providerMailTemplate.ftl", emailBasicInfoUser.getRoot(),
-                    emailBasicInfoUser.getSubject(), user.getEmail().toLowerCase(), "provider");
+            sendMailsFromTemplate(
+                    "providerMailTemplate.ftl",
+                    emailBasicInfoUser.getRoot(),
+                    emailBasicInfoUser.getSubject(),
+                    user.getEmail().toLowerCase(),
+                    "provider"
+            );
         }
     }
 
@@ -246,88 +142,11 @@ public class EmailService {
 
         updateRootAccordingToResourceType(resourceBundle, emailBasicInfo);
 
-        for (User user : (List<User>) organisationBundle.getOrganisation().get("users")) {
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        for (User user : users) {
             emailBasicInfo.updateRoot("user", user);
             sendMailsFromTemplate("providerOutdatedResources.ftl", emailBasicInfo.getRoot(),
                     emailBasicInfo.getSubject(), user.getEmail().toLowerCase(), "provider");
-        }
-    }
-
-    //TODO: fix changeProvider and enable
-    public void sendEmailsForMovedResources(OrganisationBundle oldProvider, OrganisationBundle newProvider,
-                                            Bundle bundle, Authentication auth) {
-        // are the same for training resources (same root, subject in initialization)
-        EmailService.EmailBasicInfo oldProviderAdmins = initializeEmail("resourceMovedOldProvider.ftl",
-                bundle, oldProvider.getOrganisation().get("name").toString(), null);
-        EmailService.EmailBasicInfo newProviderAdmins = initializeEmail("resourceMovedNewProvider.ftl",
-                bundle, oldProvider.getOrganisation().get("name").toString(), null);
-        EmailService.EmailBasicInfo onboardingTeam = initializeEmail("resourceMovedEPOT.ftl",
-                bundle, oldProvider.getOrganisation().get("name").toString(), null);
-
-        oldProviderAdmins.updateRoot("oldProvider", oldProvider);
-        oldProviderAdmins.updateRoot("newProvider", newProvider);
-        oldProviderAdmins.updateRoot("bundleId", bundle.getId());
-        updateRootAccordingToResourceType(bundle, oldProviderAdmins);
-
-        newProviderAdmins.setRoot(oldProviderAdmins.getRoot());
-
-        onboardingTeam.updateRoot("adminFullName", Objects.requireNonNull(AuthenticationInfo.getFullName(auth)));
-        onboardingTeam.updateRoot("adminEmail", Objects.requireNonNull(AuthenticationInfo.getEmail(auth).toLowerCase()));
-        onboardingTeam.updateRoot("adminRole", securityService.getRoleName(auth));
-        onboardingTeam.updateRoot("comment", bundle.getLoggingInfo().getLast().getComment());
-
-        for (User user : (List<User>) oldProvider.getOrganisation().get("users")) {
-            oldProviderAdmins.updateRoot("user", user);
-            sendMailsFromTemplate("resourceMovedOldProvider.ftl", oldProviderAdmins.getRoot(),
-                    oldProviderAdmins.getSubject(), user.getEmail().toLowerCase(), "provider");
-        }
-        for (User user : (List<User>) newProvider.getOrganisation().get("users")) {
-            newProviderAdmins.updateRoot("user", user);
-            sendMailsFromTemplate("resourceMovedNewProvider.ftl", newProviderAdmins.getRoot(),
-                    newProviderAdmins.getSubject(), user.getEmail().toLowerCase(), "provider");
-        }
-        sendMailsFromTemplate("resourceMovedEPOT.ftl", onboardingTeam.getRoot(), onboardingTeam.getSubject(),
-                registrationEmail, "admin");
-    }
-
-    private static void updateRootAccordingToResourceType(Bundle bundle, EmailService.EmailBasicInfo emailBasicInfo) {
-        emailBasicInfo.updateRoot("resourceBundleId", bundle.getId());
-        switch (bundle) {
-            case ServiceBundle serviceBundle -> {
-                emailBasicInfo.updateRoot("resourceBundleName", serviceBundle.getService().get("name"));
-                emailBasicInfo.updateRoot("resourceEndpoint", "resources");
-                emailBasicInfo.updateRoot("resourceType", "Service");
-            }
-            case DatasourceBundle datasourceBundle -> {
-                emailBasicInfo.updateRoot("resourceBundleName", datasourceBundle.getDatasource().get("name"));
-                emailBasicInfo.updateRoot("resourceEndpoint", "datasources");
-                emailBasicInfo.updateRoot("resourceType", "Datasource");
-            }
-            case TrainingResourceBundle trainingResourceBundle -> {
-                emailBasicInfo.updateRoot("resourceBundleName", trainingResourceBundle
-                        .getTrainingResource().get("name"));
-                emailBasicInfo.updateRoot("resourceEndpoint", "training-resources");
-                emailBasicInfo.updateRoot("resourceType", "Training Resource");
-            }
-            case DeployableApplicationBundle deployableApplicationBundle -> {
-                emailBasicInfo.updateRoot("resourceBundleName", deployableApplicationBundle
-                        .getDeployableApplication().get("name"));
-                emailBasicInfo.updateRoot("resourceEndpoint", "deployable-services");
-                emailBasicInfo.updateRoot("resourceType", "Training Resource");
-            }
-            case AdapterBundle adapterBundle -> {
-                emailBasicInfo.updateRoot("resourceBundleName", adapterBundle.getAdapter().get("name"));
-                emailBasicInfo.updateRoot("resourceEndpoint", "adapters");
-                emailBasicInfo.updateRoot("resourceType", "Adapter");
-            }
-            case InteroperabilityRecordBundle interoperabilityRecordBundle -> {
-                emailBasicInfo.updateRoot("resourceBundleName", interoperabilityRecordBundle
-                        .getInteroperabilityRecord().get("name"));
-                emailBasicInfo.updateRoot("resourceEndpoint", "guidelines");
-                emailBasicInfo.updateRoot("resourceType", "Interoperability Record");
-            }
-            default -> {
-            }
         }
     }
 
@@ -335,7 +154,8 @@ public class EmailService {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminAdded.ftl", organisationBundle,
                 null, null);
 
-        for (User user : (List<User>) organisationBundle.getOrganisation().get("users")) {
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        for (User user : users) {
             String userEmail = user.getEmail().toLowerCase();
             if (admins == null || admins.contains(userEmail)) {
                 emailBasicInfo.updateRoot("user", user);
@@ -349,7 +169,8 @@ public class EmailService {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminDeleted.ftl", organisationBundle,
                 null, null);
 
-        for (User user : (List<User>) organisationBundle.getOrganisation().get("users")) {
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        for (User user : users) {
             if (admins.contains(user.getEmail().toLowerCase())) {
                 emailBasicInfo.updateRoot("user", user);
                 sendMailsFromTemplate("providerAdminDeleted.ftl", emailBasicInfo.getRoot(),
@@ -366,17 +187,27 @@ public class EmailService {
                 registrationEmail, "admin");
     }
 
-    public void notifyProviderAdminsForProviderDeletion(OrganisationBundle provider) {
-        EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerDeletion.ftl", provider,
+    public void notifyProviderAdminsForProviderDeletion(OrganisationBundle organisation) {
+        EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerDeletion.ftl", organisation,
                 null, null);
-        for (User user : (List<User>) provider.getOrganisation().get("users")) {
+
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisation.getId())));
+        for (User user : users) {
             emailBasicInfo.updateRoot("user", user);
             sendMailsFromTemplate("providerDeletion.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
                     user.getEmail().toLowerCase(), "provider");
         }
     }
 
-    public void notifyProviderAdminsForBundleAuditing(Bundle bundle, List<User> users) {
+    public void notifyProviderAdminsForBundleAuditing(Bundle bundle) {
+        String organisationId;
+        if (bundle instanceof OrganisationBundle) {
+            organisationId = bundle.getId();
+        } else {
+            organisationId = bundle.getPayload().get("resourceOwner").toString();
+        }
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationId)));
+
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("bundleAudit.ftl", bundle, bundle.getId(), null);
 
         for (User user : users) {
@@ -438,12 +269,156 @@ public class EmailService {
 
         EmailService.EmailBasicInfo providerAdminsEmail = initializeEmail("interoperabilityRecordOnboardingForProviderAdmins.ftl",
                 interoperabilityRecordBundle, null, null);
-        for (User user : (List<User>) organisationBundle.getOrganisation().get("users")) {
+
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        for (User user : users) {
             providerAdminsEmail.updateRoot("user", user);
             sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl",
                     providerAdminsEmail.getRoot(), providerAdminsEmail.getSubject(), user.getEmail().toLowerCase(),
                     "provider");
         }
+    }
+    //endregion
+
+    //region helper
+    private String getOnboardingTeamSubject(CatalogueBundle catalogueBundle) {
+        return getSubjectForResourceOnboarding(catalogueBundle, true, false);
+    }
+
+    private String getOnboardingTeamSubject(OrganisationBundle organisationBundle) {
+        if (organisationBundle.getTemplateStatus().equals("no template status")) {
+            return getSubjectForResourceOnboarding(organisationBundle, true, false);
+        } else {
+            return getSubjectForResourceOnboarding(organisationBundle, true, true);
+        }
+    }
+
+    private String getCatalogueAdminsSubject(CatalogueBundle catalogueBundle) {
+        return getSubjectForResourceOnboarding(catalogueBundle, false, false);
+    }
+
+    private String getProviderAdminsSubject(OrganisationBundle organisationBundle) {
+        if (organisationBundle.getTemplateStatus().equals("no template status")) {
+            return getSubjectForResourceOnboarding(organisationBundle, false, false);
+        } else {
+            return getSubjectForResourceOnboarding(organisationBundle, false, true);
+        }
+    }
+
+    private String getProviderAdminsSubjectForInteroperabilityRecordOnboarding(
+            InteroperabilityRecordBundle interoperabilityRecordBundle) {
+        return getSubjectForResourceOnboarding(interoperabilityRecordBundle, false, false);
+    }
+
+    private void resolveTemplateAndUpdateRoot(String source,
+                                              OrganisationBundle organisationBundle,
+                                              EmailService.EmailBasicInfo emailBasicInfoUser) {
+        Bundle template = switch (source) {
+            case "serviceManager" ->
+                    serviceManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
+                            securityService.getAdminAccess()).getResults().getFirst();
+            case "datasourceManager" ->
+                    datasourceManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
+                            securityService.getAdminAccess()).getResults().getFirst();
+            case "trainingResourceManager" ->
+                    trainingResourceManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
+                            securityService.getAdminAccess()).getResults().getFirst();
+            case "deployableApplicationManager" ->
+                    deployableApplicationManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
+                            securityService.getAdminAccess()).getResults().getFirst();
+            default -> null;
+        };
+
+        if (template != null) {
+            updateRootAccordingToResourceType(template, emailBasicInfoUser);
+        }
+    }
+
+    private static void updateRootAccordingToResourceType(Bundle bundle, EmailService.EmailBasicInfo emailBasicInfo) {
+        emailBasicInfo.updateRoot("resourceBundleId", bundle.getId());
+        switch (bundle) {
+            case ServiceBundle serviceBundle -> {
+                emailBasicInfo.updateRoot("resourceBundleName", serviceBundle.getService().get("name"));
+                emailBasicInfo.updateRoot("resourceEndpoint", "resources");
+                emailBasicInfo.updateRoot("resourceType", "Service");
+            }
+            case DatasourceBundle datasourceBundle -> {
+                emailBasicInfo.updateRoot("resourceBundleName", datasourceBundle.getDatasource().get("name"));
+                emailBasicInfo.updateRoot("resourceEndpoint", "datasources");
+                emailBasicInfo.updateRoot("resourceType", "Datasource");
+            }
+            case TrainingResourceBundle trainingResourceBundle -> {
+                emailBasicInfo.updateRoot("resourceBundleName", trainingResourceBundle
+                        .getTrainingResource().get("name"));
+                emailBasicInfo.updateRoot("resourceEndpoint", "training-resources");
+                emailBasicInfo.updateRoot("resourceType", "Training Resource");
+            }
+            case DeployableApplicationBundle deployableApplicationBundle -> {
+                emailBasicInfo.updateRoot("resourceBundleName", deployableApplicationBundle
+                        .getDeployableApplication().get("name"));
+                emailBasicInfo.updateRoot("resourceEndpoint", "deployable-services");
+                emailBasicInfo.updateRoot("resourceType", "Training Resource");
+            }
+            case AdapterBundle adapterBundle -> {
+                emailBasicInfo.updateRoot("resourceBundleName", adapterBundle.getAdapter().get("name"));
+                emailBasicInfo.updateRoot("resourceEndpoint", "adapters");
+                emailBasicInfo.updateRoot("resourceType", "Adapter");
+            }
+            case InteroperabilityRecordBundle interoperabilityRecordBundle -> {
+                emailBasicInfo.updateRoot("resourceBundleName", interoperabilityRecordBundle
+                        .getInteroperabilityRecord().get("name"));
+                emailBasicInfo.updateRoot("resourceEndpoint", "guidelines");
+                emailBasicInfo.updateRoot("resourceType", "Interoperability Record");
+            }
+            default -> {
+            }
+        }
+    }
+
+    private User extractRegisteredUser(OrganisationBundle organisationBundle) {
+        return organisationBundle.getLoggingInfo().stream()
+                .filter(loggingInfo ->
+                        LoggingInfo.ActionType.REGISTERED.getKey().equals(loggingInfo.getActionType()))
+                .findFirst()
+                .map(this::mapToUser)
+                .orElseGet(this::createDefaultUser);
+    }
+
+    private User mapToUser(LoggingInfo loggingInfo) {
+        User user = new User();
+
+        user.setEmail(Optional.ofNullable(loggingInfo.getUserEmail())
+                .filter(email -> !email.isBlank())
+                .map(String::toLowerCase)
+                .orElse("no email provided"));
+
+        String[] nameParts = Optional.ofNullable(loggingInfo.getUserFullName())
+                .filter(name -> !name.isBlank())
+                .map(name -> name.split(" "))
+                .orElse(new String[]{"Unknown", "Unknown"});
+
+        user.setName(nameParts[0]);
+        user.setSurname(nameParts.length > 1 ? nameParts[1] : "Unknown");
+
+        return user;
+    }
+
+    private User createDefaultUser() {
+        User user = new User();
+        user.setName("Unknown");
+        user.setSurname("Unknown");
+        user.setEmail("no email provided");
+        return user;
+    }
+
+    private List<User> deduplicateUsersByEmail(List<User> users) {
+        Map<String, User> map = new LinkedHashMap<>();
+        for (User user : users) {
+            if (user.getEmail() != null) {
+                map.putIfAbsent(user.getEmail().toLowerCase(), user);
+            }
+        }
+        return new ArrayList<>(map.values());
     }
 
     private String getSubjectForResourceOnboarding(Bundle bundle, boolean isOnboardingTeam, boolean isTemplate) {
@@ -530,12 +505,6 @@ public class EmailService {
                 emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has one or more outdated Resources",
                         catalogueName, resourceName, bundle.getId()));
                 break;
-            case "resourceMovedOldProvider.ftl":
-            case "resourceMovedNewProvider.ftl":
-            case "resourceMovedEPOT.ftl":
-                emailBasicInfo.setSubject(String.format("[%s] %s [%s]-[%s] has changed Provider",
-                        catalogueName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
-                break;
             case "providerAdminAdded.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your email has been added as an Administrator for " +
                         "the Provider '%s'", catalogueName, resourceName));
@@ -581,7 +550,6 @@ public class EmailService {
         return emailBasicInfo;
     }
 
-    // helper methods
     public static class EmailBasicInfo {
         private Map<String, Object> root;
         private String subject;
@@ -650,6 +618,7 @@ public class EmailService {
         }
         return bundle.getId();
     }
+    //endregion
 
     //region scheduled
     @Scheduled(cron = "0 0 12 ? * 2/7")
@@ -660,7 +629,9 @@ public class EmailService {
         for (OrganisationBundle organisationBundle : allNonDraftProviders) {
             if (organisationBundle.getTemplateStatus().equals("no template status")) {
                 emailBasicInfo.updateRoot("organisationBundle", organisationBundle);
-                for (User user : (List<User>) organisationBundle.getOrganisation().get("users")) {
+
+                List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+                for (User user : users) {
                     emailBasicInfo.updateRoot("user", user);
                     sendMailsFromTemplate("providerOnboarding.ftl", emailBasicInfo.getRoot(),
                             emailBasicInfo.getSubject(), user.getEmail().toLowerCase(), "provider");
@@ -865,6 +836,55 @@ public class EmailService {
             return new Timestamp(0);
         }
         return new Timestamp(Long.parseLong(timestampStr));
+    }
+    //endregion
+
+    // region send emails
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, String userRole) {
+        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), userRole);
+    }
+
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, String email, List<String> cc, String userRole) {
+        sendMailsFromTemplate(templateName, root, subject, Collections.singletonList(email), cc, userRole);
+    }
+
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> emails, String userRole) {
+        sendMailsFromTemplate(templateName, root, subject, emails, null, userRole);
+    }
+
+    private void sendMailsFromTemplate(String templateName, Map<String, Object> root, String subject, List<String> to, List<String> cc, String userRole) {
+        if (to == null || to.isEmpty()) {
+            logger.error("emails empty or null");
+            return;
+        }
+        try (StringWriter out = new StringWriter()) {
+            Template temp = cfg.getTemplate(templateName);
+            temp.process(root, out);
+            String mailBody = out.getBuffer().toString();
+
+            if (userRole.equalsIgnoreCase("onboarding-team")) {
+                mailService.sendMail(to, subject, mailBody);
+            }
+
+            if (enableAdminNotifications && userRole.equalsIgnoreCase("admin")) {
+                if (cc != null && !cc.isEmpty()) {
+                    mailService.sendMail(to, cc, subject, mailBody);
+                } else {
+                    mailService.sendMail(to, subject, mailBody);
+                }
+            }
+            if (enableProviderNotifications && userRole.equalsIgnoreCase("provider")) {
+                mailService.sendMail(to, subject, mailBody);
+            }
+            logger.info("\nRecipients: {}\nCC: {}\nTitle: {}\nMail body: \n{}", String.join(", ", to), cc, subject, mailBody);
+
+        } catch (IOException e) {
+            logger.error("Error finding mail template '{}'", templateName, e);
+        } catch (TemplateException e) {
+            logger.error("ERROR", e);
+        } catch (MessagingException e) {
+            logger.error("Could not send mail", e);
+        }
     }
     //endregion
 }

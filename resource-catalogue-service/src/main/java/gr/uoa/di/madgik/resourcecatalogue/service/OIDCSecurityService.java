@@ -127,7 +127,7 @@ public class OIDCSecurityService implements SecurityService {
         return Optional.of(Objects.requireNonNull(User.of(auth)));
     }
 
-    private List<User> getProviderUsers(String id) {
+    public List<User> getProviderUsers(String id) {
         OrganisationBundle registeredProvider = checkProviderExistence(id);
         if (registeredProvider == null) {
             return null;

@@ -63,6 +63,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     private final ServiceService serviceService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final OrganisationCascadeLifecycleManager cascadeLifecycleService;
+    private final EmailService emailService;
 
     @Autowired
     @Lazy
@@ -79,12 +80,14 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
                                ProviderResourcesCommonMethods commonMethods,
                                SecurityService securityService,
                                OrganisationCascadeLifecycleManager cascadeLifecycleService,
+                               EmailService emailService,
                                WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.genericResourceService = genericResourceService;
         this.serviceService = serviceService;
         this.commonMethods = commonMethods;
         this.cascadeLifecycleService = cascadeLifecycleService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -243,7 +246,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         List<String> userEmails = extractEmails(provider);
         for (String email : userEmails) {
             if (email.equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-//                emailService.informPortalAdminsForProviderDeletion(provider, User.of(auth)); //FIXME
+                emailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
             }
         }
     }

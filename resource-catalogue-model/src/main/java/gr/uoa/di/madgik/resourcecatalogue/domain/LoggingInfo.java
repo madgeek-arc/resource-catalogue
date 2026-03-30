@@ -95,9 +95,7 @@ public class LoggingInfo {
         VALID("valid"),
         INVALID("invalid"),
         // Draft
-        CREATED("drafted"),
-        // Resource change Provider
-        MOVED("moved");
+        CREATED("drafted");
 
         private final String actionType;
 

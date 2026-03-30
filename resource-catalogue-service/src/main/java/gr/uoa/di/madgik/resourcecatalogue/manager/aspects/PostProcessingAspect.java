@@ -74,7 +74,7 @@ public class PostProcessingAspect {
                 logger.debug("Skipping AfterServiceUpdateEmails – object is {}", obj.getClass());
                 return;
             }
-            notifyPortalAdminsForInvalidResourceUpdateAspect((Bundle) obj);
+            notifyPortalAdminsForInvalidResourceUpdateAspect((ServiceBundle) obj);
         });
     }
 
@@ -222,21 +222,21 @@ public class PostProcessingAspect {
             long latestAudit = Long.parseLong(updatedProvider.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(updatedProvider.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate) {
-//                emailService.notifyPortalAdminsForInvalidProviderUpdate(bundle); //TODO: fix & enable
+                emailService.notifyPortalAdminsForInvalidProviderUpdate(updatedProvider);
             }
         }
     }
 
     private void notifyProviderAdminsForProviderDeletionAspect(OrganisationBundle bundle) {
-//        emailService.notifyProviderAdminsForProviderDeletion(bundle); //TODO: fix & enable
+        emailService.notifyProviderAdminsForProviderDeletion(bundle);
     }
 
-    private void notifyPortalAdminsForInvalidResourceUpdateAspect(Bundle bundle) {
+    private void notifyPortalAdminsForInvalidResourceUpdateAspect(ServiceBundle bundle) {
         if (bundle.getLatestAuditInfo() != null && bundle.getLatestUpdateInfo() != null) {
             long latestAudit = Long.parseLong(bundle.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(bundle.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && bundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-//                emailService.notifyPortalAdminsForInvalidServiceUpdate(bundle); //FIXME
+                emailService.notifyPortalAdminsForInvalidServiceUpdate(bundle);
             }
         }
     }

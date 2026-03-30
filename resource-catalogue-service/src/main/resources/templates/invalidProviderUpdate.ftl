@@ -1,6 +1,6 @@
 <p>Dear ${project} Onboarding Team,</p>
 <p>
-    The Provider [${bundle.provider.name}] previously marked as [invalid] during an auditing process has been
+    The Provider [${bundle.organisation.name}] previously marked as [invalid] during an auditing process has been
     updated with comment:
     <br>
     "${bundle.latestUpdateInfo.comment}"
