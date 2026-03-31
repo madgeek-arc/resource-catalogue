@@ -207,7 +207,6 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<DeployableApplicationBundle> getByIds(Authentication auth, String... ids) {
         List<DeployableApplicationBundle> resources;

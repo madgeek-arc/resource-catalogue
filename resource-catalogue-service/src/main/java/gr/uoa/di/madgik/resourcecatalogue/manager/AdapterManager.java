@@ -165,7 +165,6 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<AdapterBundle> getByIds(Authentication auth, String... ids) {
         List<AdapterBundle> resources;

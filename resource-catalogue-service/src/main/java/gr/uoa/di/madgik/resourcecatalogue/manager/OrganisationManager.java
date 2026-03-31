@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @org.springframework.stereotype.Service("organisationManager")
@@ -319,14 +320,14 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         mapValuesList.add(mapValues);
     }
 
-    private List<String> extractEmails(OrganisationBundle bundle) {
+    private List<String> extractEmails(OrganisationBundle organisationBundle) {
         List<String> emails = new ArrayList<>();
 
-        Object usersObj = bundle.getOrganisation().get("users");
+        Object usersObj = organisationBundle.getOrganisation().get("users");
         if (usersObj instanceof Collection<?>) {
             for (Object obj : (Collection<?>) usersObj) {
-                if (obj instanceof User user) {
-                    emails.add(user.getEmail().toLowerCase());
+                if (obj instanceof LinkedHashMap<?, ?>) {
+                    emails.add((String) ((LinkedHashMap<?, ?>) obj).get("email"));
                 }
             }
         }

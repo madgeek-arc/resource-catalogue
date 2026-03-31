@@ -49,11 +49,11 @@ public class MailManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
-            returning = "bundle")
-    public void providerRegistrationEmails(final OrganisationBundle bundle) {
+            returning = "organisation")
+    public void providerRegistrationEmails(final OrganisationBundle organisation) {
         logger.trace("Sending Registration emails");
-        if (!bundle.getMetadata().isPublished() && bundle.getCatalogueId().equals(catalogueId)) {
-            emailService.sendOnboardingEmailsToProviderAdmins(bundle, "providerManager");
+        if (!organisation.getMetadata().isPublished() && organisation.getCatalogueId().equals(catalogueId)) {
+            emailService.sendOnboardingEmailsToProviderAdmins(organisation, "providerManager");
         }
     }
 
@@ -106,6 +106,19 @@ public class MailManagementAspect {
         if (!provider.getTemplateStatus().equals("approved")) {
             logger.trace("Sending Registration emails");
             emailService.sendOnboardingEmailsToProviderAdmins(provider, "deployableApplicationManager");
+        }
+    }
+
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
+            returning = "guideline")
+    public void providerRegistrationEmails(final InteroperabilityRecordBundle guideline) {
+        OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
+                guideline.getCatalogueId());
+        if (!provider.getTemplateStatus().equals("approved")) {
+            logger.trace("Sending Registration emails");
+            emailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(guideline, provider);
         }
     }
     //endregion

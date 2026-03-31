@@ -356,7 +356,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
                                                                   @PathVariable String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-//        service.sendEmailNotificationToProviderForOutdatedService(id, auth); //FIXME
+        service.sendEmailNotificationToProviderForOutdatedEOSCResource(id, auth);
     }
     //endregion
 

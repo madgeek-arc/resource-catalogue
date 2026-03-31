@@ -129,12 +129,17 @@ public class OIDCSecurityService implements SecurityService {
 
     public List<User> getProviderUsers(String id) {
         OrganisationBundle registeredProvider = checkProviderExistence(id);
-        if (registeredProvider == null) {
-            return null;
+        return getProviderUsers(registeredProvider); // reuse logic
+    }
+
+    public List<User> getProviderUsers(OrganisationBundle organisationBundle) {
+        if (organisationBundle == null) {
+            return Collections.emptyList();
         }
-        Object usersObj = registeredProvider.getOrganisation().get("users");
+
+        Object usersObj = organisationBundle.getOrganisation().get("users");
         if (!(usersObj instanceof List<?> usersList)) {
-            return null;
+            return Collections.emptyList();
         }
 
         List<User> users = new ArrayList<>();

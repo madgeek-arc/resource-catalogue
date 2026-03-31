@@ -23,14 +23,12 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -100,10 +98,10 @@ public class EmailService {
     public void sendOnboardingEmailsToProviderAdmins(OrganisationBundle organisationBundle,
                                                      String afterReturningFrom) {
         EmailService.EmailBasicInfo emailBasicInfoUser =
-                initializeEmail("providerMailTemplate.ftl", organisationBundle, null, null);
+                initializeEmail("providerMailTemplate.ftl", organisationBundle, null);
 
         EmailService.EmailBasicInfo emailBasicInfoAdmin =
-                initializeEmail("registrationTeamMailTemplate.ftl", organisationBundle, null, null);
+                initializeEmail("registrationTeamMailTemplate.ftl", organisationBundle, null);
 
         resolveTemplateAndUpdateRoot(afterReturningFrom, organisationBundle, emailBasicInfoUser);
         emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
@@ -138,7 +136,7 @@ public class EmailService {
     public void sendEmailNotificationsToProviderAdminsWithOutdatedResources(Bundle resourceBundle,
                                                                             OrganisationBundle organisationBundle) {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerOutdatedResources.ftl",
-                organisationBundle, null, null);
+                organisationBundle, null);
 
         updateRootAccordingToResourceType(resourceBundle, emailBasicInfo);
 
@@ -152,9 +150,9 @@ public class EmailService {
 
     public void sendEmailsToNewlyAddedProviderAdmins(OrganisationBundle organisationBundle, List<String> admins) {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminAdded.ftl", organisationBundle,
-                null, null);
+                null);
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle)));
         for (User user : users) {
             String userEmail = user.getEmail().toLowerCase();
             if (admins == null || admins.contains(userEmail)) {
@@ -167,9 +165,9 @@ public class EmailService {
 
     public void sendEmailsToNewlyDeletedProviderAdmins(OrganisationBundle organisationBundle, List<String> admins) {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminDeleted.ftl", organisationBundle,
-                null, null);
+                null);
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle)));
         for (User user : users) {
             if (admins.contains(user.getEmail().toLowerCase())) {
                 emailBasicInfo.updateRoot("user", user);
@@ -181,7 +179,8 @@ public class EmailService {
 
     public void informPortalAdminsForProviderDeletion(OrganisationBundle provider, User user) {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerDeletionRequest.ftl", provider,
-                null, null);
+                null);
+        emailBasicInfo.updateRoot("user", user);
 
         sendMailsFromTemplate("providerDeletionRequest.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
                 registrationEmail, "admin");
@@ -189,7 +188,7 @@ public class EmailService {
 
     public void notifyProviderAdminsForProviderDeletion(OrganisationBundle organisation) {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerDeletion.ftl", organisation,
-                null, null);
+                null);
 
         List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisation.getId())));
         for (User user : users) {
@@ -208,7 +207,7 @@ public class EmailService {
         }
         List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationId)));
 
-        EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("bundleAudit.ftl", bundle, bundle.getId(), null);
+        EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("bundleAudit.ftl", bundle, bundle.getId());
 
         for (User user : users) {
             emailBasicInfo.updateRoot("user", user);
@@ -219,18 +218,9 @@ public class EmailService {
         }
     }
 
-    public void notifyPortalAdminsForInvalidCatalogueUpdate(CatalogueBundle catalogueBundle) {
-        EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("invalidCatalogueUpdate.ftl", catalogueBundle,
-                null, null);
-
-        // send email to Admins
-        sendMailsFromTemplate("invalidCatalogueUpdate.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
-                registrationEmail, "admin");
-    }
-
     public void notifyPortalAdminsForInvalidProviderUpdate(OrganisationBundle organisationBundle) {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("invalidProviderUpdate.ftl", organisationBundle,
-                null, null);
+                null);
 
         // send email to Admins
         sendMailsFromTemplate("invalidProviderUpdate.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
@@ -239,43 +229,50 @@ public class EmailService {
 
     public void notifyPortalAdminsForInvalidServiceUpdate(ServiceBundle serviceBundle) {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("invalidServiceUpdate.ftl", serviceBundle,
-                null, null);
+                null);
 
         // send email to Admins
         sendMailsFromTemplate("invalidServiceUpdate.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
                 registrationEmail, "admin");
     }
 
-    public void notifyPortalAdminsForInvalidTrainingResourceUpdate(TrainingResourceBundle trainingResourceBundle) {
-        EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("invalidTrainingResourceUpdate.ftl", trainingResourceBundle,
-                null, null);
+    public void sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(InteroperabilityRecordBundle guideline,
+                                                                         OrganisationBundle organisation) {
+        EmailService.EmailBasicInfo emailBasicInfoUser =
+                initializeEmail("interoperabilityRecordOnboardingForProviderAdmins.ftl", guideline,
+                        organisation.getOrganisation().get("name").toString());
 
-        // send email to Admins
-        sendMailsFromTemplate("invalidTrainingResourceUpdate.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
-                registrationEmail, "admin");
-    }
+        EmailService.EmailBasicInfo emailBasicInfoAdmin =
+                initializeEmail("interoperabilityRecordOnboardingForPortalAdmins.ftl", guideline,
+                        organisation.getOrganisation().get("name").toString());
 
-    public void sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(
-            InteroperabilityRecordBundle interoperabilityRecordBundle, User registrant) {
-        OrganisationBundle organisationBundle = organisationManager.get(
-                interoperabilityRecordBundle.getInteroperabilityRecord().get("resourceOwner").toString(),
-                interoperabilityRecordBundle.getCatalogueId());
+        updateRootAccordingToResourceType(guideline, emailBasicInfoUser);
+        emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
 
-        EmailService.EmailBasicInfo portalAdminsEmail = initializeEmail("interoperabilityRecordOnboardingForPortalAdmins.ftl",
-                interoperabilityRecordBundle, null, null);
-        portalAdminsEmail.updateRoot("registrant", registrant);
-        sendMailsFromTemplate("interoperabilityRecordOnboardingForPortalAdmins.ftl", portalAdminsEmail.getRoot(),
-                portalAdminsEmail.getSubject(), registrationEmail, "admin");
+        User registeredUser = extractRegisteredUser(organisation);
+        emailBasicInfoAdmin.updateRoot("user", registeredUser);
 
-        EmailService.EmailBasicInfo providerAdminsEmail = initializeEmail("interoperabilityRecordOnboardingForProviderAdmins.ftl",
-                interoperabilityRecordBundle, null, null);
+        sendMailsFromTemplate(
+                "interoperabilityRecordOnboardingForPortalAdmins.ftl",
+                emailBasicInfoAdmin.getRoot(),
+                emailBasicInfoAdmin.getSubject(),
+                registrationEmail,
+                "onboarding-team"
+        );
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        List<User> users = deduplicateUsersByEmail(
+                securityService.getProviderUsers(organisation.getId())
+        );
+
         for (User user : users) {
-            providerAdminsEmail.updateRoot("user", user);
-            sendMailsFromTemplate("interoperabilityRecordOnboardingForProviderAdmins.ftl",
-                    providerAdminsEmail.getRoot(), providerAdminsEmail.getSubject(), user.getEmail().toLowerCase(),
-                    "provider");
+            emailBasicInfoUser.updateRoot("user", user);
+            sendMailsFromTemplate(
+                    "interoperabilityRecordOnboardingForProviderAdmins.ftl",
+                    emailBasicInfoUser.getRoot(),
+                    emailBasicInfoUser.getSubject(),
+                    user.getEmail().toLowerCase(),
+                    "provider"
+            );
         }
     }
     //endregion
@@ -484,7 +481,7 @@ public class EmailService {
         return emailBasicInfo;
     }
 
-    private EmailService.EmailBasicInfo initializeEmail(String template, Bundle bundle, String associatedResource, String action) {
+    private EmailService.EmailBasicInfo initializeEmail(String template, Bundle bundle, String associatedResource) {
         String resourceName = getBundleNameOrStatus(bundle, "name");
         EmailBasicInfo emailBasicInfo = new EmailBasicInfo();
         emailBasicInfo.setRoot(initializeRoot(bundle));
@@ -538,9 +535,9 @@ public class EmailService {
                 break;
             case "interoperabilityRecordOnboardingForPortalAdmins.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Provider [%s]-[%s] has created a new Interoperability " +
-                        "Record", catalogueName, resourceName, bundle.getId()));
+                        "Record", catalogueName, associatedResource, bundle.getPayload().get("resourceOwner")));
                 break;
-            case "interoperabilityRecordOnboardingForProviderAdmins":
+            case "interoperabilityRecordOnboardingForProviderAdmins.ftl":
                 emailBasicInfo.setSubject(getProviderAdminsSubjectForInteroperabilityRecordOnboarding(
                         (InteroperabilityRecordBundle) bundle));
                 break;

@@ -203,7 +203,6 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<TrainingResourceBundle> getByIds(Authentication auth, String... ids) {
         List<TrainingResourceBundle> resources;

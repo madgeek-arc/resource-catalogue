@@ -170,49 +170,46 @@ public class PostProcessingAspect {
     }
 
     private void sendEmailsForAdminDifferences(OrganisationBundle updatedProvider, OrganisationBundle existingProvider) {
-        List<List<String>> differences = calculateDifferences(updatedProvider, existingProvider);
+        AdminDifferences differences = calculateDifferences(updatedProvider, existingProvider);
         sendEmailsToProviderAdmins(differences, updatedProvider, existingProvider);
     }
 
-    private List<List<String>> calculateDifferences(OrganisationBundle updatedProvider, OrganisationBundle existingProvider) {
+    private AdminDifferences calculateDifferences(OrganisationBundle updatedProvider,
+                                                  OrganisationBundle existingProvider) {
         List<String> existingAdmins = extractEmails(existingProvider);
         List<String> newAdmins = extractEmails(updatedProvider);
+
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
+
         List<String> adminsDeleted = new ArrayList<>(existingAdmins);
         adminsDeleted.removeAll(newAdmins);
 
-        List<List<String>> differences = new ArrayList<>();
-        differences.add(adminsAdded);
-        differences.add(adminsDeleted);
-        return differences;
+        return new AdminDifferences(adminsAdded, adminsDeleted);
     }
 
     private List<String> extractEmails(OrganisationBundle organisationBundle) {
         List<String> emails = new ArrayList<>();
 
-        Object usersObj = organisationBundle.getOrganisation().get("users"); //TODO: how to enforce that users will be always in the model
+        Object usersObj = organisationBundle.getOrganisation().get("users");
         if (usersObj instanceof Collection<?>) {
             for (Object obj : (Collection<?>) usersObj) {
-                if (obj instanceof User user) {
-                    emails.add(user.getEmail().toLowerCase());
+                if (obj instanceof LinkedHashMap<?, ?>) {
+                    emails.add((String) ((LinkedHashMap<?, ?>) obj).get("email"));
                 }
             }
         }
         return emails;
     }
 
-    private void sendEmailsToProviderAdmins(List<List<String>> differences, OrganisationBundle updatedProvider,
+    private void sendEmailsToProviderAdmins(AdminDifferences differences,
+                                            OrganisationBundle updatedProvider,
                                             OrganisationBundle existingProvider) {
-
-        List<String> adminsAdded = differences.get(0);
-        List<String> adminsDeleted = differences.get(1);
-
-        if (!adminsAdded.isEmpty()) {
-            emailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded);
+        if (!differences.added().isEmpty()) {
+            emailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, differences.added());
         }
-        if (!adminsDeleted.isEmpty()) {
-            emailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted);
+        if (!differences.deleted().isEmpty()) {
+            emailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, differences.deleted());
         }
     }
 
@@ -240,4 +237,9 @@ public class PostProcessingAspect {
             }
         }
     }
+
+    //region helper
+    public record AdminDifferences(List<String> added, List<String> deleted) {
+    }
+    //endregion
 }

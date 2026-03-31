@@ -170,7 +170,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<InteroperabilityRecordBundle> getByIds(Authentication auth, String... ids) {
         List<InteroperabilityRecordBundle> resources;

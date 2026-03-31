@@ -47,7 +47,6 @@ public class Vocabulary implements Identifiable {
         this.extras = extras;
     }
 
-    //TODO: remove any unused type after finalizing models v6
     public enum Type {
         // Generic
         NODE("Node"),

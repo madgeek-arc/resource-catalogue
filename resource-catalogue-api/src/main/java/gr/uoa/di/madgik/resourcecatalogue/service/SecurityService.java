@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
@@ -157,4 +158,11 @@ public interface SecurityService {
      * @return List<User>
      */
     List<User> getProviderUsers(String id);
+
+    /**
+     *
+     * @param organisation Organisation Bundle
+     * @return List<User>
+     */
+    List<User> getProviderUsers(OrganisationBundle organisation);
 }

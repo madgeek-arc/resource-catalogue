@@ -216,7 +216,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<ServiceBundle> getByIds(Authentication auth, String... ids) {
         List<ServiceBundle> resources;

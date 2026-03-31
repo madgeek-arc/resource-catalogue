@@ -228,7 +228,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<DatasourceBundle> getByIds(Authentication auth, String... ids) {
         List<DatasourceBundle> resources;
