@@ -31,7 +31,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +51,6 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
     private static final Logger logger = LoggerFactory.getLogger(DeployableApplicationManager.class);
 
     private final OrganisationService organisationService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
@@ -65,13 +63,11 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
                                         IdCreator idCreator,
                                         @Lazy SecurityService securityService,
                                         @Lazy VocabularyService vocabularyService,
-                                        @Lazy ProviderResourcesCommonMethods commonMethods,
                                         GenericResourceService genericResourceService,
                                         EmailService emailService,
                                         WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
-        this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.emailService = emailService;
     }
@@ -119,7 +115,7 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
 
     @Override
     public void delete(DeployableApplicationBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
         logger.info("Deleting Deployable Application: {}", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }

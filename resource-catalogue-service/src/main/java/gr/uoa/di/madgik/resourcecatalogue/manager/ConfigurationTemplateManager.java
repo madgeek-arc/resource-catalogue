@@ -28,7 +28,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -48,7 +47,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
         implements ConfigurationTemplateService {
 
     private static final Logger logger = LogManager.getLogger(ConfigurationTemplateManager.class);
-    private final ProviderResourcesCommonMethods commonMethods;
     private final OrganisationService organisationService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final GenericResourceService genericResourceService;
@@ -64,7 +62,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     private String monitoringServiceTypes;
 
     public ConfigurationTemplateManager(IdCreator idCreator,
-                                        ProviderResourcesCommonMethods commonMethods,
                                         OrganisationService organisationService,
                                         InteroperabilityRecordService interoperabilityRecordService,
                                         SecurityService securityService,
@@ -73,7 +70,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
                                         WebClient.Builder webClientBuilder,
                                         WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
-        this.commonMethods = commonMethods;
         this.organisationService = organisationService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.vocabularyService = vocabularyService;
@@ -124,7 +120,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
 
     @Override
     public void delete(ConfigurationTemplateBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
         logger.info("Deleting Configuration Template: {}", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }

@@ -1,6 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry.sqaaas;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import java.util.Map;
 @Component
 public class SqaaasClient {
 
+    private static final Logger logger = LoggerFactory.getLogger(SqaaasClient.class);
     private final WebClient webClient;
 
     public SqaaasClient(
@@ -36,9 +39,9 @@ public class SqaaasClient {
                         status -> status.is4xxClientError() || status.is5xxServerError(),
                         response -> response.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
-                                    System.err.println("SQAaaS POST " + path + " failed");
-                                    System.err.println("Status: " + response.statusCode());
-                                    System.err.println("Body: " + errorBody);
+                                    logger.info("SQAaaS POST {} failed", path);
+                                    logger.error("Status: {}", response.statusCode());
+                                    logger.error("Body: {}", errorBody);
                                     return reactor.core.publisher.Mono.error(
                                             new RuntimeException("SQAaaS error: " + errorBody)
                                     );
@@ -59,9 +62,9 @@ public class SqaaasClient {
                     .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))
                     .block();
         } catch (org.springframework.web.reactive.function.client.WebClientResponseException e) {
-            System.err.println("SQAaaS GET " + path + " failed:");
-            System.err.println("Status: " + e.getStatusCode());
-            System.err.println("Body: " + e.getResponseBodyAsString());
+            logger.info("SQAaaS GET {} failed", path);
+            logger.error("Status: {}", e.getStatusCode());
+            logger.error("Body: {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -79,9 +82,9 @@ public class SqaaasClient {
                         status -> status.is4xxClientError() || status.is5xxServerError(),
                         response -> response.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
-                                    System.err.println("Failed to run pipeline " + pipelineId);
-                                    System.err.println("Status: " + response.statusCode());
-                                    System.err.println("Body: " + errorBody);
+                                    logger.info("Failed to run pipeline {}", pipelineId);
+                                    logger.error("Status: {}", response.statusCode());
+                                    logger.error("Body: {}", errorBody);
                                     return reactor.core.publisher.Mono.error(
                                             new RuntimeException("Run failed: " + errorBody)
                                     );

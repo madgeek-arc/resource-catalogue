@@ -21,13 +21,14 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -37,11 +38,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,8 +56,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     private CatalogueService catalogueService;
     @Autowired
     private SecurityService securityService;
-    @MockitoSpyBean
-    private ProviderResourcesCommonMethods commonMethods;
     @Mock
     private ServiceService serviceService;
     private static String providerId;
@@ -84,7 +81,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         CatalogueBundle catalogueBundle = createCatalogueBundle();
         catalogueBundle.setMetadata(dummyMetadata);
 
-        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
+        doNothing().when(securityService).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
@@ -121,7 +118,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         OrganisationBundle organisationBundle = createOrganisationBundle();
         organisationBundle.setMetadata(dummyMetadata);
 
-        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
+        doNothing().when(securityService).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
@@ -299,7 +296,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         providerBundle.setId(providerId);
         providerBundle.setMetadata(metadata);
 
-        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
+        doNothing().when(securityService).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);

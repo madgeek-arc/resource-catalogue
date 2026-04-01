@@ -18,7 +18,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -29,8 +28,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +48,9 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
     private final OrganisationService organisationService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
+    private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
 
     @Value("${catalogue.id}")
@@ -65,18 +62,16 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           IdCreator idCreator,
                           SecurityService securityService,
                           VocabularyService vocabularyService,
-                          ProviderResourcesCommonMethods commonMethods,
-                          FacetLabelService facetLabelService,
                           GenericResourceService genericResourceService,
                           @Lazy RelationshipValidator relationshipValidator,
-                          ModelService modelService,
                           EmailService emailService,
+                          ResourceInteroperabilityRecordService rirService,
                           WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
-        this.organisationService = organisationService; // for providers
-        this.commonMethods = commonMethods;
+        this.organisationService = organisationService;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
+        this.rirService = rirService;
         this.emailService = emailService;
     }
 
@@ -127,8 +122,8 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     @Override
     @Transactional
     public void delete(ServiceBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
-        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
         logger.info("Deleting Service: {} and all its Resource Interoperability Records", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
@@ -246,6 +241,20 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
             }
         }
         return null;
+    }
+    //endregion
+
+    //region Service-specific
+    private void deleteResourceInteroperabilityRecords(String resourceId, String resourceType) {
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = rirService.getByResourceId(resourceId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
+                rirService.delete(resourceInteroperabilityRecordBundle);
+            } catch (ResourceNotFoundException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
     }
     //endregion
 }
