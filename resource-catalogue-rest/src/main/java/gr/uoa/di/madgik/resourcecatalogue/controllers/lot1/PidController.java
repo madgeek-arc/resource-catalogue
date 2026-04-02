@@ -51,7 +51,7 @@ public class PidController {
         if (bundle != null) {
             return new ResponseEntity<>(bundle.getPayload(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Register/Update a resource on the PID service")
@@ -62,9 +62,9 @@ public class PidController {
         Bundle bundle = pidService.get(prefix, suffix);
         if (bundle != null) {
             pidService.register(bundle.getId(), resolveEndpoints);
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return ResponseEntity.ok().build();
         } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -77,9 +77,9 @@ public class PidController {
         Bundle bundle = pidService.get(prefix, suffix);
         if (bundle != null) {
             pidService.delete(bundle.getId());
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return ResponseEntity.ok().build();
         } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 }

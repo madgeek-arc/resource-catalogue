@@ -18,9 +18,10 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import gr.uoa.di.madgik.resourcecatalogue.config.ServiceConfig;
+import gr.uoa.di.madgik.resourcecatalogue.ResourceCatalogueApplication;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.integration.IntegrationTestConfig;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
@@ -29,8 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.net.MalformedURLException;
@@ -39,9 +40,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-@SpringBootTest
-@ContextConfiguration(classes = {ServiceConfig.class})
+@SpringBootTest(classes = ResourceCatalogueApplication.class, properties = {"spring.profiles.active=test,no-auth"})
 @ActiveProfiles("test")
+@ImportTestcontainers(IntegrationTestConfig.class)
 @WebAppConfiguration
 public class ServiceProviderRegistrationIT {
 

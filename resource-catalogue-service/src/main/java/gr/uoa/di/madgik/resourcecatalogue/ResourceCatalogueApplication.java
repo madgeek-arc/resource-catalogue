@@ -17,11 +17,17 @@
 package gr.uoa.di.madgik.resourcecatalogue;
 
 import org.flowable.spring.boot.FlowableJpaAutoConfiguration;
+import org.flowable.spring.boot.FlowableSecurityAutoConfiguration;
 import org.flowable.spring.boot.eventregistry.EventRegistryAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(exclude = {EventRegistryAutoConfiguration.class, FlowableJpaAutoConfiguration.class})
+@SpringBootApplication(exclude = {
+        EventRegistryAutoConfiguration.class,
+        FlowableJpaAutoConfiguration.class,
+        // Flowable 7.1 references the removed Spring-Boot 3 security auto-config class.
+        FlowableSecurityAutoConfiguration.class
+})
 public class ResourceCatalogueApplication {
 
     public static void main(String[] args) {

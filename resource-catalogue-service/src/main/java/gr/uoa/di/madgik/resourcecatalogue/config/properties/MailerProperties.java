@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.config.properties;
 
-import org.springframework.boot.autoconfigure.mail.MailProperties;
+import org.springframework.boot.mail.autoconfigure.MailProperties;
 
 
 public class MailerProperties extends MailProperties {

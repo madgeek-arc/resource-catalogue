@@ -117,7 +117,7 @@ public class ResourceInteroperabilityRecordController {
         if (bundle != null) {
             return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Adds a new Resource Interoperability Record.")

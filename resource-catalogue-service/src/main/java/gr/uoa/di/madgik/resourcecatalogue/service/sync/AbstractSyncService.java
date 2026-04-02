@@ -232,7 +232,7 @@ public abstract class AbstractSyncService <T extends Bundle> implements Synchron
     private void logError(String operation, T t, ResponseEntity<?> response) {
         logger.error("{} {} with id '{}' from host [{}] returned code '{}'\nResponse body:\n{}",
                 operation, t.getClass().getSimpleName(), t.getId(), host,
-                response.getStatusCodeValue(), response.getBody());
+                response.getStatusCode().value(), response.getBody());
     }
 
     private void logException(String operation, T t, Exception e) {

@@ -1,8 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -13,7 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Profile("no-auth")
 @Configuration
 @EnableAutoConfiguration(exclude = {
-        RedisAutoConfiguration.class,
+        DataRedisAutoConfiguration.class,
         OAuth2ClientAutoConfiguration.class
 })
 public class NoSecurityConfig {

@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -32,6 +33,7 @@ import org.springframework.jms.support.converter.MessageType;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UrlPathHelper;
 
 import java.text.SimpleDateFormat;
@@ -51,7 +53,8 @@ public class ServiceConfig {
     }
 
     @Bean
-    ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
+    ObjectMapper objectMapper(ObjectProvider<Jackson2ObjectMapperBuilder> builderProvider) {
+        Jackson2ObjectMapperBuilder builder = builderProvider.getIfAvailable(Jackson2ObjectMapperBuilder::new);
         builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"));
         return builder.build();
@@ -71,5 +74,10 @@ public class ServiceConfig {
     @Bean
     public Random randomNumberGenerator() {
         return new Random();
+    }
+
+    @Bean
+    WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
     }
 }
