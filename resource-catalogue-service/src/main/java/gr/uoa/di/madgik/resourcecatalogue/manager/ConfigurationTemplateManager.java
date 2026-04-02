@@ -98,7 +98,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
         ct.setCatalogueId(this.catalogueId);
         this.createIdentifiers(ct, getResourceTypeName(), false);
         ct.setId(ct.getIdentifiers().getOriginalId());
-        ConfigurationTemplateBundle ret = genericResourceService.add(getResourceTypeName(), ct);
+        ConfigurationTemplateBundle ret = genericResourceService.add(getResourceTypeName(), ct, false); //FIXME
         return ret;
     }
 
