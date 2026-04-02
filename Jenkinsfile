@@ -20,32 +20,46 @@ pipeline {
       steps {
         script {
           def POM_VERSION = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//'", returnStdout: true).trim()
-          if (env.BRANCH_NAME == 'develop') {
-            env.DOCKER_TAG = 'dev'
+          if (env.TAG_NAME) {
+            DOCKER_TAG = env.TAG_NAME.replaceFirst('^v', '')
+            echo "Detected tag: ${env.TAG_NAME}"
+          } else if (env.BRANCH_NAME == 'develop') {
+            DOCKER_TAG = 'dev'
             echo "Detected development branch."
           } else if (env.BRANCH_NAME == 'master') {
-            env.DOCKER_TAG = POM_VERSION
-            echo "Detected master branch: ${POM_VERSION}"
+            DOCKER_TAG = 'latest'
+            echo "Detected master branch."
           } else {
             def branch = env.BRANCH_NAME.replace('/', '-')
-            env.DOCKER_TAG = "${POM_VERSION}-${branch}"
+            DOCKER_TAG = "${POM_VERSION}-${branch}"
           }
 
-          currentBuild.displayName = "${currentBuild.displayName}-${env.DOCKER_TAG}"
+          currentBuild.displayName = "${currentBuild.displayName}-${DOCKER_TAG}"
+        }
+      }
+    }
+    stage('Test') {
+      when { expression { return env.TAG_NAME == null } }
+      steps {
+        sh 'mvn -B verify'
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
         }
       }
     }
     stage('Build Image') {
       steps{
         script {
-          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${env.DOCKER_TAG}", "--build-arg profile=beyond --label job=${env.JOB_NAME} .")
+          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond --build-arg skipTests=true --label job=${env.JOB_NAME} .")
         }
       }
     }
     stage('Upload Image') {
-      when { // upload images only from 'develop' or 'master' branches
+      when { // upload images only from 'develop', 'master' or tags
         expression {
-          return env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'master'
+          return env.TAG_NAME != null || env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'master'
         }
       }
       steps{
@@ -56,6 +70,10 @@ pipeline {
                   echo "$DOCKER_PASS" | docker login ${REGISTRY} -u "$DOCKER_USER" --password-stdin
               """
               DOCKER_IMAGE.push()
+              if (env.TAG_NAME) {
+                def minorTag = DOCKER_TAG.tokenize('.').take(2).join('.')
+                DOCKER_IMAGE.push(minorTag)
+              }
           }
         }
       }
@@ -78,7 +96,7 @@ pipeline {
         }
       }
       steps {
-        lock(resource: 'release-resource-catalogue') {
+        lock(resource: "release-${IMAGE_NAME}") {
           withCredentials([string(credentialsId: 'jenkins-github-pat', variable: 'GH_TOKEN')]) {
             sh '''
               [ -f /etc/profile.d/load_nvm.sh ] || { echo "ERROR: /etc/profile.d/load_nvm.sh not found. NVM is required on this agent."; exit 1; }
