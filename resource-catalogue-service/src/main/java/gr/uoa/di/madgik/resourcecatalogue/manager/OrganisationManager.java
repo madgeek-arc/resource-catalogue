@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @org.springframework.stereotype.Service("organisationManager")
@@ -63,6 +64,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     private final ServiceService serviceService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final OrganisationCascadeLifecycleManager cascadeLifecycleService;
+    private final EmailService emailService;
 
     @Autowired
     @Lazy
@@ -79,12 +81,14 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
                                ProviderResourcesCommonMethods commonMethods,
                                SecurityService securityService,
                                OrganisationCascadeLifecycleManager cascadeLifecycleService,
+                               EmailService emailService,
                                WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.genericResourceService = genericResourceService;
         this.serviceService = serviceService;
         this.commonMethods = commonMethods;
         this.cascadeLifecycleService = cascadeLifecycleService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -96,12 +100,10 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     @Override
     public OrganisationBundle add(OrganisationBundle bundle, Authentication auth) {
         return super.add(bundle, auth);
-//        emailService.sendEmailsToNewlyAddedProviderAdmins(bundle, null); //FIXME
     }
 
     @Override
-//    @TriggersAspects({"HostingLegalEntityVocabularyUpdate", "AfterProviderUpdateEmails"})
-    @TriggersAspects({"HostingLegalEntityVocabularyUpdate"})
+    @TriggersAspects({"HostingLegalEntityVocabularyUpdate", "AfterProviderUpdateEmails"})
     public OrganisationBundle update(OrganisationBundle bundle, String comment, Authentication auth) {
         OrganisationBundle existing = get(bundle.getId(), bundle.getCatalogueId());
         // check if there are actual changes in the Organisation
@@ -118,7 +120,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     @Override
     @Transactional // if deleteAllRelatedResources() fails, this should also fail
-//    @TriggersAspects({"AfterProviderDeletionEmails"})
+    @TriggersAspects({"AfterProviderDeletionEmails"})
     public void delete(OrganisationBundle bundle) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // block Public Organisation deletion
@@ -227,7 +229,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         List<String> userEmails = extractEmails(provider);
         for (String email : userEmails) {
             if (email.equalsIgnoreCase(AuthenticationInfo.getEmail(auth).toLowerCase())) {
-//                emailService.informPortalAdminsForProviderDeletion(provider, User.of(auth)); //FIXME
+                emailService.informPortalAdminsForProviderDeletion(provider, User.of(auth));
             }
         }
     }
@@ -300,14 +302,14 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         mapValuesList.add(mapValues);
     }
 
-    private List<String> extractEmails(OrganisationBundle bundle) {
+    private List<String> extractEmails(OrganisationBundle organisationBundle) {
         List<String> emails = new ArrayList<>();
 
-        Object usersObj = bundle.getOrganisation().get("users");
+        Object usersObj = organisationBundle.getOrganisation().get("users");
         if (usersObj instanceof Collection<?>) {
             for (Object obj : (Collection<?>) usersObj) {
-                if (obj instanceof User user) {
-                    emails.add(user.getEmail().toLowerCase());
+                if (obj instanceof LinkedHashMap<?, ?>) {
+                    emails.add((String) ((LinkedHashMap<?, ?>) obj).get("email"));
                 }
             }
         }

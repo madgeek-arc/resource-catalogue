@@ -20,6 +20,7 @@ import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -43,16 +44,16 @@ public class PostProcessingAspect {
 
     private final Map<String, Consumer<Object>> aspectRegistry = new HashMap<>();
     private final VocabularyService vocabularyService;
-//    private final EmailService emailService;
+    private final EmailService emailService;
     private final GenericResourceService genericResourceService;
 
 
     //TODO: one class per aspect else it will get messy
     public PostProcessingAspect(VocabularyService vocabularyService,
-//                                EmailService emailService,
+                                EmailService emailService,
                                 GenericResourceService genericResourceService) {
         this.vocabularyService = vocabularyService;
-//        this.emailService = emailService;
+        this.emailService = emailService;
         this.genericResourceService = genericResourceService;
         aspectRegistry.put("HostingLegalEntityVocabularyUpdate", obj -> {
             if (!(obj instanceof OrganisationBundle bundle)) {
@@ -73,7 +74,7 @@ public class PostProcessingAspect {
                 logger.debug("Skipping AfterServiceUpdateEmails – object is {}", obj.getClass());
                 return;
             }
-            notifyPortalAdminsForInvalidResourceUpdateAspect((Bundle) obj);
+            notifyPortalAdminsForInvalidResourceUpdateAspect((ServiceBundle) obj);
         });
     }
 
@@ -169,44 +170,46 @@ public class PostProcessingAspect {
     }
 
     private void sendEmailsForAdminDifferences(OrganisationBundle updatedProvider, OrganisationBundle existingProvider) {
-        List<List<String>> differences = calculateDifferences(updatedProvider, existingProvider);
-        sendEmailsToProviderAdmins(differences);
+        AdminDifferences differences = calculateDifferences(updatedProvider, existingProvider);
+        sendEmailsToProviderAdmins(differences, updatedProvider, existingProvider);
     }
 
-    private List<List<String>> calculateDifferences(OrganisationBundle updatedProvider, OrganisationBundle existingProvider) {
+    private AdminDifferences calculateDifferences(OrganisationBundle updatedProvider,
+                                                  OrganisationBundle existingProvider) {
         List<String> existingAdmins = extractEmails(existingProvider);
         List<String> newAdmins = extractEmails(updatedProvider);
+
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
+
         List<String> adminsDeleted = new ArrayList<>(existingAdmins);
         adminsDeleted.removeAll(newAdmins);
 
-        List<List<String>> differences = new ArrayList<>();
-        differences.add(adminsAdded);
-        differences.add(adminsDeleted);
-        return differences;
+        return new AdminDifferences(adminsAdded, adminsDeleted);
     }
 
     private List<String> extractEmails(OrganisationBundle organisationBundle) {
         List<String> emails = new ArrayList<>();
 
-        Object usersObj = organisationBundle.getOrganisation().get("users"); //TODO: how to enforce that users will be always in the model
+        Object usersObj = organisationBundle.getOrganisation().get("users");
         if (usersObj instanceof Collection<?>) {
             for (Object obj : (Collection<?>) usersObj) {
-                if (obj instanceof User user) {
-                    emails.add(user.getEmail().toLowerCase());
+                if (obj instanceof LinkedHashMap<?, ?>) {
+                    emails.add((String) ((LinkedHashMap<?, ?>) obj).get("email"));
                 }
             }
         }
         return emails;
     }
 
-    private void sendEmailsToProviderAdmins(List<List<String>> differences) {
-        if (!differences.getFirst().isEmpty()) {
-//            emailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, adminsAdded); //TODO: fix & enable
+    private void sendEmailsToProviderAdmins(AdminDifferences differences,
+                                            OrganisationBundle updatedProvider,
+                                            OrganisationBundle existingProvider) {
+        if (!differences.added().isEmpty()) {
+            emailService.sendEmailsToNewlyAddedProviderAdmins(updatedProvider, differences.added());
         }
-        if (!differences.getLast().isEmpty()) {
-//            emailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, adminsDeleted); //TODO: fix & enable
+        if (!differences.deleted().isEmpty()) {
+            emailService.sendEmailsToNewlyDeletedProviderAdmins(existingProvider, differences.deleted());
         }
     }
 
@@ -216,22 +219,27 @@ public class PostProcessingAspect {
             long latestAudit = Long.parseLong(updatedProvider.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(updatedProvider.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate) {
-//                emailService.notifyPortalAdminsForInvalidProviderUpdate(bundle); //TODO: fix & enable
+                emailService.notifyPortalAdminsForInvalidProviderUpdate(updatedProvider);
             }
         }
     }
 
     private void notifyProviderAdminsForProviderDeletionAspect(OrganisationBundle bundle) {
-//        emailService.notifyProviderAdminsForProviderDeletion(bundle); //TODO: fix & enable
+        emailService.notifyProviderAdminsForProviderDeletion(bundle);
     }
 
-    private void notifyPortalAdminsForInvalidResourceUpdateAspect(Bundle bundle) {
+    private void notifyPortalAdminsForInvalidResourceUpdateAspect(ServiceBundle bundle) {
         if (bundle.getLatestAuditInfo() != null && bundle.getLatestUpdateInfo() != null) {
             long latestAudit = Long.parseLong(bundle.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(bundle.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && bundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-//                emailService.notifyPortalAdminsForInvalidServiceUpdate(bundle); //FIXME
+                emailService.notifyPortalAdminsForInvalidServiceUpdate(bundle);
             }
         }
     }
+
+    //region helper
+    public record AdminDifferences(List<String> added, List<String> deleted) {
+    }
+    //endregion
 }

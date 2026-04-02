@@ -2,7 +2,7 @@
 <p>
     <#if bundle.templateStatus == "no template status">
         <#if bundle.status == "pending">
-            You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}]) as a
+            You have applied for registering [${bundle.organisation.name}] - ([${bundle.organisation.id}]) as a
             new ${project} Provider in the ${project}.
             <br>
             Your application will be reviewed and you will be notified on its approval or rejection, as well as for any
@@ -12,7 +12,7 @@
         </#if>
         <#if bundle.status == "approved">
             <#if bundle.active == true>
-                You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}])
+                You have applied for registering [${bundle.organisation.name}] - ([${bundle.organisation.id}])
                 as a new ${project} Provider in the ${project}.
                 <br>
                 Your application has been approved and you may proceed with providing one of your Resources
@@ -26,14 +26,14 @@
                 <br>
                 For any clarifications, please contact us at ${registrationEmail}.
             <#else>
-                Your Resource Provider [${bundle.provider.name}] - ([${bundle.provider.id}]) has been
+                Your Resource Provider [${bundle.organisation.name}] - ([${bundle.organisation.id}]) has been
                 set to inactive.
                 <br>
                 For any further clarifications please contact ${registrationEmail}.
             </#if>
         </#if>
         <#if bundle.status == "rejected">
-            You have applied for registering [${bundle.provider.name}] - ([${bundle.provider.id}]) as a
+            You have applied for registering [${bundle.organisation.name}] - ([${bundle.organisation.id}]) as a
             new ${project} Provider in the ${project}.
             <br>
             Your application has been rejected, as your organization does not comply with the Rules of Participation
@@ -63,13 +63,13 @@
             Your application has been approved and the Resource has been successfully listed in the ${project}.
             <br>
             You can view the published Resource here
-            ${endpoint}/dashboard/${project?lower_case}/${bundle.provider.id}/${resourceType}-dashboard/${resourceBundleId}/stats.
+            ${endpoint}/dashboard/${project?lower_case}/${bundle.organisation.id}/${resourceType}-dashboard/${resourceBundleId}/stats.
             <br>
             [Attached you may find a Resource Description Recommendations Report to further improve your
             Resource description.]
             <br>
             You may now proceed with registering more Resources for
-            [${bundle.provider.name}] - ([${bundle.provider.id}]). You can register all other Resources
+            [${bundle.organisation.name}] - ([${bundle.organisation.id}]). You can register all other Resources
             either manually (via the same web interface) or via the ${project} API ${endpoint}/developers.
             <br>
             For any clarifications, please contact us at ${registrationEmail}.

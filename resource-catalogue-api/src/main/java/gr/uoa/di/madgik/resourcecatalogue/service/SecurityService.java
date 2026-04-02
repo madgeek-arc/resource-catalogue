@@ -16,11 +16,13 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public interface SecurityService {
 
@@ -149,4 +151,18 @@ public interface SecurityService {
      * @return True if Provider is approved
      */
     boolean isApprovedProvider(String prefix, String suffix);
+
+    /**
+     *
+     * @param id Organisation ID
+     * @return List<User>
+     */
+    List<User> getProviderUsers(String id);
+
+    /**
+     *
+     * @param organisation Organisation Bundle
+     * @return List<User>
+     */
+    List<User> getProviderUsers(OrganisationBundle organisation);
 }

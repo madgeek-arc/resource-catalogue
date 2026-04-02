@@ -55,6 +55,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
+    private final EmailService emailService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -69,6 +70,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                              GenericResourceService genericResourceService,
                              SecurityService securityService,
                              RelationshipValidator relationshipValidator,
+                             EmailService emailService,
                              WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
@@ -76,6 +78,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         this.openAIREDatasourceManager = openAIREDatasourceManager;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
+        this.emailService = emailService;
     }
 
     @Override
@@ -205,7 +208,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
                 datasource.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
-//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
+        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(datasource, provider);
     }
 
     @Override
@@ -213,7 +216,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<DatasourceBundle> getByIds(Authentication auth, String... ids) {
         List<DatasourceBundle> resources;

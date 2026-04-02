@@ -59,7 +59,6 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         return true;
     }
 
-    //TODO: test
     @Override
     public T beforeBodyWrite(T t, MethodParameter methodParameter,
                              MediaType mediaType,

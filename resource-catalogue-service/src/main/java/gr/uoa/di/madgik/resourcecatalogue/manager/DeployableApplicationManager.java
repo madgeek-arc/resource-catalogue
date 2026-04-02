@@ -54,6 +54,7 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
     private final OrganisationService organisationService;
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
+    private final EmailService emailService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -66,11 +67,13 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
                                         @Lazy VocabularyService vocabularyService,
                                         @Lazy ProviderResourcesCommonMethods commonMethods,
                                         GenericResourceService genericResourceService,
+                                        EmailService emailService,
                                         WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -184,7 +187,7 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
         OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
                 deployableApplication.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
-//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
+        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(deployableApplication, provider);
     }
 
     @Override
@@ -192,7 +195,6 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<DeployableApplicationBundle> getByIds(Authentication auth, String... ids) {
         List<DeployableApplicationBundle> resources;

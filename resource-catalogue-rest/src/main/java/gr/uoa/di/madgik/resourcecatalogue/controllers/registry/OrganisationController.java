@@ -335,17 +335,6 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
             return null;
         }
     }
-
-    @PutMapping(path = "changeCatalogue")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<OrganisationBundle> changeCatalogue(@RequestParam String catalogueId,
-                                                              @RequestParam String providerId,
-                                                              @RequestParam String newCatalogueId,
-                                                              @Parameter(hidden = true) Authentication auth) {
-//        OrganisationBundle bundle = migrationService.changeProviderCatalogue(providerId, catalogueId, newCatalogueId, auth);
-//        return ResponseEntity.ok(bundle);
-        return null;
-    }
     //endregion
 
     //region Drafts

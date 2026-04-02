@@ -262,7 +262,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         T existing = get(id, catalogueId);
         existing.markAudit(comment, actionType, auth);
 
-//        mailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
         logger.info("Audited '{}' with ID '{}' [actionType: {}]", getResourceTypeName(), existing.getId(), actionType);
         genericResourceService.update(getResourceTypeName(), existing);
         return existing;

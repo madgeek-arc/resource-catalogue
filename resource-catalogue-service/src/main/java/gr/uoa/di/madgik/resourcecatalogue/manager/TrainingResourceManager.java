@@ -51,6 +51,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
+    private final EmailService emailService;
 
     public TrainingResourceManager(OrganisationService organisationService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
@@ -58,12 +59,14 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
                                    @Lazy ProviderResourcesCommonMethods commonMethods,
                                    @Lazy RelationshipValidator relationshipValidator,
                                    GenericResourceService genericResourceService,
+                                   EmailService emailService,
                                    WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -180,7 +183,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
                 trainingResource.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Training Resources", provider.getId());
-//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResource, provider); //FIXME
+        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(trainingResource, provider);
     }
 
     @Override
@@ -188,7 +191,6 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<TrainingResourceBundle> getByIds(Authentication auth, String... ids) {
         List<TrainingResourceBundle> resources;
