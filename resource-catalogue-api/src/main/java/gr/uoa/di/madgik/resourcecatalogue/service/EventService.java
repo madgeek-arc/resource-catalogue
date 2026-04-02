@@ -20,7 +20,7 @@
 //import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
 //import org.springframework.security.core.Authentication;
 //
-//import java.util.Date;
+//import java.time.Instant;
 //import java.util.List;
 //import java.util.Map;
 //
@@ -85,7 +85,7 @@
 //     * @param noOfVisits
 //     * @param authentication
 //     */
-//    void addVisitsOnDay(Date date, String serviceId, Float noOfVisits, Authentication authentication);
+//    void addVisitsOnDay(Instant date, String serviceId, Float noOfVisits, Authentication authentication);
 //
 //    /**
 //     * Set a Visit Event on a Service.

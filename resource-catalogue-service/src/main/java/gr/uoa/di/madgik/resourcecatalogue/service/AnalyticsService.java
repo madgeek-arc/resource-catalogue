@@ -35,6 +35,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -121,7 +122,7 @@ public class AnalyticsService implements Analytics {
     }
 
     private Map<String, Integer> getServiceVisits() {
-        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(Instant.now());
         JsonNode json = parse(getMatomoResponse(String.format(serviceVisits, date)).block());
         if (json != null) {
             try {

@@ -103,7 +103,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         OidcUser user = ((OidcUser) authentication.getPrincipal());
         if (user.getAttribute("exp") instanceof Instant) {
             Instant exp = user.getAttribute("exp");
-            int age = (int) (exp.getEpochSecond() - (new Date().getTime() / 1000));
+            int age = (int) (exp.getEpochSecond() - (Instant.now().getEpochSecond()));
             return age;
         }
         return null;

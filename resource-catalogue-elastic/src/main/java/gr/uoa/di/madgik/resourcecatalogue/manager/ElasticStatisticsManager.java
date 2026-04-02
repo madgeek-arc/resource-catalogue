@@ -61,7 +61,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -163,7 +163,7 @@ public class ElasticStatisticsManager implements StatisticsService {
     }
 
     private Query getEventQuery(String serviceId, String eventType) {
-        Date date = new Date();
+        Instant date = Instant.now();
         java.util.Calendar c = java.util.Calendar.getInstance();
         c.setTimeInMillis(0);
 
@@ -172,7 +172,7 @@ public class ElasticStatisticsManager implements StatisticsService {
                 Query.of(f -> f.range(r -> r.untyped(n -> n
                         .field("instant")
                         .gte(JsonData.of(c.getTime().getTime()))
-                        .lte(JsonData.of(date.getTime()))
+                        .lte(JsonData.of(date.toEpochMilli()))
                 ))),
                 Query.of(f -> f.term(t -> t.field("type").value(eventType)))
         )));
@@ -262,11 +262,11 @@ public class ElasticStatisticsManager implements StatisticsService {
         return counts.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> ((float) v.getValue()) / grandTotal));
     }
 
-    public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by) {
+    public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Instant from, Instant to, Interval by) {
         Map<DateTime, Map<String, Long>> results = new LinkedHashMap<>();
         Paging<Resource> resources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND creation_date > %s AND creation_date < %s",
-                        type, from.toInstant().toEpochMilli(), to.toInstant().toEpochMilli()), "event",
+                        type, from.toEpochMilli(), to.toEpochMilli()), "event",
                 maxQuantity, 0, "creation_date", "ASC");
         List<Event> events = resources
                 .getResults()

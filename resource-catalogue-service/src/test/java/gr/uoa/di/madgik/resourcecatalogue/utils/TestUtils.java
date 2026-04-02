@@ -26,7 +26,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Date;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -147,7 +147,7 @@ public class TestUtils {
         trainingResource.put("url", createURL());
         trainingResource.put("license", "Test License");
         trainingResource.put("accessRights", "tr_access_right-open_access");
-        trainingResource.put("versionDate", new Date(1674858000000L));
+        trainingResource.put("versionDate", Instant.ofEpochMilli(1674858000000L));
         trainingResource.put("targetGroups", List.of("target_user-businesses", "target_user-funders"));
         trainingResource.put("learningOutcomes", List.of("outcome1", "outcome2"));
         trainingResource.put("expertiseLevel", "tr_expertise_level-advanced");

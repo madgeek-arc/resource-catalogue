@@ -194,12 +194,12 @@
 //        return midnight.getTimeInMillis() < instant;
 //    }
 //
-//    public void addVisitsOnDay(Date date, String serviceId, Float noOfVisits, Authentication authentication) {
+//    public void addVisitsOnDay(Instant date, String serviceId, Float noOfVisits, Authentication authentication) {
 //        List<Event> serviceEvents = getServiceEvents(Event.UserActionType.VISIT.toString(), serviceId);
 //        for (Event event : serviceEvents) {
 //
 //            // Compare the event.getInstant(long) to user's give date
-//            Date eventDate = new Date(event.getInstant());
+//            Instant eventDate = new Instant(event.getInstant());
 //            Calendar cal1 = Calendar.getInstance();
 //            Calendar cal2 = Calendar.getInstance();
 //            cal1.setTime(date);

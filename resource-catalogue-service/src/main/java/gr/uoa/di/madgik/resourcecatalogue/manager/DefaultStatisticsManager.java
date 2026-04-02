@@ -32,6 +32,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.StatisticsService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.joda.time.DateTime;
+import java.time.Instant;
 import org.postgresql.jdbc.PgArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,11 +111,11 @@ public class DefaultStatisticsManager implements StatisticsService {
         throw new UnsupportedOperationException("Method has been removed");
     }
 
-    public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by) {
+    public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Instant from, Instant to, Interval by) {
         Map<DateTime, Map<String, Long>> results = new LinkedHashMap<>();
         Paging<Resource> resources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND creation_date > %s AND creation_date < %s",
-                        type, from.toInstant().toEpochMilli(), to.toInstant().toEpochMilli()), "event",
+                        type, from.toEpochMilli(), to.toEpochMilli()), "event",
                 maxQuantity, 0, "creation_date", "ASC");
         List<Event> events = resources
                 .getResults()

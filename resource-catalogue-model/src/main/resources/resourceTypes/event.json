@@ -20,7 +20,7 @@
       "multivalued": false,
       "name": "instant",
       "path": "$.instant",
-      "type": "java.util.Date"
+      "type": "java.time.Instant"
     },
     {
       "label": null,
