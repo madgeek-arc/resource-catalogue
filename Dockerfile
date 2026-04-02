@@ -1,6 +1,7 @@
 ### Build using Maven ###
 FROM maven:3.9-eclipse-temurin-21 AS maven
 ARG profile
+ARG skipTests=false
 
 WORKDIR /build
 
@@ -28,7 +29,7 @@ RUN if [ -z "$profile" ] ; then echo "Building without profile"; sleep 2 ; else 
 RUN mvn help:effective-pom
 
 ## Run maven based on given profile ##
-RUN if [ -z "$profile" ] ; then mvn package ; else mvn package -P $profile ; fi
+RUN if [ -z "$profile" ] ; then mvn package -Dmaven.test.skip=${skipTests} ; else mvn package -P $profile -Dmaven.test.skip=${skipTests} ; fi
 
 
 ### Create Docker Image ###
