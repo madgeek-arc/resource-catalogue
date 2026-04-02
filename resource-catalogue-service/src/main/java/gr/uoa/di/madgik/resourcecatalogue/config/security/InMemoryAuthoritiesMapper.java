@@ -196,7 +196,6 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     }
 
 
-    //TODO: make global
     private User mapToUser(Map<?, ?> userMap) {
         User user = new User();
         user.setId((String) userMap.get("id"));

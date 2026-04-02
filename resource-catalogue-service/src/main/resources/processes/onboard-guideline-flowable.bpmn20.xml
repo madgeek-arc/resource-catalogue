@@ -27,7 +27,7 @@
     </sequenceFlow>
 
     <sequenceFlow id="Flow_0z3uyfs" name="Name exists" sourceRef="Gateway_1yi00kg" targetRef="Gateway_0ux95fk">
-      <conditionExpression xsi:type="tFormalExpression">${resource['payload'] != null &amp;&amp; resource['payload']['name'] != null &amp;&amp; !resource['payload']['name'].empty}</conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression">${resource['payload'] != null &amp;&amp; resource['payload']['name'] != null &amp;&amp; not empty resource['payload']['name']}</conditionExpression>
     </sequenceFlow>
 
     <exclusiveGateway id="Gateway_0ux95fk" name="Check if Resource is owned by a Catalogue">

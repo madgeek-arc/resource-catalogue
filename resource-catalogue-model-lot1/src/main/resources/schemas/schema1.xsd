@@ -2431,8 +2431,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:enumeration value="INVALID"/>
             
       <xs:enumeration value="CREATED"/>
-            
-      <xs:enumeration value="MOVED"/>
           
     </xs:restriction>
       

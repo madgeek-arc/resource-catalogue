@@ -112,7 +112,7 @@ public class SimpleMailService implements MailService {
     void sendMessage(Message message, List<String> to, List<String> cc, List<String> bcc) throws MessagingException {
         boolean sent = false;
         int attempts = 0;
-        while (!sent && attempts < 20) {
+        while (!sent && attempts < 5) {
             try {
                 attempts++;
                 Transport.send(message);

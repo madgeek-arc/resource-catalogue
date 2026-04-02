@@ -356,19 +356,9 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
                                                                   @PathVariable String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-//        service.sendEmailNotificationToProviderForOutdatedService(id, auth); //FIXME
+        service.sendEmailNotificationToProviderForOutdatedEOSCResource(id, auth);
     }
-
-    //FIXME
-//    @PutMapping(path = {"changeProvider"})
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-//    public void changeProvider(@RequestParam String resourceId,
-//                               @RequestParam String newProvider,
-//                               @RequestParam(required = false) String comment,
-//                               @Parameter(hidden = true) Authentication authentication) {
-//        service.changeProvider(resourceId, newProvider, comment, authentication);
-//    }
-
+    //endregion
 
     // OpenAIRE related methods
     @GetMapping(path = "openaire/getById")

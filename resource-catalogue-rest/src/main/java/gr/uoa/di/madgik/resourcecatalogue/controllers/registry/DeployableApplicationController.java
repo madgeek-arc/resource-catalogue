@@ -330,17 +330,6 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
         String id = prefix + "/" + suffix;
         service.sendEmailNotificationToProviderForOutdatedEOSCResource(id, auth);
     }
-
-    //FIXME
-//    @Tag(name = "ServiceAdmin")
-//    @PutMapping(path = {"changeProvider"})
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-//    public void changeProvider(@RequestParam String resourceId,
-//                               @RequestParam String newProvider,
-//                               @RequestParam(required = false) String comment,
-//                               @Parameter(hidden = true) Authentication authentication) {
-//        service.changeProvider(resourceId, newProvider, comment, authentication);
-//    }
     //endregion
 
     //region Drafts

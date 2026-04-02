@@ -50,6 +50,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final OrganisationService organisationService;
+    private final EmailService emailService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -62,12 +63,14 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                           IdCreator idCreator,
                           GenericResourceService genericResourceService,
                           OrganisationService organisationService,
+                          EmailService emailService,
                           WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.securityService = securityService;
         this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.organisationService = organisationService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -154,7 +157,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         OrganisationBundle provider = organisationService.get((String) adapter.getAdapter().get("resourceOwner"),
                 adapter.getCatalogueId());
         logger.info("Sending email to Provider '{}' for outdated Adapters", provider.getId());
-//        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider); //FIXME
+        emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(adapter, provider);
     }
 
     @Override
@@ -162,7 +165,6 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         return getMyResources(filter, auth);
     }
 
-    //FIXME
     @Override
     public List<AdapterBundle> getByIds(Authentication auth, String... ids) {
         List<AdapterBundle> resources;
