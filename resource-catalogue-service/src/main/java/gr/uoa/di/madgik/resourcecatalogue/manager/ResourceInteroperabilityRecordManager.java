@@ -59,8 +59,8 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ResourceInteroperabilityRecordManager(ServiceService serviceService,
-                                                 DatasourceService datasourceService,
+    public ResourceInteroperabilityRecordManager(@Lazy ServiceService serviceService,
+                                                 @Lazy DatasourceService datasourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
                                                  SecurityService securityService,
                                                  IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator,
