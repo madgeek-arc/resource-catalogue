@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -94,7 +94,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     }
 
     @Override
-    public Browsing<CatalogueBundle> getAll(FacetFilter ff, Authentication auth) {
+    public Paging<CatalogueBundle> getAll(FacetFilter ff, Authentication auth) {
         List<CatalogueBundle> userCatalogues = null;
         List<CatalogueBundle> retList = new ArrayList<>();
 
@@ -105,7 +105,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
                 return super.getAll(ff, auth);
             }
 
-            Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
+            Paging<CatalogueBundle> catalogues = super.getAll(ff, auth);
             for (CatalogueBundle catalogueBundle : catalogues.getResults()) {
                 if (catalogueBundle.getStatus().equals(vocabularyService.get("approved").getId()) ||
                         securityService.hasAdminAccess(auth, catalogueBundle.getId())) {
@@ -128,7 +128,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
 
         // else return ONLY approved Catalogues
         ff.addFilter("status", "approved");
-        Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
+        Paging<CatalogueBundle> catalogues = super.getAll(ff, auth);
         retList.addAll(catalogues.getResults());
         catalogues.setResults(retList);
 
@@ -216,7 +216,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     }
 
     @Override
-    public Browsing<CatalogueBundle> getMy(FacetFilter ff, Authentication auth) {
+    public Paging<CatalogueBundle> getMy(FacetFilter ff, Authentication auth) {
         if (auth == null) {
             throw new InsufficientAuthenticationException("Please log in.");
         }
@@ -317,11 +317,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
         //TODO: enable and fix if Catalogues return to their original state
 //        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     @Override

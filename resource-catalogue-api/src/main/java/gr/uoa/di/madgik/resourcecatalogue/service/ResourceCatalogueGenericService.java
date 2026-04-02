@@ -1,7 +1,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import org.springframework.security.core.Authentication;
@@ -10,6 +11,24 @@ import java.util.List;
 
 public interface ResourceCatalogueGenericService<T extends Bundle>
         extends BundleOperations<T>, ResourceService<T>, DraftService<T> {
+
+    /**
+     *
+     * @param id          resource ID
+     * @param catalogueId catalogue ID
+     *
+     * @return
+     */
+    T get(String id, String catalogueId);
+
+    /**
+     * Get a Resource, providing its ID and the catalogue ID
+     *
+     * @param id          resource ID
+     * @param catalogueId the catalogue ID
+     * @return {@link Resource}
+     */
+    Resource getResource(String id, String catalogueId);
 
     /**
      * Update a resource providing a meaningful comment
@@ -40,15 +59,15 @@ public interface ResourceCatalogueGenericService<T extends Bundle>
      *
      * @param ff   FacetFilter
      * @param auth Authentication
-     * @return {@link Browsing<T>}
+     * @return {@link Paging<T>}
      */
-    Browsing<T> getMyProviders(FacetFilter ff, Authentication auth, String resourceType);
+    Paging<T> getMyProviders(FacetFilter ff, Authentication auth, String resourceType);
 
     /**
      *
      * @param filter FacetFilter
      * @param auth   Authentication
-     * @return {@link Browsing<T>}
+     * @return {@link Paging<T>}
      */
-    Browsing<T> getMyResources(FacetFilter filter, Authentication auth);
+    Paging<T> getMyResources(FacetFilter filter, Authentication auth);
 }

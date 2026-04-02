@@ -16,48 +16,34 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
-import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.service.AbstractGenericService;
-import gr.uoa.di.madgik.registry.service.ParserService;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public abstract class ResourceManager<T extends Identifiable> extends AbstractGenericService<T> implements ResourceService<T> {
+public abstract class ResourceManager<T extends Identifiable> implements ResourceService<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceManager.class);
 
-//    @Lazy
-//    @Autowired
-//    private FieldValidator fieldValidator;
+    protected final GenericResourceService genericResourceService;
+    protected final IdCreator idCreator;
+    protected final int maxQuantity;
 
-    @Lazy
-    @Autowired
-    private IdCreator idCreator;
-
-    public ResourceManager(Class<T> typeParameterClass) {
-        super(typeParameterClass);
+    public ResourceManager(GenericResourceService genericResourceService, IdCreator idCreator, int maxQuantity) {
+        this.genericResourceService = genericResourceService;
+        this.idCreator = idCreator;
+        this.maxQuantity = maxQuantity;
     }
+
+    public abstract String getResourceTypeName();
 
     @Override
     public String createId(T t) {
@@ -66,81 +52,40 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
 
     @Override
     public T get(String id) {
-        return deserialize(whereID(id, true));
+        return genericResourceService.get(getResourceTypeName(), id);
     }
 
     @Override
     public Resource getResource(String id) {
-        return whereID(id, true);
+        return genericResourceService.searchResource(getResourceTypeName(), id, true);
     }
 
     @Override
-    public Resource getResource(String id, String catalogueId) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_internal_id", id);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.setResourceType(getResourceTypeName());
-        return searchService.searchFields(
-                getResourceTypeName(),
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("catalogue_id", catalogueId)
-        );
+    public Paging<T> getAll(FacetFilter filter) {
+        return genericResourceService.getResults(filter);
     }
 
     @Override
-    public T get(String id, String catalogueId) {
-        Resource resource = getResource(id, catalogueId);
-        if (resource == null) {
-            throw new CatalogueResourceNotFoundException(String.format("Could not find %s with id: %s and catalogueId: %s",
-                    typeParameterClass.getSimpleName(), id, catalogueId));
-        }
-        return deserialize(resource);
+    public Paging<T> getAll(FacetFilter ff, Authentication auth) {
+        return genericResourceService.getResults(ff);
     }
 
     @Override
-    public Browsing<T> getAll(FacetFilter filter) {
-        filter.setBrowseBy(getBrowseBy());
-        return getResults(filter);
-    }
-
-    @Override
-    public Browsing<T> getAll(FacetFilter ff, Authentication auth) {
-        ff.setBrowseBy(getBrowseBy());
-        Browsing<T> browsing;
-        try {
-            browsing = getResults(ff);
-        } catch (Exception e) {
-            throw new ServiceException("Search error, check search parameters"); // check elastic status
-        }
-        return browsing;
-    }
-
-    @Override
-    public Browsing<T> getMy(FacetFilter ff, Authentication auth) {
+    public Paging<T> getMy(FacetFilter ff, Authentication auth) {
         return null;
     }
 
     @Override
     public T add(T t, Authentication auth) {
-        if (exists(t)) {
-            throw new ResourceAlreadyExistsException(String.format("%s with id = '%s' already exists!", getResourceTypeName(), t.getId()));
-        }
-        String serialized = serialize(t);
-        Resource created = new Resource();
-        created.setPayload(serialized);
-        created.setResourceType(getResourceType());
-        resourceService.addResource(created);
         logger.debug("Adding Resource {}", t);
+        t = genericResourceService.add(getResourceTypeName(), t);
         return t;
     }
 
     @Override
     public T update(T t, Authentication auth) {
-        Resource existing = whereID(t.getId(), true);
-        existing.setPayload(serialize(t));
-        existing.setResourceType(getResourceType());
-        resourceService.updateResource(existing);
         logger.debug("Updating Resource {}", t);
+        t = genericResourceService.update(getResourceTypeName(), t);
         return t;
     }
 
@@ -148,117 +93,52 @@ public abstract class ResourceManager<T extends Identifiable> extends AbstractGe
     public final T save(T t) {
         Resource resource = new Resource();
         if (exists(t)) { // update
-            resource = whereID(t.getId(), true);
-            resource.setPayload(serialize(t));
-            resource.setResourceType(getResourceType());
-            resourceService.updateResource(resource);
             logger.debug("Updated Resource: {}", t);
+            t = this.update(t, null);
         } else { // add
             // create id
             String id = createId(t);
             t.setId(id);
             // save
-            String serialized = serialize(t);
-            resource.setPayload(serialized);
-            resource.setResourceType(getResourceType());
-            resourceService.addResource(resource);
             logger.debug("Added Resource: {}", t);
+            t = this.add(t, null);
         }
         return t;
     }
 
     @Override
     public void delete(T t) {
-        resourceService.deleteResource(whereID(t.getId(), true).getId());
         logger.debug("Deleting Resource {}", t);
-    }
-
-    @Override
-    public Map<String, List<T>> getBy(String field) {
-        return groupBy(field).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                entry -> entry.getValue()
-                        .stream()
-                        .map(resource -> deserialize(where(true, new SearchService.KeyValue("id", resource.getId()))))
-                        .collect(Collectors.toList())));
-    }
-
-    @Override
-    public List<T> getSome(String... ids) {
-        return whereIDin(ids).stream().filter(Objects::nonNull).map(this::deserialize).collect(Collectors.toList());
+        genericResourceService.delete(getResourceTypeName(), t.getId());
     }
 
     @Override
     public T get(SearchService.KeyValue... keyValues) {
-        return deserialize(where(true, keyValues));
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<T> delAll() {
-        FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(maxQuantity);
-        logger.info("Deleting all Resources");
-        List<T> results = getAll(facetFilter, null).getResults();
-        results.forEach(this::delete);
-        return results;
+        return genericResourceService.get(getResourceTypeName(), keyValues);
     }
 
     @Override
     public T validate(T t) {
         logger.debug("Validating Resource {} using FieldValidator", t);
-        //FIXME
-//        try {
-//            fieldValidator.validate(t);
-//        } catch (IllegalAccessException e) {
-//            logger.error("", e);
-//        }
+        genericResourceService.validate(getResourceTypeName(), t);
         return t;
     }
 
     @Override
     public boolean exists(T t) {
-        return exists(t.getId());
+        return genericResourceService.exists(getResourceTypeName(), t);
     }
 
     @Override
     public boolean exists(String id) {
-        return id != null && whereID(id, false) != null;
-    }
-
-    protected String serialize(T t) {
-        String ret = parserPool.serialize(t, ParserService.ParserServiceTypes.fromString(getResourceType().getPayloadType()));
-        if (ret.equals("failed")) {
-            throw new ResourceException(String.format("Not a valid %s!", getResourceTypeName()), HttpStatus.BAD_REQUEST);
+        T t;
+        try {
+            t = genericResourceService.get(getResourceTypeName(), id);
+        } catch (ResourceNotFoundException e) {
+            t = null;
         }
-        return ret;
+        return id != null && t != null;
     }
 
-    protected T deserialize(Resource resource) {
-        return parserPool.deserialize(resource, typeParameterClass);
-    }
-
-    protected Map<String, List<Resource>> groupBy(String field) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
-        return searchService.searchByCategory(ff, field);
-    }
-
-    protected List<Resource> whereIDin(String... ids) {
-        return Stream.of(ids).map((String id) -> whereID(id, false)).collect(Collectors.toList());
-    }
-
-    protected Resource whereID(String id, boolean throwOnNull) {
-        return id == null ? null : where(throwOnNull, new SearchService.KeyValue("resource_internal_id", id));
-    }
-
-    protected Resource where(boolean throwOnNull, SearchService.KeyValue... keyValues) {
-        Resource ret;
-        ret = searchService.searchFields(getResourceTypeName(), keyValues);
-        if (throwOnNull && ret == null) {
-            throw new ResourceException(String.format("%s does not exist!", getResourceTypeName()), HttpStatus.NOT_FOUND);
-        }
-        return ret;
-    }
 
 }

@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -113,11 +113,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     @Override
@@ -146,11 +142,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         logger.info("Verifying Organisation: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     @Override
@@ -163,11 +155,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     @Override
@@ -180,15 +168,11 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         bundle.markSuspend(suspend, auth);
         cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     @Override
-    public Browsing<OrganisationBundle> getMy(FacetFilter ff, Authentication auth) {
+    public Paging<OrganisationBundle> getMy(FacetFilter ff, Authentication auth) {
         return getMyProviders(ff, auth, getResourceTypeName());
     }
     //endregion
@@ -227,11 +211,9 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
             bundle.getMetadata().setTerms(existingTerms);
 
             try {
-                genericResourceService.update(getResourceTypeName(), id, bundle);
+                genericResourceService.update(getResourceTypeName(), bundle);
             } catch (ResourceException | ResourceNotFoundException e) {
                 logger.info("Could not update terms for Provider with id: '{}'", id);
-            } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-                throw new RuntimeException(e);
             }
         }
     }

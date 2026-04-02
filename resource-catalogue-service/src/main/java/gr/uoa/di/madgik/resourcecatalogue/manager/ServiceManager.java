@@ -17,9 +17,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -100,11 +100,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), service.getId(), service);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), service);
     }
 
     private void checkAndResetServiceOnboarding(ServiceBundle service, Authentication auth) {
@@ -142,11 +138,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         updateProviderTemplateStatus(existing, status, auth);
 
         logger.info("Verifying Service: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     private void updateProviderTemplateStatus(ServiceBundle service, String status, Authentication auth) {
@@ -183,11 +175,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
     //endregion
 
@@ -273,7 +261,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 //    }
 
     @Override
-    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Paging<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
         return getMyResources(filter, auth);
     }
 

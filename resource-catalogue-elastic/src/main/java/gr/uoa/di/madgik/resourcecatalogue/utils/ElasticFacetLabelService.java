@@ -16,15 +16,13 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.FieldAndFormat;
+import co.elastic.clients.elasticsearch.core.ScrollResponse;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import gr.uoa.di.madgik.registry.domain.Facet;
-import org.elasticsearch.ElasticsearchStatusException;
-import org.elasticsearch.action.search.*;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.core.TimeValue;
-import org.elasticsearch.search.Scroll;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
+import co.elastic.clients.json.JsonData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
@@ -44,9 +42,10 @@ import java.util.TreeMap;
 public class ElasticFacetLabelService implements FacetLabelService {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticFacetLabelService.class);
-    private final RestHighLevelClient client;
 
-    ElasticFacetLabelService(RestHighLevelClient client) {
+    private final ElasticsearchClient client;
+
+    ElasticFacetLabelService(ElasticsearchClient client) {
         this.client = client;
     }
 
@@ -66,57 +65,87 @@ public class ElasticFacetLabelService implements FacetLabelService {
         return facets;
     }
 
-    private Map<String, String> getIdNameFields() throws IOException, ElasticsearchStatusException {
+    private Map<String, String> getIdNameFields() throws IOException {
         Map<String, String> idNameMap = new TreeMap<>();
+        String scrollId = null;
 
-        final Scroll scroll = new Scroll(TimeValue.timeValueSeconds(1L));
-        SearchRequest searchRequest = new SearchRequest("resourceTypes");
-        searchRequest.scroll(scroll);
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder
-                .size(10000)
-                .docValueField("resource_internal_id")
-                .docValueField("name")
-                .docValueField("title")
-                .fetchSource(false)
-                .explain(true);
-        searchRequest.source(searchSourceBuilder);
+        try {
+            SearchResponse<Void> searchResponse = client.search(s -> s
+                            .index("resourceTypes")
+                            .scroll(sc -> sc.time("1m"))
+                            .size(10000)
+                            .source(src -> src.fetch(false))
+                            .fields(
+                                    FieldAndFormat.of(f -> f.field("resource_internal_id")),
+                                    FieldAndFormat.of(f -> f.field("name")),
+                                    FieldAndFormat.of(f -> f.field("title"))),
+                    Void.class);
 
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        String scrollId = searchResponse.getScrollId();
-        SearchHit[] searchHits = searchResponse.getHits().getHits();
+            scrollId = searchResponse.scrollId();
+            processHits(searchResponse.hits().hits(), idNameMap);
 
-        while (searchHits != null && searchHits.length > 0) {
-
-            for (SearchHit hit : searchHits) {
-                if (hit.getFields().containsKey("resource_internal_id")) {
-                    String id = (String) hit.getFields().get("resource_internal_id").getValues().get(0);
-                    if (hit.getFields().containsKey("name")) {
-                        idNameMap.put(id, (String) hit.getFields().get("name").getValues().get(0));
-                    } else if (hit.getFields().containsKey("title")) {
-                        idNameMap.put(id, (String) hit.getFields().get("title").getValues().get(0));
-                    }
-                } else {
-                    logger.error("Could not create id - name value. \nHit: {}", hit);
+            while (hasHits(searchResponse.hits().hits()) && scrollId != null && !scrollId.isBlank()) {
+                String currentScrollId = scrollId;
+                ScrollResponse<Void> scrollResponse = client.scroll(s -> s
+                                .scrollId(currentScrollId)
+                                .scroll(sc -> sc.time("1m")),
+                        Void.class);
+                scrollId = scrollResponse.scrollId();
+                processHits(scrollResponse.hits().hits(), idNameMap);
+                if (!hasHits(scrollResponse.hits().hits())) {
+                    break;
                 }
             }
-
-            SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
-            scrollRequest.scroll(scroll);
-            searchResponse = client.scroll(scrollRequest, RequestOptions.DEFAULT);
-            scrollId = searchResponse.getScrollId();
-            searchHits = searchResponse.getHits().getHits();
-        }
-
-        ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
-        clearScrollRequest.addScrollId(scrollId);
-        ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
-        boolean succeeded = clearScrollResponse.isSucceeded();
-        if (!succeeded) {
-            logger.error("clear scroll request failed...");
+        } finally {
+            clearScroll(scrollId);
         }
 
         return idNameMap;
+    }
+
+    private void processHits(List<Hit<Void>> hits, Map<String, String> idNameMap) {
+        for (Hit<Void> hit : hits) {
+            Map<String, JsonData> fields = hit.fields();
+            String id = firstFieldValue(fields.get("resource_internal_id"));
+            if (id == null) {
+                logger.error("Could not create id - name value. Hit: {}", hit);
+                continue;
+            }
+            String name = firstFieldValue(fields.get("name"));
+            String title = firstFieldValue(fields.get("title"));
+            if (name != null) {
+                idNameMap.put(id, name);
+            } else if (title != null) {
+                idNameMap.put(id, title);
+            }
+        }
+    }
+
+    private boolean hasHits(List<Hit<Void>> hits) {
+        return hits != null && !hits.isEmpty();
+    }
+
+    private String firstFieldValue(JsonData field) {
+        if (field == null) {
+            return null;
+        }
+        Object value = field.to(Object.class);
+        if (value instanceof List<?> values && !values.isEmpty()) {
+            Object first = values.getFirst();
+            return first != null ? first.toString() : null;
+        }
+        return value != null ? value.toString() : null;
+    }
+
+    private void clearScroll(String scrollId) {
+        if (scrollId == null || scrollId.isBlank()) {
+            return;
+        }
+        try {
+            client.clearScroll(c -> c.scrollId(scrollId));
+        } catch (IOException e) {
+            logger.error("clear scroll request failed...", e);
+        }
     }
 
     String toProperCase(String str, String delimiter, String newDelimiter) {
@@ -137,6 +166,9 @@ public class ElasticFacetLabelService implements FacetLabelService {
     }
 
     String getLabelElseKeepValue(String value, Map<String, String> labels) {
+        if (labels == null) {
+            return toProperCase(toProperCase(value, "-", "-"), "_", " ");
+        }
         String ret = labels.get(value);
         if (ret == null) {
             ret = toProperCase(toProperCase(value, "-", "-"), "_", " ");

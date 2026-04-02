@@ -16,6 +16,17 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
+import co.elastic.clients.elasticsearch._types.aggregations.DateHistogramBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.json.JsonData;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
@@ -28,22 +39,11 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
-import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
+import gr.uoa.di.madgik.resourcecatalogue.service.Analytics;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.StatisticsService;
+import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.joda.time.DateTime;
 import org.postgresql.jdbc.PgArray;
 import org.slf4j.Logger;
@@ -59,7 +59,18 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -69,7 +80,8 @@ import java.util.stream.Collectors;
 public class ElasticStatisticsManager implements StatisticsService {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticStatisticsManager.class);
-    private final RestHighLevelClient client;
+
+    private final ElasticsearchClient client;
     private final Analytics analyticsService;
     private final OrganisationService organisationService;
     private final SearchService searchService;
@@ -77,11 +89,12 @@ public class ElasticStatisticsManager implements StatisticsService {
     private final ServiceService serviceService;
     private final VocabularyService vocabularyService;
     private final DataSource dataSource;
+    private final ObjectMapper objectMapper;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    ElasticStatisticsManager(RestHighLevelClient client, Analytics analyticsService,
+    ElasticStatisticsManager(ElasticsearchClient client, Analytics analyticsService,
                              OrganisationService organisationService,
                              SearchService searchService, ParserService parserService,
                              ServiceService serviceService,
@@ -95,93 +108,97 @@ public class ElasticStatisticsManager implements StatisticsService {
         this.serviceService = serviceService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
+        this.objectMapper = new ObjectMapper();
     }
 
-    private ParsedDateHistogram histogram(String id, String eventType, Interval by) {
-
+    private List<DateHistogramBucket> histogramBuckets(String id, String eventType, Interval by) {
         String dateFormat;
         String aggregationName;
-        DateHistogramInterval dateHistogramInterval;
+        CalendarInterval calendarInterval;
 
         switch (StatisticsService.Interval.fromString(by.getKey())) {
             case DAY:
                 dateFormat = "yyyy-MM-dd";
                 aggregationName = "day";
-                dateHistogramInterval = DateHistogramInterval.DAY;
+                calendarInterval = CalendarInterval.Day;
                 break;
             case WEEK:
                 dateFormat = "yyyy-MM-dd";
                 aggregationName = "week";
-                dateHistogramInterval = DateHistogramInterval.WEEK;
+                calendarInterval = CalendarInterval.Week;
                 break;
             case YEAR:
                 dateFormat = "yyyy";
                 aggregationName = "year";
-                dateHistogramInterval = DateHistogramInterval.YEAR;
+                calendarInterval = CalendarInterval.Year;
                 break;
             default:
                 dateFormat = "yyyy-MM";
                 aggregationName = "month";
-                dateHistogramInterval = DateHistogramInterval.MONTH;
+                calendarInterval = CalendarInterval.Month;
         }
 
-        DateHistogramAggregationBuilder dateHistogramAggregationBuilder = AggregationBuilders
-                .dateHistogram(aggregationName)
-                .field("instant")
-                .calendarInterval(dateHistogramInterval)
-                .format(dateFormat)
-                .subAggregation(AggregationBuilders.terms("value").field("value"));
-
-        SearchRequest search = new SearchRequest("event");
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        search.searchType(SearchType.DEFAULT);
-        searchSourceBuilder.query(getEventQueryBuilder(id, eventType));
-        searchSourceBuilder.aggregation(dateHistogramAggregationBuilder);
-        search.source(searchSourceBuilder);
-
-        SearchResponse response = null;
         try {
-            response = client.search(search, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        }
+            Aggregate aggregate = client.search(s -> s
+                            .index("event")
+                            .size(0)
+                            .query(getEventQuery(id, eventType))
+                            .aggregations(aggregationName, a -> a
+                                    .dateHistogram(dh -> dh
+                                            .field("instant")
+                                            .calendarInterval(calendarInterval)
+                                            .format(dateFormat))
+                                    .aggregations("value", sub -> sub.terms(t -> t.field("value")))),
+                    Void.class)
+                    .aggregations()
+                    .get(aggregationName);
 
-        return response
-                .getAggregations()
-                .get(aggregationName);
+            if (aggregate == null || !aggregate.isDateHistogram()) {
+                return List.of();
+            }
+            return aggregate.dateHistogram().buckets().array();
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage(), e);
+        }
     }
 
-    private QueryBuilder getEventQueryBuilder(String serviceId, String eventType) {
+    private Query getEventQuery(String serviceId, String eventType) {
         Date date = new Date();
-        Calendar c = Calendar.getInstance();
+        java.util.Calendar c = java.util.Calendar.getInstance();
         c.setTimeInMillis(0);
-        return QueryBuilders.boolQuery()
-                .filter(QueryBuilders.termsQuery("service", serviceId))
-                .filter(QueryBuilders.rangeQuery("instant").from(c.getTime().getTime()).to(date.getTime()))
-                .filter(QueryBuilders.termsQuery("type", eventType));
+
+        return Query.of(q -> q.bool(b -> b.filter(
+                Query.of(f -> f.term(t -> t.field("service").value(serviceId))),
+                Query.of(f -> f.range(r -> r.untyped(n -> n
+                        .field("instant")
+                        .gte(JsonData.of(c.getTime().getTime()))
+                        .lte(JsonData.of(date.getTime()))
+                ))),
+                Query.of(f -> f.term(t -> t.field("type").value(eventType)))
+        )));
     }
 
     @Override
     public Map<String, Integer> addToProject(String id, Interval by) {
-        final long[] totalDocCounts = new long[2]; //0 - not added, 1 - added
-        List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.ADD_TO_PROJECT.getKey(), by).getBuckets();
-        return new TreeMap<>(buckets.stream().collect(
-                Collectors.toMap(
-                        MultiBucketsAggregation.Bucket::getKeyAsString,
-                        bucket -> {
-                            Terms subTerm = bucket.getAggregations().get("value");
-                            if (subTerm.getBuckets() != null) {
-                                totalDocCounts[0] += subTerm.getBuckets().stream().mapToLong(
-                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 0 ? subBucket.getDocCount() : 0
-                                ).sum();
-                                totalDocCounts[1] += subTerm.getBuckets().stream().mapToLong(
-                                        subBucket -> subBucket.getKeyAsNumber().intValue() == 1 ? subBucket.getDocCount() : 0
-                                ).sum();
-                            }
-                            return (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0);
-                        }
-                )
-        ));
+        final long[] totalDocCounts = new long[2];
+        List<DateHistogramBucket> buckets = histogramBuckets(id, Event.UserActionType.ADD_TO_PROJECT.getKey(), by);
+        Map<String, Integer> results = new LinkedHashMap<>();
+        for (DateHistogramBucket bucket : buckets) {
+            Aggregate valueAggregate = bucket.aggregations().get("value");
+            if (valueAggregate != null && valueAggregate.isLterms()) {
+                for (LongTermsBucket subBucket : valueAggregate.lterms().buckets().array()) {
+                    long key = subBucket.key();
+                    long docCount = subBucket.docCount();
+                    if (key == 0) {
+                        totalDocCounts[0] += docCount;
+                    } else if (key == 1) {
+                        totalDocCounts[1] += docCount;
+                    }
+                }
+            }
+            results.put(bucket.keyAsString(), (int) Math.max(totalDocCounts[1] - totalDocCounts[0], 0));
+        }
+        return new TreeMap<>(results);
     }
 
     @Override
@@ -198,35 +215,21 @@ public class ElasticStatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> visits(String id, Interval by) {
-        List<? extends Histogram.Bucket> buckets = histogram(id, Event.UserActionType.VISIT.getKey(), by).getBuckets();
-        final long[] totalDocCounts = new long[buckets.size()];
-        final int[] j = {-1}; // bucket counter
-        return new TreeMap<>(buckets.stream().collect(
-                Collectors.toMap(
-                        MultiBucketsAggregation.Bucket::getKeyAsString,
-                        bucket -> {
-                            j[0]++;
-                            Terms subTerm = bucket.getAggregations().get("value");
-                            if (subTerm.getBuckets() != null) {
-                                for (int i = 0; i < subTerm.getBuckets().size(); i++) {
-                                    Double key = (Double) subTerm.getBuckets().get(i).getKey();
-                                    int keyToInt = key.intValue();
-                                    int totalVistisOnBucket = keyToInt * Integer.parseInt(String.valueOf(subTerm.getBuckets().get(i).getDocCount()));
-                                    totalDocCounts[j[0]] += totalVistisOnBucket;
-                                }
-                            }
-                            return (int) Math.max(totalDocCounts[j[0]], 0);
-                        }
-                )
-        ));
-
-        // alternatively - fetching data from matomo
-//        try {
-//            return analyticsService.getVisitsForLabel("/service/" + id, by);
-//        } catch (Exception e) {
-//            logger.error("Could not find Matomo analytics", e);
-//        }
-//        return new HashMap<>();
+        List<DateHistogramBucket> buckets = histogramBuckets(id, Event.UserActionType.VISIT.getKey(), by);
+        Map<String, Integer> results = new LinkedHashMap<>();
+        for (DateHistogramBucket bucket : buckets) {
+            long totalDocCount = 0;
+            Aggregate valueAggregate = bucket.aggregations().get("value");
+            if (valueAggregate != null && valueAggregate.isLterms()) {
+                for (LongTermsBucket subBucket : valueAggregate.lterms().buckets().array()) {
+                    long key = subBucket.key();
+                    long docCount = subBucket.docCount();
+                    totalDocCount += (long) key * docCount;
+                }
+            }
+            results.put(bucket.keyAsString(), (int) Math.max(totalDocCount, 0));
+        }
+        return new TreeMap<>(results);
     }
 
     @Override
@@ -293,7 +296,6 @@ public class ElasticStatisticsManager implements StatisticsService {
                     })
                     .filter(Objects::nonNull)
                     .toList();
-//            weekEvents.sort(Comparator.comparing(Event::getService));
             eventsByDate.put(start, weekEvents);
             start = endDate;
         }
@@ -311,9 +313,7 @@ public class ElasticStatisticsManager implements StatisticsService {
             results.put(weekEntry.getKey(), weekResults);
         }
 
-
         return results;
-
     }
 
     private DateTime addInterval(DateTime date, Interval by) {
@@ -384,7 +384,6 @@ public class ElasticStatisticsManager implements StatisticsService {
         return toListMapValues(mapValues);
     }
 
-    //TODO: fetch from elastic
     @Override
     public List<MapValues> mapServicesToVocabulary(String providerId, String vocType) {
         Map<String, Set<Value>> vocabularyServices = new HashMap<>();
@@ -408,7 +407,7 @@ public class ElasticStatisticsManager implements StatisticsService {
                 value.setName(entry.get("name").toString());
 
                 String[] vocabularyValues;
-                if (!vocType.equals("order_type")) { // because order type is not multivalued
+                if (!vocType.equals("order_type")) {
                     PgArray pgArray = ((PgArray) entry.get(vocType));
                     vocabularyValues = ((String[]) pgArray.getArray());
                 } else {
@@ -468,4 +467,5 @@ public class ElasticStatisticsManager implements StatisticsService {
         }
         return mapValuesList;
     }
+
 }

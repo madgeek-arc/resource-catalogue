@@ -1,33 +1,35 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 //TODO: resource-specific method -> inside corresponding manager/service
@@ -53,10 +55,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     protected abstract String getResourceTypeName();
 
     protected ResourceCatalogueGenericManager(GenericResourceService genericResourceService,
-                                           IdCreator idCreator,
-                                           SecurityService securityService,
-                                           VocabularyService vocabularyService,
-                                           WorkflowService workflowService) {
+                                              IdCreator idCreator,
+                                              SecurityService securityService,
+                                              VocabularyService vocabularyService,
+                                              WorkflowService workflowService) {
         this.genericResourceService = genericResourceService;
         this.idCreator = idCreator;
         this.securityService = securityService;
@@ -128,7 +130,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     @Override
-    public Browsing<T> getMyProviders(FacetFilter ff, Authentication auth, String resourceType) {
+    public Paging<T> getMyProviders(FacetFilter ff, Authentication auth, String resourceType) {
         ff.setResourceType(resourceType);
         ff.setQuantity(maxQuantity);
         ff.addFilter("published", false);
@@ -138,12 +140,12 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     @Override
-    public Browsing<T> getMyResources(FacetFilter filter, Authentication auth) {
+    public Paging<T> getMyResources(FacetFilter filter, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("draft", false); // A Draft Provider cannot have resources
         List<T> providers = getMyProviders(ff, auth, "organisation").getResults();
         if (providers.isEmpty()) {
-            return new Browsing<>();
+            return new Paging<>();
         }
 
         filter.setResourceType(getResourceTypeName());
@@ -198,7 +200,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     @Override
-    public Browsing<T> getAll(FacetFilter ff, Authentication auth) {
+    public Paging<T> getAll(FacetFilter ff, Authentication auth) {
         ff.setResourceType(getResourceTypeName());
         boolean authenticated = auth != null && auth.isAuthenticated();
         if (authenticated) {
@@ -217,7 +219,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     @Override
-    public Browsing<T> getAll(FacetFilter ff) {
+    public Paging<T> getAll(FacetFilter ff) {
         ff.setResourceType(getResourceTypeName());
         return genericResourceService.getResults(ff);
     }
@@ -228,12 +230,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         T ret = genericResourceService.add(getResourceTypeName(), bundle);
         try {
             ret = workflowService.onboard(getResourceTypeName(), ret, auth);
-            ret = genericResourceService.update(getResourceTypeName(), ret.getId(), ret); // adds logging info - possibly replace with generic update
+            ret = genericResourceService.update(getResourceTypeName(), ret); // adds logging info - possibly replace with generic update
         } catch (ResourceException e) {
             genericResourceService.delete(getResourceTypeName(), bundle.getId());
             throw e;
-        } catch (NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
-            throw new RuntimeException(e);
         }
         return ret;
     }
@@ -244,11 +244,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             return bundle;
         }
         bundle.markUpdate(UserInfo.of(auth), null); //TODO: make sure all resources will use this
-        try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     private boolean hasChanged(T bundle) {
@@ -268,12 +264,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
 //        mailService.notifyProviderAdminsForBundleAuditing(existing, existing.getProvider().get("users")); //FIXME
         logger.info("Audited '{}' with ID '{}' [actionType: {}]", getResourceTypeName(), existing.getId(), actionType);
-
-        try {
-            genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        genericResourceService.update(getResourceTypeName(), existing);
         return existing;
     }
 
@@ -287,11 +278,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                 getResourceTypeName(), bundle.getId());
         bundle.markSuspend(suspend, auth);
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     //TODO: delete catalogueId if not used
@@ -332,7 +319,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
 
-        Browsing<T> resourcesBrowsing = getAll(ff, auth);
+        Paging<T> resourcesPaging = getAll(ff, auth);
         List<T> resourcesToBeAudited = new ArrayList<>();
 
         long todayEpochMillis = System.currentTimeMillis();
@@ -341,7 +328,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                 .minusMonths(auditingInterval)
                 .toEpochSecond();
 
-        for (T bundle : resourcesBrowsing.getResults()) {
+        for (T bundle : resourcesPaging.getResults()) {
             LoggingInfo auditInfo = bundle.getLatestAuditInfo();
             if (auditInfo == null) {
                 // Include providers that have never been audited
@@ -366,8 +353,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             resourcesToBeAudited = resourcesToBeAudited.subList(0, quantity);
         }
 
-        return new Browsing<>(resourcesToBeAudited.size(), 0, resourcesToBeAudited.size(), resourcesToBeAudited,
-                resourcesBrowsing.getFacets());
+        return new Paging<>(resourcesToBeAudited.size(), 0, resourcesToBeAudited.size(), resourcesToBeAudited,
+                resourcesPaging.getFacets());
     }
 
     @Override
@@ -382,11 +369,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public T updateDraft(T bundle, Authentication auth) {
         bundle.markUpdate(UserInfo.of(auth), null);
-        try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new ResourceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle, false);
     }
 
     @Override
@@ -403,27 +386,28 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     //region unused
     @Override
     public String createId(T bundle) {
-        return "";
+        return idCreator.generate(getResourceTypeName());
     }
 
     @Override
     public T save(T bundle) {
-        return null;
+        if (exists(bundle)) { // update
+            logger.debug("Updated Resource: {}", bundle);
+            bundle = this.update(bundle, null);
+        } else { // add
+            // create id
+            String id = createId(bundle);
+            bundle.setId(id);
+            // save
+            logger.debug("Added Resource: {}", bundle);
+            bundle = this.add(bundle, null);
+        }
+        return bundle;
     }
 
     @Override
-    public Map<String, List<T>> getBy(String field) {
-        return Map.of();
-    }
-
-    @Override
-    public List<T> getSome(String... ids) {
-        return List.of();
-    }
-
-    @Override
-    public List<T> delAll() {
-        return List.of();
+    public boolean exists(T bundle) {
+        return genericResourceService.exists(getResourceTypeName(), bundle);
     }
 
     @Override
@@ -434,11 +418,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public Resource getResource(String id, String catalogueId) {
         return null;
-    }
-
-    @Override
-    public boolean exists(T bundle) {
-        return false;
     }
 
     @Override

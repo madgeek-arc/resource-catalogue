@@ -74,25 +74,6 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     }
 
     @Deprecated
-    @GetMapping(path = "vocabularyTree/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
-        return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
-    }
-
-    @Deprecated
-    @GetMapping(path = "vocabularyMap", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, Vocabulary>> getVocabularyMap() {
-        return new ResponseEntity<>(vocabularyService.getVocabulariesMap(), HttpStatus.OK);
-    }
-
-    @Deprecated
-    @Operation(summary = "Get a Map of vocabulary types and their respective entries")
-    @GetMapping(path = "/byType", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<Vocabulary.Type, List<Vocabulary>>> getAllVocabulariesByType() {
-        return new ResponseEntity<>(vocabularyService.getAllVocabulariesByType(), HttpStatus.OK);
-    }
-
-    @Deprecated
     @Operation(summary = "Get vocabularies by type")
     @GetMapping(path = "/byType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Vocabulary>> getByType(@PathVariable(value = "type") Vocabulary.Type type) {

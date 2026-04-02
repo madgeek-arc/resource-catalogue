@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -361,7 +361,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
             "draft/byProvider/{prefix}/{suffix}",
             "draft/byOrganisation/{prefix}/{suffix}"
     })
-    public ResponseEntity<Browsing<DeployableApplicationBundle>> getProviderDraftDeployableApplication(@PathVariable String prefix,
+    public ResponseEntity<Paging<DeployableApplicationBundle>> getProviderDraftDeployableApplication(@PathVariable String prefix,
                                                                                                        @PathVariable String suffix,
                                                                                                        @Parameter(hidden = true)
                                                                                                        @RequestParam MultiValueMap<String, Object> params,

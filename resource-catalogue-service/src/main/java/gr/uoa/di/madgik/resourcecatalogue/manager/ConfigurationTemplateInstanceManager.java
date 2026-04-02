@@ -18,8 +18,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
@@ -112,12 +112,8 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
                     "ConfigurationTemplateInstance is related");
         }
 
-        try {
-            //FIXME: should pass validation
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        //FIXME: should pass validation
+        return genericResourceService.update(getResourceTypeName(), bundle, false);
     }
 
     @Override
@@ -227,7 +223,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
 
     //region Not-Used
     @Override
-    public Browsing<ConfigurationTemplateInstanceBundle> getMy(FacetFilter filter, Authentication authentication) {
+    public Paging<ConfigurationTemplateInstanceBundle> getMy(FacetFilter filter, Authentication authentication) {
         return null;
     }
 

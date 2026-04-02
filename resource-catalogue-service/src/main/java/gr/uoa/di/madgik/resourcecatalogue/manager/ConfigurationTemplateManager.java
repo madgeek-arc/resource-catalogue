@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -115,11 +115,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
         }
         bundle.markUpdate(UserInfo.of(auth), comment);
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     @Override
@@ -210,7 +206,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
 
     //region Not-Needed
     @Override
-    public Browsing<ConfigurationTemplateBundle> getMy(FacetFilter filter, Authentication authentication) {
+    public Paging<ConfigurationTemplateBundle> getMy(FacetFilter filter, Authentication authentication) {
         return null;
     }
 

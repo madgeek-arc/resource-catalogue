@@ -77,29 +77,12 @@ public abstract class ResourceController<T extends Identifiable> {
         return new ResponseEntity<>(t, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "all", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<T>> delAll(@Parameter(hidden = true) Authentication auth) {
-        ResponseEntity<List<T>> ret = new ResponseEntity<>(service.delAll(), HttpStatus.OK);
-        logger.debug("Deleted a list of resources {}", ret);
-        return ret;
-    }
-
     // Filter a list of Resources based on a set of filters.
     @BrowseParameters
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         return new ResponseEntity<>(service.getAll(ff, null), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "ids/{ids}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<T>> getSome(@PathVariable String[] ids, @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "by/{field}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, List<T>>> getBy(@PathVariable String field, @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
 
 //    @ExceptionHandler(ResourceException.class)

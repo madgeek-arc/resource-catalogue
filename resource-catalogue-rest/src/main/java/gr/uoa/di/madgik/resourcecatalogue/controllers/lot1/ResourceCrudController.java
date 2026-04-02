@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequestMapping
-public abstract class ResourceCrudController<T extends Identifiable> {
+public abstract class ResourceCrudController<T> {
     protected final ResourceService<T> service;
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceCrudController.class);
@@ -90,7 +90,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
         if (service.exists(t))
             throw new ResourceAlreadyExistsException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.CREATED);
-        logger.debug("Created a new {} with id '{}'", t.getClass().getSimpleName(), t.getId());
+//        logger.debug("Created a new {} with id '{}'", t.getClass().getSimpleName(), t.getId()); // TODO
         return ret;
     }
 
@@ -100,14 +100,14 @@ public abstract class ResourceCrudController<T extends Identifiable> {
         if (!service.exists(t))
             throw new ResourceNotFoundException();
         ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.OK);
-        logger.debug("Updated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
+//        logger.debug("Updated {} with id '{}'", t.getClass().getSimpleName(), t.getId()); // TODO
         return ret;
     }
 
     @PostMapping(path = "validate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> validate(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         service.validate(t);
-        logger.debug("Validated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
+//        logger.debug("Validated {} with id '{}'", t.getClass().getSimpleName(), t.getId()); // TODO
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -115,7 +115,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) {
         T resource = service.get(id);
         service.delete(resource);
-        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId());
+//        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId()); // TODO
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
@@ -126,7 +126,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
                                          HttpServletRequest request) {
         T resource = service.get(extractPid(id, request));
         service.delete(resource);
-        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId());
+//        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId()); // TODO
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
@@ -136,15 +136,5 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         return new ResponseEntity<>(service.getAll(ff), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "ids", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<T>> getSome(@RequestParam("ids") String[] ids, @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "by/{field}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, List<T>>> getBy(@PathVariable String field, @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
     }
 }

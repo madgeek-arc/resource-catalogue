@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -112,11 +112,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), datasource.getId(), datasource);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), datasource);
     }
 
     private void checkAndResetDatasourceOnboarding(DatasourceBundle datasource, Authentication auth) {
@@ -154,11 +150,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         updateProviderTemplateStatus(existing, status, auth);
 
         logger.info("Verifying Datasource: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     private void updateProviderTemplateStatus(DatasourceBundle datasource, String status, Authentication auth) {
@@ -195,11 +187,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
     //endregion
 
@@ -221,7 +209,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     @Override
-    public Browsing<DatasourceBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Paging<DatasourceBundle> getMy(FacetFilter filter, Authentication auth) {
         return getMyResources(filter, auth);
     }
 
