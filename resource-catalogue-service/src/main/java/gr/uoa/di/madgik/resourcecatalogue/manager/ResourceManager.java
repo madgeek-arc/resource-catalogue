@@ -62,11 +62,17 @@ public abstract class ResourceManager<T extends Identifiable> implements Resourc
 
     @Override
     public Paging<T> getAll(FacetFilter filter) {
+        if (filter.getResourceType() == null) {
+            filter.setResourceType(getResourceTypeName());
+        }
         return genericResourceService.getResults(filter);
     }
 
     @Override
     public Paging<T> getAll(FacetFilter ff, Authentication auth) {
+        if (ff.getResourceType() == null) {
+            ff.setResourceType(getResourceTypeName());
+        }
         return genericResourceService.getResults(ff);
     }
 
