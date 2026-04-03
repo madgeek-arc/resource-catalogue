@@ -108,7 +108,7 @@ public class ElasticStatisticsManager implements StatisticsService {
         this.serviceService = serviceService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = new ObjectMapper().findAndRegisterModules();
     }
 
     private List<DateHistogramBucket> histogramBuckets(String id, String eventType, Interval by) {

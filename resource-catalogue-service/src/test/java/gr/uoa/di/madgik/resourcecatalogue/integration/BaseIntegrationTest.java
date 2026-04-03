@@ -52,10 +52,12 @@ public abstract class BaseIntegrationTest {
     @Autowired
     ModelService modelService;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @BeforeAll
     void loadVocabulariesFromFile() throws IOException {
         if (vocabularyService.getAll(new FacetFilter()).getTotal() == 0) {
-            ObjectMapper objectMapper = new ObjectMapper();
             if (vocabularyService.getAll(new FacetFilter()).getTotal() == 0) {
                 ClassLoader classLoader = getClass().getClassLoader();
                 List<Vocabulary> vocabularies = objectMapper.readValue(
@@ -70,7 +72,6 @@ public abstract class BaseIntegrationTest {
 
     @BeforeAll
     void loadModelsFromResources() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(getClass().getClassLoader());
         Resource[] resources = resolver.getResources("classpath*:models/*.json");
 
