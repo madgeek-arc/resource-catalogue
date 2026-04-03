@@ -57,10 +57,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     private CatalogueService catalogueService;
     @Autowired
     private SecurityService securityService;
-    @MockitoSpyBean
-    private ProviderResourcesCommonMethods commonMethods;
-    @Mock
-    private ServiceService serviceService;
     private static String providerId;
 
     /**
@@ -84,7 +80,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         CatalogueBundle catalogueBundle = createCatalogueBundle();
         catalogueBundle.setMetadata(dummyMetadata);
 
-        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
@@ -121,7 +116,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         OrganisationBundle organisationBundle = createOrganisationBundle();
         organisationBundle.setMetadata(dummyMetadata);
 
-        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
@@ -299,7 +293,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         providerBundle.setId(providerId);
         providerBundle.setMetadata(metadata);
 
-        doNothing().when(commonMethods).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);

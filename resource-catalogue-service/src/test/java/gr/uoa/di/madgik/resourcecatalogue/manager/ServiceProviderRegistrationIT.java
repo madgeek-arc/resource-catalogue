@@ -84,7 +84,7 @@ public class ServiceProviderRegistrationIT {
             provider = updateProvider(providerId);
             assert provider != null;
 
-            providerService.verify(providerId, "pending template submission", true, securityService.getAdminAccess());
+            providerService.verify(providerId, "pending template", true, securityService.getAdminAccess());
 
             serviceBundle = new ServiceBundle();
             serviceBundle.setService(createService("WP4_TestService", provider.getId()));

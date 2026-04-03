@@ -34,7 +34,7 @@ public class IntegrationTestConfig {
 
     @Container
     static final ElasticsearchContainer elastic =
-            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.17.23")
+            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.3.2")
                     .withPassword("password")
                     // disable SSL
                     .withEnv("xpack.security.transport.ssl.enabled", "false")

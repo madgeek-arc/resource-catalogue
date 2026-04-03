@@ -39,7 +39,7 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
         OrganisationBundle provider = new OrganisationBundle();
         Authentication auth = createJwtAuth();
 
-        provider.markOnboard("pending template submission", false, UserInfo.of(auth), null);
+        provider.markOnboard("pending template", false, UserInfo.of(auth), null);
 
         List<LoggingInfo> result = provider.getLoggingInfo();
         assertNotNull(result, "The result should not be null");
@@ -57,9 +57,9 @@ class LoggingInfoIntegrationTest extends BaseIntegrationTest {
                 createLoggingInfo(LoggingInfo.Types.UPDATE.getKey(), LoggingInfo.ActionType.UPDATED.getKey())
         ));
         provider.setLoggingInfo(existingLoggingInfo);
-        provider.setStatus("pending template submission");
+        provider.setStatus("pending template");
 
-        provider.markOnboard("pending template submission", false, UserInfo.of(auth), null);
+        provider.markOnboard("pending template", false, UserInfo.of(auth), null);
 
         assertSame(existingLoggingInfo, provider.getLoggingInfo(),
                 "When status is unchanged, the bundle should keep the same logging list");
