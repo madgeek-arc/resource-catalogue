@@ -23,6 +23,8 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
@@ -36,6 +38,7 @@ import java.util.Map;
 
 @Service
 @Primary
+@ConditionalOnProperty(name = "registry.jms.enabled", havingValue = "true")
 public class AmsJmsService extends DefaultJmsService implements JmsService {
 
     private static final Logger logger = LoggerFactory.getLogger(AmsJmsService.class);
@@ -47,8 +50,8 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     @Value("${catalogue.jms.prefix}")
     private String jmsPrefix;
 
-    public AmsJmsService(JmsTemplate jmsTopicTemplate,
-                         JmsTemplate jmsQueueTemplate,
+    public AmsJmsService(@Autowired(required = false) JmsTemplate jmsTopicTemplate,
+                         @Autowired(required = false) JmsTemplate jmsQueueTemplate,
                          WebClient.Builder webClientBuilder,
                          AmsProperties amsProperties,
                          ObjectMapper objectMapper) {

@@ -19,32 +19,40 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(name = "registry.jms.enabled", havingValue = "true")
 public class DefaultJmsService implements JmsService {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultJmsService.class);
     private final JmsTemplate jmsTopicTemplate;
     private final JmsTemplate jmsQueueTemplate;
 
-    public DefaultJmsService(JmsTemplate jmsTopicTemplate, JmsTemplate jmsQueueTemplate) {
+    public DefaultJmsService(@Autowired(required = false) JmsTemplate jmsTopicTemplate,
+                             @Autowired(required = false) JmsTemplate jmsQueueTemplate) {
         this.jmsTopicTemplate = jmsTopicTemplate;
         this.jmsQueueTemplate = jmsQueueTemplate;
     }
 
     @Retryable(value = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(value = 6000))
     public void convertAndSendTopic(String messageDestination, Object message) {
-        logger.info("Sending JMS to topic: {}", messageDestination);
-        jmsTopicTemplate.convertAndSend(messageDestination, message);
+        if (jmsTopicTemplate != null) {
+            logger.info("Sending JMS to topic: {}", messageDestination);
+            jmsTopicTemplate.convertAndSend(messageDestination, message);
+        }
     }
 
     @Retryable(value = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(value = 6000))
     public void convertAndSendQueue(String messageDestination, Object message) {
-        logger.info("Sending JMS to topic: {}", messageDestination);
-        jmsQueueTemplate.convertAndSend(messageDestination, message);
+        if (jmsQueueTemplate != null) {
+            logger.info("Sending JMS to topic: {}", messageDestination);
+            jmsQueueTemplate.convertAndSend(messageDestination, message);
+        }
     }
 }
