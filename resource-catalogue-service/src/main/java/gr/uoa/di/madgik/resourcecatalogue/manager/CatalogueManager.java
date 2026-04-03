@@ -31,7 +31,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,10 +50,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     private static final Logger logger = LoggerFactory.getLogger(CatalogueManager.class);
     private final OrganisationService organisationService;
     private final ServiceService serviceService;
-    private final ProviderResourcesCommonMethods commonMethods;
-
     private final GenericResourceService genericResourceService;
-//    private final EmailService emailService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
@@ -65,16 +61,12 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
                             @Lazy ServiceService serviceService,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,
-                            @Lazy ProviderResourcesCommonMethods commonMethods,
-//                            EmailService emailService,
                             GenericResourceService genericResourceService,
                             WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.serviceService = serviceService;
-        this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
-//        this.emailService = emailService;
     }
 
     @Override
@@ -139,7 +131,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
         logger.trace("Attempting to add a new Catalogue: {}", catalogue);
-        commonMethods.addAuthenticatedUser(catalogue.getCatalogue(), auth);
+//        commonMethods.addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
         catalogue.setId(idCreator.generate(this.getResourceTypeName()));
 

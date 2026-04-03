@@ -28,7 +28,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordB
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.slf4j.Logger;
@@ -51,7 +50,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
@@ -61,10 +59,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public ResourceInteroperabilityRecordManager(ServiceService serviceService,
-                                                 DatasourceService datasourceService,
+    public ResourceInteroperabilityRecordManager(@Lazy ServiceService serviceService,
+                                                 @Lazy DatasourceService datasourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
-                                                 SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
+                                                 SecurityService securityService,
                                                  IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator,
                                                  GenericResourceService genericResourceService,
                                                  VocabularyService vocabularyService,
@@ -75,7 +73,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
-        this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
@@ -132,7 +129,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     }
 
     public void delete(ResourceInteroperabilityRecordBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
         logger.info("Deleting Resource Interoperability Record: {}", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
 

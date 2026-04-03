@@ -32,7 +32,6 @@ import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.OrganisationCascadeLifecycleManager;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,6 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     private final GenericResourceService genericResourceService;
     private final ServiceService serviceService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final OrganisationCascadeLifecycleManager cascadeLifecycleService;
     private final EmailService emailService;
 
@@ -78,7 +76,6 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
                                VocabularyService vocabularyService,
                                @Lazy ServiceService serviceService,
                                IdCreator idCreator,
-                               ProviderResourcesCommonMethods commonMethods,
                                SecurityService securityService,
                                OrganisationCascadeLifecycleManager cascadeLifecycleService,
                                EmailService emailService,
@@ -86,7 +83,6 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.genericResourceService = genericResourceService;
         this.serviceService = serviceService;
-        this.commonMethods = commonMethods;
         this.cascadeLifecycleService = cascadeLifecycleService;
         this.emailService = emailService;
     }
@@ -163,8 +159,9 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     @Override
     public OrganisationBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         OrganisationBundle bundle = get(id, catalogueId);
-        //TODO: enable and fix if Catalogues return to their original state
-//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend);
+        if (bundle.getMetadata().isPublished()) {
+            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
+        }
 
         logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
         bundle.markSuspend(suspend, auth);
@@ -320,8 +317,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     //region Drafts
     @Override
     public OrganisationBundle addDraft(OrganisationBundle bundle, Authentication auth) {
-        commonMethods.addAuthenticatedUser(bundle.getOrganisation(), auth);
-
+        securityService.addAuthenticatedUser(bundle.getOrganisation(), auth);
         return super.addDraft(bundle, auth);
     }
     //endregion

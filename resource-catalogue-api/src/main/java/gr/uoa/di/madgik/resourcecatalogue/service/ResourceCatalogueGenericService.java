@@ -70,4 +70,11 @@ public interface ResourceCatalogueGenericService<T extends Bundle>
      * @return {@link Paging<T>}
      */
     Paging<T> getMyResources(FacetFilter filter, Authentication auth);
+
+    /**
+     *
+     * @param status      Status
+     * @param isPublished true/false
+     */
+    void blockResourceDeletion(String status, boolean isPublished);
 }

@@ -31,7 +31,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,7 +52,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     private static final String RESERVED_NAME = "EOSC Monitoring: Architecture and Interoperability Guidelines";
 
     private final OrganisationService organisationService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
@@ -64,13 +62,11 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     public InteroperabilityRecordManager(OrganisationService organisationService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
-                                         ProviderResourcesCommonMethods commonMethods,
                                          GenericResourceService genericResourceService,
                                          EmailService emailService,
                                          WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
-        this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.emailService = emailService;
     }
@@ -97,7 +93,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
     @Override
     public void delete(InteroperabilityRecordBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
         logger.info("Deleting Interoperability Record: {}", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }

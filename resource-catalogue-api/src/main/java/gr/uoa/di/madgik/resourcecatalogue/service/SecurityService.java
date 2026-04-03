@@ -165,4 +165,12 @@ public interface SecurityService {
      * @return List<User>
      */
     List<User> getProviderUsers(OrganisationBundle organisation);
+
+    /**
+     * Add authenticated user to the Organisation
+     *
+     * @param organisation Organisation
+     * @param auth         Authentication
+     */
+    void addAuthenticatedUser(LinkedHashMap<String, Object> organisation, Authentication auth);
 }

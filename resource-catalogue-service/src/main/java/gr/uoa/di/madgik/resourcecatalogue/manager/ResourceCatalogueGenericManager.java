@@ -271,7 +271,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     public T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         T bundle = get(id, catalogueId);
         String resourceOwner = (String) bundle.getPayload().get("resourceOwner");
-        suspensionValidation(bundle, catalogueId, resourceOwner, suspend);
+        suspensionValidation(bundle, resourceOwner, suspend);
 
         logger.info("{} resource '{}' with id: '{}'", suspend ? "Suspending" : "Unsuspending",
                 getResourceTypeName(), bundle.getId());
@@ -281,7 +281,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     //TODO: delete catalogueId if not used
-    private void suspensionValidation(Bundle bundle, String catalogueId, String resourceOwner, boolean suspend) {
+    private void suspensionValidation(Bundle bundle, String resourceOwner, boolean suspend) {
         if (bundle.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
         }
@@ -381,6 +381,17 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         t = workflowService.onboard(getResourceTypeName(), t, auth);
         return update(t, auth);
     }
+
+    //region helper
+    public void blockResourceDeletion(String status, boolean isPublished) {
+        if (status.equals(vocabularyService.get("pending").getId())) {
+            throw new ResourceException("You cannot delete a Template that is under review", HttpStatus.FORBIDDEN);
+        }
+        if (isPublished) {
+            throw new ResourceException("You cannot directly delete a Public Resource", HttpStatus.FORBIDDEN);
+        }
+    }
+    //endregion
 
     //region unused
     @Override

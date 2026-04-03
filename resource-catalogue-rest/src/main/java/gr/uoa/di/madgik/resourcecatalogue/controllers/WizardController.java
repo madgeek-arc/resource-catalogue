@@ -22,7 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,9 +38,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.File;
 import java.io.IOException;
@@ -225,60 +228,134 @@ public class WizardController {
     @Operation(summary = "Create main Catalogue")
     @GetMapping("/step3")
     public String createCatalogue(Model model) {
-        CatalogueBundle catalogue = new CatalogueBundle();
-        catalogue.setPayload(new LinkedHashMap<>());
-        catalogue.setId(catalogueId);
+        LinkedHashMap<String, Object> catalogue = new LinkedHashMap<>();
 
-        // Get countries as Map (ID -> Name)
+        // Basic
+        catalogue.put("id", catalogueId);
+        catalogue.put("abbreviation", "");
+        catalogue.put("name", "");
+        catalogue.put("website", "");
+        catalogue.put("legalEntity", false);
+        catalogue.put("inclusionCriteria", "");
+        catalogue.put("validationProcess", "");
+        catalogue.put("endOfLife", "");
+        catalogue.put("description", "");
+        catalogue.put("scope", "");
+        catalogue.put("logo", "");
+
+        // Location
+        Map<String, Object> location = new LinkedHashMap<>();
+        location.put("streetNameAndNumber", "");
+        location.put("postalCode", "");
+        location.put("city", "");
+        location.put("country", "");
+        catalogue.put("location", location);
+
+        // Main Contact
+        Map<String, Object> mainContact = new LinkedHashMap<>();
+        mainContact.put("firstName", "");
+        mainContact.put("lastName", "");
+        mainContact.put("email", "");
+        catalogue.put("mainContact", mainContact);
+
+        // Public Contacts
+        List<Map<String, Object>> publicContacts = new ArrayList<>();
+        publicContacts.add(new LinkedHashMap<>(Map.of("email", "")));
+        catalogue.put("publicContacts", publicContacts);
+
+        // Users
+        List<Map<String, Object>> users = new ArrayList<>();
+        users.add(new LinkedHashMap<>(Map.of(
+                "name", "",
+                "surname", "",
+                "email", ""
+        )));
+        catalogue.put("users", users);
+
+        // Countries
         Map<String, String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY)
                 .stream()
                 .collect(Collectors.toMap(
                         Vocabulary::getId,
                         Vocabulary::getName,
-                        (existing, replacement) -> existing,
+                        (a, b) -> a,
                         LinkedHashMap::new
                 ));
 
-        model.addAttribute("countries", countries);
         model.addAttribute("catalogue", catalogue);
-        model.addAttribute("id", catalogueId);
+        model.addAttribute("countries", countries);
+
         return "wizard-step3";
     }
 
     @PostMapping("/step3/loadCatalogue")
-    public String loadCatalogue(@ModelAttribute LinkedHashMap<String, Object> catalogue, Model model) {
+    public String loadCatalogue(@RequestParam Map<String, String> params, Model model) {
+        LinkedHashMap<String, Object> catalogue = buildCatalogue(params);
+
         try {
             logger.info("Loading main Catalogue with ID [{}]", catalogue.get("id"));
             CatalogueBundle bundle = new CatalogueBundle();
-            bundle.setCatalogue(catalogue);
+            bundle.setPayload(catalogue);
             addCatalogue(bundle);
-            model.addAttribute("successMessage", "Catalogue saved successfully! You can now close the tab!");
-
-//            return "redirect:/wizard/step4";
+            model.addAttribute("successMessage", "Catalogue saved successfully!");
         } catch (Exception e) {
             logger.error("Failed to save Catalogue [{}]: {}", catalogue.get("id"), e.getMessage());
             model.addAttribute("errorMessage", "Error saving catalogue: " + e.getMessage());
-            model.addAttribute("catalogue", catalogue);
         }
 
-        model.addAttribute("id", catalogue.get("id"));
+        model.addAttribute("catalogue", catalogue);
         model.addAttribute("homepage", homepage);
+
         return "wizard-step3";
     }
 
-    private void addCatalogue(CatalogueBundle catalogue) {
+    @SuppressWarnings("unchecked")
+    private LinkedHashMap<String, Object> buildCatalogue(Map<String, String> params) {
 
-        catalogue.setMetadata(Metadata.createMetadata("system", "system"));
+        LinkedHashMap<String, Object> catalogue = new LinkedHashMap<>();
+
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            // Handle list: users[0].email
+            if (key.matches(".+\\[\\d+\\]\\..+")) {
+                String listName = key.substring(0, key.indexOf("["));
+                int index = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
+                String field = key.substring(key.indexOf("].") + 2);
+                List<Map<String, Object>> list =
+                        (List<Map<String, Object>>) catalogue.computeIfAbsent(listName, k -> new ArrayList<>());
+
+                while (list.size() <= index) {
+                    list.add(new LinkedHashMap<>());
+                }
+                list.get(index).put(field, value);
+            } else if (key.contains(".")) { // Handle nested map: location.city
+                String[] parts = key.split("\\.");
+                Map<String, Object> current = catalogue;
+                for (int i = 0; i < parts.length - 1; i++) {
+                    current = (Map<String, Object>) current.computeIfAbsent(parts[i], k -> new LinkedHashMap<>());
+                }
+                current.put(parts[parts.length - 1], value);
+            } else {
+                catalogue.put(key, value);
+            }
+        }
+
+        return catalogue;
+    }
+
+    private void addCatalogue(CatalogueBundle catalogue) {
         List<LoggingInfo> loggingInfoList = createLoggingInfoList();
         catalogue.setLoggingInfo(loggingInfoList);
+        catalogue.setMetadata(Metadata.createMetadata("system", "system"));
         catalogue.setActive(true);
         catalogue.setStatus(vocabularyService.get("approved").getId());
         catalogue.setAuditState(Auditable.NOT_AUDITED);
-
-        // latestOnboardingInfo
         catalogue.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
-        genericService.add("catalogue", catalogue);
+        genericService.add("catalogue", catalogue, false);
     }
 
     private static List<LoggingInfo> createLoggingInfoList() {

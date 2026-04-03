@@ -112,7 +112,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
         T ret;
         logger.info("{} '{}' is being published with id '{}'", t.getClass().getSimpleName(), lowerLevelId, t.getId());
-        ret = genericResourceService.add(getResourceTypeName(), t);
+        ret = genericResourceService.add(getResourceTypeName(), t, false); //FIXME: issue with public CTI (Found more than one models)
         jmsService.convertAndSendTopic(getResourceTypeName() + ".create", t);
         return ret;
     }

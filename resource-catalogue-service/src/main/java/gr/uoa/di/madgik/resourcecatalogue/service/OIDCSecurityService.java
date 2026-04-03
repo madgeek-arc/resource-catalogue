@@ -127,6 +127,27 @@ public class OIDCSecurityService implements SecurityService {
         return Optional.of(Objects.requireNonNull(User.of(auth)));
     }
 
+    public void addAuthenticatedUser(LinkedHashMap<String, Object> organisation, Authentication auth) {
+        User authUser = User.of(auth);
+        if (organisation instanceof LinkedHashMap<?, ?> raw) {
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<String, Object> payload = (LinkedHashMap<String, Object>) raw;
+            Object value = payload.get("users");
+            Set<User> users = new LinkedHashSet<>();
+            if (value instanceof Collection<?> collection) {
+                for (Object o : collection) {
+                    if (o instanceof User user) {
+                        users.add(user);
+                    } else if (o instanceof Map<?, ?> map) {
+                        users.add(mapToUser(map));
+                    }
+                }
+            }
+            users.add(authUser);
+            payload.put("users", new ArrayList<>(users));
+        }
+    }
+
     public List<User> getProviderUsers(String id) {
         OrganisationBundle registeredProvider = checkProviderExistence(id);
         return getProviderUsers(registeredProvider); // reuse logic
@@ -151,8 +172,7 @@ public class OIDCSecurityService implements SecurityService {
         return users;
     }
 
-    //TODO: make global
-    private User mapToUser(Map<?, ?> userMap) {
+    public User mapToUser(Map<?, ?> userMap) {
         User user = new User();
         user.setId((String) userMap.get("id"));
         user.setName((String) userMap.get("name"));
