@@ -19,7 +19,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.catalogue.node",
+      "path": "$.catalogue.nodePID",
       "type": "java.lang.String"
     },
     {

@@ -33,7 +33,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.configurationTemplateInstance.node",
+      "path": "$.configurationTemplateInstance.nodePID",
       "type": "java.lang.String"
     },
     {

@@ -47,7 +47,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.adapter.node",
+      "path": "$.adapter.nodePID",
       "type": "java.lang.String"
     },
     {

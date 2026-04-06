@@ -47,7 +47,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.datasource.node",
+      "path": "$.datasource.nodePID",
       "type": "java.lang.String"
     },
     {
@@ -124,7 +124,7 @@
       "label": "Jurisdiction",
       "multivalued": false,
       "name": "jurisdiction",
-      "path": "$.datasource.jurisdiction[*]",
+      "path": "$.datasource.jurisdiction",
       "type": "java.lang.String"
     },
     {
@@ -170,10 +170,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Contact",
+      "label": "Public Contacts",
       "multivalued": true,
       "name": "contacts",
-      "path": "$.datasource.contact.email",
+      "path": "$.service.publicContacts[*]",
       "type": "java.lang.String"
     },
     {

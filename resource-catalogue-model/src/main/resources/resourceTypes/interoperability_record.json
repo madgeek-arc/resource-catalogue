@@ -47,7 +47,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.interoperabilityRecord.node",
+      "path": "$.interoperabilityRecord.nodePID",
       "type": "java.lang.String"
     },
     {
