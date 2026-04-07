@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class User implements Identifiable {
@@ -96,6 +97,15 @@ public class User implements Identifiable {
             throw new InsufficientAuthenticationException("Could not create user. Insufficient user authentication");
         }
         logger.debug("User from Authentication: {}", user);
+        return user;
+    }
+
+    public static User fromMap(Map<?, ?> userMap) {
+        User user = new User();
+        user.setId((String) userMap.get("id"));
+        user.setName((String) userMap.get("name"));
+        user.setSurname((String) userMap.get("surname"));
+        user.setEmail((String) userMap.get("email"));
         return user;
     }
 

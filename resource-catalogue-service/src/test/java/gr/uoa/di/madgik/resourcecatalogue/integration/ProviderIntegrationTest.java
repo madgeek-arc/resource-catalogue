@@ -81,7 +81,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         CatalogueBundle catalogueBundle = createCatalogueBundle();
         catalogueBundle.setMetadata(dummyMetadata);
 
-        doNothing().when(securityService).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
@@ -118,7 +117,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         OrganisationBundle organisationBundle = createOrganisationBundle();
         organisationBundle.setMetadata(dummyMetadata);
 
-        doNothing().when(securityService).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);
@@ -296,7 +294,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         providerBundle.setId(providerId);
         providerBundle.setMetadata(metadata);
 
-        doNothing().when(securityService).addAuthenticatedUser(any(), any());
         try (MockedStatic<Metadata> mockedMetadata = mockStatic(Metadata.class);
              MockedStatic<AuthenticationInfo> mockedAuthInfo = mockStatic(AuthenticationInfo.class)) {
             mockedMetadata.when(() -> Metadata.createMetadata(any(), any())).thenReturn(dummyMetadata);

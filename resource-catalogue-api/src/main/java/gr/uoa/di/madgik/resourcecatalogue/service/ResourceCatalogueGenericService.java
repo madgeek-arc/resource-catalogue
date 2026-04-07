@@ -51,11 +51,4 @@ public interface ResourceCatalogueGenericService<T extends Bundle>
      * @return {@link Browsing<T>}
      */
     Browsing<T> getMyResources(FacetFilter filter, Authentication auth);
-
-    /**
-     *
-     * @param status      Status
-     * @param isPublished true/false
-     */
-    void blockResourceDeletion(String status, boolean isPublished);
 }

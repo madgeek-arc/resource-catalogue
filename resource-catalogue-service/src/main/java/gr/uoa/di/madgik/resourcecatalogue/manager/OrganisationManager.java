@@ -43,10 +43,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 @org.springframework.stereotype.Service("organisationManager")
 public class OrganisationManager extends ResourceCatalogueGenericManager<OrganisationBundle>
@@ -335,8 +332,31 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     //region Drafts
     @Override
     public OrganisationBundle addDraft(OrganisationBundle bundle, Authentication auth) {
-        securityService.addAuthenticatedUser(bundle.getOrganisation(), auth);
+        addAuthenticatedUser(bundle.getOrganisation(), auth);
         return super.addDraft(bundle, auth);
+    }
+    //endregion
+
+    //region helper
+    public void addAuthenticatedUser(LinkedHashMap<String, Object> organisation, Authentication auth) {
+        User authUser = User.of(auth);
+        if (organisation instanceof LinkedHashMap<?, ?> raw) {
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<String, Object> payload = (LinkedHashMap<String, Object>) raw;
+            Object value = payload.get("users");
+            Set<User> users = new LinkedHashSet<>();
+            if (value instanceof Collection<?> collection) {
+                for (Object o : collection) {
+                    if (o instanceof User user) {
+                        users.add(user);
+                    } else if (o instanceof Map<?, ?> map) {
+                        users.add(User.fromMap(map));
+                    }
+                }
+            }
+            users.add(authUser);
+            payload.put("users", new ArrayList<>(users));
+        }
     }
     //endregion
 }
