@@ -181,6 +181,9 @@ logging.level.root=INFO
 ##  Spring Properties  ##
 #########################
 
+## Mail Templates ##
+spring.freemarker.template-loader-path=classpath:/mail/
+
 ## Profiles ##
 spring.profiles.active=beyond
 
@@ -351,6 +354,9 @@ accounting.token-endpoint=
 
 ## SQAaaS ##
 sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
+
+## Node Registry ##
+node.registry.url=
 ```
 
 ### PID Properties Example
