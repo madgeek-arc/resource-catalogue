@@ -30,6 +30,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,10 +38,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,15 +55,24 @@ public class WizardController {
 
     @Value("${catalogue.id}")
     private String catalogueId;
-
     @Value("${catalogue.homepage}")
     private String homepage;
+    @Value("${node.registry.url}")
+    private String nodeRegistry;
 
     private static final Logger logger = LoggerFactory.getLogger(WizardController.class);
 
     private final VocabularyService vocabularyService;
     private final ModelService modelService;
     private final GenericResourceService genericService;
+    private WebClient webClient;
+
+    @PostConstruct
+    public void init() {
+        this.webClient = WebClient.builder()
+                .baseUrl(nodeRegistry)
+                .build();
+    }
 
     public WizardController(VocabularyService vocabularyService,
                             ModelService modelService,
@@ -225,6 +233,7 @@ public class WizardController {
     }
 
 
+    //TODO: REMOVE WHEN CATALOGUE IS REMOVED
     @Operation(summary = "Create main Catalogue")
     @GetMapping("/step3")
     public String createCatalogue(Model model) {
@@ -375,5 +384,100 @@ public class WizardController {
                     return info;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Operation(summary = "Register node on Node Registry")
+    @GetMapping("/step4")
+    public String step4Page(Model model) {
+        NodeRegistryRequest request = new NodeRegistryRequest();
+        request.setLegalEntity(new NodeRegistryRequest.LegalEntity()); // important
+        model.addAttribute("nodeRequest", request);
+        return "wizard-step4";
+    }
+
+    @PostMapping("/step4")
+    public String registerNodeOnNodeRegistry(@ModelAttribute NodeRegistryRequest request,
+                                             @RequestParam(required = false) String skip,
+                                             Model model) {
+        if ("true".equals(skip)) {
+            return "redirect:/wizard/success";
+        }
+        try {
+            webClient.post()
+                    .uri("/nodes")
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .block();
+        } catch (Exception e) {
+            model.addAttribute("error", "Failed to register node: " + e.getMessage());
+            return "wizard-step4";
+        }
+        return "redirect:/wizard/success";
+    }
+
+    @GetMapping("/success")
+    public String wizardSuccess() {
+        return "wizard-success";
+    }
+
+    public class NodeRegistryRequest {
+        private String name;
+        private String logo;
+        private String nodeEndpoint;
+        private LegalEntity legalEntity;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getLogo() {
+            return logo;
+        }
+
+        public void setLogo(String logo) {
+            this.logo = logo;
+        }
+
+        public String getNodeEndpoint() {
+            return nodeEndpoint;
+        }
+
+        public void setNodeEndpoint(String nodeEndpoint) {
+            this.nodeEndpoint = nodeEndpoint;
+        }
+
+        public LegalEntity getLegalEntity() {
+            return legalEntity;
+        }
+
+        public void setLegalEntity(LegalEntity legalEntity) {
+            this.legalEntity = legalEntity;
+        }
+
+        public static class LegalEntity {
+            private String name;
+            private String rorId;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getRorId() {
+                return rorId;
+            }
+
+            public void setRorId(String rorId) {
+                this.rorId = rorId;
+            }
+        }
     }
 }
