@@ -665,7 +665,7 @@ public class EmailService {
 
     @Scheduled(cron = "0 0 12 ? * *")
     public void dailyNotificationsToPortalAdmins() {
-        EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("adminDailyDigest");
+        EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("adminDailyDigest.ftl");
 
         // Generate timestamps
         LocalDate today = LocalDate.now();

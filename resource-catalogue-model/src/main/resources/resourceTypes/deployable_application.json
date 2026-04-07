@@ -47,7 +47,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.deployableApplication.node",
+      "path": "$.deployableApplication.nodePID",
       "type": "java.lang.String"
     },
     {

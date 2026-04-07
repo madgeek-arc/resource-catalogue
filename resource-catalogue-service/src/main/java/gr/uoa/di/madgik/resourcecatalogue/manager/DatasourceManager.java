@@ -29,7 +29,6 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +39,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @org.springframework.stereotype.Service
 public class DatasourceManager extends ResourceCatalogueGenericManager<DatasourceBundle> implements DatasourceService {
@@ -51,10 +47,10 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
 
     private final OrganisationService organisationService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
+    private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
 
     @Value("${catalogue.id}")
@@ -64,20 +60,20 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     public DatasourceManager(OrganisationService organisationService,
                              @Lazy VocabularyService vocabularyService,
-                             @Lazy ProviderResourcesCommonMethods commonMethods,
                              OpenAIREDatasourceManager openAIREDatasourceManager,
                              IdCreator idCreator,
                              GenericResourceService genericResourceService,
                              SecurityService securityService,
                              RelationshipValidator relationshipValidator,
+                             ResourceInteroperabilityRecordService rirService,
                              EmailService emailService,
                              WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
-        this.commonMethods = commonMethods;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
+        this.rirService = rirService;
         this.emailService = emailService;
     }
 
@@ -89,12 +85,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     //region generic
     @Override
     public DatasourceBundle add(DatasourceBundle bundle, Authentication auth) {
-        // if Datasource has ID -> check if it exists in OpenAIRE Datasource list
-        Object raw = bundle.getDatasource() != null ? bundle.getDatasource().get("id") : null;
-        String id = (String) raw;
-        if (id != null && !id.isEmpty()) {
-            checkOpenAIREIDExistence(bundle);
-        }
+        checkOpenAIREIDExistence(bundle);
         return super.add(bundle, auth);
     }
 
@@ -139,8 +130,8 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     @Override
     @Transactional
     public void delete(DatasourceBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
-        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
         logger.info("Deleting Datasource: {} and all its Resource Interoperability Records", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
@@ -262,14 +253,41 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     // OpenAIRE
-    private void checkOpenAIREIDExistence(DatasourceBundle datasourceBundle) {
-        LinkedHashMap<String, Object> datasource = openAIREDatasourceManager.get(datasourceBundle.getId());
-        if (datasource != null) {
-            datasourceBundle.setOriginalOpenAIREId(datasourceBundle.getId()); //TODO: create AlternativeIdentifiers inside Identifiers and move there?
-        } else {
-            throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong to an " +
-                    "OpenAIRE Datasource", datasourceBundle.getId()));
+    private void checkOpenAIREIDExistence(DatasourceBundle bundle) {
+        // if Datasource has ID -> check if it exists in OpenAIRE Datasource list
+        Object raw = bundle.getDatasource() != null ? bundle.getDatasource().get("id") : null;
+        String id = (String) raw;
+
+        if (id != null && !id.isEmpty()) {
+            LinkedHashMap<String, Object> datasource = openAIREDatasourceManager.get(bundle.getId());
+            if (datasource != null) {
+                bundle.setOriginalOpenAIREId(bundle.getId());
+                createAlternativePid(bundle);
+            } else {
+                throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong " +
+                        "to an OpenAIRE Datasource", bundle.getId()));
+            }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void createAlternativePid(DatasourceBundle bundle) {
+        Map<String, Object> datasource = bundle.getDatasource();
+        List<Map<String, String>> alternativePIDs;
+        Object existing = datasource.get("alternativePIDs");
+
+        if (existing instanceof List && !((List<?>) existing).isEmpty()) {
+            alternativePIDs = (List<Map<String, String>>) existing;
+        } else {
+            alternativePIDs = new ArrayList<>();
+            datasource.put("alternativePIDs", alternativePIDs);
+        }
+
+        Map<String, String> openaireAlternativePID = new HashMap<>();
+        openaireAlternativePID.put("pid", bundle.getId());
+        openaireAlternativePID.put("pidSchema", "openaire");
+
+        alternativePIDs.add(openaireAlternativePID);
     }
 
     public boolean isDatasourceRegisteredOnOpenAIRE(String id) {
@@ -288,6 +306,28 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
             throw new ResourceNotFoundException(id, "Datasource");
         }
         return found;
+    }
+    //endregion
+
+    //region Service-specific
+    private void deleteResourceInteroperabilityRecords(String resourceId, String resourceType) {
+        ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle = rirService.getByResourceId(resourceId);
+        if (resourceInteroperabilityRecordBundle != null) {
+            try {
+                logger.info("Deleting ResourceInteroperabilityRecord of {} with id: '{}'", resourceType, resourceId);
+                rirService.delete(resourceInteroperabilityRecordBundle);
+            } catch (ResourceNotFoundException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+    //endregion
+
+    //region Drafts
+    @Override
+    public DatasourceBundle addDraft(DatasourceBundle bundle, Authentication auth) {
+        checkOpenAIREIDExistence(bundle);
+        return super.addDraft(bundle, auth);
     }
     //endregion
 }

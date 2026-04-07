@@ -40,7 +40,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.organisation.node",
+      "path": "$.organisation.nodePID",
       "type": "java.lang.String"
     },
     {
@@ -114,10 +114,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Contact",
+      "label": "Public Contacts",
       "multivalued": false,
-      "name": "contact",
-      "path": "$.organisation.mainContact.email",
+      "name": "contacts",
+      "path": "$.organisation.publicContacts[*]",
       "type": "java.lang.String"
     },
     {

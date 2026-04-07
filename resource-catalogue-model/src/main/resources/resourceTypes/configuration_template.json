@@ -26,7 +26,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.configurationTemplate.node",
+      "path": "$.configurationTemplate.nodePID",
       "type": "java.lang.String"
     },
     {

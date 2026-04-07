@@ -24,11 +24,13 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +50,6 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     private static final Logger logger = LoggerFactory.getLogger(TrainingResourceManager.class);
 
     private final OrganisationService organisationService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
@@ -56,14 +57,12 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     public TrainingResourceManager(OrganisationService organisationService,
                                    IdCreator idCreator, @Lazy SecurityService securityService,
                                    VocabularyService vocabularyService,
-                                   @Lazy ProviderResourcesCommonMethods commonMethods,
                                    @Lazy RelationshipValidator relationshipValidator,
                                    GenericResourceService genericResourceService,
                                    EmailService emailService,
                                    WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
-        this.commonMethods = commonMethods;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
         this.emailService = emailService;
@@ -114,9 +113,8 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     @Override
     @Transactional
     public void delete(TrainingResourceBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
-        commonMethods.deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
-        logger.info("Deleting Training Resource: {} and all its Resource Interoperability Records", bundle.getId()); //TODO: can TRs be connected to IGs?
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        logger.info("Deleting Training Resource: {}", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
 

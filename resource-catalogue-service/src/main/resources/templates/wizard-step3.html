@@ -95,47 +95,52 @@
 <p th:if="${successMessage}" th:text="${successMessage}" style="color: green; font-weight: bold;"></p>
 <p th:if="${errorMessage}" th:text="${errorMessage}" style="color: red; font-weight: bold;"></p>
 
-<form th:action="@{/wizard/step3/loadCatalogue}" th:object="${catalogue}" method="post" id="catalogueForm">
+<form th:action="@{/wizard/step3/loadCatalogue}" method="post" id="catalogueForm">
 
     <!-- Basic Information -->
     <fieldset>
         <legend>Basic Information</legend>
         <div class="form-row">
             <label>ID:</label>
-            <input type="text" th:field="*{id}" readonly
+            <input type="text" th:name="id" th:value="${catalogue['id']}" readonly
                    style="background-color: #f0f0f0; color: #555; cursor: not-allowed;"/>
         </div>
         <div class="form-row">
             <label>Abbreviation (String):</label>
-            <input type="text" th:field="*{abbreviation}" required/>
+            <input type="text" th:name="abbreviation" th:value="${catalogue['abbreviation']}" required/>
         </div>
         <div class="form-row">
             <label>Name (String):</label>
-            <input type="text" th:field="*{name}" required/>
+            <input type="text" th:name="name" th:value="${catalogue['name']}" required/>
         </div>
         <div class="form-row">
             <label>Website (URL):</label>
-            <input type="url" th:field="*{website}" required/>
+            <input type="url" th:name="website" th:value="${catalogue['website']}" required/>
         </div>
         <div class="form-row">
             <label>Legal Entity:</label>
             <div>
-                <label><input type="radio" th:field="*{legalEntity}" value="true"/> Yes</label>
-                <label style="margin-left: 20px;"><input type="radio" th:field="*{legalEntity}" value="false"/>
-                    No</label>
+                <label>
+                    <input type="radio" th:name="legalEntity" value="true"
+                           th:checked="${catalogue['legalEntity']} == true"/> Yes
+                </label>
+                <label style="margin-left: 20px;">
+                    <input type="radio" th:name="legalEntity" value="false"
+                           th:checked="${catalogue['legalEntity']} == false"/> No
+                </label>
             </div>
         </div>
         <div class="form-row">
             <label>Inclusion Criteria (URL):</label>
-            <input type="url" th:field="*{inclusionCriteria}" required/>
+            <input type="url" th:name="inclusionCriteria" th:value="${catalogue['inclusionCriteria']}" required/>
         </div>
         <div class="form-row">
             <label>Validation Process (URL):</label>
-            <input type="url" th:field="*{validationProcess}" required/>
+            <input type="url" th:name="validationProcess" th:value="${catalogue['validationProcess']}" required/>
         </div>
         <div class="form-row">
             <label>End of Life (String):</label>
-            <input type="text" th:field="*{endOfLife}" required/>
+            <input type="text" th:name="endOfLife" th:value="${catalogue['endOfLife']}" required/>
         </div>
     </fieldset>
 
@@ -144,15 +149,16 @@
         <legend>Marketing Information</legend>
         <div class="form-row">
             <label>Description (String):</label>
-            <textarea th:field="*{description}" rows="4" required></textarea>
+            <textarea th:name="description" rows="4" required
+                      th:text="${catalogue['description']}"></textarea>
         </div>
         <div class="form-row">
             <label>Scope (String):</label>
-            <input type="text" th:field="*{scope}" required/>
+            <input type="text" th:name="scope" th:value="${catalogue['scope']}" required/>
         </div>
         <div class="form-row">
             <label>Logo (URL):</label>
-            <input type="url" th:field="*{logo}" required/>
+            <input type="url" th:name="logo" th:value="${catalogue['logo']}" required/>
         </div>
     </fieldset>
 
@@ -161,23 +167,26 @@
         <legend>Location Information</legend>
         <div class="form-row">
             <label>Street Name and Number (String):</label>
-            <input type="text" th:field="*{location.streetNameAndNumber}" required/>
+            <input type="text" th:name="location.streetNameAndNumber"
+                   th:value="${catalogue['location']['streetNameAndNumber']}" required/>
         </div>
         <div class="form-row">
             <label>Postal Code (String):</label>
-            <input type="text" th:field="*{location.postalCode}" required/>
+            <input type="text" th:name="location.postalCode"
+                   th:value="${catalogue['location']['postalCode']}" required/>
         </div>
         <div class="form-row">
             <label>City (String):</label>
-            <input type="text" th:field="*{location.city}" required/>
+            <input type="text" th:name="location.city" th:value="${catalogue['location']['city']}" required/>
         </div>
         <div class="form-row">
             <label>Country:</label>
-            <select th:field="*{location.country}" required>
+            <select th:name="location.country" required>
                 <option value="">-- Select a country --</option>
                 <option th:each="entry : ${countries}"
                         th:value="${entry.key}"
-                        th:text="${entry.value}">
+                        th:text="${entry.value}"
+                        th:selected="${catalogue['location']['country']} == entry.key">
                 </option>
             </select>
         </div>
@@ -188,15 +197,18 @@
         <legend>Contact Information</legend>
         <div class="form-row">
             <label>Main Contact First Name (String):</label>
-            <input type="text" th:field="*{mainContact.firstName}" required/>
+            <input type="text" th:name="mainContact.firstName"
+                   th:value="${catalogue['mainContact']['firstName']}" required/>
         </div>
         <div class="form-row">
-            <label>Main Contact Email (String):</label>
-            <input type="email" th:field="*{mainContact.email}" required/>
+            <label>Main Contact Last Name (String):</label>
+            <input type="text" th:name="mainContact.lastName"
+                   th:value="${catalogue['mainContact']['lastName']}" required/>
         </div>
         <div class="form-row">
             <label>Public Contact Email (String):</label>
-            <input type="email" th:field="*{publicContacts[0].email}" required/>
+            <input type="email" th:name="'publicContacts[0].email'"
+                   th:value="${catalogue['publicContacts'][0]['email']}" required/>
         </div>
     </fieldset>
 
@@ -205,21 +217,23 @@
         <legend>Catalogue Admin Information</legend>
         <div class="form-row">
             <label>Admin Name (String):</label>
-            <input type="text" th:field="*{users[0].name}" required/>
+            <input type="text" th:name="'users[0].name'"
+                   th:value="${catalogue['users'][0]['name']}" required/>
         </div>
         <div class="form-row">
             <label>Admin Surname (String):</label>
-            <input type="text" th:field="*{users[0].surname}" required/>
+            <input type="text" th:name="'users[0].surname'"
+                   th:value="${catalogue['users'][0]['surname']}" required/>
         </div>
         <div class="form-row">
             <label>Admin Email (String):</label>
-            <input type="email" th:field="*{users[0].email}" required/>
+            <input type="email" th:name="'users[0].email'"
+                   th:value="${catalogue['users'][0]['email']}" required/>
         </div>
     </fieldset>
 
     <div class="button-row">
-        <button type="submit"
-                th:if="${successMessage == null}">
+        <button type="submit" th:if="${successMessage == null}">
             Submit
         </button>
     </div>

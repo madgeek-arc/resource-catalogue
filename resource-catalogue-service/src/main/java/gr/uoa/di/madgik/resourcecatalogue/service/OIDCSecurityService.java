@@ -145,20 +145,10 @@ public class OIDCSecurityService implements SecurityService {
         List<User> users = new ArrayList<>();
         for (Object obj : usersList) {
             if (obj instanceof Map<?, ?> userMap) {
-                users.add(mapToUser(userMap));
+                users.add(User.fromMap(userMap));
             }
         }
         return users;
-    }
-
-    //TODO: make global
-    private User mapToUser(Map<?, ?> userMap) {
-        User user = new User();
-        user.setId((String) userMap.get("id"));
-        user.setName((String) userMap.get("name"));
-        user.setSurname((String) userMap.get("surname"));
-        user.setEmail((String) userMap.get("email"));
-        return user;
     }
 
 //    private List<User> getCatalogueUsers(String id) {
@@ -224,8 +214,7 @@ public class OIDCSecurityService implements SecurityService {
                     (String) trainingResourceBundle.getTrainingResource().get("resourceOwner");
             case DeployableApplicationBundle deployableApplicationBundle ->
                     (String) deployableApplicationBundle.getDeployableApplication().get("resourceOwner");
-            case AdapterBundle adapterBundle ->
-                    (String) adapterBundle.getAdapter().get("resourceOwner");
+            case AdapterBundle adapterBundle -> (String) adapterBundle.getAdapter().get("resourceOwner");
             case null, default ->
                     (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("resourceOwner");
         };

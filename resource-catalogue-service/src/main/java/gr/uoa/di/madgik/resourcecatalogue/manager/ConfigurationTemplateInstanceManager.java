@@ -27,7 +27,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordB
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +45,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
 
     private final ConfigurationTemplateService configService;
     private final SecurityService securityService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
 
@@ -57,7 +55,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
                                                 @Lazy ConfigurationTemplateService configService,
                                                 @Lazy ResourceInteroperabilityRecordService rirService,
                                                 SecurityService securityService, IdCreator idCreator,
-                                                ProviderResourcesCommonMethods commonMethods,
                                                 GenericResourceService genericResourceService,
                                                 VocabularyService vocabularyService,
                                                 WorkflowService workflowService) {
@@ -65,7 +62,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         this.configService = configService;
         this.rirService = rirService;
         this.securityService = securityService;
-        this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.vocabularyService = vocabularyService;
     }
@@ -122,7 +118,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
 
     @Override
     public void delete(ConfigurationTemplateInstanceBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
         logger.info("Deleting Configuration Template Instance: {}", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }

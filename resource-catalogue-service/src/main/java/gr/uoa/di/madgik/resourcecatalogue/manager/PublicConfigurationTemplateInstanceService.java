@@ -17,10 +17,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
+import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -33,17 +35,17 @@ public class PublicConfigurationTemplateInstanceService
         extends AbstractPublicResourceManager<ConfigurationTemplateInstanceBundle> {
 
     private final ServiceService serviceService;
-    private final TrainingResourceService trainingResourceService;
+    private final DatasourceService datasourceService;
 
     public PublicConfigurationTemplateInstanceService(GenericResourceService genericResourceService,
                                                       JmsService jmsService,
                                                       PidIssuer pidIssuer,
                                                       FacetLabelService facetLabelService,
                                                       ServiceService serviceService,
-                                                      TrainingResourceService trainingResourceService) {
+                                                      DatasourceService datasourceService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
         this.serviceService = serviceService;
-        this.trainingResourceService = trainingResourceService;
+        this.datasourceService = datasourceService;
     }
 
     @Override
@@ -57,8 +59,8 @@ public class PublicConfigurationTemplateInstanceService
         String resourceId = (String) bundle.getConfigurationTemplateInstance().get("resourceId");
         try {
             resource = serviceService.get(resourceId, bundle.getCatalogueId());
-        } catch (CatalogueResourceNotFoundException e) {
-            resource = trainingResourceService.get(resourceId, bundle.getCatalogueId());
+        } catch (ResourceException e) {
+            resource = datasourceService.get(resourceId, bundle.getCatalogueId());
         }
         bundle.getConfigurationTemplateInstance().put("resourceId", resource.getIdentifiers().getPid());
     }

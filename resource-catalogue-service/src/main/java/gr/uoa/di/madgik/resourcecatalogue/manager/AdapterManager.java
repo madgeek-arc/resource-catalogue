@@ -30,7 +30,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,8 +45,6 @@ import java.util.Objects;
 public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundle> implements AdapterService {
 
     private static final Logger logger = LoggerFactory.getLogger(AdapterManager.class);
-    private final OIDCSecurityService securityService;
-    private final ProviderResourcesCommonMethods commonMethods;
     private final GenericResourceService genericResourceService;
     private final OrganisationService organisationService;
     private final EmailService emailService;
@@ -59,15 +56,12 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
 
     public AdapterManager(OIDCSecurityService securityService,
                           VocabularyService vocabularyService,
-                          ProviderResourcesCommonMethods commonMethods,
                           IdCreator idCreator,
                           GenericResourceService genericResourceService,
                           OrganisationService organisationService,
                           EmailService emailService,
                           WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
-        this.securityService = securityService;
-        this.commonMethods = commonMethods;
         this.genericResourceService = genericResourceService;
         this.organisationService = organisationService;
         this.emailService = emailService;
@@ -97,7 +91,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
 
     @Override
     public void delete(AdapterBundle bundle) {
-        commonMethods.blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
         logger.info("Deleting Adapter: {}", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }

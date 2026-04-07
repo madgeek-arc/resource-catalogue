@@ -47,7 +47,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.trainingResource.node",
+      "path": "$.trainingResource.nodePID",
       "type": "java.lang.String"
     },
     {

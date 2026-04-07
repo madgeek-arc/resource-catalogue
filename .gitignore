@@ -37,3 +37,6 @@ hs_err_pid*
 **/*.properties
 **/*.yml
 **/*.yaml
+
+CLAUDE.md
+SUMMARY.md
