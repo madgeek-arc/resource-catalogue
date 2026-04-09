@@ -113,13 +113,27 @@ public class SupportManagementAspect {
 
     //region SQA
     @Async
-    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))",
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..))",
             returning = "adapter"
     )
     public void performSqaAssessment(final AdapterBundle adapter) {
         if (!"approved".equals(adapter.getStatus())) {
             return;
         }
+
+        Object sqaObj = adapter.getAdapter().get("sqa");
+        if (sqaObj instanceof LinkedHashMap<?, ?> sqaMap) {
+            Object urlObj = sqaMap.get("sqaURL");
+            if (urlObj instanceof String url && !url.trim().isEmpty()) {
+                return;
+            }
+        }
+        access(adapter);
+    }
+
+    private void access(AdapterBundle adapter) {
+        logger.info("Starting SQA assessment for Adapter {}", adapter.getId());
         String repo = adapter.getAdapter().get("repository").toString();
         sqaaasAssessmentService.startAssessment(repo, "main")
                 .thenApply(sqaaasAssessmentService::waitForCompletion)
