@@ -103,8 +103,12 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
         // Post PID
         if (pidServiceEnabled && registerPID) {
-            logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
-            pidIssuer.postPID(t.getId(), null);
+            try {
+                logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
+                pidIssuer.postPID(t.getId(), null);
+            } catch (Exception e) {
+                logger.info("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
+            }
         }
 
         // sets public ids to fields
