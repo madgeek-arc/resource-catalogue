@@ -108,12 +108,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         return children;
     }
 
-
-    @Override
-    public Paging<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
-        return genericResourceService.getResults(ff);
-    }
-
     @Override
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
@@ -122,18 +116,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
         return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
-    }
-
-    @Override
-    public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
-        super.addBulk(vocabularies, auth);
-    }
-
-    @Override
-    public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
-        for (Vocabulary vocabulary : vocabularies) {
-            update(vocabulary, auth);
-        }
     }
 
     @Override
@@ -149,7 +131,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     public void deleteByType(Vocabulary.Type type) {
         List<Vocabulary> toBeDeleted = getByType(type);
         for (Vocabulary vocabulary : toBeDeleted) {
-            genericResourceService.delete(getResourceTypeName(), vocabulary.getId());
+            super.delete(vocabulary);
         }
     }
 
@@ -169,16 +151,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         }
 
         logger.debug("Adding Vocabulary {}", vocabulary);
-        genericResourceService.add(getResourceTypeName(), vocabulary);
+        super.add(vocabulary, auth);
 
-        return vocabulary;
-    }
-
-    @Override
-    public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
-
-        logger.debug("Updating Vocabulary {}", vocabulary);
-        genericResourceService.update(getResourceTypeName(), vocabulary);
         return vocabulary;
     }
 
