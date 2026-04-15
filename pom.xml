@@ -43,6 +43,8 @@
         <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
         <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <netty.version>4.1.132.Final</netty.version> <!-- CVE-2026-33871, CVE-2026-33870: patched in 4.1.132 -->
+        <tomcat.version>10.1.54</tomcat.version> <!-- CVE-2026-29145: patched in 10.1.54 -->
         <owasp-dependency-check-plugin.version>12.1.9</owasp-dependency-check-plugin.version>
         <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
@@ -226,6 +228,11 @@
                 <version>6.2.1</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency> <!-- CVE-2025-66453: rhino 1.7.7.1 pulled in by json-schema-core:1.2.10 -->
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino</artifactId>
+                <version>1.7.15</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
