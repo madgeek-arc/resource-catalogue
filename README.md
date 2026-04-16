@@ -277,8 +277,6 @@ catalogue.jms.ams.project=
 ############################
 
 ## Basic Info ##
-catalogue.id=resource-catalogue
-catalogue.name=Resource Catalogue
 catalogue.homepage=
 catalogue.version=@project.version@
 ## Admins / Onboarding Team ##
@@ -356,7 +354,9 @@ accounting.token-endpoint=
 sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
 
 ## Node Registry ##
+node.pid=
 node.registry.url=
+node.registry.key=
 ```
 
 ### PID Properties Example
