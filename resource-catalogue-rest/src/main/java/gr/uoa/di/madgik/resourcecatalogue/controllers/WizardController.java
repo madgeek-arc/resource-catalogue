@@ -22,12 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
@@ -35,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,8 +41,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Profile("beyond")
 @Controller
@@ -57,8 +52,12 @@ public class WizardController {
     private String catalogueId;
     @Value("${catalogue.homepage}")
     private String homepage;
+    @Value("${node.pid}")
+    private String nodePid;
     @Value("${node.registry.url}")
-    private String nodeRegistry;
+    private String nodeRegistryUrl;
+    @Value("${node.registry.key}")
+    private String nodeRegistryKey;
 
     private static final Logger logger = LoggerFactory.getLogger(WizardController.class);
 
@@ -70,7 +69,7 @@ public class WizardController {
     @PostConstruct
     public void init() {
         this.webClient = WebClient.builder()
-                .baseUrl(nodeRegistry)
+                .baseUrl(nodeRegistryUrl)
                 .build();
     }
 
@@ -232,170 +231,33 @@ public class WizardController {
         return "redirect:/wizard/step2";
     }
 
-
-    //TODO: REMOVE WHEN CATALOGUE IS REMOVED
-    @Operation(summary = "Create main Catalogue")
-    @GetMapping("/step3")
-    public String createCatalogue(Model model) {
-        LinkedHashMap<String, Object> catalogue = new LinkedHashMap<>();
-
-        // Basic
-        catalogue.put("id", catalogueId);
-        catalogue.put("abbreviation", "");
-        catalogue.put("name", "");
-        catalogue.put("website", "");
-        catalogue.put("legalEntity", false);
-        catalogue.put("inclusionCriteria", "");
-        catalogue.put("validationProcess", "");
-        catalogue.put("endOfLife", "");
-        catalogue.put("description", "");
-        catalogue.put("scope", "");
-        catalogue.put("logo", "");
-
-        // Location
-        Map<String, Object> location = new LinkedHashMap<>();
-        location.put("streetNameAndNumber", "");
-        location.put("postalCode", "");
-        location.put("city", "");
-        location.put("country", "");
-        catalogue.put("location", location);
-
-        // Main Contact
-        Map<String, Object> mainContact = new LinkedHashMap<>();
-        mainContact.put("firstName", "");
-        mainContact.put("lastName", "");
-        mainContact.put("email", "");
-        catalogue.put("mainContact", mainContact);
-
-        // Public Contacts
-        List<Map<String, Object>> publicContacts = new ArrayList<>();
-        publicContacts.add(new LinkedHashMap<>(Map.of("email", "")));
-        catalogue.put("publicContacts", publicContacts);
-
-        // Users
-        List<Map<String, Object>> users = new ArrayList<>();
-        users.add(new LinkedHashMap<>(Map.of(
-                "name", "",
-                "surname", "",
-                "email", ""
-        )));
-        catalogue.put("users", users);
-
-        // Countries
-        Map<String, String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY)
-                .stream()
-                .collect(Collectors.toMap(
-                        Vocabulary::getId,
-                        Vocabulary::getName,
-                        (a, b) -> a,
-                        LinkedHashMap::new
-                ));
-
-        model.addAttribute("catalogue", catalogue);
-        model.addAttribute("countries", countries);
-
-        return "wizard-step3";
-    }
-
-    @PostMapping("/step3/loadCatalogue")
-    public String loadCatalogue(@RequestParam Map<String, String> params, Model model) {
-        LinkedHashMap<String, Object> catalogue = buildCatalogue(params);
-
-        try {
-            logger.info("Loading main Catalogue with ID [{}]", catalogue.get("id"));
-            CatalogueBundle bundle = new CatalogueBundle();
-            bundle.setPayload(catalogue);
-            addCatalogue(bundle);
-            model.addAttribute("successMessage", "Catalogue saved successfully!");
-        } catch (Exception e) {
-            logger.error("Failed to save Catalogue [{}]: {}", catalogue.get("id"), e.getMessage());
-            model.addAttribute("errorMessage", "Error saving catalogue: " + e.getMessage());
-        }
-
-        model.addAttribute("catalogue", catalogue);
-        model.addAttribute("homepage", homepage);
-
-        return "wizard-step3";
-    }
-
-    @SuppressWarnings("unchecked")
-    private LinkedHashMap<String, Object> buildCatalogue(Map<String, String> params) {
-
-        LinkedHashMap<String, Object> catalogue = new LinkedHashMap<>();
-
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            // Handle list: users[0].email
-            if (key.matches(".+\\[\\d+\\]\\..+")) {
-                String listName = key.substring(0, key.indexOf("["));
-                int index = Integer.parseInt(key.substring(key.indexOf("[") + 1, key.indexOf("]")));
-                String field = key.substring(key.indexOf("].") + 2);
-                List<Map<String, Object>> list =
-                        (List<Map<String, Object>>) catalogue.computeIfAbsent(listName, k -> new ArrayList<>());
-
-                while (list.size() <= index) {
-                    list.add(new LinkedHashMap<>());
-                }
-                list.get(index).put(field, value);
-            } else if (key.contains(".")) { // Handle nested map: location.city
-                String[] parts = key.split("\\.");
-                Map<String, Object> current = catalogue;
-                for (int i = 0; i < parts.length - 1; i++) {
-                    current = (Map<String, Object>) current.computeIfAbsent(parts[i], k -> new LinkedHashMap<>());
-                }
-                current.put(parts[parts.length - 1], value);
-            } else {
-                catalogue.put(key, value);
-            }
-        }
-
-        return catalogue;
-    }
-
-    private void addCatalogue(CatalogueBundle catalogue) {
-        List<LoggingInfo> loggingInfoList = createLoggingInfoList();
-        catalogue.setLoggingInfo(loggingInfoList);
-        catalogue.setMetadata(Metadata.createMetadata("system", "system"));
-        catalogue.setActive(true);
-        catalogue.setStatus(vocabularyService.get("approved").getId());
-        catalogue.setAuditState(Auditable.NOT_AUDITED);
-        catalogue.setLatestOnboardingInfo(loggingInfoList.getFirst());
-
-        genericService.add("catalogue", catalogue, false);
-    }
-
-    private static List<LoggingInfo> createLoggingInfoList() {
-        String currentTime = String.valueOf(System.currentTimeMillis());
-        String system = "system";
-        String type = LoggingInfo.Types.ONBOARD.getKey();
-
-        return Stream.of(LoggingInfo.ActionType.REGISTERED, LoggingInfo.ActionType.APPROVED)
-                .map(action -> {
-                    LoggingInfo info = new LoggingInfo();
-                    info.setDate(currentTime);
-                    info.setType(type);
-                    info.setActionType(action.getKey());
-                    info.setUserEmail(system);
-                    info.setUserFullName(system);
-                    info.setUserRole(system);
-                    return info;
-                })
-                .collect(Collectors.toList());
-    }
-
     @Operation(summary = "Register node on Node Registry")
-    @GetMapping("/step4")
-    public String step4Page(Model model) {
+    @GetMapping("/step3")
+    public String checkNodeRegistration(Model model) {
         NodeRegistryRequest request = new NodeRegistryRequest();
         request.setLegalEntity(new NodeRegistryRequest.LegalEntity()); // important
         model.addAttribute("nodeRequest", request);
-        return "wizard-step4";
+
+        boolean isRegistered = false;
+        try {
+            List<Map<String, Object>> nodes = webClient.get()
+                    .header("x-api-key", nodeRegistryKey)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+                    .block();
+            if (nodes != null) {
+                isRegistered = nodes.stream()
+                        .anyMatch(node -> nodePid.equals(node.get("pid")));
+            }
+        } catch (Exception e) {
+            logger.warn("Could not reach node registry to check registration status: {}", e.getMessage());
+        }
+
+        model.addAttribute("isRegistered", isRegistered);
+        return "wizard-step3";
     }
 
-    @PostMapping("/step4")
+    @PostMapping("/step3")
     public String registerNodeOnNodeRegistry(@ModelAttribute NodeRegistryRequest request,
                                              @RequestParam(required = false) String skip,
                                              Model model) {
@@ -411,7 +273,7 @@ public class WizardController {
                     .block();
         } catch (Exception e) {
             model.addAttribute("error", "Failed to register node: " + e.getMessage());
-            return "wizard-step4";
+            return "wizard-step3";
         }
         return "redirect:/wizard/success";
     }
