@@ -307,11 +307,12 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         if (bundle.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
         }
-        OrganisationBundle organisationBundle = genericResourceService.get("organisation", resourceOwner);
-        if (organisationBundle.isSuspended() && !suspend) {
-            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
-                    HttpStatus.CONFLICT);
-        }
+        //TODO: probably remove
+//        OrganisationBundle organisationBundle = genericResourceService.get("organisation", resourceOwner);
+//        if (organisationBundle.isSuspended() && !suspend) {
+//            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
+//                    HttpStatus.CONFLICT);
+//        }
 
         //TODO: enable if Catalogues return.
 //        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
