@@ -106,7 +106,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
                 logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
                 pidIssuer.postPID(t.getId(), null);
             } catch (Exception e) {
-                logger.info("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
+                logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
             }
         }
 
