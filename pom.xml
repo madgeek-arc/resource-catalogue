@@ -231,16 +231,6 @@
                 <artifactId>rhino</artifactId>
                 <version>1.7.15</version>
             </dependency>
-            <dependency> <!-- CVE-2018-10237, CVE-2020-8908, CVE-2023-2976: force off guava:16.0.1 pulled by jackson-coreutils -->
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>33.3.1-jre</version>
-            </dependency>
-            <dependency> <!-- CVE-2025-15599, CVE-2026-0540: DOMPurify 3.3.2 ships in swagger-ui 5.32.4 -->
-                <groupId>org.webjars</groupId>
-                <artifactId>swagger-ui</artifactId>
-                <version>5.32.4</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
