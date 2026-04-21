@@ -16,9 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.domain.Facet;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
+import gr.uoa.di.madgik.resourcecatalogue.service.NodeResolver;
+import gr.uoa.di.madgik.resourcecatalogue.service.NodeResolver.Node;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +37,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Profile("beyond")
 @ControllerAdvice
@@ -42,14 +50,20 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
     private final SecurityService securityService;
     private final AuthoritiesMapper authoritiesMapper;
+    private final NodeResolver nodeResolver;
 
     private final String epotEmail;
+    private final String nodePid;
 
     public SecureResponseAdvice(SecurityService securityService, AuthoritiesMapper authoritiesMapper,
-                                @Value("${catalogue.email-properties.registration-emails.to:registration@catalogue.eu}") String epotEmail) {
+                                @Value("${catalogue.email-properties.registration-emails.to:registration@catalogue.eu}") String epotEmail,
+                                @Value("${node.pid}") String nodePid,
+                                NodeResolver nodeResolver) {
         this.securityService = securityService;
         this.authoritiesMapper = authoritiesMapper;
         this.epotEmail = epotEmail;
+        this.nodeResolver = nodeResolver;
+        this.nodePid = nodePid;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(SecureResponseAdvice.class);
@@ -66,7 +80,11 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                              ServerHttpRequest serverHttpRequest,
                              ServerHttpResponse serverHttpResponse) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (t != null && !securityService.hasPortalAdminRole(auth)) {
+
+        // TODO: remove when implemented correctly
+        fixNodeFacets(t, resolveNodeName());
+
+        if (t != null && !securityService.hasRole(auth, "ROLE_ADMIN") && !securityService.hasRole(auth, "ROLE_EPOT")) {
             logger.trace("User is not Admin nor EPOT: attempting to remove sensitive information");
             if (Collection.class.isAssignableFrom(t.getClass())) {
                 for (T object : ((Collection<T>) t)) {
@@ -83,6 +101,24 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         }
 
         return t;
+    }
+
+    private String resolveNodeName() {
+        Node node = nodeResolver.fetchNodes().stream().filter(f -> f.pid().equals(nodePid)).findFirst().orElseThrow();
+        return node.name();
+    }
+
+    private void fixNodeFacets(T t, String nodeLabel) {
+        if (Paging.class.isAssignableFrom(t.getClass())) {
+            Facet nodeFacet = ((Paging<?>) t).getFacets().stream().filter(f -> f.getField().equals("node")).findFirst().orElse(null);
+            if (nodeFacet != null) {
+                for (gr.uoa.di.madgik.registry.domain.Value value : nodeFacet.getValues()) {
+                    if (!nodeLabel.equalsIgnoreCase(value.getLabel())) {
+                        value.setLabel("%s (%s)".formatted(nodeLabel, value.getLabel()));
+                    }
+                }
+            }
+        }
     }
 
     //TODO: enable for LinkedHasMap too

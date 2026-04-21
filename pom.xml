@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.11</version>
+        <version>3.5.12</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>gr.uoa.di.madgik</groupId>
@@ -43,6 +43,10 @@
         <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
         <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <netty.version>4.1.132.Final</netty.version> <!-- CVE-2026-33871, CVE-2026-33870: patched in 4.1.132 -->
+        <tomcat.version>10.1.54</tomcat.version> <!-- CVE-2026-29145: patched in 10.1.54 -->
+        <spring-security.version>6.5.9</spring-security.version> <!-- CVE-2026-22732: patched in 6.5.9 -->
+        <log4j2.version>2.25.4</log4j2.version> <!-- CVE-2025-68161: TLS hostname bypass; patched in 2.25.3 -->
         <owasp-dependency-check-plugin.version>12.1.9</owasp-dependency-check-plugin.version>
         <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
@@ -155,11 +159,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>1.9.13</version>
-            </dependency>
-            <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
@@ -220,12 +219,17 @@
                 <artifactId>json-simple</artifactId>
                 <version>1.1.1</version>
             </dependency>
-            <dependency> <!-- Addresses issues of version 6.1.8 shipped by spring-boot 3.5.10 -->
+            <dependency> <!-- Addresses CVE-2026-34197 (8.8); 6.2.1 was vulnerable -->
                 <groupId>org.apache.activemq</groupId>
                 <artifactId>activemq-bom</artifactId>
-                <version>6.2.1</version>
+                <version>6.2.4</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency> <!-- CVE-2025-66453: rhino 1.7.7.1 pulled in by json-schema-core:1.2.10 -->
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino</artifactId>
+                <version>1.7.15</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

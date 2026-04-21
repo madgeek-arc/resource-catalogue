@@ -19,8 +19,10 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericServic
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -45,6 +47,9 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     protected final VocabularyService vocabularyService;
     protected final IdCreator idCreator;
     protected final WorkflowService workflowService;
+
+    @Autowired
+    private FacetLabelService facetLabelService;
 
     @Value("${catalogue.id}")
     protected String catalogueId;
@@ -220,7 +225,11 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public Browsing<T> getAll(FacetFilter ff) {
         ff.setResourceType(getResourceTypeName());
-        return genericResourceService.getResults(ff);
+        Browsing<T> browsing = genericResourceService.getResults(ff);
+        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
+            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+        }
+        return browsing;
     }
 
     @Override
@@ -298,11 +307,12 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         if (bundle.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
         }
-        OrganisationBundle organisationBundle = genericResourceService.get("organisation", resourceOwner);
-        if (organisationBundle.isSuspended() && !suspend) {
-            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
-                    HttpStatus.CONFLICT);
-        }
+        //TODO: probably remove
+//        OrganisationBundle organisationBundle = genericResourceService.get("organisation", resourceOwner);
+//        if (organisationBundle.isSuspended() && !suspend) {
+//            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
+//                    HttpStatus.CONFLICT);
+//        }
 
         //TODO: enable if Catalogues return.
 //        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);

@@ -53,7 +53,7 @@
     {
       "label": "Type",
       "multivalued": false,
-      "name": "entity_type",
+      "name": "type",
       "path": "$.datasource.type",
       "type": "java.lang.String"
     },

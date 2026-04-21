@@ -69,7 +69,6 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         ff.setResourceType(getResourceTypeName());
         ff.addFilter("published", true);
         Browsing<T> browsing = genericResourceService.getResults(ff);
-        //TODO: test if we need this
         if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }
@@ -103,8 +102,12 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
         // Post PID
         if (pidServiceEnabled && registerPID) {
-            logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
-            pidIssuer.postPID(t.getId(), null);
+            try {
+                logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
+                pidIssuer.postPID(t.getId(), null);
+            } catch (Exception e) {
+                logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
+            }
         }
 
         // sets public ids to fields

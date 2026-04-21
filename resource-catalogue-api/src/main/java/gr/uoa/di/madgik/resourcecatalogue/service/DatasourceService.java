@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
+import org.springframework.security.core.Authentication;
 
 public interface DatasourceService extends ResourceCatalogueGenericService<DatasourceBundle>,
         EOSCResourceService<DatasourceBundle>, TemplateOnboardingService, DraftService<DatasourceBundle> {
@@ -29,4 +30,22 @@ public interface DatasourceService extends ResourceCatalogueGenericService<Datas
      * @return True/False
      */
     boolean isDatasourceRegisteredOnOpenAIRE(String id);
+
+    /**
+     *
+     * @param bundle     Bundle
+     * @param openaireId Original OpenAIRE ID
+     * @param auth       Authentication
+     * @return {@link DatasourceBundle}
+     */
+    DatasourceBundle add(DatasourceBundle bundle, String openaireId, Authentication auth);
+
+    /**
+     *
+     * @param bundle     Bundle
+     * @param openaireId Original OpenAIRE ID
+     * @param auth       Authentication
+     * @return {@link DatasourceBundle}
+     */
+    DatasourceBundle addDraft(DatasourceBundle bundle, String openaireId, Authentication auth);
 }

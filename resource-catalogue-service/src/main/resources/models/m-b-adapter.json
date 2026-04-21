@@ -2438,7 +2438,7 @@
                   "parentId": "sqa",
                   "parent": "sqa",
                   "label": {
-                    "text": "URL",
+                    "text": "Report",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -2447,7 +2447,7 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "url",
+                    "type": "string",
                     "defaultValue": null,
                     "values": null,
                     "properties": {

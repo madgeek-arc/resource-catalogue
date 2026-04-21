@@ -1,253 +1,156 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Step 3 - Create Catalogue</title>
+    <title>Step 3 - Node Registration</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 900px;
+            max-width: 800px;
             margin: 20px auto;
         }
 
-        fieldset {
-            border: 1px solid #ccc;
-            padding: 20px;
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p.description {
+            font-size: 0.9rem;
+            color: #555;
             margin-bottom: 20px;
-            border-radius: 8px;
         }
 
-        legend {
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
             font-weight: bold;
-            padding: 0 10px;
+            margin-bottom: 4px;
         }
 
-        .form-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .form-row label {
-            width: 200px;
-            font-weight: bold;
-        }
-
-        .form-row input,
-        .form-row textarea,
-        .form-row select {
-            flex: 1;
-            padding: 6px;
-            border: 1px solid #ccc;
+        input {
+            width: 100%;
+            padding: 8px;
             border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
         }
 
-        textarea {
-            resize: vertical;
+        .error {
+            color: red;
+            font-size: 0.8rem;
+            margin-top: 4px;
         }
 
         .button-row {
             display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-top: 20px;
+            justify-content: space-between;
+            margin-top: 25px;
         }
 
         button {
             padding: 8px 16px;
             font-size: 1rem;
             border-radius: 5px;
-            background-color: #007BFF;
-            color: white;
             border: none;
             cursor: pointer;
         }
 
-        button:hover {
+        .primary {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .primary:hover {
             background-color: #0056b3;
         }
 
-        a {
-            display: inline-block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #007BFF;
+        .secondary {
+            background-color: #ccc;
+            color: #333;
         }
 
-        a:hover {
-            text-decoration: underline;
+        .secondary:hover {
+            background-color: #999;
         }
 
-        .disabled {
-            background-color: #f5f5f5;
-            color: #888;
-            cursor: not-allowed;
+        .banner {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .banner-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .banner-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
+
 <body>
 
-<h2>Step 3: Create Default Catalogue</h2>
+<h2>Step 3: Register your node on Node Registry</h2>
 
-<p class="description" th:if="${successMessage == null}">
-    Please fill all the fields.
+<p class="description">
+    Register your node to make it discoverable to other EOSC nodes.
+    This step is optional and can be skipped.
 </p>
 
-<p th:if="${successMessage}" th:text="${successMessage}" style="color: green; font-weight: bold;"></p>
-<p th:if="${errorMessage}" th:text="${errorMessage}" style="color: red; font-weight: bold;"></p>
+<div th:if="${isRegistered}" class="banner banner-success">
+    &#10003; This node is already registered on the Node Registry.
+</div>
 
-<form th:action="@{/wizard/step3/loadCatalogue}" method="post" id="catalogueForm">
+<div th:if="${error}" class="banner banner-error" th:text="${error}"></div>
 
-    <!-- Basic Information -->
-    <fieldset>
-        <legend>Basic Information</legend>
-        <div class="form-row">
-            <label>ID:</label>
-            <input type="text" th:name="id" th:value="${catalogue['id']}" readonly
-                   style="background-color: #f0f0f0; color: #555; cursor: not-allowed;"/>
-        </div>
-        <div class="form-row">
-            <label>Abbreviation (String):</label>
-            <input type="text" th:name="abbreviation" th:value="${catalogue['abbreviation']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Name (String):</label>
-            <input type="text" th:name="name" th:value="${catalogue['name']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Website (URL):</label>
-            <input type="url" th:name="website" th:value="${catalogue['website']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Legal Entity:</label>
-            <div>
-                <label>
-                    <input type="radio" th:name="legalEntity" value="true"
-                           th:checked="${catalogue['legalEntity']} == true"/> Yes
-                </label>
-                <label style="margin-left: 20px;">
-                    <input type="radio" th:name="legalEntity" value="false"
-                           th:checked="${catalogue['legalEntity']} == false"/> No
-                </label>
-            </div>
-        </div>
-        <div class="form-row">
-            <label>Inclusion Criteria (URL):</label>
-            <input type="url" th:name="inclusionCriteria" th:value="${catalogue['inclusionCriteria']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Validation Process (URL):</label>
-            <input type="url" th:name="validationProcess" th:value="${catalogue['validationProcess']}" required/>
-        </div>
-        <div class="form-row">
-            <label>End of Life (String):</label>
-            <input type="text" th:name="endOfLife" th:value="${catalogue['endOfLife']}" required/>
-        </div>
-    </fieldset>
+<form th:action="@{/wizard/step3}" th:object="${nodeRequest}" method="post">
 
-    <!-- Marketing Information -->
-    <fieldset>
-        <legend>Marketing Information</legend>
-        <div class="form-row">
-            <label>Description (String):</label>
-            <textarea th:name="description" rows="4" required
-                      th:text="${catalogue['description']}"></textarea>
-        </div>
-        <div class="form-row">
-            <label>Scope (String):</label>
-            <input type="text" th:name="scope" th:value="${catalogue['scope']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Logo (URL):</label>
-            <input type="url" th:name="logo" th:value="${catalogue['logo']}" required/>
-        </div>
-    </fieldset>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input id="name" type="text" th:field="*{name}" placeholder="Enter node name"/>
+        <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+    </div>
 
-    <!-- Location Information -->
-    <fieldset>
-        <legend>Location Information</legend>
-        <div class="form-row">
-            <label>Street Name and Number (String):</label>
-            <input type="text" th:name="location.streetNameAndNumber"
-                   th:value="${catalogue['location']['streetNameAndNumber']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Postal Code (String):</label>
-            <input type="text" th:name="location.postalCode"
-                   th:value="${catalogue['location']['postalCode']}" required/>
-        </div>
-        <div class="form-row">
-            <label>City (String):</label>
-            <input type="text" th:name="location.city" th:value="${catalogue['location']['city']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Country:</label>
-            <select th:name="location.country" required>
-                <option value="">-- Select a country --</option>
-                <option th:each="entry : ${countries}"
-                        th:value="${entry.key}"
-                        th:text="${entry.value}"
-                        th:selected="${catalogue['location']['country']} == entry.key">
-                </option>
-            </select>
-        </div>
-    </fieldset>
+    <div class="form-group">
+        <label for="logo">Logo</label>
+        <input id="logo" type="text" th:field="*{logo}" placeholder="https://..."/>
+    </div>
 
-    <!-- Contact Information -->
-    <fieldset>
-        <legend>Contact Information</legend>
-        <div class="form-row">
-            <label>Main Contact First Name (String):</label>
-            <input type="text" th:name="mainContact.firstName"
-                   th:value="${catalogue['mainContact']['firstName']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Main Contact Last Name (String):</label>
-            <input type="text" th:name="mainContact.lastName"
-                   th:value="${catalogue['mainContact']['lastName']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Public Contact Email (String):</label>
-            <input type="email" th:name="'publicContacts[0].email'"
-                   th:value="${catalogue['publicContacts'][0]['email']}" required/>
-        </div>
-    </fieldset>
+    <div class="form-group">
+        <label for="legalName">Legal Entity - Name</label>
+        <input id="legalName" type="text" th:field="*{legalEntity.name}" placeholder="Organization name"/>
+    </div>
 
-    <!-- Catalogue Admin Information -->
-    <fieldset>
-        <legend>Catalogue Admin Information</legend>
-        <div class="form-row">
-            <label>Admin Name (String):</label>
-            <input type="text" th:name="'users[0].name'"
-                   th:value="${catalogue['users'][0]['name']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Admin Surname (String):</label>
-            <input type="text" th:name="'users[0].surname'"
-                   th:value="${catalogue['users'][0]['surname']}" required/>
-        </div>
-        <div class="form-row">
-            <label>Admin Email (String):</label>
-            <input type="email" th:name="'users[0].email'"
-                   th:value="${catalogue['users'][0]['email']}" required/>
-        </div>
-    </fieldset>
+    <div class="form-group">
+        <label for="rorId">Legal Entity - ROR ID</label>
+        <input id="rorId" type="text" th:field="*{legalEntity.rorId}" placeholder="https://ror.org/..."/>
+    </div>
+
+    <div class="form-group">
+        <label for="endpoint">Node Endpoint</label>
+        <input id="endpoint" type="text" th:field="*{nodeEndpoint}" placeholder="https://api.yournode.com"/>
+        <div class="error" th:if="${#fields.hasErrors('nodeEndpoint')}" th:errors="*{nodeEndpoint}"></div>
+    </div>
 
     <div class="button-row">
-        <button type="submit" th:if="${successMessage == null}">
-            Submit
+        <button type="submit" name="skip" value="true" class="secondary">
+            Skip
+        </button>
+        <button type="submit" class="primary" th:text="${isRegistered} ? 'Update Registration' : 'Register Node'">
+            Register Node
         </button>
     </div>
-</form>
 
-<script th:if="${successMessage != null}">
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('#catalogueForm input, #catalogueForm textarea, #catalogueForm select')
-            .forEach(el => {
-                el.disabled = true;
-                el.classList.add('disabled');
-            });
-    });
-</script>
+</form>
 
 </body>
 </html>
