@@ -84,8 +84,10 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     //region generic
     @Override
-    public DatasourceBundle add(DatasourceBundle bundle, Authentication auth) {
-        checkOpenAIREIDExistence(bundle);
+    public DatasourceBundle add(DatasourceBundle bundle, String openaireId, Authentication auth) {
+        if (openaireId != null && !openaireId.isEmpty()) {
+            checkOpenAIREIDExistence(bundle, openaireId);
+        }
         return super.add(bundle, auth);
     }
 
@@ -253,25 +255,19 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     // OpenAIRE
-    private void checkOpenAIREIDExistence(DatasourceBundle bundle) {
-        // if Datasource has ID -> check if it exists in OpenAIRE Datasource list
-        Object raw = bundle.getDatasource() != null ? bundle.getDatasource().get("id") : null;
-        String id = (String) raw;
-
-        if (id != null && !id.isEmpty()) {
-            LinkedHashMap<String, Object> datasource = openAIREDatasourceManager.get(bundle.getId());
-            if (datasource != null) {
-                bundle.setOriginalOpenAIREId(bundle.getId());
-                createAlternativePid(bundle);
-            } else {
-                throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong " +
-                        "to an OpenAIRE Datasource", bundle.getId()));
-            }
+    private void checkOpenAIREIDExistence(DatasourceBundle bundle, String openaireId) {
+        LinkedHashMap<String, Object> datasource = openAIREDatasourceManager.get(openaireId);
+        if (datasource != null) {
+            bundle.setOriginalOpenAIREId(openaireId);
+            createAlternativePid(bundle, openaireId);
+        } else {
+            throw new CatalogueResourceNotFoundException(String.format("The ID [%s] you provided does not belong " +
+                    "to an OpenAIRE Datasource", bundle.getId()));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void createAlternativePid(DatasourceBundle bundle) {
+    private void createAlternativePid(DatasourceBundle bundle, String openaireId) {
         Map<String, Object> datasource = bundle.getDatasource();
         List<Map<String, String>> alternativePIDs;
         Object existing = datasource.get("alternativePIDs");
@@ -284,7 +280,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         }
 
         Map<String, String> openaireAlternativePID = new HashMap<>();
-        openaireAlternativePID.put("pid", bundle.getId());
+        openaireAlternativePID.put("pid", openaireId);
         openaireAlternativePID.put("pidSchema", "openaire");
 
         alternativePIDs.add(openaireAlternativePID);
@@ -325,8 +321,10 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     //region Drafts
     @Override
-    public DatasourceBundle addDraft(DatasourceBundle bundle, Authentication auth) {
-        checkOpenAIREIDExistence(bundle);
+    public DatasourceBundle addDraft(DatasourceBundle bundle, String openaireId, Authentication auth) {
+        if (openaireId != null && !openaireId.isEmpty()) {
+            checkOpenAIREIDExistence(bundle, openaireId);
+        }
         return super.addDraft(bundle, auth);
     }
     //endregion

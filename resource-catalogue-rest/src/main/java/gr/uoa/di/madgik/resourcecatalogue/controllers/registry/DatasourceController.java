@@ -158,10 +158,11 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.providerCanAddResources(#auth, #datasource, @resourceCatalogueInfo.catalogueId)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> datasource,
+                                 @RequestParam(required = false) String openaireId,
                                  @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle bundle = new DatasourceBundle();
         bundle.setDatasource(datasource);
-        DatasourceBundle ret = service.add(bundle, auth);
+        DatasourceBundle ret = service.add(bundle, openaireId, auth);
         logger.info("Added Datasource with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getDatasource(), HttpStatus.CREATED);
     }
@@ -437,10 +438,11 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @PostMapping(path = "/draft")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> datasource,
+                                      @RequestParam(required = false) String openaireId,
                                       @Parameter(hidden = true) Authentication auth) {
         DatasourceBundle bundle = new DatasourceBundle();
         bundle.setDatasource(datasource);
-        DatasourceBundle ret = service.addDraft(bundle, auth);
+        DatasourceBundle ret = service.addDraft(bundle, openaireId, auth);
         logger.info("Added Draft Datasource with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getDatasource(), HttpStatus.CREATED);
     }
@@ -470,7 +472,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> datasource,
-                                              @Parameter(hidden = true) Authentication auth) {
+                                      @Parameter(hidden = true) Authentication auth) {
         String id = (String) datasource.get("id");
         DatasourceBundle bundle = service.get(id);
         bundle.setDatasource(datasource);
