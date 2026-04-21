@@ -46,6 +46,7 @@
         <netty.version>4.1.132.Final</netty.version> <!-- CVE-2026-33871, CVE-2026-33870: patched in 4.1.132 -->
         <tomcat.version>10.1.54</tomcat.version> <!-- CVE-2026-29145: patched in 10.1.54 -->
         <spring-security.version>6.5.9</spring-security.version> <!-- CVE-2026-22732: patched in 6.5.9 -->
+        <log4j2.version>2.25.4</log4j2.version> <!-- CVE-2025-68161: TLS hostname bypass; patched in 2.25.3 -->
         <owasp-dependency-check-plugin.version>12.1.9</owasp-dependency-check-plugin.version>
         <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
@@ -158,11 +159,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>1.9.13</version>
-            </dependency>
-            <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
@@ -234,6 +230,16 @@
                 <groupId>org.mozilla</groupId>
                 <artifactId>rhino</artifactId>
                 <version>1.7.15</version>
+            </dependency>
+            <dependency> <!-- CVE-2018-10237, CVE-2020-8908, CVE-2023-2976: force off guava:16.0.1 pulled by jackson-coreutils -->
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.3.1-jre</version>
+            </dependency>
+            <dependency> <!-- CVE-2025-15599, CVE-2026-0540: DOMPurify 3.3.2 ships in swagger-ui 5.32.4 -->
+                <groupId>org.webjars</groupId>
+                <artifactId>swagger-ui</artifactId>
+                <version>5.32.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
