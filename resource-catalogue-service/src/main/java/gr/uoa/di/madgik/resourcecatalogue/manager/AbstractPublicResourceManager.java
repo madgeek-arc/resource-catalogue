@@ -69,7 +69,6 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         ff.setResourceType(getResourceTypeName());
         ff.addFilter("published", true);
         Browsing<T> browsing = genericResourceService.getResults(ff);
-        //TODO: test if we need this
         if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }
