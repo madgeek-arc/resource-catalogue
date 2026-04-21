@@ -47,6 +47,9 @@ public class CacheConfig {
                 new ConcurrentMapCache(CACHE_VISITS,
                         CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(2000).build().asMap(), false),
 
+                new ConcurrentMapCache("nodes",
+                        CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).maximumSize(200).build().asMap(), false),
+
                 // NEEDED FOR registry-core
                 new ConcurrentMapCache("resourceTypes"),
                 new ConcurrentMapCache("resourceTypesIndexFields")
