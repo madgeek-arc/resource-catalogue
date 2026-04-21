@@ -53,7 +53,7 @@
     {
       "label": "Type",
       "multivalued": false,
-      "name": "entity_type",
+      "name": "type",
       "path": "$.service.type",
       "type": "java.lang.String"
     },
