@@ -15,6 +15,48 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+    <profiles>
+        <profile>
+            <id>lot1</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/controllers/MailController.java</exclude>
+                                <exclude>**/controllers/registry/AdapterController.java</exclude>
+                                <exclude>**/controllers/registry/ConfigurationTemplateController.java</exclude>
+                                <exclude>**/controllers/registry/ConfigurationTemplateInstanceController.java</exclude>
+                                <exclude>**/controllers/registry/CSVController.java</exclude>
+                                <exclude>**/controllers/registry/DeployableApplicationController.java</exclude>
+                                <exclude>**/controllers/registry/OrganisationController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicAdapterController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicConfigurationTemplateInstanceController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicDeployableApplicationController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicOrganisationController.java</exclude>
+                                <exclude>**/controllers/registry/CatalogueController.java</exclude>
+                                <exclude>**/controllers/registry/DatasourceController.java</exclude>
+                                <exclude>**/controllers/registry/InteroperabilityRecordController.java</exclude>
+                                <exclude>**/controllers/registry/ResourceInteroperabilityRecordController.java</exclude>
+                                <exclude>**/controllers/registry/SecureResponseAdvice.java</exclude>
+                                <exclude>**/controllers/registry/ServiceController.java</exclude>
+                                <exclude>**/controllers/registry/TrainingResourceController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicDatasourceController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicInteroperabilityRecordController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicResourceInteroperabilityRecordController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicServiceController.java</exclude>
+                                <exclude>**/controllers/publicresources/PublicTrainingResourceController.java</exclude>
+                                <exclude>**/controllers/StatisticsController.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>gr.uoa.di.madgik</groupId>

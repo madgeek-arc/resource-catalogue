@@ -44,6 +44,24 @@
                     <artifactId>resource-catalogue-model-lot1</artifactId>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/service/AdapterService.java</exclude>
+                                <exclude>**/service/ConfigurationTemplateService.java</exclude>
+                                <exclude>**/service/ConfigurationTemplateInstanceService.java</exclude>
+                                <exclude>**/service/DeployableApplicationService.java</exclude>
+                                <exclude>**/service/OrganisationService.java</exclude>
+                                <exclude>**/utils/CSVService.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 

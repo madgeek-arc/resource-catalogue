@@ -92,6 +92,77 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-implicit:none</arg>
+                            </compilerArgs>
+                            <excludes>
+                                <exclude>**/config/security/InMemoryAuthoritiesMapper.java</exclude>
+                                <exclude>**/manager/AdapterManager.java</exclude>
+                                <exclude>**/manager/DeployableApplicationManager.java</exclude>
+                                <exclude>**/manager/OrganisationManager.java</exclude>
+                                <exclude>**/manager/aspects/PostProcessingAspect.java</exclude>
+                                <exclude>**/service/EmailService.java</exclude>
+                                <exclude>**/service/OIDCSecurityService.java</exclude>
+                                <exclude>**/utils/OrganisationCascadeLifecycleManager.java</exclude>
+                                <exclude>**/utils/RelationshipValidator.java</exclude>
+                                <exclude>**/manager/DatasourceManager.java</exclude>
+                                <exclude>**/manager/InteroperabilityRecordManager.java</exclude>
+                                <exclude>**/manager/ResourceCatalogueGenericManager.java</exclude>
+                                <exclude>**/manager/ServiceManager.java</exclude>
+                                <exclude>**/manager/TrainingResourceManager.java</exclude>
+                                <exclude>**/manager/aspects/PublicResourcesManagementAspect.java</exclude>
+                                <exclude>**/manager/CatalogueManager.java</exclude>
+                                <exclude>**/manager/ConfigurationTemplateInstanceManager.java</exclude>
+                                <exclude>**/manager/ConfigurationTemplateManager.java</exclude>
+                                <exclude>**/manager/CSVManager.java</exclude>
+                                <exclude>**/manager/pids/PidServiceRegistrationConsistency.java</exclude>
+                                <exclude>**/manager/PublicAdapterService.java</exclude>
+                                <exclude>**/manager/PublicConfigurationTemplateInstanceService.java</exclude>
+                                <exclude>**/manager/PublicDatasourceService.java</exclude>
+                                <exclude>**/manager/PublicDeployableApplicationService.java</exclude>
+                                <exclude>**/manager/PublicInteroperabilityRecordService.java</exclude>
+                                <exclude>**/manager/PublicOrganisationService.java</exclude>
+                                <exclude>**/manager/PublicServiceService.java</exclude>
+                                <exclude>**/manager/PublicTrainingResourceService.java</exclude>
+                                <exclude>**/manager/ResourceInteroperabilityRecordManager.java</exclude>
+                                <exclude>**/service/sync/AbstractSyncService.java</exclude>
+                                <exclude>**/service/sync/ProviderSync.java</exclude>
+                                <exclude>**/service/sync/ServiceSync.java</exclude>
+                                <exclude>**/service/sync/DatasourceSync.java</exclude>
+                                <exclude>**/service/sync/TrainingResourceSync.java</exclude>
+                                <exclude>**/manager/AbstractPublicResourceManager.java</exclude>
+                                <exclude>**/manager/ResourceCatalogueManager.java</exclude>
+                                <exclude>**/manager/PublicResourceInteroperabilityRecordService.java</exclude>
+                                <exclude>**/onboarding/flowable/WorkflowVariableMapper.java</exclude>
+                                <exclude>**/onboarding/flowable/delegates/OnboardResourceDelegate.java</exclude>
+                                <exclude>**/onboarding/flowable/delegates/GetCatalogueDelegate.java</exclude>
+                                <exclude>**/onboarding/flowable/delegates/GetOrganisationDelegate.java</exclude>
+                                <exclude>**/onboarding/flowable/delegates/UpdateResourceDelegate.java</exclude>
+                                <exclude>**/manager/VocabularyManager.java</exclude>
+                                <exclude>**/manager/aspects/MailManagementAspect.java</exclude>
+                                <exclude>**/manager/aspects/OnboardingManagementAspect.java</exclude>
+                                <exclude>**/manager/aspects/SupportManagementAspect.java</exclude>
+                                <exclude>**/manager/DefaultStatisticsManager.java</exclude>
+                                <exclude>**/manager/PublicConfigurationTemplateService.java</exclude>
+                                <exclude>**/utils/DefaultFacetLabelService.java</exclude>
+                                <exclude>**/utils/InternalToPublicConsistency.java</exclude>
+                            </excludes>
+                                <testExcludes>
+                                    <testExclude>**/utils/TestUtils.java</testExclude>
+                                    <testExclude>**/integration/LoggingInfoIntegrationTest.java</testExclude>
+                                    <testExclude>**/integration/ProviderIntegrationTest.java</testExclude>
+                                    <testExclude>**/manager/ServiceProviderRegistrationIT.java</testExclude>
+                                    <testExclude>**/unit/ProviderUnitTest.java</testExclude>
+                                    <testExclude>**/unit/ServiceUnitTest.java</testExclude>
+                                    <testExclude>**/unit/TrainingResourceUnitTest.java</testExclude>
+                                    <testExclude>**/unit/DatasourceUnitTest.java</testExclude>
+                                </testExcludes>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <version>3.5.0</version>
                         <executions>
