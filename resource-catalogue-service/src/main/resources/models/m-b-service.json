@@ -625,7 +625,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/provider/list",
+                  "url": "/api/organisation/list",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -684,7 +684,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/provider/list",
+                  "url": "/api/organisation/list",
                   "idField": "id",
                   "labelField": "name"
                 },
