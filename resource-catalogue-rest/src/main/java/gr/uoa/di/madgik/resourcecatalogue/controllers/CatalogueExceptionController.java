@@ -18,14 +18,10 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import gr.uoa.di.madgik.catalogue.controller.GenericExceptionController;
-import gr.uoa.di.madgik.catalogue.exception.ServerError;
+import io.micrometer.tracing.Tracer;
 import jakarta.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,34 +32,35 @@ import java.util.Set;
 @RestControllerAdvice
 public class CatalogueExceptionController extends GenericExceptionController {
 
+    public CatalogueExceptionController(ObjectProvider<Tracer> tracer) {
+        super(tracer);
+    }
+
     /**
-     * Transforms every thrown exception to a {@link ServerError} response.
+     * Transforms unreadable request bodies to a {@link ProblemDetail} response.
      *
      * @param req http servlet request
      * @param ex  the thrown exception
-     * @return {@link ServerError}
+     * @return {@link ProblemDetail}
      */
     @ExceptionHandler(value = HttpMessageNotReadableException.class, produces = MediaType.APPLICATION_JSON_VALUE)
-    protected ResponseEntity<ServerError> handleException(HttpServletRequest req, HttpMessageNotReadableException ex) {
+    protected ResponseEntity<ProblemDetail> handleException(HttpServletRequest req, HttpMessageNotReadableException ex) {
         HttpStatusCode status = HttpStatus.INTERNAL_SERVER_ERROR;
         String message = ex.getMessage();
 
-        switch (ex.getCause()) {
-            case null -> {}
-            case InvalidFormatException exception -> {
-                status = HttpStatus.BAD_REQUEST;
-                String field = exception.getPathReference();
-                field = field.substring(field.indexOf("[")).replaceAll("\"", "");
-                message = "Field %s: %s".formatted(field, exception.getOriginalMessage());
-            }
-            default -> {}
+        InvalidFormatException invalidFormatException = findCause(ex, InvalidFormatException.class);
+        if (invalidFormatException != null) {
+            status = HttpStatus.BAD_REQUEST;
+            String field = invalidFormatException.getPathReference();
+            field = field.substring(field.indexOf("[")).replaceAll("\"", "");
+            message = "Field %s: %s".formatted(field, invalidFormatException.getOriginalMessage());
         }
 
-        ServerError serverError = new ServerError(status, req, ex);
-        serverError.setMessage(message);
+        reportException(req, ex, status);
+        ProblemDetail problemDetail = buildProblemDetail(req, status, message);
         return ResponseEntity
                 .status(status)
-                .body(serverError);
+                .body(problemDetail);
     }
 
     /**
