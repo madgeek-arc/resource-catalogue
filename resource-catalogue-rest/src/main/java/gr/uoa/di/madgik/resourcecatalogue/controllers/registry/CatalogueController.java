@@ -275,8 +275,8 @@ public class CatalogueController {
             "{catalogueId}/provider/{providerId}",
             "{catalogueId}/organisation/{providerId}"
     })
-    public ResponseEntity<?> getCatalogueProvider(@PathVariable String catalogueId,
-                                                  @PathVariable String providerId) {
+    public ResponseEntity<?> getCatalogueOrganisation(@PathVariable String catalogueId,
+                                                      @PathVariable String providerId) {
         return new ResponseEntity<>(organisationService.get(providerId, catalogueId).getOrganisation(), HttpStatus.OK);
     }
 
@@ -300,9 +300,9 @@ public class CatalogueController {
             "{catalogueId}/provider/all",
             "{catalogueId}/organisation/all"
     })
-    public ResponseEntity<Paging<?>> getAllCatalogueProviders(@Parameter(hidden = true)
-                                                              @RequestParam MultiValueMap<String, Object> params,
-                                                              @PathVariable String catalogueId) {
+    public ResponseEntity<Paging<?>> getAllCatalogueOrganisations(@Parameter(hidden = true)
+                                                                  @RequestParam MultiValueMap<String, Object> params,
+                                                                  @PathVariable String catalogueId) {
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("organisation");
         ff.addFilter("catalogue_id", catalogueId);
@@ -353,9 +353,9 @@ public class CatalogueController {
             "{catalogueId}/organisation"
     })
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> addCatalogueProvider(@RequestBody LinkedHashMap<String, Object> provider,
-                                                  @PathVariable String catalogueId,
-                                                  @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> addCatalogueOrganisation(@RequestBody LinkedHashMap<String, Object> provider,
+                                                      @PathVariable String catalogueId,
+                                                      @Parameter(hidden = true) Authentication auth) {
         OrganisationBundle bundle = new OrganisationBundle();
         bundle.setOrganisation(provider);
         bundle.setCatalogueId(catalogueId);
@@ -385,10 +385,10 @@ public class CatalogueController {
             "{catalogueId}/organisation"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider['id'])")
-    public ResponseEntity<?> updateCatalogueProvider(@RequestBody LinkedHashMap<String, Object> provider,
-                                                     @PathVariable String catalogueId,
-                                                     @RequestParam(required = false) String comment,
-                                                     @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> updateCatalogueOrganisation(@RequestBody LinkedHashMap<String, Object> provider,
+                                                         @PathVariable String catalogueId,
+                                                         @RequestParam(required = false) String comment,
+                                                         @Parameter(hidden = true) Authentication auth) {
         String id = provider.get("id").toString();
         OrganisationBundle bundle = organisationService.get(id, catalogueId);
         bundle.setOrganisation(provider);
@@ -417,9 +417,9 @@ public class CatalogueController {
             "{catalogueId}/organisation/{providerId}"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #catalogueId)")
-    public ResponseEntity<?> deleteCatalogueProvider(@PathVariable String catalogueId,
-                                                     @PathVariable String providerId,
-                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<?> deleteCatalogueOrganisation(@PathVariable String catalogueId,
+                                                         @PathVariable String providerId,
+                                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         OrganisationBundle provider = organisationService.get(providerId, catalogueId);
         organisationService.delete(provider);
         logger.info("Deleted the Provider with id '{}' of the Catalogue '{}'", providerId, catalogueId);
@@ -432,11 +432,11 @@ public class CatalogueController {
             "{catalogueId}/organisation/audit/{providerId}"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<OrganisationBundle> auditProvider(@PathVariable String providerId,
-                                                            @PathVariable String catalogueId,
-                                                            @RequestParam(required = false) String comment,
-                                                            @RequestParam LoggingInfo.ActionType actionType,
-                                                            @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<OrganisationBundle> auditOrganisation(@PathVariable String providerId,
+                                                                @PathVariable String catalogueId,
+                                                                @RequestParam(required = false) String comment,
+                                                                @RequestParam LoggingInfo.ActionType actionType,
+                                                                @Parameter(hidden = true) Authentication auth) {
         OrganisationBundle provider = organisationService.audit(providerId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
