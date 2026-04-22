@@ -74,7 +74,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
@@ -84,6 +84,7 @@ public class SecurityConfig {
                                         "/logs/**",
                                         "/forms/**",
                                         "/dump/",
+                                        "/records/**",
                                         "/restore/",
                                         "/resources/**",
                                         "/resourceType/**",
