@@ -40,7 +40,7 @@ public class DefaultJmsService implements JmsService {
         this.jmsQueueTemplate = jmsQueueTemplate;
     }
 
-    @Retryable(value = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(value = 6000))
+    @Retryable(retryFor = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(value = 6000))
     public void convertAndSendTopic(String messageDestination, Object message) {
         if (jmsTopicTemplate != null) {
             logger.info("Sending JMS to topic: {}", messageDestination);
@@ -48,7 +48,7 @@ public class DefaultJmsService implements JmsService {
         }
     }
 
-    @Retryable(value = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(value = 6000))
+    @Retryable(retryFor = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(value = 6000))
     public void convertAndSendQueue(String messageDestination, Object message) {
         if (jmsQueueTemplate != null) {
             logger.info("Sending JMS to topic: {}", messageDestination);
