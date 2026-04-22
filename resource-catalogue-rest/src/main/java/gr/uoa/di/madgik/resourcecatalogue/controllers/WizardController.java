@@ -157,7 +157,7 @@ public class WizardController {
 
         for (File file : modelFiles) {
             try {
-                gr.uoa.di.madgik.catalogue.ui.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
+                gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.domain.Model.class);
                 boolean exists;
                 try {
                     exists = modelService.get(m.getId()) != null;
@@ -197,7 +197,7 @@ public class WizardController {
 
         for (File file : modelFiles) {
             try {
-                gr.uoa.di.madgik.catalogue.ui.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
+                gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.domain.Model.class);
 
                 boolean exists;
                 try {

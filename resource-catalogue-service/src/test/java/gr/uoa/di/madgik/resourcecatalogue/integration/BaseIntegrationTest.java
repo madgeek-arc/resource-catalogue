@@ -19,7 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.integration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
-import gr.uoa.di.madgik.catalogue.ui.domain.Model;
+import gr.uoa.di.madgik.catalogue.domain.Model;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
