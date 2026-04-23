@@ -41,10 +41,15 @@ public class FlowableWorkflowService implements WorkflowService {
         SUCCESS, FAILURE
     }
 
-    public record WorkflowResult(WorkflowStatus status, Integer code, String message) {}
+    public record WorkflowResult(WorkflowStatus status, Integer code, String message) {
+    }
 
     public <T extends Bundle> T onboard(String resourceType, T bundle, Authentication authentication) {
         String bpmnProcess = getBpmnProcess(resourceType);
+        if (bpmnProcess == null) {
+            bundle.markOnboard("pending", false, UserInfo.of(authentication), "Default onboarding.");
+            return bundle;
+        }
         Map<String, Object> vars = new HashMap<>();
         vars.put("resourceType", resourceType);
         helper.putResourceBundle(vars, bundle);
@@ -76,7 +81,7 @@ public class FlowableWorkflowService implements WorkflowService {
             case "service", "datasource", "training_resource", "deployable_application" -> "onboard-resource-flowable";
             case "adapter" -> "onboard-adapter-flowable";
             case "interoperability_record" -> "onboard-guideline-flowable";
-            default -> throw new IllegalStateException("Unhandled onboarding for resourceType: " + resourceType);
+            default -> null;
         };
     }
 

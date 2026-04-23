@@ -137,7 +137,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
 
 
         CatalogueBundle ret;
-        ret = super.add(catalogue, null);
+        ret = super.add(catalogue, auth);
         logger.debug("Adding Catalogue: {}", catalogue);
 
 //        emailService.sendEmailsToNewlyAddedCatalogueAdmins(catalogue, null);
