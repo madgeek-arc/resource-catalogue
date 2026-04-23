@@ -18,7 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.config;
 
 import gr.uoa.di.madgik.registry.service.AuditActorProvider;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -30,12 +30,10 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
-import java.util.Random;
 
 @Configuration
 @EnableAspectJAutoProxy
@@ -44,7 +42,7 @@ import java.util.Random;
 public class ServiceConfig {
 
     @Bean
-    public UrlPathHelper urlPathHelper() {
+    public UrlPathHelper urlPathHelper() { // TODO: keep or delete?
         UrlPathHelper urlPathHelper = new UrlPathHelper();
         urlPathHelper.setUrlDecode(false);
         return urlPathHelper;
