@@ -8,18 +8,19 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -53,10 +54,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     protected abstract String getResourceTypeName();
 
     protected ResourceCatalogueGenericManager(GenericResourceService genericResourceService,
-                                           IdCreator idCreator,
-                                           SecurityService securityService,
-                                           VocabularyService vocabularyService,
-                                           WorkflowService workflowService) {
+                                              IdCreator idCreator,
+                                              SecurityService securityService,
+                                              VocabularyService vocabularyService,
+                                              WorkflowService workflowService) {
         this.genericResourceService = genericResourceService;
         this.idCreator = idCreator;
         this.securityService = securityService;
@@ -234,6 +235,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             throw e;
         } catch (NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException(e);
+        } catch (IllegalStateException e) {
+            logger.warn(e.getMessage());
         }
         return ret;
     }

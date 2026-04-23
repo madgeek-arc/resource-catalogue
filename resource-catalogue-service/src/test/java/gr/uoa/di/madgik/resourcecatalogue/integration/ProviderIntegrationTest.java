@@ -41,7 +41,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -100,7 +99,10 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+
+
     /**
+     *
      * Test method for adding a provider to the database.
      * <p>
      * This test verifies the functionality of the {@code providerService.add} method by:

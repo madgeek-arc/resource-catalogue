@@ -1,0 +1,111 @@
+{
+  "indexFields": [
+    {
+      "multivalued": false,
+      "name": "resource_internal_id",
+      "path": "$.id",
+      "type": "java.lang.String",
+      "primaryKey": true
+    },
+    {
+      "multivalued": false,
+      "name": "name",
+      "path": "$.name",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "description",
+      "path": "$.description",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "resourceType",
+      "path": "$.resourceType",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "type",
+      "path": "$.type",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "subType",
+      "path": "$.subType",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": false,
+      "name": "creationDate",
+      "path": "$.creationDate",
+      "type": "java.util.Date"
+    },
+    {
+      "multivalued": false,
+      "name": "modificationDate",
+      "path": "$.modificationDate",
+      "type": "java.util.Date"
+    },
+    {
+      "multivalued": true,
+      "name": "allSectionIds",
+      "path": "$.sections[*]..subSections[*].id",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "allSectionNames",
+      "path": "$.sections[*]..subSections[*].name",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "sectionIds",
+      "path": "$.sections[*].id",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "sectionNames",
+      "path": "$.sections[*].name",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "subSectionsIds",
+      "path": "$.sections[*].subSections[*].id",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "subSectionsNames",
+      "path": "$.sections[*].subSections[*].name",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "fields",
+      "path": "$..fields[*].id",
+      "type": "java.lang.String"
+    },
+    {
+      "multivalued": true,
+      "name": "fieldNames",
+      "path": "$..fields[*].name",
+      "type": "java.lang.String"
+    }
+  ],
+  "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
+  "name": "model",
+  "aliases": [
+    "resourceTypes"
+  ],
+  "payloadType": "json",
+  "properties": {
+    "class": "gr.uoa.di.madgik.catalogue.ui.domain.Model"
+  },
+  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+}
