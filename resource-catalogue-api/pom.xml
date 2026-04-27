@@ -34,7 +34,20 @@
                     <groupId>gr.uoa.di.madgik</groupId>
                     <artifactId>resource-catalogue-model</artifactId>
                 </dependency>
-        </dependencies>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/service/ProviderService.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>lot1</id>
@@ -56,6 +69,7 @@
                                 <exclude>**/service/ConfigurationTemplateInstanceService.java</exclude>
                                 <exclude>**/service/DeployableApplicationService.java</exclude>
                                 <exclude>**/service/OrganisationService.java</exclude>
+                                <exclude>**/service/ResourceInteroperabilityRecordService.java</exclude>
                                 <exclude>**/utils/CSVService.java</exclude>
                             </excludes>
                         </configuration>

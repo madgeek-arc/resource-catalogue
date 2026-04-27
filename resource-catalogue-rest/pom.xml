@@ -17,6 +17,25 @@
     </licenses>
     <profiles>
         <profile>
+            <id>beyond</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/controllers/lot1/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>lot1</id>
             <build>
                 <plugins>
@@ -26,6 +45,7 @@
                         <configuration>
                             <excludes>
                                 <exclude>**/controllers/MailController.java</exclude>
+                                <exclude>**/controllers/WizardController.java</exclude>
                                 <exclude>**/controllers/registry/AdapterController.java</exclude>
                                 <exclude>**/controllers/registry/ConfigurationTemplateController.java</exclude>
                                 <exclude>**/controllers/registry/ConfigurationTemplateInstanceController.java</exclude>
@@ -49,6 +69,9 @@
                                 <exclude>**/controllers/publicresources/PublicServiceController.java</exclude>
                                 <exclude>**/controllers/publicresources/PublicTrainingResourceController.java</exclude>
                                 <exclude>**/controllers/StatisticsController.java</exclude>
+                                <exclude>**/controllers/registry/sqaaas/SqaaasController.java</exclude>
+                                <exclude>**/controllers/registry/sqaaas/SqaaasClient.java</exclude>
+                                <exclude>**/controllers/registry/sqaaas/SqaaasAssessmentService.java</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

@@ -356,6 +356,8 @@
                     </execution>
                 </executions>
                 <configuration>
+<!--                    <dataDirectory>${user.home}/.owasp/dependency-check-data</dataDirectory>-->
+                    <nvdValidForHours>24</nvdValidForHours>
                     <failBuildOnCVSS>7.6</failBuildOnCVSS>
                     <formats>
                         <format>JSON</format>

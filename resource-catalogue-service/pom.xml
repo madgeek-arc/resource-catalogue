@@ -41,9 +41,25 @@
                     <groupId>gr.uoa.di.madgik</groupId>
                     <artifactId>resource-catalogue-matomo</artifactId>
                 </dependency>
+                <dependency>
+                    <groupId>org.flowable</groupId>
+                    <artifactId>flowable-spring-boot-starter</artifactId>
+                    <version>7.1.0</version>
+                </dependency>
             </dependencies>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/config/security/SimpleAuthoritiesMapper.java</exclude>
+                                <exclude>**/manager/ProviderManager.java</exclude>
+                                <exclude>**/manager/lot1/*.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
@@ -135,10 +151,14 @@
                                 <exclude>**/manager/AbstractPublicResourceManager.java</exclude>
                                 <exclude>**/manager/ResourceCatalogueManager.java</exclude>
                                 <exclude>**/manager/PublicResourceInteroperabilityRecordService.java</exclude>
+                                <exclude>**/onboarding/flowable/FlowableDataSourceConfig.java</exclude>
+                                <exclude>**/onboarding/flowable/FlowableWorkflowService.java</exclude>
                                 <exclude>**/onboarding/flowable/WorkflowVariableMapper.java</exclude>
-                                <exclude>**/onboarding/flowable/delegates/OnboardResourceDelegate.java</exclude>
                                 <exclude>**/onboarding/flowable/delegates/GetCatalogueDelegate.java</exclude>
                                 <exclude>**/onboarding/flowable/delegates/GetOrganisationDelegate.java</exclude>
+                                <exclude>**/onboarding/flowable/delegates/MarkWorkflowResultDelegate.java</exclude>
+                                <exclude>**/onboarding/flowable/delegates/OnboardResourceDelegate.java</exclude>
+                                <exclude>**/onboarding/flowable/delegates/SetKeyValueDelegate.java</exclude>
                                 <exclude>**/onboarding/flowable/delegates/UpdateResourceDelegate.java</exclude>
                                 <exclude>**/manager/VocabularyManager.java</exclude>
                                 <exclude>**/manager/aspects/MailManagementAspect.java</exclude>
@@ -407,12 +427,6 @@
             <version>1.11.0</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.flowable</groupId>
-            <artifactId>flowable-spring-boot-starter</artifactId>
-            <version>7.1.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>
