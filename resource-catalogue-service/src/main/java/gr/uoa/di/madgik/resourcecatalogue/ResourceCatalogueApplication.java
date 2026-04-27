@@ -16,12 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue;
 
-import org.flowable.spring.boot.FlowableJpaAutoConfiguration;
-import org.flowable.spring.boot.eventregistry.EventRegistryAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(exclude = {EventRegistryAutoConfiguration.class, FlowableJpaAutoConfiguration.class})
+@SpringBootApplication
 public class ResourceCatalogueApplication {
 
     public static void main(String[] args) {
