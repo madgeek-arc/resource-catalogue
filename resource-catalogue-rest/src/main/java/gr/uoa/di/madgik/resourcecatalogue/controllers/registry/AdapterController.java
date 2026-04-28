@@ -59,9 +59,6 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @Value("${auditing.interval:6}")
     private int auditingInterval;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public AdapterController(AdapterService adapterService) {
         super(adapterService, "Adapter");
     }
@@ -76,7 +73,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        AdapterBundle bundle = service.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getAdapter(), HttpStatus.OK);
     }
 
@@ -86,7 +83,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
                                                    @PathVariable String suffix,
                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        AdapterBundle bundle = service.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -179,7 +176,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = adapter.get("id").toString();
-        AdapterBundle bundle = service.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id);
         bundle.setAdapter(adapter);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Adapter with id '{}'", id);
@@ -203,7 +200,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        AdapterBundle bundle = service.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Adapter with id '{}'", bundle.getId());
@@ -266,10 +263,9 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @Operation(summary = "Get the LoggingInfo History of a specific Adapter.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
-                                                                @PathVariable String suffix,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        AdapterBundle bundle = service.get(id, catalogueId);
+        AdapterBundle bundle = service.get(id);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }

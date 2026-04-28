@@ -84,7 +84,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     @Override
     public ConfigurationTemplateBundle add(ConfigurationTemplateBundle ct, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(
-                (String) ct.getConfigurationTemplate().get("interoperabilityRecordId"), catalogueId);
+                (String) ct.getConfigurationTemplate().get("interoperabilityRecordId"));
         OrganisationBundle organisationBundle = organisationService.get(
                 (String) interoperabilityRecordBundle.getInteroperabilityRecord().get("resourceOwner"),
                 interoperabilityRecordBundle.getCatalogueId());

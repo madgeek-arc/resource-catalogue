@@ -58,9 +58,6 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
 
     @Value("${auditing.interval:6}")
     private int auditingInterval;
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     DeployableApplicationController(DeployableApplicationService deployableApplicationService) {
         super(deployableApplicationService, "Deployable Application");
     }
@@ -75,7 +72,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getDeployableApplication(), HttpStatus.OK);
     }
 
@@ -85,7 +82,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
                                                                  @PathVariable String suffix,
                                                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -178,7 +175,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = deployableApplication.get("id").toString();
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         bundle.setDeployableApplication(deployableApplication);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Deployable Application with id '{}'", deployableApplication.get("id"));
@@ -202,7 +199,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Deployable Application with id '{}'", bundle.getId());

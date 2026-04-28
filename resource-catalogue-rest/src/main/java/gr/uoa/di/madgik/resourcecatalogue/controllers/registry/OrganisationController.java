@@ -60,9 +60,6 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     protected int maxQuantity;
     @Value("${auditing.interval:6}")
     private int auditingInterval;
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     OrganisationController(OrganisationService organisationService) {
         super(organisationService, "Organisation");
     }
@@ -78,7 +75,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
                                  @SuppressWarnings("unused")
                                  @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getOrganisation(), HttpStatus.OK);
     }
 
@@ -89,7 +86,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
                                                         @SuppressWarnings("unused")
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -182,7 +179,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = provider.get("id").toString();
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         bundle.setOrganisation(provider);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Provider with id '{}'", id);
@@ -205,7 +202,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle provider = service.get(id, catalogueId);
+        OrganisationBundle provider = service.get(id);
 
         service.delete(provider);
         logger.info("Deleted the Provider with id '{}'", provider.getId());

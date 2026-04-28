@@ -51,9 +51,6 @@ public class ResourceInteroperabilityRecordController {
     private final ResourceInteroperabilityRecordService service;
 //    private final ConfigurationTemplateInstanceService ctiService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public ResourceInteroperabilityRecordController(ResourceInteroperabilityRecordService service
             /*ConfigurationTemplateInstanceService ctiService*/) {
         this.service = service;
@@ -147,7 +144,7 @@ public class ResourceInteroperabilityRecordController {
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = rir.get("id").toString();
-        ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id);
         service.checkAndRemoveCTI(bundle.getResourceInteroperabilityRecord(), rir);
         bundle.setResourceInteroperabilityRecord(rir);
         bundle = service.update(bundle, comment, auth);
@@ -164,7 +161,7 @@ public class ResourceInteroperabilityRecordController {
                                         @PathVariable String rirSuffix,
                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String resourceInteroperabilityRecordId = rirPrefix + "/" + rirSuffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(resourceInteroperabilityRecordId, catalogueId);
+        ResourceInteroperabilityRecordBundle bundle = service.get(resourceInteroperabilityRecordId);
         if (bundle == null) {
             return new ResponseEntity<>(HttpStatus.GONE);
         }

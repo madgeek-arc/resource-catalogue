@@ -91,7 +91,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         bundle.setIdentifiers(identifiers);
     }
 
-    //TODO: we don't need this
     @Override
     public T get(String id) {
         return genericResourceService.get(
@@ -101,6 +100,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         );
     }
 
+    //TODO: we don't need this
     @Override
     public T get(String id, String catalogueId) {
         if (catalogueId != null && !catalogueId.isBlank()) {

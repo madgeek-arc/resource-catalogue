@@ -65,9 +65,6 @@ public class InteroperabilityRecordController
     @org.springframework.beans.factory.annotation.Value("${auditing.interval:6}")
     private int auditingInterval;
 
-    @org.springframework.beans.factory.annotation.Value("${catalogue.id}")
-    private String catalogueId;
-
     InteroperabilityRecordController(InteroperabilityRecordService interoperabilityRecordService,
                                      @Lazy ResourceInteroperabilityRecordService rirService) {
         super(interoperabilityRecordService, "Interoperability Record");
@@ -85,7 +82,7 @@ public class InteroperabilityRecordController
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getInteroperabilityRecord(), HttpStatus.OK);
     }
 
@@ -96,7 +93,7 @@ public class InteroperabilityRecordController
                                                                   @PathVariable String suffix,
                                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -198,7 +195,7 @@ public class InteroperabilityRecordController
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = guideline.get("id").toString();
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         bundle.setInteroperabilityRecord(guideline);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Interoperability Record with id '{}'", guideline.get("id"));
@@ -224,7 +221,7 @@ public class InteroperabilityRecordController
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Interoperability Record with id '{}'", bundle.getId());

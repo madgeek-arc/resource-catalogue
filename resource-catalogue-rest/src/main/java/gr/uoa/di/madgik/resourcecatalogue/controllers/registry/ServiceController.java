@@ -58,9 +58,6 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Value("${auditing.interval:6}")
     private int auditingInterval;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     ServiceController(ServiceService serviceService) {
         super(serviceService, "Service");
     }
@@ -76,7 +73,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
     }
 
@@ -87,7 +84,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                                    @PathVariable String suffix,
                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -204,7 +201,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = serviceMap.get("id").toString();
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         bundle.setService(serviceMap);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Service with id '{}'", serviceMap.get("id"));
@@ -230,7 +227,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Service with id '{}'", bundle.getId());

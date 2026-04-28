@@ -50,9 +50,6 @@ public class ConfigurationTemplateInstanceController
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceController.class);
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService service) {
         super(service, "Configuration Template Instance");
     }
@@ -161,7 +158,7 @@ public class ConfigurationTemplateInstanceController
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = cti.get("id").toString();
-        ConfigurationTemplateInstanceBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id);
         bundle.setConfigurationTemplateInstance(cti);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Configuration Template Instance with id '{}'", cti.get("id"));
@@ -175,7 +172,7 @@ public class ConfigurationTemplateInstanceController
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Configuration Template Instance with id '{}'", bundle.getId());

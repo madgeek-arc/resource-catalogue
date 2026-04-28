@@ -228,7 +228,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }

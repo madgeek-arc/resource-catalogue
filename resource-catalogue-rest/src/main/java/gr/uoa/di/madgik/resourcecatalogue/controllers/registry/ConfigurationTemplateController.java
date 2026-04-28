@@ -52,8 +52,6 @@ public class ConfigurationTemplateController {
 
     private final ConfigurationTemplateService service;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
 
     public ConfigurationTemplateController(ConfigurationTemplateService service) {
         this.service = service;
@@ -132,7 +130,7 @@ public class ConfigurationTemplateController {
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = ct.get("id").toString();
-        ConfigurationTemplateBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateBundle bundle = service.get(id);
         bundle.setConfigurationTemplate(ct);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Configuration Template with id '{}'", ct.get("id"));
@@ -146,7 +144,7 @@ public class ConfigurationTemplateController {
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Configuration Template with id '{}'", bundle.getId());

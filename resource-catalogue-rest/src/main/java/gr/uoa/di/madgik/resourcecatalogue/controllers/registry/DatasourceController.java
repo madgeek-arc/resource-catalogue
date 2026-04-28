@@ -67,9 +67,6 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @Value("${auditing.interval:6}")
     private int auditingInterval;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public DatasourceController(DatasourceService datasourceService,
                                 GenericResourceService genericResourceService,
                                 OpenAIREDatasourceService openAIREDatasourceService) {
@@ -88,7 +85,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getDatasource(), HttpStatus.OK);
     }
 
@@ -98,7 +95,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
                                                       @PathVariable String suffix,
                                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -190,7 +187,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = datasource.get("id").toString();
-        DatasourceBundle bundle = service.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id);
         bundle.setDatasource(datasource);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Datasource with id '{}'", datasource.get("id"));
@@ -214,7 +211,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle datasource = service.get(id, catalogueId);
+        DatasourceBundle datasource = service.get(id);
 
         service.delete(datasource);
         logger.info("Deleted the Datasource with id '{}'", datasource.getId());

@@ -49,8 +49,6 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private final OrganisationService organisationService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -166,7 +164,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }

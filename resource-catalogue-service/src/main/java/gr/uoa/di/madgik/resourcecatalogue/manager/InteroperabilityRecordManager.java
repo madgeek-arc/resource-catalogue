@@ -55,8 +55,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -173,7 +171,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }

@@ -57,9 +57,6 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @Value("${auditing.interval:6}")
     private int auditingInterval;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     TrainingResourceController(TrainingResourceService trainingResourceService) {
         super(trainingResourceService, "Training Resource");
     }
@@ -74,7 +71,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        TrainingResourceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
     }
 
@@ -84,7 +81,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                                             @PathVariable String suffix,
                                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        TrainingResourceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -177,7 +174,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = trainingResource.get("id").toString();
-        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        TrainingResourceBundle bundle = service.get(id);
         bundle.settTrainingResource(trainingResource);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Training Resource with id '{}'", trainingResource.get("id"));
@@ -201,7 +198,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        TrainingResourceBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Training Resource with id '{}'", bundle.getId());
