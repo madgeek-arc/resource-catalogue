@@ -79,28 +79,30 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                              Class<? extends HttpMessageConverter<?>> aClass,
                              ServerHttpRequest serverHttpRequest,
                              ServerHttpResponse serverHttpResponse) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (t != null) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            // TODO: remove when implemented correctly
+            fixNodeFacets(t, resolveNodeName());
 
-        // TODO: remove when implemented correctly
-        fixNodeFacets(t, resolveNodeName());
-
-        if (t != null && !securityService.hasRole(auth, "ROLE_ADMIN") && !securityService.hasRole(auth, "ROLE_EPOT")) {
-            logger.trace("User is not Admin nor EPOT: attempting to remove sensitive information");
-            if (Collection.class.isAssignableFrom(t.getClass())) {
-                for (T object : ((Collection<T>) t)) {
-                    modifyContent(object, auth);
+            if (t != null && !securityService.hasRole(auth, "ROLE_ADMIN") && !securityService.hasRole(auth, "ROLE_EPOT")) {
+                logger.trace("User is not Admin nor EPOT: attempting to remove sensitive information");
+                if (Collection.class.isAssignableFrom(t.getClass())) {
+                    for (T object : ((Collection<T>) t)) {
+                        modifyContent(object, auth);
+                    }
+                } else if (Paging.class.isAssignableFrom(t.getClass())) {
+                    for (T object : ((Paging<T>) t).getResults()) {
+                        modifyContent(object, auth);
+                    }
+                } else {
+                    modifyContent(t, auth);
                 }
-            } else if (Paging.class.isAssignableFrom(t.getClass())) {
-                for (T object : ((Paging<T>) t).getResults()) {
-                    modifyContent(object, auth);
-                }
-            } else {
-                modifyContent(t, auth);
+                logger.debug("Final Object: {}", t);
             }
-            logger.debug("Final Object: {}", t);
-        }
 
-        return t;
+            return t;
+        }
+        return null;
     }
 
     private String resolveNodeName() {
