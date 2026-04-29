@@ -66,7 +66,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.trainingResourceIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.trainingResourceIsActive(#prefix+'/'+#suffix, null)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -141,7 +141,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @Operation(summary = "Adds a new Training Resource.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #trainingResource, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #trainingResource, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                  @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
@@ -239,12 +239,11 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<TrainingResourceBundle> audit(@PathVariable String prefix,
                                                         @PathVariable String suffix,
-                                                        @RequestParam("catalogueId") String catalogueId,
                                                         @RequestParam(required = false) String comment,
                                                         @RequestParam LoggingInfo.ActionType actionType,
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.audit(id, catalogueId, comment, actionType, auth);
+        TrainingResourceBundle bundle = service.audit(id, null, comment, actionType, auth);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -252,19 +251,17 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public TrainingResourceBundle suspend(@RequestParam String id,
-                                          @RequestParam String catalogueId,
                                           @RequestParam boolean suspend,
                                           @Parameter(hidden = true) Authentication auth) {
-        return service.setSuspend(id, catalogueId, suspend, auth);
+        return service.setSuspend(id, null, suspend, auth);
     }
 
     @Operation(summary = "Get the LoggingInfo History of a specific Training Resource.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
-                                                                @PathVariable String suffix,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        TrainingResourceBundle bundle = service.get(id);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -298,11 +295,9 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     public ResponseEntity<Paging<TrainingResourceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                         @PathVariable String prefix,
                                                                         @PathVariable String suffix,
-                                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("catalogue_id", catalogueId);
         return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
     }
 

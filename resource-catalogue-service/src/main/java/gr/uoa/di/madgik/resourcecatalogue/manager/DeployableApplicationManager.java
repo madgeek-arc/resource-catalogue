@@ -54,8 +54,6 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -224,7 +222,6 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<DeployableApplicationBundle> allProviderDeployableApplication = getAll(ff, auth).getResults();
         for (DeployableApplicationBundle bundle : allProviderDeployableApplication) {

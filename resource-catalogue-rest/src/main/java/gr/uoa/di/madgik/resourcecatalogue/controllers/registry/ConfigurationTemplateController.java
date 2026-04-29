@@ -28,7 +28,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,20 +59,18 @@ public class ConfigurationTemplateController {
     @Operation(summary = "Returns the Configuration Template with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
     public ResponseEntity<?> get(@PathVariable String prefix,
-                                 @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                 @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ConfigurationTemplateBundle> getBundle(@PathVariable String prefix,
-                                                                 @PathVariable String suffix,
-                                                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                 @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 

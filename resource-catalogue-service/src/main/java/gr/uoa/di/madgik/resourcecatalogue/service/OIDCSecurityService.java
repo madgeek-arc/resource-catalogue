@@ -33,7 +33,7 @@ import java.util.*;
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
 
-    //    private final CatalogueService catalogueService;
+    private final CatalogueService catalogueService;
     private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
@@ -49,7 +49,7 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${catalogue.id}")
     private String catalogueId;
 
-    public OIDCSecurityService(/*@Lazy CatalogueService catalogueService,*/
+    public OIDCSecurityService(@Lazy CatalogueService catalogueService,
             @Lazy OrganisationService organisationService,
             @Lazy ServiceService serviceService,
             @Lazy DatasourceService datasourceService,
@@ -58,7 +58,7 @@ public class OIDCSecurityService implements SecurityService {
             @Lazy DeployableApplicationService deployableApplicationService,
             @Lazy AdapterService adapterService,
             CatalogueProperties properties) {
-//        this.catalogueService = catalogueService;
+        this.catalogueService = catalogueService;
         this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
@@ -296,9 +296,6 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean providerCanAddResources(Authentication auth, LinkedHashMap<String, Object> resource, String catalogueId) {
         String providerId = (String) resource.get("resourceOwner");
-        if (catalogueId == null || catalogueId.isEmpty()) {
-            catalogueId = this.catalogueId;
-        }
         OrganisationBundle provider = organisationService.get(providerId, catalogueId);
         return canAddResources(auth, provider);
     }
@@ -363,6 +360,12 @@ public class OIDCSecurityService implements SecurityService {
     public boolean datasourceIsActive(String id, String catalogueId) {
         DatasourceBundle datasourceBundle = datasourceService.get(id, catalogueId);
         return datasourceBundle.isActive();
+    }
+
+    @Override
+    public boolean catalogueIsActive(String id) {
+        CatalogueBundle catalogueBundle = catalogueService.get(id);
+        return catalogueBundle.isActive();
     }
 
     @Override

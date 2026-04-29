@@ -77,7 +77,7 @@ public class InteroperabilityRecordController
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.guidelineIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.guidelineIsActive(#prefix+'/'+#suffix, null)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -158,7 +158,7 @@ public class InteroperabilityRecordController
     @Operation(summary = "Adds a new Interoperability Record.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #guideline, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #guideline, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> guideline,
                                  @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle bundle = new InteroperabilityRecordBundle();
@@ -265,12 +265,11 @@ public class InteroperabilityRecordController
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<InteroperabilityRecordBundle> audit(@PathVariable String prefix,
                                                               @PathVariable String suffix,
-                                                              @RequestParam("catalogueId") String catalogueId,
                                                               @RequestParam(required = false) String comment,
                                                               @RequestParam LoggingInfo.ActionType actionType,
                                                               @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.audit(id, catalogueId, comment, actionType, auth);
+        InteroperabilityRecordBundle bundle = service.audit(id, null, comment, actionType, auth);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -279,20 +278,18 @@ public class InteroperabilityRecordController
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public InteroperabilityRecordBundle suspend(@RequestParam String id,
-                                                @RequestParam String catalogueId,
                                                 @RequestParam boolean suspend,
                                                 @Parameter(hidden = true) Authentication auth) {
-        return service.setSuspend(id, catalogueId, suspend, auth);
+        return service.setSuspend(id, null, suspend, auth);
     }
 
     @Tag(name = "InteroperabilityRecordRead")
     @Operation(summary = "Get the LoggingInfo History of a specific Interoperability Record.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
-                                                                @PathVariable String suffix,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -330,11 +327,9 @@ public class InteroperabilityRecordController
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                               @PathVariable String prefix,
                                                                               @PathVariable String suffix,
-                                                                              @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                               @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("catalogue_id", catalogueId);
         return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
     }
 

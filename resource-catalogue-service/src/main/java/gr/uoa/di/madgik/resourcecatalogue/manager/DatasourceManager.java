@@ -53,8 +53,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -95,7 +93,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     @Transactional
 //    @TriggersAspects({"AfterServiceUpdateEmails"})
     public DatasourceBundle update(DatasourceBundle datasource, String comment, Authentication auth) {
-        DatasourceBundle existing = get(datasource.getId(), datasource.getCatalogueId());
+        DatasourceBundle existing = get(datasource.getId());
         // check if there are actual changes in the Service
         if (datasource.equals(existing)) {
             return datasource;
@@ -116,8 +114,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     private void checkAndResetDatasourceOnboarding(DatasourceBundle datasource, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"));
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (datasource.getStatus().equals(vocabularyService.get("rejected").getId())) {
             if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
@@ -158,8 +155,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     }
 
     private void updateProviderTemplateStatus(DatasourceBundle datasource, String status, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"));
         switch (status) {
             case "pending":
                 provider.setTemplateStatus("pending template");
@@ -180,8 +176,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     public DatasourceBundle setActive(String id, Boolean active, Authentication auth) {
         DatasourceBundle existing = get(id);
 
-        OrganisationBundle provider = organisationService.get((String) existing.getDatasource().get("resourceOwner"),
-                existing.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) existing.getDatasource().get("resourceOwner"));
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Datasource, as its Provider is inactive", HttpStatus.CONFLICT);
         }
@@ -210,8 +205,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         DatasourceBundle datasource = get(id);
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"));
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
         emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(datasource, provider);
     }
@@ -243,7 +237,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<DatasourceBundle> allProviderServices = getAll(ff, auth).getResults();
         for (DatasourceBundle bundle : allProviderServices) {

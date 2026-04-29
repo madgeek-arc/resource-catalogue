@@ -97,7 +97,6 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     }
 
 
-
     /**
      *
      * Test method for adding a provider to the database.

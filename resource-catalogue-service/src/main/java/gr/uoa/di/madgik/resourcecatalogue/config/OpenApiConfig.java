@@ -34,7 +34,7 @@ public class OpenApiConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenApiConfig.class);
 
-    @Value("${catalogue.id}")
+    @Value("${node.name}")
     String projectName;
 
     @Value("${catalogue.version}")

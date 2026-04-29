@@ -53,8 +53,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -85,7 +83,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     @Transactional
 //    @TriggersAspects({"AfterServiceUpdateEmails"})
     public ServiceBundle update(ServiceBundle service, String comment, Authentication auth) {
-        ServiceBundle existing = get(service.getId(), service.getCatalogueId());
+        ServiceBundle existing = get(service.getId());
         // check if there are actual changes in the Service
         if (service.equals(existing)) {
             return service;
@@ -106,8 +104,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     private void checkAndResetServiceOnboarding(ServiceBundle service, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
-                service.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"));
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (service.getStatus().equals(vocabularyService.get("rejected").getId())) {
             if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
@@ -148,8 +145,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     }
 
     private void updateProviderTemplateStatus(ServiceBundle service, String status, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
-                service.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"));
         switch (status) {
             case "pending":
                 provider.setTemplateStatus("pending template");
@@ -170,8 +166,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     public ServiceBundle setActive(String id, Boolean active, Authentication auth) {
         ServiceBundle existing = get(id);
 
-        OrganisationBundle provider = organisationService.get((String) existing.getService().get("resourceOwner"),
-                existing.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) existing.getService().get("resourceOwner"));
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Service, as its Provider is inactive", HttpStatus.CONFLICT);
         }
@@ -200,8 +195,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         ServiceBundle service = get(id);
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
-                service.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"));
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
         emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider);
     }
@@ -232,7 +226,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<ServiceBundle> allProviderServices = getAll(ff, auth).getResults();
         for (ServiceBundle bundle : allProviderServices) {

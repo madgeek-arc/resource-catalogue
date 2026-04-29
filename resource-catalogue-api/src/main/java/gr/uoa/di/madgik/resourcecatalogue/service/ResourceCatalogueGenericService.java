@@ -12,6 +12,13 @@ public interface ResourceCatalogueGenericService<T extends Bundle>
         extends BundleOperations<T>, ResourceService<T>, DraftService<T> {
 
     /**
+     *
+     * @param id Resource ID
+     * @return {@link T}
+     */
+    T get(String id);
+
+    /**
      * Update a resource providing a meaningful comment
      *
      * @param bundle  Bundle

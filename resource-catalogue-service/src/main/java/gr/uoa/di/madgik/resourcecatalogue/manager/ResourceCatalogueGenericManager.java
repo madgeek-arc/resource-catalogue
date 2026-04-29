@@ -11,7 +11,6 @@ import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -22,6 +21,7 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -50,8 +50,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Autowired
     private FacetLabelService facetLabelService;
 
-    @Value("${catalogue.id}")
-    protected String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -71,7 +69,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     public void createIdentifiers(Bundle bundle) {
         String catalogueId = bundle.getCatalogueId();
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
+        if (catalogueId == null || catalogueId.isEmpty()) {
             this.createIdentifiers(bundle, getResourceTypeName(), false);
             bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
@@ -96,11 +94,11 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         return genericResourceService.get(
                 getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", id),
+                //TODO: new SearchService.KeyValue("catalogue_id", null), is it legit?
                 new SearchService.KeyValue("published", "false")
         );
     }
 
-    //TODO: we don't need this
     @Override
     public T get(String id, String catalogueId) {
         if (catalogueId != null && !catalogueId.isBlank()) {
@@ -109,9 +107,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                     new SearchService.KeyValue("catalogue_id", catalogueId),
                     new SearchService.KeyValue("published", "false"));
         }
-        return genericResourceService.get(getResourceTypeName(),
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "false"));
+        return get(id);
     }
 
     //TODO: probably we do not need this IF we use the same get for drafts and non-drafts
@@ -161,19 +157,18 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     @Override
     public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) {
-        final String effectiveCatalogueId = catalogueId != null ? catalogueId : this.catalogueId;
         List<Bundle> bundles = Stream.concat(
-                this.getAll(createFacetFilter(effectiveCatalogueId, false, getResourceTypeName()))
+                this.getAll(createFacetFilter(catalogueId, false, getResourceTypeName()))
                         .getResults()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(c -> (Bundle) c),
-                this.getAll(createFacetFilter(effectiveCatalogueId, true, getResourceTypeName()))
+                this.getAll(createFacetFilter(catalogueId, true, getResourceTypeName()))
                         .getResults()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(c -> (Bundle) c)
-                        .filter(b -> !Objects.equals(b.getCatalogueId(), effectiveCatalogueId))
+                        .filter(b -> !Objects.equals(b.getCatalogueId(), catalogueId))
         ).toList();
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = bundles.stream()

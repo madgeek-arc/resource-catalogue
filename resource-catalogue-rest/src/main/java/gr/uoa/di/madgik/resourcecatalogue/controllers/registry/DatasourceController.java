@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -61,17 +60,14 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     private static final Logger logger = LoggerFactory.getLogger(DatasourceController.class);
 
-    private final GenericResourceService genericResourceService;
     private final OpenAIREDatasourceService openAIREDatasourceService;
 
     @Value("${auditing.interval:6}")
     private int auditingInterval;
 
     public DatasourceController(DatasourceService datasourceService,
-                                GenericResourceService genericResourceService,
                                 OpenAIREDatasourceService openAIREDatasourceService) {
         super(datasourceService, "Datasource");
-        this.genericResourceService = genericResourceService;
         this.openAIREDatasourceService = openAIREDatasourceService;
     }
 
@@ -80,7 +76,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.datasourceIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.datasourceIsActive(#prefix+'/'+#suffix, null)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -153,7 +149,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @Operation(summary = "Adds a new Datasource.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #datasource, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #datasource, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> datasource,
                                  @RequestParam(required = false) String openaireId,
                                  @Parameter(hidden = true) Authentication auth) {
@@ -252,12 +248,11 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<DatasourceBundle> audit(@PathVariable String prefix,
                                                   @PathVariable String suffix,
-                                                  @RequestParam("catalogueId") String catalogueId,
                                                   @RequestParam(required = false) String comment,
                                                   @RequestParam LoggingInfo.ActionType actionType,
                                                   @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.audit(id, catalogueId, comment, actionType, auth);
+        DatasourceBundle bundle = service.audit(id, null, comment, actionType, auth);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -265,19 +260,17 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public DatasourceBundle suspend(@RequestParam String id,
-                                    @RequestParam String catalogueId,
                                     @RequestParam boolean suspend,
                                     @Parameter(hidden = true) Authentication auth) {
-        return service.setSuspend(id, catalogueId, suspend, auth);
+        return service.setSuspend(id, null, suspend, auth);
     }
 
     @Operation(summary = "Get the LoggingInfo History of a specific Datasource.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
-                                                                @PathVariable String suffix,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        DatasourceBundle bundle = service.get(id, catalogueId);
+        DatasourceBundle bundle = service.get(id);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -311,11 +304,9 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     public ResponseEntity<Paging<DatasourceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                   @PathVariable String prefix,
                                                                   @PathVariable String suffix,
-                                                                  @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("catalogue_id", catalogueId);
         return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
     }
 
@@ -337,12 +328,10 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     public ResponseEntity<Paging<?>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                         @PathVariable String prefix,
                                                         @PathVariable String suffix,
-                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("service_providers", id);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("active", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);

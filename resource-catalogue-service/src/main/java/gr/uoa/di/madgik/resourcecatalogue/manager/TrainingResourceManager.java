@@ -222,7 +222,6 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     public Bundle getTemplate(String providerId, Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();
         for (TrainingResourceBundle bundle : allProviderTrainingResources) {

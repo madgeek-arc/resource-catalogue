@@ -27,7 +27,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,20 +59,18 @@ public class ResourceInteroperabilityRecordController {
     @Operation(summary = "Returns the Resource Interoperability Record with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
     public ResponseEntity<?> get(@PathVariable String prefix,
-                                 @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                 @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ResourceInteroperabilityRecordBundle> getBundle(@PathVariable String prefix,
-                                                                          @PathVariable String suffix,
-                                                                          @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                          @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -107,8 +104,7 @@ public class ResourceInteroperabilityRecordController {
     @Operation(summary = "Returns the Resource Interoperability Record of the given Resource of the given Catalogue.")
     @GetMapping(path = "/byResource/{prefix}/{suffix}")
     public ResponseEntity<?> getByResourceId(@PathVariable String prefix,
-                                             @PathVariable String suffix,
-                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                             @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecordBundle bundle = service.getByResourceId(id);
         if (bundle != null) {

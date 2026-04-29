@@ -9,10 +9,38 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.catalogue.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Catalogue Name",
       "multivalued": false,
       "name": "name",
       "path": "$.catalogue.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Description",
+      "multivalued": false,
+      "name": "description",
+      "path": "$.catalogue.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.catalogue.alternativePIDs[*].pid",
       "type": "java.lang.String"
     },
     {
@@ -23,38 +51,45 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Abbreviation",
+      "label": "Type",
       "multivalued": false,
-      "name": "abbreviation",
-      "path": "$.catalogue.abbreviation",
+      "name": "type",
+      "path": "$.catalogue.type",
       "type": "java.lang.String"
     },
     {
-      "label": "Legal Entity",
+      "label": "Resource Owner",
       "multivalued": false,
-      "name": "legal_entity",
-      "path": "$.catalogue.legalEntity",
-      "type": "java.lang.Boolean"
-    },
-    {
-      "label": "Legal Status",
-      "multivalued": false,
-      "name": "legal_status",
-      "path": "$.catalogue.legalStatus",
+      "name": "resource_owner",
+      "path": "$.catalogue.resourceOwner",
       "type": "java.lang.String"
     },
     {
-      "label": "Hosting Legal Entity",
+      "label": "Service Provider",
+      "multivalued": true,
+      "name": "service_providers",
+      "path": "$.catalogue.serviceProviders[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Webpage",
       "multivalued": false,
-      "name": "hosting_legal_entity",
-      "path": "$.catalogue.hostingLegalEntity",
+      "name": "webpage",
+      "path": "$.catalogue.webpage",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Logo",
+      "multivalued": false,
+      "name": "logo",
+      "path": "$.catalogue.logo",
       "type": "java.lang.String"
     },
     {
       "label": "Scientific Domain",
       "multivalued": true,
       "name": "scientific_domains",
-      "path": "$.catalogue.scientificDomains[*]",
+      "path": "$.catalogue.scientificDomains[*].scientificDomain",
       "type": "java.lang.String"
     },
     {
@@ -65,6 +100,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Category",
+      "multivalued": true,
+      "name": "categories",
+      "path": "$.catalogue.categories[*].category",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Subcategory",
+      "multivalued": true,
+      "name": "subcategories",
+      "path": "$.catalogue.categories[*].subcategory",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Tag",
       "multivalued": true,
       "name": "tags",
@@ -72,24 +121,59 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Affiliation",
-      "multivalued": true,
-      "name": "affiliations",
-      "path": "$.catalogue.affiliations[*]",
+      "label": "Jurisdiction",
+      "multivalued": false,
+      "name": "jurisdiction",
+      "path": "$.catalogue.jurisdiction",
       "type": "java.lang.String"
     },
     {
-      "label": "Network",
-      "multivalued": true,
-      "name": "networks",
-      "path": "$.catalogue.networks[*]",
+      "label": "TRL",
+      "multivalued": false,
+      "name": "trl",
+      "path": "$.catalogue.trl",
       "type": "java.lang.String"
     },
     {
-      "label": null,
+      "label": "Terms of Use",
+      "multivalued": false,
+      "name": "terms_of_use",
+      "path": "$.catalogue.termsOfUse",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Privacy Policy",
+      "multivalued": false,
+      "name": "privacy_policy",
+      "path": "$.catalogue.privacyPolicy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Access Policy",
+      "multivalued": false,
+      "name": "access_policy",
+      "path": "$.catalogue.accessPolicy",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Order Type",
+      "multivalued": false,
+      "name": "order_type",
+      "path": "$.catalogue.orderType",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Order",
+      "multivalued": false,
+      "name": "order_link",
+      "path": "$.catalogue.order",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Public Contacts",
       "multivalued": true,
-      "name": "users",
-      "path": "$.catalogue.users[*].email",
+      "name": "contacts",
+      "path": "$.catalogue.publicContacts[*]",
       "type": "java.lang.String"
     },
     {
@@ -119,6 +203,13 @@
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
       "type": "java.util.Date"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "published",
+      "path": "$.metadata.published",
+      "type": "java.lang.Boolean"
     },
     {
       "label": null,
@@ -228,19 +319,19 @@
       "type": "java.lang.Boolean"
     },
     {
-      "label": null,
-      "multivalued": false,
-      "name": "status",
-      "path": "$.status",
-      "type": "java.lang.String"
-    },
-    {
       "defaultValue": "false",
       "label": null,
       "multivalued": false,
       "name": "draft",
       "path": "$.draft",
       "type": "java.lang.Boolean"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "status",
+      "path": "$.status",
+      "type": "java.lang.String"
     },
     {
       "label": null,
@@ -252,7 +343,9 @@
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
-    "resourceTypes"
+    "resourceTypes",
+    "eoscServices",
+    "eoscResources"
   ],
   "name": "catalogue",
   "payloadType": "json",

@@ -68,7 +68,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.adapterIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.adapterIsActive(#prefix+'/'+#suffix, null)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -143,7 +143,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @Operation(summary = "Adds a new Adapter.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #adapter, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #adapter, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> adapter,
                                  @Parameter(hidden = true) Authentication auth) {
         AdapterBundle bundle = new AdapterBundle();
@@ -241,12 +241,11 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<AdapterBundle> audit(@PathVariable String prefix,
                                                @PathVariable String suffix,
-                                               @RequestParam("catalogueId") String catalogueId,
                                                @RequestParam(required = false) String comment,
                                                @RequestParam LoggingInfo.ActionType actionType,
                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        AdapterBundle adapter = service.audit(id, catalogueId, comment, actionType, auth);
+        AdapterBundle adapter = service.audit(id, null, comment, actionType, auth);
         return new ResponseEntity<>(adapter, HttpStatus.OK);
     }
 
@@ -254,10 +253,9 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public AdapterBundle suspend(@RequestParam String id,
-                                 @RequestParam String catalogueId,
                                  @RequestParam boolean suspend,
                                  @Parameter(hidden = true) Authentication auth) {
-        return service.setSuspend(id, catalogueId, suspend, auth);
+        return service.setSuspend(id, null, suspend, auth);
     }
 
     @Operation(summary = "Get the LoggingInfo History of a specific Adapter.")
@@ -300,11 +298,9 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     public ResponseEntity<Paging<AdapterBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                @PathVariable String prefix,
                                                                @PathVariable String suffix,
-                                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("catalogue_id", catalogueId);
         return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
     }
 

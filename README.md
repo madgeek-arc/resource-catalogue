@@ -276,6 +276,9 @@ catalogue.jms.ams.project=
 ##  Catalogue Properties  ##
 ############################
 
+## Node Info ##
+node.id=
+node.name=
 ## Basic Info ##
 catalogue.homepage=
 catalogue.version=@project.version@
@@ -287,6 +290,7 @@ catalogue.login-redirect=
 catalogue.logout-redirect=
 ## Resource ID Prefixes ##
 catalogue.resources.adapter.id-prefix=adapter
+catalogue.resources.catalogue.id-prefix=catalogue
 catalogue.resources.configuration-template.id-prefix=configuration_template
 catalogue.resources.configuration-template-instance.id-prefix=configuration_template_instance
 catalogue.resources.datasource.id-prefix=datasource
@@ -395,6 +399,17 @@ catalogue:
           client-key:
           client-cert:
     datasource:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    catalogue:
       resolve-endpoints:
       pid-issuer:
         url:

@@ -117,6 +117,12 @@ public interface SecurityService {
     boolean datasourceIsActive(String id, String catalogueId);
 
     /**
+     * @param id catalogue id
+     * @return True if catalogue is active
+     */
+    boolean catalogueIsActive(String id);
+
+    /**
      * @param id          deployable application id
      * @param catalogueId catalogue id
      * @return True if service is active

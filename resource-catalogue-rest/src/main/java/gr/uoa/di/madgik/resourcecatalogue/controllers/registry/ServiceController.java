@@ -68,7 +68,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.serviceIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.serviceIsActive(#prefix+'/'+#suffix, null)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -165,7 +165,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Operation(summary = "Adds a new Service.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #serviceMap, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #serviceMap, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                  @Parameter(hidden = true) Authentication auth) {
         ServiceBundle bundle = new ServiceBundle();
@@ -271,12 +271,11 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ServiceBundle> audit(@PathVariable String prefix,
                                                @PathVariable String suffix,
-                                               @RequestParam("catalogueId") String catalogueId,
                                                @RequestParam(required = false) String comment,
                                                @RequestParam LoggingInfo.ActionType actionType,
                                                @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.audit(id, catalogueId, comment, actionType, auth);
+        ServiceBundle bundle = service.audit(id, null, comment, actionType, auth);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -285,20 +284,18 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ServiceBundle suspend(@RequestParam String id,
-                                 @RequestParam String catalogueId,
                                  @RequestParam boolean suspend,
                                  @Parameter(hidden = true) Authentication auth) {
-        return service.setSuspend(id, catalogueId, suspend, auth);
+        return service.setSuspend(id, null, suspend, auth);
     }
 
     @Tag(name = "ServiceRead")
     @Operation(summary = "Get the LoggingInfo History of a specific Service.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
-                                                                @PathVariable String suffix,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -335,11 +332,9 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     public ResponseEntity<Paging<ServiceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                @PathVariable String prefix,
                                                                @PathVariable String suffix,
-                                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("catalogue_id", catalogueId);
         return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
     }
 
@@ -363,12 +358,10 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     public ResponseEntity<Paging<?>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                         @PathVariable String prefix,
                                                         @PathVariable String suffix,
-                                                        @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                         @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("service_providers", id);
-        ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("active", true);
         return new ResponseEntity<>(service.getAll(ff, auth), HttpStatus.OK);

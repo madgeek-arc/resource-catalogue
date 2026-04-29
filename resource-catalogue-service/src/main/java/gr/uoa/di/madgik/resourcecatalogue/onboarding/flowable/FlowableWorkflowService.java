@@ -6,8 +6,8 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RuntimeService;
-import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
@@ -46,6 +46,7 @@ public class FlowableWorkflowService implements WorkflowService {
 
     public <T extends Bundle> T onboard(String resourceType, T bundle, Authentication authentication) {
         String bpmnProcess = getBpmnProcess(resourceType);
+        //TODO: do we need this check?
         if (bpmnProcess == null) {
             bundle.markOnboard("pending", false, UserInfo.of(authentication), "Default onboarding.");
             return bundle;
@@ -78,10 +79,12 @@ public class FlowableWorkflowService implements WorkflowService {
     private String getBpmnProcess(String resourceType) {
         return switch (resourceType) {
             case "organisation" -> "onboard-provider-flowable";
-            case "service", "datasource", "training_resource", "deployable_application" -> "onboard-resource-flowable";
+            //TODO: catalogue will probably have its own onboarding
+            case "service", "datasource", "catalogue", "training_resource", "deployable_application" ->
+                    "onboard-resource-flowable";
             case "adapter" -> "onboard-adapter-flowable";
             case "interoperability_record" -> "onboard-guideline-flowable";
-            default -> null;
+            default -> throw new IllegalStateException("Unhandled onboarding for resourceType: " + resourceType);
         };
     }
 
