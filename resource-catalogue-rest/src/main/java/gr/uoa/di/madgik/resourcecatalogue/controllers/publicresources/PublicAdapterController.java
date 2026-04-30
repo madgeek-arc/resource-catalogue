@@ -52,7 +52,7 @@ public class PublicAdapterController {
         this.service = service;
     }
 
-    @Operation(description = "Returns the Public ADapter with the given id.")
+    @Operation(description = "Returns the Public Adapter with the given id.")
     @GetMapping(path = "public/adapter/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.adapterIsActive(#prefix+'/'+#suffix, catalogueId) or " +

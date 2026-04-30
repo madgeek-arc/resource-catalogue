@@ -85,7 +85,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
 //    @TriggersAspects({"AfterServiceUpdateEmails"})
     public CatalogueBundle update(CatalogueBundle catalogue, String comment, Authentication auth) {
         CatalogueBundle existing = get(catalogue.getId());
-        // check if there are actual changes in the Service
+        // check if there are actual changes in the Catalogue
         if (catalogue.equals(existing)) {
             return catalogue;
         }
@@ -122,7 +122,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     public void delete(CatalogueBundle bundle) {
         blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
         deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
-        logger.info("Deleting Service: {} and all its Resource Interoperability Records", bundle.getId());
+        logger.info("Deleting Catalogue: {} and all its Resource Interoperability Records", bundle.getId());
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
 
@@ -137,7 +137,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
 
         updateProviderTemplateStatus(existing, status, auth);
 
-        logger.info("Verifying Service: {}", existing);
+        logger.info("Verifying Catalogue: {}", existing);
         try {
             return genericResourceService.update(getResourceTypeName(), id, existing);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {

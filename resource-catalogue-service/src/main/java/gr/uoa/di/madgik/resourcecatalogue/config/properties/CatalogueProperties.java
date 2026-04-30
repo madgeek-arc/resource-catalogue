@@ -41,20 +41,6 @@ public class CatalogueProperties {
     private static final Logger logger = LoggerFactory.getLogger(CatalogueProperties.class);
 
     /**
-     * Catalogue ID.
-     */
-    @NotNull
-    @NotEmpty
-    private String id;
-
-    /**
-     * Catalogue name.
-     */
-    @NotNull
-    @NotEmpty
-    private String name;
-
-    /**
      * Catalogue Admins.
      */
     @NotNull
@@ -170,24 +156,6 @@ public class CatalogueProperties {
 
     public CatalogueProperties setLogoutRedirect(String logoutRedirect) {
         this.logoutRedirect = logoutRedirect;
-        return this;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public CatalogueProperties setId(String id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public CatalogueProperties setName(String name) {
-        this.name = name;
         return this;
     }
 

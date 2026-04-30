@@ -276,9 +276,6 @@ catalogue.jms.ams.project=
 ##  Catalogue Properties  ##
 ############################
 
-## Node Info ##
-node.id=
-node.name=
 ## Basic Info ##
 catalogue.homepage=
 catalogue.version=@project.version@
@@ -359,6 +356,7 @@ sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
 
 ## Node Registry ##
 node.pid=
+node.name=
 node.registry.url=
 node.registry.key=
 ```

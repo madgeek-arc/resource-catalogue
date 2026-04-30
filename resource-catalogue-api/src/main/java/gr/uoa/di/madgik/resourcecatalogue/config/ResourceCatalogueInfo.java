@@ -22,38 +22,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResourceCatalogueInfo {
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
-    @Value("${catalogue.name}")
-    private String catalogueName;
-
     @Value("${catalogue.emails.support}")
     private String catalogueSupportEmail;
 
     public ResourceCatalogueInfo() {
     }
 
-    public ResourceCatalogueInfo(String catalogueId, String catalogueName, String catalogueSupportEmail) {
-        this.catalogueId = catalogueId;
-        this.catalogueName = catalogueName;
+    public ResourceCatalogueInfo(String catalogueSupportEmail) {
         this.catalogueSupportEmail = catalogueSupportEmail;
-    }
-
-    public String getCatalogueId() {
-        return catalogueId;
-    }
-
-    public void setCatalogueId(String catalogueId) {
-        this.catalogueId = catalogueId;
-    }
-
-    public String getCatalogueName() {
-        return catalogueName;
-    }
-
-    public void setCatalogueName(String catalogueName) {
-        this.catalogueName = catalogueName;
     }
 
     public String getCatalogueSupportEmail() {

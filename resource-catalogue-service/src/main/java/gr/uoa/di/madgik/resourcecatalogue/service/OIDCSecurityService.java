@@ -46,9 +46,6 @@ public class OIDCSecurityService implements SecurityService {
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
             @Lazy OrganisationService organisationService,
             @Lazy ServiceService serviceService,

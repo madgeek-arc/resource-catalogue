@@ -50,9 +50,6 @@ public class PublicTrainingResourceController {
 
     private final PublicResourceService<TrainingResourceBundle> service;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     PublicTrainingResourceController(PublicResourceService<TrainingResourceBundle> service) {
         this.service = service;
     }

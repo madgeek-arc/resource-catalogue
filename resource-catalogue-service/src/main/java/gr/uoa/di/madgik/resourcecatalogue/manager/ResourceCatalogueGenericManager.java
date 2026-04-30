@@ -156,7 +156,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     @Override
-    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) {
+    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) { //TODO: make catalogueId optional?
         List<Bundle> bundles = Stream.concat(
                 this.getAll(createFacetFilter(catalogueId, false, getResourceTypeName()))
                         .getResults()

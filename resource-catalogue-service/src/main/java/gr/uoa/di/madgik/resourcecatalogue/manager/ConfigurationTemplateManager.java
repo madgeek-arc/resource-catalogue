@@ -53,9 +53,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     private final VocabularyService vocabularyService;
     private final WebClient webClient;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
     @Value("${argo.grnet.monitoring.service.types:}")
@@ -95,7 +92,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
 
         ct.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         ct.setActive(true);
-        ct.setCatalogueId(this.catalogueId);
+        ct.setCatalogueId(null);
         this.createIdentifiers(ct, getResourceTypeName(), false);
         ct.setId(ct.getIdentifiers().getOriginalId());
         ConfigurationTemplateBundle ret = genericResourceService.add(getResourceTypeName(), ct, false); //FIXME

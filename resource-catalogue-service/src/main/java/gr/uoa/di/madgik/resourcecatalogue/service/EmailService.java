@@ -64,8 +64,8 @@ public class EmailService {
     @Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
-    @Value("${catalogue.name}")
-    private String catalogueName;
+    @Value("${node.name}")
+    private String nodeName;
 
     public EmailService(MailService mailService, Configuration cfg,
                         SecurityService securityService,
@@ -428,34 +428,34 @@ public class EmailService {
             OrganisationBundle organisationBundle = (OrganisationBundle) bundle;
             String templateStatus = organisationBundle.getTemplateStatus();
             baseMessage = String.format("[%s] %s application for registering [%s]-[%s] as a new %s Resource",
-                    catalogueName, pronoun, bundleName, bundle.getId(), catalogueName);
+                    nodeName, pronoun, bundleName, bundle.getId(), nodeName);
             if (templateStatus.contains("pending")) {
                 return String.format("%s to the %s has been received and %s",
-                        baseMessage, catalogueName, isOnboardingTeam ? "should be reviewed" : "is under review");
+                        baseMessage, nodeName, isOnboardingTeam ? "should be reviewed" : "is under review");
             } else if (templateStatus.contains("approved")) {
                 if (organisationBundle.isActive()) {
                     return String.format("%s has been approved", baseMessage);
                 } else {
-                    return String.format("[%s] The Provider [%s] has been set to inactive", catalogueName, bundleName);
+                    return String.format("[%s] The Provider [%s] has been set to inactive", nodeName, bundleName);
                 }
             } else if (templateStatus.contains("rejected")) {
                 return String.format("%s has been rejected", baseMessage);
             } else {
-                return String.format("[%s] Resource Registration", catalogueName);
+                return String.format("[%s] Resource Registration", nodeName);
             }
         } else {
             baseMessage = String.format("[%s] %s application for registering [%s]-[%s] as a new %s %s",
-                    catalogueName, pronoun, bundleName, bundle.getId(), catalogueName,
+                    nodeName, pronoun, bundleName, bundle.getId(), nodeName,
                     bundle.getClass().getSimpleName());
             if (status.contains("pending")) {
                 return String.format("%s to the %s has been received and %s",
-                        baseMessage, catalogueName, isOnboardingTeam ? "should be reviewed" : "is under review");
+                        baseMessage, nodeName, isOnboardingTeam ? "should be reviewed" : "is under review");
             } else if (status.contains("approved")) {
                 return String.format("%s has been approved", baseMessage);
             } else if (status.contains("rejected")) {
                 return String.format("%s has been rejected", baseMessage);
             } else {
-                return String.format("[%s] Resource Registration", catalogueName);
+                return String.format("[%s] Resource Registration", nodeName);
             }
         }
     }
@@ -466,14 +466,14 @@ public class EmailService {
         switch (template) {
             case "adminDailyDigest.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Daily Notification - Changes to Resources",
-                        catalogueName));
+                        nodeName));
             case "adminOnboardingDigest.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Some new Providers are pending for your approval",
-                        catalogueName));
+                        nodeName));
                 break;
             case "providerOnboarding.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Friendly reminder for your Provider",
-                        catalogueName));
+                        nodeName));
                 break;
             default:
                 break;
@@ -500,42 +500,42 @@ public class EmailService {
                 break;
             case "providerOutdatedResources.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has one or more outdated Resources",
-                        catalogueName, resourceName, bundle.getId()));
+                        nodeName, resourceName, bundle.getId()));
                 break;
             case "providerAdminAdded.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your email has been added as an Administrator for " +
-                        "the Provider '%s'", catalogueName, resourceName));
+                        "the Provider '%s'", nodeName, resourceName));
                 break;
             case "providerAdminDeleted.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your email has been deleted from the Administration " +
-                        "Team of the Provider '%s'", catalogueName, resourceName));
+                        "Team of the Provider '%s'", nodeName, resourceName));
                 break;
             case "providerDeletionRequest.ftl":
-                emailBasicInfo.setSubject(String.format("[%s] Provider Deletion Request", catalogueName));
+                emailBasicInfo.setSubject(String.format("[%s] Provider Deletion Request", nodeName));
                 break;
             case "providerDeletion.ftl":
-                emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has been Deleted", catalogueName,
+                emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has been Deleted", nodeName,
                         resourceName, bundle.getId()));
                 break;
             case "bundleAudit.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your %s [%s]-[%s] has been audited by the EPOT team",
-                        catalogueName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
+                        nodeName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
                 break;
             case "invalidProviderUpdate.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] The Provider [%s]-[%s] previously marked as " +
-                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                        "[invalid] has been updated", nodeName, resourceName, bundle.getId()));
                 break;
             case "invalidServiceUpdate.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] The Service [%s]-[%s] previously marked as " +
-                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                        "[invalid] has been updated", nodeName, resourceName, bundle.getId()));
                 break;
             case "invalidTrainingResourceUpdate.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] The Training Resource [%s]-[%s] previously marked as " +
-                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                        "[invalid] has been updated", nodeName, resourceName, bundle.getId()));
                 break;
             case "interoperabilityRecordOnboardingForPortalAdmins.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Provider [%s]-[%s] has created a new Interoperability " +
-                        "Record", catalogueName, associatedResource, bundle.getPayload().get("resourceOwner")));
+                        "Record", nodeName, associatedResource, bundle.getPayload().get("resourceOwner")));
                 break;
             case "interoperabilityRecordOnboardingForProviderAdmins.ftl":
                 emailBasicInfo.setSubject(getProviderAdminsSubjectForInteroperabilityRecordOnboarding(
@@ -587,7 +587,7 @@ public class EmailService {
 
     private Map<String, Object> getRootTemplate() {
         Map<String, Object> root = new HashMap<>();
-        root.put("project", catalogueName);
+        root.put("project", nodeName);
         root.put("endpoint", homepage);
         return root;
     }

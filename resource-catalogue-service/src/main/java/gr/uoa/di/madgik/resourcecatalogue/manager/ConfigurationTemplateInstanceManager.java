@@ -48,9 +48,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService service,
                                                 @Lazy ConfigurationTemplateService configService,
                                                 @Lazy ResourceInteroperabilityRecordService rirService,
@@ -77,7 +74,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
 
         cti.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         cti.setActive(true);
-        cti.setCatalogueId(this.catalogueId);
+        cti.setCatalogueId(null);
         this.createIdentifiers(cti, getResourceTypeName(), false);
         cti.setId(cti.getIdentifiers().getOriginalId());
         //FIXME: should pass validation

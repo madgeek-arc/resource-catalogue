@@ -26,7 +26,7 @@
     </sequenceFlow>
 
     <sequenceFlow id="Flow_07azb67" name="no catalogue" sourceRef="Gateway_0ux95fk" targetRef="Activity_1otm8rv">
-      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] == null || resource['catalogueId'].equals('') || 'eosc'.equals(resource['catalogueId'])}</conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] == null || resource['catalogueId'].equals('')}</conditionExpression>
     </sequenceFlow>
 
     <!-- Get Catalogue -->
@@ -36,13 +36,13 @@
       <outgoing>Flow_0pjxq7p</outgoing>
     </serviceTask>
 
-    <!-- Set Catalogue Value (was script task: context put(resource, "catalogueId", "eosc")) -->
+    <!-- Set Catalogue Value (was script task: context put(resource, "catalogueId", null)) -->
     <serviceTask id="Activity_1otm8rv" name="Set Catalogue Value"
                  flowable:delegateExpression="${setKeyValueDelegate}">
       <extensionElements>
         <flowable:field name="variableName" stringValue="resource"/>
         <flowable:field name="key" stringValue="catalogueId"/>
-        <flowable:field name="value" stringValue="eosc"/>
+<!--        <flowable:field name="value" expression="${null}"/>-->
       </extensionElements>
       <incoming>Flow_07azb67</incoming>
       <outgoing>Flow_1b9ungf</outgoing>

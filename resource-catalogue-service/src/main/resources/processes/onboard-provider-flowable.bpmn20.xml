@@ -3,7 +3,7 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xmlns:flowable="http://flowable.org/bpmn"
              xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns: dc="http://www.omg.org/spec/DD/20100524/DC"
              xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
              targetNamespace="http://flowable.org/bpmn">
 
@@ -26,7 +26,7 @@
     </sequenceFlow>
 
     <sequenceFlow id="Flow_07azb67" name="catalogueId is null" sourceRef="Gateway_0ux95fk" targetRef="Activity_1otm8rv">
-      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] == null || resource['catalogueId'].equals('') || 'eosc'.equals(resource['catalogueId'])}</conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] == null || resource['catalogueId'].equals('')}</conditionExpression>
     </sequenceFlow>
 
     <serviceTask id="Activity_1ewiokm" name="Get Catalogue"
@@ -40,7 +40,6 @@
       <extensionElements>
         <flowable:field name="variableName" stringValue="resource"/>
         <flowable:field name="key" stringValue="catalogueId"/>
-        <flowable:field name="value" stringValue="eosc"/>
       </extensionElements>
       <incoming>Flow_07azb67</incoming>
       <outgoing>Flow_124o2b5</outgoing>

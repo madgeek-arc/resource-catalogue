@@ -45,7 +45,11 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
     @Override
     public T get(String id) {
-        return null;
+        return genericResourceService.get(
+                getResourceTypeName(),
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "true")
+        );
     }
 
     @Override
@@ -56,9 +60,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
                     new SearchService.KeyValue("catalogue_id", catalogueId),
                     new SearchService.KeyValue("published", "true"));
         }
-        return genericResourceService.get(getResourceTypeName(),
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "true"));
+        return get(id);
     }
 
     public Browsing<T> getAll(FacetFilter ff) {

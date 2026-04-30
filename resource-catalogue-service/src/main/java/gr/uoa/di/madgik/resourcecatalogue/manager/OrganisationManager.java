@@ -51,8 +51,6 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     private static final Logger logger = LoggerFactory.getLogger(OrganisationManager.class);
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 

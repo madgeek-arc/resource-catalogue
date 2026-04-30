@@ -10,6 +10,7 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,9 @@ public class FlowableWorkflowService implements WorkflowService {
     private final RuntimeService runtimeService;
     private final HistoryService historyService;
     private final WorkflowVariableMapper helper;
+
+    @Value("${node.pid}")
+    private String nodePid;
 
     public FlowableWorkflowService(RuntimeService runtimeService,
                                    HistoryService historyService,
@@ -53,6 +57,7 @@ public class FlowableWorkflowService implements WorkflowService {
         }
         Map<String, Object> vars = new HashMap<>();
         vars.put("resourceType", resourceType);
+        vars.put("nodePID", nodePid);
         helper.putResourceBundle(vars, bundle);
         helper.putUserInfo(vars, UserInfo.of(authentication));
 

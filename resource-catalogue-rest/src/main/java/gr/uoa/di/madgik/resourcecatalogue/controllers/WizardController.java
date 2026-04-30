@@ -19,7 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
@@ -48,10 +47,6 @@ import java.util.*;
 @Tag(name = "wizard")
 public class WizardController {
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-    @Value("${catalogue.homepage}")
-    private String homepage;
     @Value("${node.pid}")
     private String nodePid;
     @Value("${node.registry.url}")
@@ -63,7 +58,6 @@ public class WizardController {
 
     private final VocabularyService vocabularyService;
     private final ModelService modelService;
-    private final GenericResourceService genericService;
     private WebClient webClient;
 
     @PostConstruct
@@ -74,11 +68,9 @@ public class WizardController {
     }
 
     public WizardController(VocabularyService vocabularyService,
-                            ModelService modelService,
-                            GenericResourceService genericService) {
+                            ModelService modelService) {
         this.vocabularyService = vocabularyService;
         this.modelService = modelService;
-        this.genericService = genericService;
     }
 
     @Operation(summary = "Check Vocabularies Existence")
@@ -243,7 +235,8 @@ public class WizardController {
             List<Map<String, Object>> nodes = webClient.get()
                     .header("x-api-key", nodeRegistryKey)
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+                    .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {
+                    })
                     .block();
             if (nodes != null) {
                 isRegistered = nodes.stream()
