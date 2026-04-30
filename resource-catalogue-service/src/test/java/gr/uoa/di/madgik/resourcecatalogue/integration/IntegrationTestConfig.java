@@ -27,7 +27,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 public class IntegrationTestConfig {
 
     @Container
-    static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine")
+    static final PostgreSQLContainer postgres = new PostgreSQLContainer("pgvector/pgvector:pg16")
             .withDatabaseName("registry")
             .withUsername("test")
             .withPassword("test");
@@ -36,6 +36,9 @@ public class IntegrationTestConfig {
     static final ElasticsearchContainer elastic =
             new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.3.2")
                     .withPassword("password")
+                    .withEnv("discovery.type", "single-node")
+                    .withEnv("cluster.routing.allocation.disk.threshold_enabled", "false")
+                    .withEnv("ES_JAVA_OPTS", "-Xms256m -Xmx256m")
                     // disable SSL
                     .withEnv("xpack.security.transport.ssl.enabled", "false")
                     .withEnv("xpack.security.http.ssl.enabled", "false");

@@ -16,10 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.catalogue.domain.Model;
+import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
@@ -32,6 +30,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,16 +55,16 @@ public abstract class BaseIntegrationTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(
+            getClass().getClassLoader()
+    );
+
     @BeforeAll
     void loadVocabulariesFromFile() throws IOException {
         if (vocabularyService.getAll(new FacetFilter()).getTotal() == 0) {
             if (vocabularyService.getAll(new FacetFilter()).getTotal() == 0) {
-                ClassLoader classLoader = getClass().getClassLoader();
                 List<Vocabulary> vocabularies = objectMapper.readValue(
-                        classLoader.getResource("vocabularies.json"),
-                        new TypeReference<>() {
-                        }
-                );
+                        resolver.getResource("vocabularies.json").getInputStream(), new TypeReference<>() {});
                 vocabularyService.addBulk(vocabularies, null);
             }
         }
@@ -72,7 +72,6 @@ public abstract class BaseIntegrationTest {
 
     @BeforeAll
     void loadModelsFromResources() throws IOException {
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(getClass().getClassLoader());
         Resource[] resources = resolver.getResources("classpath*:models/*.json");
 
         for (Resource resource : resources) {

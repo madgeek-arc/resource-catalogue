@@ -17,16 +17,17 @@
 package gr.uoa.di.madgik.resourcecatalogue.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
-import org.springframework.security.oauth2.client.jackson2.OAuth2ClientJackson2Module;
+import org.springframework.security.jackson.SecurityJacksonModules;
+import org.springframework.security.oauth2.client.jackson.OAuth2ClientJacksonModule;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
 
 @Profile("!no-auth")
@@ -38,7 +39,7 @@ public class SessionConfig implements BeanClassLoaderAware {
 
     @Bean
     public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
-        return new GenericJackson2JsonRedisSerializer(objectMapper());
+        return new GenericJacksonJsonRedisSerializer(objectMapper());
     }
 
     /**
@@ -47,13 +48,11 @@ public class SessionConfig implements BeanClassLoaderAware {
      * @return the {@link ObjectMapper} to use
      */
     private ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModules(SecurityJackson2Modules.getModules(this.loader));
-        mapper.registerModule(new OAuth2ClientJackson2Module());
-
-        mapper.addMixIn(OrderedJSONObject.class, OrderedJSONObjectMixin.class);
-
-        return mapper;
+        return JsonMapper.builder()
+                .addModules(SecurityJacksonModules.getModules(this.loader))
+                .addModule(new OAuth2ClientJacksonModule())
+                .addMixIn(OrderedJSONObject.class, OrderedJSONObjectMixin.class)
+                .build();
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")

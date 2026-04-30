@@ -17,16 +17,13 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
 import co.elastic.clients.elasticsearch._types.aggregations.DateHistogramBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonData;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.Resource;
@@ -99,7 +96,8 @@ public class ElasticStatisticsManager implements StatisticsService {
                              SearchService searchService, ParserService parserService,
                              ServiceService serviceService,
                              VocabularyService vocabularyService,
-                             DataSource dataSource) {
+                             DataSource dataSource,
+                             ObjectMapper objectMapper) {
         this.client = client;
         this.analyticsService = analyticsService;
         this.organisationService = organisationService;
@@ -108,7 +106,7 @@ public class ElasticStatisticsManager implements StatisticsService {
         this.serviceService = serviceService;
         this.vocabularyService = vocabularyService;
         this.dataSource = dataSource;
-        this.objectMapper = new ObjectMapper().findAndRegisterModules();
+        this.objectMapper = objectMapper;
     }
 
     private List<DateHistogramBucket> histogramBuckets(String id, String eventType, Interval by) {

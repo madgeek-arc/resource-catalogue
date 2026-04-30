@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.exc.InvalidFormatException;
 import gr.uoa.di.madgik.catalogue.controller.GenericExceptionController;
 import io.micrometer.tracing.Tracer;
 import jakarta.servlet.http.HttpServletRequest;

@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.resourcecatalogue.config.AmsProperties;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
 import org.slf4j.Logger;
@@ -177,7 +177,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
             Map<String, Object> pubSubMessage = createMessageForTopic(base64EncodedData);
             String jsonPayload = objectMapper.writeValueAsString(pubSubMessage);
             return new HttpEntity<>(jsonPayload, headers);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error serializing message to JSON", e);
         }
     }
@@ -188,7 +188,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
             Map<String, Object> pubSubMessage = createMessageForSubscription(topicUrl);
             String jsonPayload = objectMapper.writeValueAsString(pubSubMessage);
             return new HttpEntity<>(jsonPayload, headers);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error serializing message to JSON", e);
         }
     }

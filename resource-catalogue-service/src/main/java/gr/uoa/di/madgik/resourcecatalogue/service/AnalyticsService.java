@@ -16,10 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +28,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static gr.uoa.di.madgik.resourcecatalogue.config.Properties.Cache.CACHE_VISITS;
 
@@ -67,6 +65,8 @@ public class AnalyticsService implements Analytics {
 
     @Autowired
     private CacheManager cacheManager;
+
+    private static ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
 
     @PostConstruct
     void postConstruct() {
@@ -107,13 +107,16 @@ public class AnalyticsService implements Analytics {
     @Override
     public Map<String, Integer> getVisitsForLabel(String label, StatisticsService.Interval by) {
         try {
-            Map<String, Integer> results = StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(getAnalyticsForLabel(label, by).fields(), Spliterator.NONNULL), false).collect(
-                    Collectors.toMap(
-                            Map.Entry::getKey,
-                            dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
-                    )
-            );
+            JsonNode analytics = getAnalyticsForLabel(label, by);
+            Map<String, Integer> results = analytics == null
+                    ? new HashMap<>()
+                    : analytics.propertyStream()
+                      .collect(
+                              Collectors.toMap(
+                                      Map.Entry::getKey,
+                                      dayStats -> dayStats.getValue().get(0) != null ? dayStats.getValue().get(0).path("nb_visits").asInt(0) : 0
+                              )
+                      );
             return new TreeMap<>(results);
         } catch (Exception e) {
             logger.warn("Cannot find visits for the label '{}'\n", label, e);
@@ -148,11 +151,9 @@ public class AnalyticsService implements Analytics {
 
     private static JsonNode parse(String json) {
         try {
-            return new ObjectMapper(new JsonFactory()).readTree(json);
-        } catch (JsonParseException e) {
+            return objectMapper.readTree(json);
+        } catch (JacksonException e) {
             logger.error(e.getMessage());
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
         }
         return null;
     }

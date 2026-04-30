@@ -16,9 +16,9 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -65,13 +65,16 @@ public class WizardController {
     private final VocabularyService vocabularyService;
     private final ModelService modelService;
     private final GenericResourceService genericService;
+    private final ObjectMapper objectMapper;
 
     public WizardController(VocabularyService vocabularyService,
                             ModelService modelService,
-                            GenericResourceService genericService) {
+                            GenericResourceService genericService,
+                            ObjectMapper objectMapper) {
         this.vocabularyService = vocabularyService;
         this.modelService = modelService;
         this.genericService = genericService;
+        this.objectMapper = objectMapper;
     }
 
     @Operation(summary = "Check Vocabularies Existence")
@@ -139,9 +142,6 @@ public class WizardController {
     @Operation(summary = "Check Models Existence")
     @GetMapping("/step2")
     public String checkModelsExistence(Model model) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
         ClassPathResource modelDir = new ClassPathResource("models");
         File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
 
@@ -190,8 +190,6 @@ public class WizardController {
     @Operation(summary = "Load Models")
     @PostMapping("/step2/loadModels")
     public String loadModels() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ClassPathResource modelDir = new ClassPathResource("models");
         File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
 
