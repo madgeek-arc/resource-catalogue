@@ -87,15 +87,14 @@ public class ResourceIdCreator implements IdCreator {
 
     @Override
     public void validateId(String id) {
-        if (id == null || id.isEmpty()) {
+        if (id == null || id.isBlank()) {
             throw new ValidationException("ID cannot be null or empty");
         }
-        //TODO: warning instead of throw error
-        if (id.length() > 50) {
-            throw new ValidationException("ID is too long; max 50 characters allowed.");
+        if (id.length() > 255) {
+            throw new ValidationException("ID is too long; max 255 characters allowed.");
         }
-        if (!id.matches("^[a-zA-Z0-9_-]+$")) {
-            throw new ValidationException("Invalid ID: only letters, digits, hyphens, and underscores are allowed.");
+        if (id.chars().anyMatch(c -> c < 0x21 || c > 0x7E)) {
+            throw new ValidationException("ID must contain only printable ASCII characters.");
         }
     }
 }
