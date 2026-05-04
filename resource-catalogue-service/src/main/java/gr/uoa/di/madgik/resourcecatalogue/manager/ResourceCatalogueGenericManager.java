@@ -9,6 +9,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
@@ -52,6 +53,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
+    @Value("${node.pid}")
+    private String nodePid;
 
     protected abstract String getResourceTypeName();
 
@@ -73,6 +76,9 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             this.createIdentifiers(bundle, getResourceTypeName(), false);
             bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
+            if (!(bundle instanceof CatalogueBundle)) {
+                validateCatalogueExistence(catalogueId);
+            }
             idCreator.validateId(bundle.getId());
             this.createIdentifiers(bundle, getResourceTypeName(), true);
         }
@@ -87,6 +93,19 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             identifiers.setOriginalId(identifiers.getPid() + "00");
         }
         bundle.setIdentifiers(identifiers);
+    }
+
+    private void validateCatalogueExistence(String catalogueId) {
+        genericResourceService.get("catalogue",
+                new SearchService.KeyValue("resource_internal_id", catalogueId));
+    }
+
+    private void setNodePid(T bundle) {
+        String nodePid = bundle.getPayload().get("nodePID").toString();
+        //TODO: find a better way to support forced nodePID VS vocabulary
+        if (!nodePid.equals("21.T15999/EOSC-BEYOND")) {
+            bundle.getPayload().put("nodePID", nodePid);
+        }
     }
 
     @Override
@@ -229,6 +248,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public T add(T bundle, Authentication auth) {
         createIdentifiers(bundle);
+        setNodePid(bundle);
         T ret = genericResourceService.add(getResourceTypeName(), bundle);
         try {
             ret = workflowService.onboard(getResourceTypeName(), ret, auth);

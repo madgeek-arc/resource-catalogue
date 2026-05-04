@@ -43,6 +43,7 @@ public class PublicResourcesManagementAspect {
 
     private final PublicOrganisationService publicOrganisationService;
     private final PublicServiceService publicServiceService;
+    private final PublicCatalogueService publicCatalogueService;
     private final PublicDatasourceService publicDatasourceService;
     private final PublicTrainingResourceService publicTrainingResourceService;
     private final PublicInteroperabilityRecordService publicGuidelineService;
@@ -54,6 +55,7 @@ public class PublicResourcesManagementAspect {
 
     public PublicResourcesManagementAspect(PublicOrganisationService publicOrganisationService,
                                            PublicServiceService publicServiceService,
+                                           PublicCatalogueService publicCatalogueService,
                                            PublicDatasourceService publicDatasourceService,
                                            PublicTrainingResourceService publicTrainingResourceService,
                                            PublicInteroperabilityRecordService publicGuidelineService,
@@ -64,6 +66,7 @@ public class PublicResourcesManagementAspect {
                                            PublicInteroperabilityRecordService publicInteroperabilityRecordService) {
         this.publicOrganisationService = publicOrganisationService;
         this.publicServiceService = publicServiceService;
+        this.publicCatalogueService = publicCatalogueService;
         this.publicDatasourceService = publicDatasourceService;
         this.publicTrainingResourceService = publicTrainingResourceService;
         this.publicGuidelineService = publicGuidelineService;
@@ -181,6 +184,51 @@ public class PublicResourcesManagementAspect {
         ServiceBundle service = (ServiceBundle) joinPoint.getArgs()[0];
         try {
             publicServiceService.delete(service);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+    //endregion
+
+    //region Public Catalogue
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.finalizeDraft(..))",
+            returning = "catalogue")
+    public void addPublicCatalogue(final CatalogueBundle catalogue) {
+        if (catalogue.getStatus().equals("approved") && catalogue.isActive()) {
+            try {
+                publicCatalogueService.get(catalogue.getIdentifiers().getPid(), catalogue.getCatalogueId());
+            } catch (ResourceException e) {
+                publicCatalogueService.add(ObjectUtils.clone(catalogue), true);
+            }
+        }
+    }
+
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.update(..)) && args(catalogue, ..)")
+    public Object updatePublicCatalogue(ProceedingJoinPoint pjp, CatalogueBundle catalogue) throws Throwable {
+        return updatePublicBundle(pjp, publicCatalogueService, catalogue);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.setActive(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
+            returning = "catalogue")
+    public void updatePublicCatalogue(final CatalogueBundle catalogue) {
+        try {
+            publicCatalogueService.update(ObjectUtils.clone(catalogue), null);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.delete(..))")
+    public void deletePublicCatalogue(JoinPoint joinPoint) {
+        CatalogueBundle catalogue = (CatalogueBundle) joinPoint.getArgs()[0];
+        try {
+            publicCatalogueService.delete(catalogue);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }

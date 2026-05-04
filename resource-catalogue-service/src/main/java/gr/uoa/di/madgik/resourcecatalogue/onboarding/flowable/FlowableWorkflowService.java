@@ -57,7 +57,6 @@ public class FlowableWorkflowService implements WorkflowService {
         }
         Map<String, Object> vars = new HashMap<>();
         vars.put("resourceType", resourceType);
-        vars.put("nodePID", nodePid);
         helper.putResourceBundle(vars, bundle);
         helper.putUserInfo(vars, UserInfo.of(authentication));
 
@@ -84,11 +83,11 @@ public class FlowableWorkflowService implements WorkflowService {
     private String getBpmnProcess(String resourceType) {
         return switch (resourceType) {
             case "organisation" -> "onboard-provider-flowable";
-            //TODO: catalogue will probably have its own onboarding
-            case "service", "datasource", "catalogue", "training_resource", "deployable_application" ->
+            case "service", "datasource", "training_resource", "deployable_application" ->
                     "onboard-resource-flowable";
             case "adapter" -> "onboard-adapter-flowable";
             case "interoperability_record" -> "onboard-guideline-flowable";
+            case "catalogue" -> "onboard-catalogue-flowable";
             default -> throw new IllegalStateException("Unhandled onboarding for resourceType: " + resourceType);
         };
     }
