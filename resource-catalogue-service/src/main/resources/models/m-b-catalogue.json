@@ -387,14 +387,10 @@
               "kind": null,
               "typeInfo": {
                 "vocabulary": null,
-                "type": "vocabulary",
+                "type": "string",
                 "defaultValue": null,
                 "values": null,
-                "properties": {
-                  "url": "/api/vocabulary/types/Node",
-                  "idField": "id",
-                  "labelField": "name"
-                },
+                "properties": {},
                 "multiplicity": false,
                 "prefill": null
               },
