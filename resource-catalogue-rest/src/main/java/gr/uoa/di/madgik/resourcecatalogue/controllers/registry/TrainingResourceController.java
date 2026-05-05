@@ -100,6 +100,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
         return ResponseEntity.ok(paging.map(TrainingResourceBundle::getTrainingResource));
     }
 
+    @Deprecated
     @BrowseParameters
     @BrowseCatalogue
     @Parameters({
@@ -107,6 +108,27 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
             @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
     @GetMapping(path = "adminPage/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<TrainingResourceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
+                                                                                  @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        Paging<TrainingResourceBundle> paging = service.getAll(ff);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</bundle/all>; rel=\"successor-version\"")
+                .body(paging);
+    }
+
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameters({
+            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true))),
+            @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
+    })
+    @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {
@@ -389,7 +411,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResource['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> trainingResource,
-                                              @Parameter(hidden = true) Authentication auth) {
+                                      @Parameter(hidden = true) Authentication auth) {
         String id = (String) trainingResource.get("id");
         TrainingResourceBundle bundle = service.get(id);
         bundle.settTrainingResource(trainingResource);

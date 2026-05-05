@@ -28,7 +28,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,7 +60,7 @@ public class PublicTrainingResourceController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         TrainingResourceBundle bundle = service.get(id, catalogueId);
@@ -72,13 +71,29 @@ public class PublicTrainingResourceController {
                 "The specific Training Resource is not active"));
     }
 
-    //TODO: change path -> notify cyf
+    @Deprecated
     @GetMapping(path = "public/trainingResource/trainingResourceBundle/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> getBundleDeprecated(@PathVariable String prefix,
+                                                 @PathVariable String suffix,
+                                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId,
+                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        TrainingResourceBundle bundle = service.get(id, catalogueId);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</public/trainingResource/bundle/{prefix}/{suffix}>; rel=\"successor-version\"")
+                .body(bundle);
+    }
+
+    @GetMapping(path = "public/trainingResource/bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                       @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         TrainingResourceBundle bundle = service.get(id, catalogueId);
@@ -98,11 +113,28 @@ public class PublicTrainingResourceController {
         return ResponseEntity.ok(paging.map(TrainingResourceBundle::getTrainingResource));
     }
 
-    //TODO: change path -> notify cyf
+    @Deprecated
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/trainingResource/adminPage/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<TrainingResourceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
+                                                                                  @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("active", true);
+        Paging<TrainingResourceBundle> paging = service.getAll(ff);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</public/trainingResource/bundle/all>; rel=\"successor-version\"")
+                .body(paging);
+    }
+
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "public/trainingResource/bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                         @RequestParam MultiValueMap<String, Object> params) {

@@ -110,12 +110,28 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
         return ResponseEntity.ok(paging.map(DatasourceBundle::getDatasource));
     }
 
-    //TODO: rename path
-    //TODO: SOS external teams use it SOS
+    @Deprecated
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "adminPage/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<DatasourceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
+                                                                            @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("published", false);
+        Paging<DatasourceBundle> paging = service.getAll(ff);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</bundle/all>; rel=\"successor-version\"")
+                .body(paging);
+    }
+
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                   @RequestParam MultiValueMap<String, Object> params) {

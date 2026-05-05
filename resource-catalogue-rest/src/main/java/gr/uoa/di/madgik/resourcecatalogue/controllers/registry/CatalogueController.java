@@ -462,7 +462,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "{catalogueId}/provider/bundle/all",
             "{catalogueId}/organisation/bundle/all"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<OrganisationBundle>> getAllCatalogueOrganisationBundles(@PathVariable String catalogueId,
                                                                                          @Parameter(hidden = true)
                                                                                          @RequestParam MultiValueMap<String, Object> params,
@@ -640,7 +640,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{catalogueId}/service/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllCatalogueServiceBundles(@PathVariable String catalogueId,
                                                                                @Parameter(hidden = true)
                                                                                @RequestParam MultiValueMap<String, Object> params,
@@ -775,7 +775,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{catalogueId}/datasource/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllCatalogueDatasourceBundles(@PathVariable String catalogueId,
                                                                                      @Parameter(hidden = true)
                                                                                      @RequestParam MultiValueMap<String, Object> params,
@@ -893,7 +893,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{catalogueId}/adapter/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<AdapterBundle>> getAllCatalogueAdapterBundles(@PathVariable String catalogueId,
                                                                                @Parameter(hidden = true)
                                                                                @RequestParam MultiValueMap<String, Object> params,
@@ -1029,7 +1029,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{catalogueId}/trainingResource/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllCatalogueTrainingResourceBundles(@PathVariable String catalogueId,
                                                                                                  @Parameter(hidden = true)
                                                                                                  @RequestParam MultiValueMap<String, Object> params,
@@ -1166,7 +1166,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{catalogueId}/deployableApplication/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DeployableApplicationBundle>> getAllCatalogueDeployableApplicationBundles(@PathVariable String catalogueId,
                                                                                                            @Parameter(hidden = true)
                                                                                                            @RequestParam MultiValueMap<String, Object> params,
@@ -1300,7 +1300,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{catalogueId}/interoperabilityRecord/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')") //TODO: add User Admin access if we keep Catalogues
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllCatalogueInteroperabilityRecordBundles(@PathVariable String catalogueId,
                                                                                                              @Parameter(hidden = true)
                                                                                                              @RequestParam MultiValueMap<String, Object> params,

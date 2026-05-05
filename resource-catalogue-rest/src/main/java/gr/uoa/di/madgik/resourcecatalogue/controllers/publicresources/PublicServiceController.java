@@ -45,7 +45,7 @@ public class PublicServiceController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ServiceBundle bundle = service.get(id, catalogueId);
@@ -56,13 +56,29 @@ public class PublicServiceController {
                 "The specific Service is not active"));
     }
 
-    //TODO: change path -> notify cyf
+    @Deprecated
     @GetMapping(path = "public/service/infraService/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> getBundleDeprecated(@PathVariable String prefix,
+                                                 @PathVariable String suffix,
+                                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId,
+                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        ServiceBundle bundle = service.get(id, catalogueId);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</public/service/bundle/{prefix}/{suffix}>; rel=\"successor-version\"")
+                .body(bundle);
+    }
+
+    @GetMapping(path = "public/service/bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                       @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ServiceBundle bundle = service.get(id, catalogueId);
@@ -95,11 +111,28 @@ public class PublicServiceController {
         return browsing;
     }
 
-    //TODO: change path -> notify cyf
+    @Deprecated
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/service/adminPage/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<ServiceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
+                                                                         @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("active", true);
+        Paging<ServiceBundle> paging = service.getAll(ff);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</public/service/bundle/all>; rel=\"successor-version\"")
+                .body(paging);
+    }
+
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "public/service/bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                @RequestParam MultiValueMap<String, Object> params) {

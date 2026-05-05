@@ -104,6 +104,26 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
+    @Deprecated
+    @Tag(name = "ServiceAdmin")
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "adminPage/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<ServiceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
+                                                                         @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
+        Paging<ServiceBundle> paging = service.getAll(ff);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</bundle/all>; rel=\"successor-version\"")
+                .body(paging);
+    }
+
     @Tag(name = "ServiceAdmin")
     @BrowseParameters
     @BrowseCatalogue
@@ -118,22 +138,6 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
-        Paging<ServiceBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging);
-    }
-
-    //TODO: delete this as it is identical with bundle/all.
-    //TODO: SOS external teams use it SOS
-    @Tag(name = "ServiceAdmin")
-    @BrowseParameters
-    @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "adminPage/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<ServiceBundle>> getAllServicesForAdminPage(@Parameter(hidden = true)
-                                                                            @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", false);
         Paging<ServiceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
@@ -450,7 +454,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @PutMapping(path = "draft/transform")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceMap['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> serviceMap,
-                                              @Parameter(hidden = true) Authentication auth) {
+                                      @Parameter(hidden = true) Authentication auth) {
         String id = (String) serviceMap.get("id");
         ServiceBundle bundle = service.get(id);
         bundle.setService(serviceMap);

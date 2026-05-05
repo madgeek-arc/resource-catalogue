@@ -67,7 +67,7 @@ public class PublicInteroperabilityRecordController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
@@ -83,7 +83,7 @@ public class PublicInteroperabilityRecordController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                       @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         InteroperabilityRecordBundle bundle = service.get(id, catalogueId);

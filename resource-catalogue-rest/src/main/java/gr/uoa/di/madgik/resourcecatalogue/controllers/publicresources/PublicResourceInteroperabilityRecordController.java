@@ -42,7 +42,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public resource interoperability record")
-public class PublicResourceInteroperabilityRecordController {
+public class  PublicResourceInteroperabilityRecordController {
 
     private final PublicResourceService<ResourceInteroperabilityRecordBundle> service;
 
@@ -54,7 +54,7 @@ public class PublicResourceInteroperabilityRecordController {
     @GetMapping(path = "public/resourceInteroperabilityRecord/{prefix}/{suffix}")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId) {
         String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId);
         if (bundle.isActive()) {
@@ -69,7 +69,7 @@ public class PublicResourceInteroperabilityRecordController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                       @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId);
