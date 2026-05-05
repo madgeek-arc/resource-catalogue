@@ -31,6 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -260,8 +261,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         return vocabulary;
     }
 
+    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00pm, every 7 days starting on Monday, every month
     //    @Scheduled(initialDelay = 0, fixedRate = 120000)
-//    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
     public void updateHostingLegalEntityVocabularyList() {
         logger.info("Checking for possible new Hosting Legal Entity entries..");
         List<Vocabulary> hostingLegalEntities = getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
@@ -275,13 +276,16 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.addFilter("status", "approved");
         ff.addFilter("published", false);
         List<OrganisationBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<String> providerNames = new ArrayList<>();
+        Map<String, String> providerNames = new LinkedHashMap<>();
         for (OrganisationBundle organisationBundle : allActiveAndApprovedProviders) {
             if ((boolean) organisationBundle.getOrganisation().get("legalEntity")) {
-                providerNames.add((String) organisationBundle.getOrganisation().get("name"));
+                providerNames.put(
+                        (String) organisationBundle.getOrganisation().get("name"),
+                        organisationBundle.getCatalogueId()
+                );
             }
         }
-        for (Iterator<String> it = providerNames.iterator(); it.hasNext(); ) {
+        for (Iterator<String> it = providerNames.keySet().iterator(); it.hasNext(); ) {
             String providerName = it.next();
             for (String hleName : hostingLegalEntityNames) {
                 if (hleName.contains(providerName)) {
@@ -293,17 +297,18 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         updateHLEVocabularyList(providerNames);
     }
 
-    private void updateHLEVocabularyList(List<String> providerNames) {
-        for (String newHLE : providerNames) {
+    private void updateHLEVocabularyList(Map<String, String> providerNames) {
+        for (Map.Entry<String, String> entry : providerNames.entrySet()) {
             Vocabulary newHostingLegalEntity = new Vocabulary();
-            newHostingLegalEntity.setId(idCreator.sanitizeString(newHLE));
-            newHostingLegalEntity.setName(newHLE);
+            newHostingLegalEntity.setId(idCreator.sanitizeString(entry.getKey()));
+            newHostingLegalEntity.setName(entry.getKey());
             newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
-            //TODO: Also add catalogueId as extras if this method gets activated
+            if (entry.getValue() != null) {
+                newHostingLegalEntity.setExtras(Map.of("catalogueId", entry.getValue()));
+            }
             logger.info("Creating a new Hosting Legal Entity Vocabulary with id: '{}' and name: '{}'",
                     newHostingLegalEntity.getId(), newHostingLegalEntity.getName());
-//                        add(newHostingLegalEntity, null);
+            add(newHostingLegalEntity, null);
         }
     }
-
 }
