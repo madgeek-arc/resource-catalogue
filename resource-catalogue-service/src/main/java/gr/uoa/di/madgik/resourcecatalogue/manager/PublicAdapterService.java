@@ -56,7 +56,6 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
         return "adapter";
     }
 
-    //TODO: test me
     @SuppressWarnings("unchecked")
     public void updateIdsToPublic(AdapterBundle adapter) {
         Map<String, Object> adapterMap = adapter.getAdapter();

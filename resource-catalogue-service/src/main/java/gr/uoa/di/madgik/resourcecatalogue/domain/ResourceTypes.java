@@ -17,7 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 //TODO: decouple from LOT1 - tool
-//TODO: remove test related resource types
 public enum ResourceTypes {
     ADAPTER,
     CATALOGUE,

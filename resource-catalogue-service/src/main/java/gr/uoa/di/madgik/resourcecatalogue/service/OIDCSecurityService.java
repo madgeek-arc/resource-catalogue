@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-//FIXME: need to work with external catalogues too -> get with catalogueId
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
 
@@ -47,14 +46,14 @@ public class OIDCSecurityService implements SecurityService {
     protected int maxQuantity;
 
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
-            @Lazy OrganisationService organisationService,
-            @Lazy ServiceService serviceService,
-            @Lazy DatasourceService datasourceService,
-            @Lazy TrainingResourceService trainingResourceService,
-            @Lazy InteroperabilityRecordService interoperabilityRecordService,
-            @Lazy DeployableApplicationService deployableApplicationService,
-            @Lazy AdapterService adapterService,
-            CatalogueProperties properties) {
+                               @Lazy OrganisationService organisationService,
+                               @Lazy ServiceService serviceService,
+                               @Lazy DatasourceService datasourceService,
+                               @Lazy TrainingResourceService trainingResourceService,
+                               @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                               @Lazy DeployableApplicationService deployableApplicationService,
+                               @Lazy AdapterService adapterService,
+                               CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.organisationService = organisationService;
         this.serviceService = serviceService;
@@ -105,10 +104,7 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean userHasAdminAccess(User user, @NotNull String id) {
-        boolean isProvider = isProvider(id);
-        //FIXME: if provider,catalogue have the same ID
         List<User> users = getProviderUsers(id);
-//        List<User> users = isProvider ? getProviderUsers(id) : getCatalogueUsers(id); //FIXME
         if (users == null) {
             return false;
         }
@@ -148,14 +144,6 @@ public class OIDCSecurityService implements SecurityService {
         return users;
     }
 
-//    private List<User> getCatalogueUsers(String id) {
-//        CatalogueBundle registeredCatalogue = checkCatalogueExistence(id);
-//        if (registeredCatalogue == null || registeredCatalogue.getCatalogue().getUsers() == null) {
-//            return null;
-//        }
-//        return registeredCatalogue.getCatalogue().getUsers();
-//    }
-
     private OrganisationBundle checkProviderExistence(String providerId) {
         try {
             return organisationService.get(providerId);
@@ -163,14 +151,6 @@ public class OIDCSecurityService implements SecurityService {
             return null;
         }
     }
-
-//    private CatalogueBundle checkCatalogueExistence(String id) {
-//        try {
-//            return catalogueService.get(id, adminAccess);
-//        } catch (ResourceException | ResourceNotFoundException e) {
-//            return null;
-//        }
-//    }
 
     private boolean userMatches(User u1, User u2) {
         return u1.getEmail().equalsIgnoreCase(u2.getEmail());
@@ -199,13 +179,12 @@ public class OIDCSecurityService implements SecurityService {
         return userHasAdminAccess(user, providerId);
     }
 
-    //TODO: expand to check for other resources too
-    //TODO: when done, refactor PreAuthorization annotations to include them
     private String getProviderId(String resourceId) {
         String providerId;
         Bundle bundle = determineResourceType(resourceId);
         providerId = switch (bundle) {
             case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("resourceOwner");
+            case CatalogueBundle catalogueBundle -> (String) catalogueBundle.getCatalogue().get("resourceOwner");
             case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("resourceOwner");
             case TrainingResourceBundle trainingResourceBundle ->
                     (String) trainingResourceBundle.getTrainingResource().get("resourceOwner");
@@ -225,6 +204,8 @@ public class OIDCSecurityService implements SecurityService {
             return serviceService.getOrElseReturnNull(id);
         } else if (isDatasource(id)) {
             return datasourceService.getOrElseReturnNull(id);
+        } else if (isCatalogue(id)) {
+            return catalogueService.getOrElseReturnNull(id);
         } else if (isTrainingResource(id)) {
             return trainingResourceService.getOrElseReturnNull(id);
         } else if (isDeployableApplication(id)) {
@@ -257,6 +238,15 @@ public class OIDCSecurityService implements SecurityService {
     private boolean isDatasource(String id) {
         try {
             datasourceService.get(id);
+            return true;
+        } catch (ResourceException e) {
+            return false;
+        }
+    }
+
+    private boolean isCatalogue(String id) {
+        try {
+            catalogueService.get(id);
             return true;
         } catch (ResourceException e) {
             return false;

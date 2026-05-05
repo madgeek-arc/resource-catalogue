@@ -159,12 +159,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         return checkIfEachInteroperabilityRecordIsApproved(bundle);
     }
 
-    //TODO: test me
     @SuppressWarnings("unchecked")
     private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle bundle) {
         List<String> interoperabilityRecordIds = (List<String>) bundle.getResourceInteroperabilityRecord()
                 .get("interoperabilityRecordIds");
-
         for (String id : interoperabilityRecordIds) {
             if (!"approved".equals(interoperabilityRecordService.get(id).getStatus())) {
                 throw new ValidationException(

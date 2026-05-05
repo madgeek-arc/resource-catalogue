@@ -60,6 +60,8 @@ public class SupportManagementAspect {
     }
 
     //region EOSC monitoring assignment
+    //TODO: Should EOSC monitoring get assigned to Catalogues too?
+
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
@@ -74,7 +76,7 @@ public class SupportManagementAspect {
             InteroperabilityRecordBundle guideline;
             try {
                 guideline = guidelineService.getEOSCMonitoringGuideline();
-            } catch (Exception e) { //TODO: probably needs ResourceException
+            } catch (Exception e) {
                 logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for Service: {}",
                         service.getId());
                 return;
@@ -99,7 +101,7 @@ public class SupportManagementAspect {
             InteroperabilityRecordBundle guideline;
             try {
                 guideline = guidelineService.getEOSCMonitoringGuideline();
-            } catch (Exception e) { //TODO: probably needs ResourceException
+            } catch (Exception e) {
                 logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for Datasource: {}",
                         datasource.getId());
                 return;

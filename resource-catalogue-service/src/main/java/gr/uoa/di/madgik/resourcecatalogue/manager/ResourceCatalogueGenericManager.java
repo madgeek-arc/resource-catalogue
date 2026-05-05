@@ -101,9 +101,9 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     private void setNodePid(T bundle) {
-        String nodePid = bundle.getPayload().get("nodePID").toString();
+        String resourceNodePid = bundle.getPayload().get("nodePID").toString();
         //TODO: find a better way to support forced nodePID VS vocabulary
-        if (!nodePid.equals("21.T15999/EOSC-BEYOND")) {
+        if (!resourceNodePid.equals("21.T15999/EOSC-BEYOND")) {
             bundle.getPayload().put("nodePID", nodePid);
         }
     }
@@ -113,7 +113,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         return genericResourceService.get(
                 getResourceTypeName(),
                 new SearchService.KeyValue("resource_internal_id", id),
-                //TODO: new SearchService.KeyValue("catalogue_id", null), is it legit?
                 new SearchService.KeyValue("published", "false")
         );
     }
@@ -175,7 +174,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     @Override
-    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) { //TODO: make catalogueId optional?
+    public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) {
         List<Bundle> bundles = Stream.concat(
                 this.getAll(createFacetFilter(catalogueId, false, getResourceTypeName()))
                         .getResults()
@@ -209,7 +208,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         if (isPublic) {
             ff.addFilter("published", true);
         } else {
-            ff.addFilter("catalogue_id", catalogueId);
+            //TODO: facetfilter to support null facet values
+            if (catalogueId != null && !catalogueId.isBlank()) {
+                ff.addFilter("catalogue_id", catalogueId);
+            }
             ff.addFilter("published", false);
         }
         ff.setResourceType(resourceType);
@@ -269,7 +271,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         if (!hasChanged(bundle)) {
             return bundle;
         }
-        bundle.markUpdate(UserInfo.of(auth), null); //TODO: make sure all resources will use this
+        bundle.markUpdate(UserInfo.of(auth), null);
         try {
             return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
@@ -304,8 +306,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         T bundle = get(id, catalogueId);
-        String resourceOwner = (String) bundle.getPayload().get("resourceOwner");
-        suspensionValidation(bundle, resourceOwner, suspend);
+        suspensionValidation(bundle);
 
         logger.info("{} resource '{}' with id: '{}'", suspend ? "Suspending" : "Unsuspending",
                 getResourceTypeName(), bundle.getId());
@@ -318,34 +319,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         }
     }
 
-    //TODO: delete catalogueId if not used
-    private void suspensionValidation(Bundle bundle, String resourceOwner, boolean suspend) {
+    private void suspensionValidation(Bundle bundle) {
         if (bundle.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
         }
-        //TODO: probably remove
-//        OrganisationBundle organisationBundle = genericResourceService.get("organisation", resourceOwner);
-//        if (organisationBundle.isSuspended() && !suspend) {
-//            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
-//                    HttpStatus.CONFLICT);
-//        }
-
-        //TODO: enable if Catalogues return.
-//        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
-//        if (bundle instanceof OrganisationBundle) {
-//            if (catalogueBundle.isSuspended() && !suspend) {
-//                throw new ResourceException("You cannot unsuspend a Provider when its Catalogue is suspended",
-//                        HttpStatus.CONFLICT);
-//            }
-//        } else {
-//            if (providerId != null && !providerId.isEmpty()) {
-//                OrganisationBundle OrganisationBundle = providerService.get(providerId, catalogueId);
-//                if ((catalogueBundle.isSuspended() || OrganisationBundle.isSuspended()) && !suspend) {
-//                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
-//                            HttpStatus.CONFLICT);
-//                }
-//            }
-//        }
     }
 
     @Override

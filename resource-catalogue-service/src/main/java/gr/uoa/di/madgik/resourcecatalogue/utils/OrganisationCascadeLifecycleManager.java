@@ -2,10 +2,7 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -18,6 +15,8 @@ public class OrganisationCascadeLifecycleManager {
     private final DatasourceService datasourceService;
     private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final AdapterService adapterService;
+    private final DeployableApplicationService deployableApplicationService;
 
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
@@ -25,14 +24,18 @@ public class OrganisationCascadeLifecycleManager {
     public OrganisationCascadeLifecycleManager(@Lazy ServiceService serviceService,
                                                @Lazy DatasourceService datasourceService,
                                                @Lazy TrainingResourceService trainingResourceService,
-                                               @Lazy InteroperabilityRecordService interoperabilityRecordService) {
+                                               @Lazy InteroperabilityRecordService interoperabilityRecordService,
+                                               @Lazy AdapterService adapterService,
+                                               @Lazy DeployableApplicationService deployableApplicationService) {
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.adapterService = adapterService;
+        this.deployableApplicationService = deployableApplicationService;
     }
 
-    //TODO: populate
+    //TODO: catalogue
     public void deleteAllRelatedResources(OrganisationBundle bundle, Authentication auth) {
         String providerId = bundle.getId();
         String catalogueId = bundle.getCatalogueId();
@@ -48,9 +51,15 @@ public class OrganisationCascadeLifecycleManager {
         interoperabilityRecordService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
                 .getResults()
                 .forEach(interoperabilityRecordService::delete);
+        adapterService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
+                .getResults()
+                .forEach(adapterService::delete);
+        deployableApplicationService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
+                .getResults()
+                .forEach(deployableApplicationService::delete);
     }
 
-    //TODO: populate
+    //TODO: catalogue
     public void suspendAllRelatedResources(OrganisationBundle bundle, Authentication auth) {
         String providerId = bundle.getId();
         String catalogueId = bundle.getCatalogueId();
@@ -71,12 +80,22 @@ public class OrganisationCascadeLifecycleManager {
                 .getResults()
                 .forEach(ig ->
                         interoperabilityRecordService.setSuspend(ig.getId(), catalogueId, suspended, auth));
+        adapterService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
+                .getResults()
+                .forEach(ad ->
+                        adapterService.setSuspend(ad.getId(), catalogueId, suspended, auth));
+        deployableApplicationService.getAllEOSCResourcesOfAProvider(providerId, createFacetFilter(catalogueId), auth)
+                .getResults()
+                .forEach(da ->
+                        deployableApplicationService.setSuspend(da.getId(), catalogueId, suspended, auth));
     }
 
     private FacetFilter createFacetFilter(String catalogueId) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
-        ff.addFilter("catalogue_id", catalogueId);
+        if (catalogueId != null && !catalogueId.isBlank()) {
+            ff.addFilter("catalogue_id", catalogueId);
+        }
         return ff;
     }
 }
