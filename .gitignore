@@ -38,5 +38,10 @@ hs_err_pid*
 **/*.yml
 **/*.yaml
 
+# claude code
 CLAUDE.md
 SUMMARY.md
+.claude/
+
+# scripts
+debug.sh

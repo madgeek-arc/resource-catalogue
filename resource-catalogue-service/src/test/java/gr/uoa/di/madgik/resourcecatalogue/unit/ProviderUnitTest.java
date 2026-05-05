@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
-import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createOrganisationBundle;
+import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createOrganisation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -49,6 +49,12 @@ class ProviderUnitTest {
      *   <li>The {@code add} method of the {@link OrganisationService} is invoked exactly once with the correct arguments.</li>
      * </ul>
      */
+    private static OrganisationBundle createOrganisationBundle() {
+        OrganisationBundle bundle = new OrganisationBundle();
+        bundle.setOrganisation(createOrganisation());
+        return bundle;
+    }
+
     @Test
     void addProviderSuccess() {
         OrganisationBundle inputOrganisationBundle = createOrganisationBundle();

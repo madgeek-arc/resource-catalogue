@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue;
+package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
+import org.springframework.stereotype.Service;
 
-@SpringBootApplication
-public class ResourceCatalogueApplication {
+@Service
+public class ProviderManager extends ResourceManager<ProviderBundle> {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ResourceCatalogueApplication.class, args);
+    public ProviderManager() {
+        super(ProviderBundle.class);
     }
 
+    @Override
+    public String getResourceTypeName() {
+        return "provider";
+    }
 }

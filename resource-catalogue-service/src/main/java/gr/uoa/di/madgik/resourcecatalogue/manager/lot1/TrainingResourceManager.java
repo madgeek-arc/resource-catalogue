@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue;
+package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
+import org.springframework.stereotype.Service;
 
-@SpringBootApplication
-public class ResourceCatalogueApplication {
+@Service
+public class TrainingResourceManager extends ResourceManager<TrainingResourceBundle> {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ResourceCatalogueApplication.class, args);
+    public TrainingResourceManager() {
+        super(TrainingResourceBundle.class);
     }
 
+    @Override
+    public String getResourceTypeName() {
+        return "training_resource";
+    }
 }

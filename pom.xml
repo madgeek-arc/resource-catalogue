@@ -44,6 +44,7 @@
         <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
         <netty.version>4.1.132.Final</netty.version> <!-- CVE-2026-33871, CVE-2026-33870: patched in 4.1.132 -->
+        <thymeleaf.version>3.1.4.RELEASE</thymeleaf.version> <!-- CVE-2026-40477, CVE-2026-40478: SSTI RCE; patched in 3.1.4 -->
         <tomcat.version>10.1.54</tomcat.version> <!-- CVE-2026-29145: patched in 10.1.54 -->
         <spring-security.version>6.5.9</spring-security.version> <!-- CVE-2026-22732: patched in 6.5.9 -->
         <log4j2.version>2.25.4</log4j2.version> <!-- CVE-2025-68161: TLS hostname bypass; patched in 2.25.3 -->
@@ -219,10 +220,10 @@
                 <artifactId>json-simple</artifactId>
                 <version>1.1.1</version>
             </dependency>
-            <dependency> <!-- Addresses CVE-2026-34197 (8.8); 6.2.1 was vulnerable -->
+            <dependency> <!-- CVE-2026-34197 (8.8): patched in 6.2.4; CVE-2026-41044, CVE-2026-40466 (8.8): patched in 6.2.5 -->
                 <groupId>org.apache.activemq</groupId>
                 <artifactId>activemq-bom</artifactId>
-                <version>6.2.4</version>
+                <version>6.2.5</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -356,6 +357,9 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <dataDirectory>${user.home}/.owasp/dependency-check-data</dataDirectory>
+                    <nvdValidForHours>24</nvdValidForHours>
+                    <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
                     <failBuildOnCVSS>7.6</failBuildOnCVSS>
                     <formats>
                         <format>JSON</format>

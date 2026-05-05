@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.config.security;
+package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
 
-import org.springframework.context.annotation.AdviceMode;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
+import org.springframework.stereotype.Service;
 
-@Profile("!no-auth")
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true, mode = AdviceMode.PROXY)
-public class SecurityRootConfig {
+@Service
+public class DatasourceManager extends ResourceManager<DatasourceBundle> {
+
+    public DatasourceManager() {
+        super(DatasourceBundle.class);
+    }
+
+    @Override
+    public String getResourceTypeName() {
+        return "datasource";
+    }
 }

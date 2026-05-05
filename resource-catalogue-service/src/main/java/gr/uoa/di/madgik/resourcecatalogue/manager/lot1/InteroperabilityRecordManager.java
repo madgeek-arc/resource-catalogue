@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue;
+package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
+import org.springframework.stereotype.Service;
 
-@SpringBootApplication
-public class ResourceCatalogueApplication {
+@Service
+public class InteroperabilityRecordManager extends ResourceManager<InteroperabilityRecordBundle> {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ResourceCatalogueApplication.class, args);
+    public InteroperabilityRecordManager() {
+        super(InteroperabilityRecordBundle.class);
     }
 
+    @Override
+    public String getResourceTypeName() {
+        return "interoperability_record";
+    }
 }
