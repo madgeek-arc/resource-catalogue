@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Step 3 - Node Registration</title>
+    <title>Step 3 - Node Registry</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,67 +20,18 @@
             margin-bottom: 20px;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        input {
-            width: 100%;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-
-        .error {
-            color: red;
-            font-size: 0.8rem;
-            margin-top: 4px;
-        }
-
-        .button-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 25px;
-        }
-
-        button {
-            padding: 8px 16px;
-            font-size: 1rem;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .primary {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        .primary:hover {
-            background-color: #0056b3;
-        }
-
-        .secondary {
-            background-color: #ccc;
-            color: #333;
-        }
-
-        .secondary:hover {
-            background-color: #999;
-        }
-
         .banner {
-            padding: 12px 16px;
+            padding: 16px 20px;
             border-radius: 6px;
-            margin-bottom: 20px;
-            font-weight: bold;
+            margin-bottom: 24px;
+        }
+
+        .banner p {
+            margin: 0 0 8px 0;
+        }
+
+        .banner p:last-child {
+            margin: 0;
         }
 
         .banner-success {
@@ -89,68 +40,32 @@
             border: 1px solid #c3e6cb;
         }
 
-        .banner-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .banner-info {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
         }
     </style>
 </head>
 
 <body>
 
-<h2>Step 3: Register your node on Node Registry</h2>
+<h2>Step 3: Node Registry</h2>
 
 <p class="description">
-    Register your node to make it discoverable to other EOSC nodes.
-    This step is optional and can be skipped.
+    Verify that your node is registered on the Node Registry so it is discoverable to other EOSC nodes.
 </p>
 
 <div th:if="${isRegistered}" class="banner banner-success">
-    &#10003; This node is already registered on the Node Registry.
+    <p>&#10003; Your node is already registered on the Node Registry.</p>
+    <p>Setup is complete — you can now close this page.</p>
 </div>
 
-<div th:if="${error}" class="banner banner-error" th:text="${error}"></div>
-
-<form th:action="@{/wizard/step3}" th:object="${nodeRequest}" method="post">
-
-    <div class="form-group">
-        <label for="name">Name</label>
-        <input id="name" type="text" th:field="*{name}" placeholder="Enter node name"/>
-        <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-    </div>
-
-    <div class="form-group">
-        <label for="logo">Logo</label>
-        <input id="logo" type="text" th:field="*{logo}" placeholder="https://..."/>
-    </div>
-
-    <div class="form-group">
-        <label for="legalName">Legal Entity - Name</label>
-        <input id="legalName" type="text" th:field="*{legalEntity.name}" placeholder="Organization name"/>
-    </div>
-
-    <div class="form-group">
-        <label for="rorId">Legal Entity - ROR ID</label>
-        <input id="rorId" type="text" th:field="*{legalEntity.rorId}" placeholder="https://ror.org/..."/>
-    </div>
-
-    <div class="form-group">
-        <label for="endpoint">Node Endpoint</label>
-        <input id="endpoint" type="text" th:field="*{nodeEndpoint}" placeholder="https://api.yournode.com"/>
-        <div class="error" th:if="${#fields.hasErrors('nodeEndpoint')}" th:errors="*{nodeEndpoint}"></div>
-    </div>
-
-    <div class="button-row">
-        <button type="submit" name="skip" value="true" class="secondary">
-            Skip
-        </button>
-        <button type="submit" class="primary" th:text="${isRegistered} ? 'Update Registration' : 'Register Node'">
-            Register Node
-        </button>
-    </div>
-
-</form>
+<div th:unless="${isRegistered}" class="banner banner-info">
+    <p>&#9888; Your node is not yet registered on the Node Registry.</p>
+    <p>Please visit the <strong>Node Registry</strong> and register your node to make it discoverable to other EOSC nodes.</p>
+    <p>Setup is otherwise complete — you can now close this page.</p>
+</div>
 
 </body>
 </html>

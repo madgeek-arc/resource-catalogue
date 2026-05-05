@@ -223,13 +223,9 @@ public class WizardController {
         return "redirect:/wizard/step2";
     }
 
-    @Operation(summary = "Register node on Node Registry")
+    @Operation(summary = "Node Registry Information")
     @GetMapping("/step3")
-    public String checkNodeRegistration(Model model) {
-        NodeRegistryRequest request = new NodeRegistryRequest();
-        request.setLegalEntity(new NodeRegistryRequest.LegalEntity()); // important
-        model.addAttribute("nodeRequest", request);
-
+    public String nodeRegistryInfo(Model model) {
         boolean isRegistered = false;
         try {
             List<Map<String, Object>> nodes = webClient.get()
@@ -245,30 +241,8 @@ public class WizardController {
         } catch (Exception e) {
             logger.warn("Could not reach node registry to check registration status: {}", e.getMessage());
         }
-
         model.addAttribute("isRegistered", isRegistered);
         return "wizard-step3";
-    }
-
-    @PostMapping("/step3")
-    public String registerNodeOnNodeRegistry(@ModelAttribute NodeRegistryRequest request,
-                                             @RequestParam(required = false) String skip,
-                                             Model model) {
-        if ("true".equals(skip)) {
-            return "redirect:/wizard/success";
-        }
-        try {
-            webClient.post()
-                    .uri("/nodes")
-                    .bodyValue(request)
-                    .retrieve()
-                    .bodyToMono(Void.class)
-                    .block();
-        } catch (Exception e) {
-            model.addAttribute("error", "Failed to register node: " + e.getMessage());
-            return "wizard-step3";
-        }
-        return "redirect:/wizard/success";
     }
 
     @GetMapping("/success")
@@ -276,63 +250,4 @@ public class WizardController {
         return "wizard-success";
     }
 
-    public class NodeRegistryRequest {
-        private String name;
-        private String logo;
-        private String nodeEndpoint;
-        private LegalEntity legalEntity;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getLogo() {
-            return logo;
-        }
-
-        public void setLogo(String logo) {
-            this.logo = logo;
-        }
-
-        public String getNodeEndpoint() {
-            return nodeEndpoint;
-        }
-
-        public void setNodeEndpoint(String nodeEndpoint) {
-            this.nodeEndpoint = nodeEndpoint;
-        }
-
-        public LegalEntity getLegalEntity() {
-            return legalEntity;
-        }
-
-        public void setLegalEntity(LegalEntity legalEntity) {
-            this.legalEntity = legalEntity;
-        }
-
-        public static class LegalEntity {
-            private String name;
-            private String rorId;
-
-            public String getName() {
-                return name;
-            }
-
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            public String getRorId() {
-                return rorId;
-            }
-
-            public void setRorId(String rorId) {
-                this.rorId = rorId;
-            }
-        }
-    }
 }
