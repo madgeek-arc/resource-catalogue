@@ -324,6 +324,7 @@ catalogue.mailer.ssl=
 
 ## PID Service ##
 pid.service.enabled=false
+pid.service.consistency.enabled=false
 
 ## OpenAIRE Datasource Properties ##
 openaire.ds.api=https://beta.services.openaire.eu/
