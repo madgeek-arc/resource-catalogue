@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
@@ -25,11 +26,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -70,28 +73,57 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
     }
 
+    @Deprecated
     @GetMapping(path = "vocabularyTree/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<VocabularyTree> getVocabularyTree(@PathVariable("type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getVocabulariesTree(type), HttpStatus.OK);
     }
 
+    @Deprecated
     @GetMapping(path = "vocabularyMap", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Vocabulary>> getVocabularyMap() {
         return new ResponseEntity<>(vocabularyService.getVocabulariesMap(), HttpStatus.OK);
     }
 
+    @Deprecated
     @Operation(summary = "Get a Map of vocabulary types and their respective entries")
     @GetMapping(path = "/byType", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<Vocabulary.Type, List<Vocabulary>>> getAllVocabulariesByType() {
         return new ResponseEntity<>(vocabularyService.getAllVocabulariesByType(), HttpStatus.OK);
     }
 
+    @Deprecated
     @Operation(summary = "Get vocabularies by type")
     @GetMapping(path = "/byType/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Vocabulary>> getByType(@PathVariable(value = "type") Vocabulary.Type type) {
         return new ResponseEntity<>(vocabularyService.getByType(type), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get vocabularies by type")
+    @GetMapping(path = "types/{type}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Vocabulary>> getByTypeV2(@PathVariable(value = "type") String type,
+                                                        @RequestParam(required = false) String parent_id,
+                                                        @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, Sort sort) {
+        FacetFilter filter = FacetFilter.from(allRequestParams);
+        filter.addFilter("type", type);
+        filter.setQuantity(10000);
+        List<Vocabulary> vocs = vocabularyService.getAll(filter).getResults();
+        vocs.sort(Comparator.comparing(Vocabulary::getName));
+        return new ResponseEntity<>(vocs, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get vocabularies by id")
+    @GetMapping(path = "types/{type}/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Vocabulary> getByTypeAndId(@PathVariable(value = "type") String type,
+                                                     @PathVariable(value = "id") String id) {
+        return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get vocabulary children given the vocabulary parent")
+    @GetMapping(path = "/getChildren/{parentId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<Vocabulary>> getChildren(@PathVariable String parentId) {
+        return new ResponseEntity<>(vocabularyService.getChildren(parentId), HttpStatus.OK);
+    }
 
     /**
      * Secured methods
@@ -115,6 +147,13 @@ public class VocabularyController extends ResourceController<Vocabulary> {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
     public ResponseEntity<Vocabulary> delete(@RequestBody Vocabulary vocabulary, @Parameter(hidden = true) Authentication auth) {
+        return super.delete(vocabulary, auth);
+    }
+
+    @DeleteMapping(path = "{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Vocabulary> deleteById(@PathVariable String id, @Parameter(hidden = true) Authentication auth) {
+        Vocabulary vocabulary = vocabularyService.get(id);
         return super.delete(vocabulary, auth);
     }
 

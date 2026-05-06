@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,31 +19,28 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Profile("beyond")
 @Controller
@@ -53,15 +50,28 @@ public class WizardController {
 
     @Value("${catalogue.id}")
     private String catalogueId;
-
     @Value("${catalogue.homepage}")
     private String homepage;
+    @Value("${node.pid}")
+    private String nodePid;
+    @Value("${node.registry.url}")
+    private String nodeRegistryUrl;
+    @Value("${node.registry.key}")
+    private String nodeRegistryKey;
 
     private static final Logger logger = LoggerFactory.getLogger(WizardController.class);
 
     private final VocabularyService vocabularyService;
     private final ModelService modelService;
     private final GenericResourceService genericService;
+    private WebClient webClient;
+
+    @PostConstruct
+    public void init() {
+        this.webClient = WebClient.builder()
+                .baseUrl(nodeRegistryUrl)
+                .build();
+    }
 
     public WizardController(VocabularyService vocabularyService,
                             ModelService modelService,
@@ -86,7 +96,7 @@ public class WizardController {
             });
 
             if (!vocabularies.isEmpty()) {
-                String type = vocabularies.get(0).getType();
+                String type = vocabularies.getFirst().getType();
                 int countInJson = vocabularies.size();
                 int countInDb = vocabularyService.getByType(Vocabulary.Type.fromString(type)).size();
                 boolean fullyPosted = countInDb >= countInJson;
@@ -221,83 +231,115 @@ public class WizardController {
         return "redirect:/wizard/step2";
     }
 
-
-    @Operation(summary = "Create main Catalogue")
+    @Operation(summary = "Register node on Node Registry")
     @GetMapping("/step3")
-    public String createCatalogue(Model model) {
-        Catalogue catalogue = new Catalogue();
-        catalogue.setId(catalogueId);
-        catalogue.setLocation(new ProviderLocation());
-        catalogue.setMainContact(new ProviderMainContact());
-        catalogue.setPublicContacts(new ArrayList<>(List.of(new ProviderPublicContact())));
-        catalogue.setUsers(new ArrayList<>(List.of(new User())));
+    public String checkNodeRegistration(Model model) {
+        NodeRegistryRequest request = new NodeRegistryRequest();
+        request.setLegalEntity(new NodeRegistryRequest.LegalEntity()); // important
+        model.addAttribute("nodeRequest", request);
 
-        // Get countries as Map (ID -> Name)
-        Map<String, String> countries = vocabularyService.getByType(Vocabulary.Type.COUNTRY)
-                .stream()
-                .collect(Collectors.toMap(
-                        Vocabulary::getId,
-                        Vocabulary::getName,
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                ));
-
-        model.addAttribute("countries", countries);
-        model.addAttribute("catalogue", catalogue);
-        model.addAttribute("id", catalogueId);
-        return "wizard-step3";
-    }
-
-    @PostMapping("/step3/loadCatalogue")
-    public String loadCatalogue(@ModelAttribute Catalogue catalogue, Model model) {
+        boolean isRegistered = false;
         try {
-            logger.info("Loading main Catalogue with ID [{}]", catalogue.getId());
-            addCatalogue(new CatalogueBundle(catalogue));
-            model.addAttribute("successMessage", "Catalogue saved successfully! You can now close the tab!");
-
-//            return "redirect:/wizard/step4";
+            List<Map<String, Object>> nodes = webClient.get()
+                    .header("x-api-key", nodeRegistryKey)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+                    .block();
+            if (nodes != null) {
+                isRegistered = nodes.stream()
+                        .anyMatch(node -> nodePid.equals(node.get("pid")));
+            }
         } catch (Exception e) {
-            logger.error("Failed to save Catalogue [{}]: {}", catalogue.getId(), e.getMessage());
-            model.addAttribute("errorMessage", "Error saving catalogue: " + e.getMessage());
-            model.addAttribute("catalogue", catalogue);
+            logger.warn("Could not reach node registry to check registration status: {}", e.getMessage());
         }
 
-        model.addAttribute("id", catalogue.getId());
-        model.addAttribute("homepage", homepage);
+        model.addAttribute("isRegistered", isRegistered);
         return "wizard-step3";
     }
 
-    private void addCatalogue(CatalogueBundle catalogue) {
-
-        catalogue.setMetadata(Metadata.createMetadata("system", "system"));
-        List<LoggingInfo> loggingInfoList = createLoggingInfoList();
-        catalogue.setLoggingInfo(loggingInfoList);
-        catalogue.setActive(true);
-        catalogue.setStatus(vocabularyService.get("approved catalogue").getId());
-        catalogue.setAuditState(Auditable.NOT_AUDITED);
-
-        // latestOnboardingInfo
-        catalogue.setLatestOnboardingInfo(loggingInfoList.getFirst());
-
-        genericService.add("catalogue", catalogue);
+    @PostMapping("/step3")
+    public String registerNodeOnNodeRegistry(@ModelAttribute NodeRegistryRequest request,
+                                             @RequestParam(required = false) String skip,
+                                             Model model) {
+        if ("true".equals(skip)) {
+            return "redirect:/wizard/success";
+        }
+        try {
+            webClient.post()
+                    .uri("/nodes")
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .block();
+        } catch (Exception e) {
+            model.addAttribute("error", "Failed to register node: " + e.getMessage());
+            return "wizard-step3";
+        }
+        return "redirect:/wizard/success";
     }
 
-    private static List<LoggingInfo> createLoggingInfoList() {
-        String currentTime = String.valueOf(System.currentTimeMillis());
-        String system = "system";
-        String type = LoggingInfo.Types.ONBOARD.getKey();
+    @GetMapping("/success")
+    public String wizardSuccess() {
+        return "wizard-success";
+    }
 
-        return Stream.of(LoggingInfo.ActionType.REGISTERED, LoggingInfo.ActionType.APPROVED)
-                .map(action -> {
-                    LoggingInfo info = new LoggingInfo();
-                    info.setDate(currentTime);
-                    info.setType(type);
-                    info.setActionType(action.getKey());
-                    info.setUserEmail(system);
-                    info.setUserFullName(system);
-                    info.setUserRole(system);
-                    return info;
-                })
-                .collect(Collectors.toList());
+    public class NodeRegistryRequest {
+        private String name;
+        private String logo;
+        private String nodeEndpoint;
+        private LegalEntity legalEntity;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getLogo() {
+            return logo;
+        }
+
+        public void setLogo(String logo) {
+            this.logo = logo;
+        }
+
+        public String getNodeEndpoint() {
+            return nodeEndpoint;
+        }
+
+        public void setNodeEndpoint(String nodeEndpoint) {
+            this.nodeEndpoint = nodeEndpoint;
+        }
+
+        public LegalEntity getLegalEntity() {
+            return legalEntity;
+        }
+
+        public void setLegalEntity(LegalEntity legalEntity) {
+            this.legalEntity = legalEntity;
+        }
+
+        public static class LegalEntity {
+            private String name;
+            private String rorId;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getRorId() {
+                return rorId;
+            }
+
+            public void setRorId(String rorId) {
+                this.rorId = rorId;
+            }
+        }
     }
 }

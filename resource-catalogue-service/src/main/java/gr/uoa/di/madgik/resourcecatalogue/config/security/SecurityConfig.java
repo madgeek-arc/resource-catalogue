@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,16 @@ import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -36,7 +40,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
@@ -50,6 +53,8 @@ import java.util.*;
 
 @Profile("!no-auth")
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true, mode = AdviceMode.PROXY)
 public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
@@ -78,7 +83,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/resourcesync/**").permitAll()
-                                .requestMatchers("/dump/", "/restore/", "/resources/**", "/resourceType/**",
+                                .requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
+                                .requestMatchers(
+                                        "/logs/**",
+                                        "/forms/**",
+                                        "/dump/",
+                                        "/restore/",
+                                        "/resources/**",
+                                        "/resourceType/**",
                                         "/search/**").hasAuthority("ROLE_ADMIN")
                                 .anyRequest().permitAll()
                 )
@@ -128,29 +140,19 @@ public class SecurityConfig {
                     // to one or more GrantedAuthority's and add it to mappedAuthorities
 
                     OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
-
-                    OidcIdToken idToken = oidcUserAuthority.getIdToken();
                     OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
-
-                    if (idToken != null && (catalogueProperties.getAdmins().contains(idToken.getClaims().get("email"))
-                            || catalogueProperties.getOnboardingTeam().contains(idToken.getClaims().get("email")))) {
-                        sub = idToken.getClaimAsString("sub");
-                        email = idToken.getClaimAsString("email");
-                    } else if (userInfo != null && (catalogueProperties.getAdmins().contains(userInfo.getEmail())
-                            || catalogueProperties.getOnboardingTeam().contains(userInfo.getEmail()))) {
+                    if (userInfo != null) {
                         sub = userInfo.getSubject();
                         email = userInfo.getEmail();
                     } else {
                         if (((OidcUserAuthority) authority).getAttributes() != null
-                                && ((OidcUserAuthority) authority).getAttributes().containsKey("email")
-                                && (catalogueProperties.getAdmins().contains(((OidcUserAuthority) authority).getAttributes().get("email"))
-                                || catalogueProperties.getOnboardingTeam().contains(((OidcUserAuthority) authority).getAttributes().get("email")))) {
+                                && ((OidcUserAuthority) authority).getAttributes().containsKey("email")) {
                             sub = ((OidcUserAuthority) authority).getAttributes().get("sub").toString();
                             email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
                         }
                     }
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
-                    logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
+                    logger.info("User mapped as '{}'", mappedAuthorities);
 
                 } else if (authority instanceof OAuth2UserAuthority) {
                     // Map the attributes found in userAttributes
@@ -165,7 +167,7 @@ public class SecurityConfig {
                         email = userAttributes.get("email").toString();
                     }
                     mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
-                    logger.info("User '{}' with email '{}' mapped as '{}'", sub, email, mappedAuthorities);
+                    logger.info("User mapped as '{}'", mappedAuthorities);
 
                 }
             });

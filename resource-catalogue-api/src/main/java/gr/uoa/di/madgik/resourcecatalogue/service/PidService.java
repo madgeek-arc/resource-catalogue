@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public interface PidService {
      * @param suffix PID suffix
      * @return Bundle<?>
      */
-    Bundle<?> get(String prefix, String suffix);
+    Bundle get(String prefix, String suffix);
 
     /**
      * Registers/Updates a PID on a specific resource

@@ -9,6 +9,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.adapter.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Adapter Name",
       "multivalued": false,
       "name": "name",
@@ -16,17 +30,38 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Catalogue ID",
+      "label": "Description",
       "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.adapter.catalogueId",
+      "name": "description",
+      "path": "$.adapter.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.adapter.alternativePIDs[*].pid",
       "type": "java.lang.String"
     },
     {
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.adapter.node",
+      "path": "$.adapter.nodePID",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Type",
+      "multivalued": false,
+      "name": "type",
+      "path": "$.adapter.type",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Resource Owner",
+      "multivalued": false,
+      "name": "resource_owner",
+      "path": "$.adapter.resourceOwner",
       "type": "java.lang.String"
     },
     {
@@ -44,10 +79,66 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Documentation",
+      "multivalued": false,
+      "name": "documentation",
+      "path": "$.adapter.documentation",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Software Repository",
+      "multivalued": false,
+      "name": "software_repository",
+      "path": "$.adapter.softwareRepository",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Packages",
+      "multivalued": true,
+      "name": "packages",
+      "path": "$.adapter.packages[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Programming Language",
+      "multivalued": false,
+      "name": "programming_language",
+      "path": "$.adapter.programmingLanguage",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "License",
+      "multivalued": false,
+      "name": "license",
+      "path": "$.adapter.license.licenseName",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Adapter Version",
+      "multivalued": false,
+      "name": "adapter_version",
+      "path": "$.adapter.version",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Changelog",
+      "multivalued": false,
+      "name": "changelog",
+      "path": "$.adapter.changelog",
+      "type": "java.lang.String"
+    },
+    {
       "label": null,
       "multivalued": true,
-      "name": "admins",
-      "path": "$.adapter.admins[*].email",
+      "name": "creators",
+      "path": "$.adapter.creators[*].email",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": true,
+      "name": "users",
+      "path": "$.adapter.users[*].email",
       "type": "java.lang.String"
     },
     {
@@ -200,6 +291,14 @@
       "type": "java.lang.Boolean"
     },
     {
+      "defaultValue": "false",
+      "label": null,
+      "multivalued": false,
+      "name": "draft",
+      "path": "$.draft",
+      "type": "java.lang.Boolean"
+    },
+    {
       "label": null,
       "multivalued": false,
       "name": "audit_state",
@@ -209,12 +308,13 @@
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
-    "resourceTypes"
+    "resourceTypes",
+    "eoscResources"
   ],
   "name": "adapter",
   "payloadType": "json",
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle"
   },
-  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+  "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

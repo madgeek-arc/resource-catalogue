@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service.sync;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResource;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class TrainingResourceSync extends AbstractSyncService<TrainingResource> {
+public class TrainingResourceSync extends AbstractSyncService<TrainingResourceBundle> {
 
     @Autowired
     public TrainingResourceSync(@Value("${sync.host:}") String host,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class SimpleMailService implements MailService {
     void sendMessage(Message message, List<String> to, List<String> cc, List<String> bcc) throws MessagingException {
         boolean sent = false;
         int attempts = 0;
-        while (!sent && attempts < 20) {
+        while (!sent && attempts < 5) {
             try {
                 attempts++;
                 Transport.send(message);

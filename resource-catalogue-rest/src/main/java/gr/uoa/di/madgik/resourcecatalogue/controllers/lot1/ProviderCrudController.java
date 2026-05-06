@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,10 +37,9 @@ import java.util.List;
 @Tag(name = "providers")
 public class ProviderCrudController extends ResourceCrudController<ProviderBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProviderCrudController.class);
-    private final ProviderService providerService;
+    private final ResourceService<ProviderBundle> providerService;
 
-    ProviderCrudController(ProviderService providerService) {
+    ProviderCrudController(ResourceService<ProviderBundle> providerService) {
         super(providerService);
         this.providerService = providerService;
     }

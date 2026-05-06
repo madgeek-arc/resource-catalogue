@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,10 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 
-import org.springframework.security.core.Authentication;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class LoggingInfo {
 
@@ -91,7 +87,6 @@ public class LoggingInfo {
         REJECTED("rejected"),
         // Update
         UPDATED("updated"),
-        UPDATED_VERSION("updated version"),
         ACTIVATED("activated"),
         DEACTIVATED("deactivated"),
         SUSPENDED("suspended"),
@@ -100,9 +95,7 @@ public class LoggingInfo {
         VALID("valid"),
         INVALID("invalid"),
         // Draft
-        CREATED("drafted"),
-        // Resource change Provider
-        MOVED("moved");
+        CREATED("drafted");
 
         private final String actionType;
 
@@ -126,21 +119,16 @@ public class LoggingInfo {
         }
     }
 
-    public static LoggingInfo createLoggingInfoEntry(Authentication auth, String userRole, String type, String actionType) {
-        return createLoggingInfoEntry(auth, userRole, type, actionType, null);
-    }
-
-    public static LoggingInfo createLoggingInfoEntry(Authentication auth, String userRole, String type, String actionType,
+    public static LoggingInfo createLoggingInfoEntry(UserInfo userInfo, String type, String actionType,
                                                      String comment) {
         validateLoggingInfoEnums(type, actionType);
         LoggingInfo ret = new LoggingInfo();
-        User user = Objects.requireNonNull(User.of(auth));
         ret.setDate(String.valueOf(System.currentTimeMillis()));
         ret.setType(type);
         ret.setActionType(actionType);
-        ret.setUserEmail(user.getEmail());
-        ret.setUserFullName(user.getFullName());
-        ret.setUserRole(userRole);
+        ret.setUserEmail(userInfo.email());
+        ret.setUserFullName("%s %s".formatted(userInfo.name(), userInfo.surname()));
+        ret.setUserRole(userInfo.roles().getFirst().replace("ROLE_", ""));
         ret.setComment(comment);
         return ret;
     }

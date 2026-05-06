@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;
+
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public interface SecurityService {
 
@@ -39,6 +42,13 @@ public interface SecurityService {
      * @return False if authentication is null, True otherwise
      */
     boolean hasRole(Authentication auth, String role);
+
+    /**
+     *
+     * @param auth authentication
+     * @return True if authentication is not null and has role ADMIN or EPOT, False otherwise
+     */
+    boolean hasPortalAdminRole(Authentication auth);
 
     /**
      * @param auth Authentication
@@ -69,32 +79,12 @@ public interface SecurityService {
     boolean userIsResourceAdmin(User user, String resourceId);
 
     /**
-     * @param auth    Authentication
-     * @param service Service
+     * @param auth        Authentication
+     * @param service     Service
+     * @param catalogueId Catalogue ID
      * @return True if provider where the service is registered is active and approved
      */
-    boolean providerCanAddResources(Authentication auth, Service service);
-
-    /**
-     * @param auth             Authentication
-     * @param trainingResource Training Resource
-     * @return True if provider where the training resource is registered is active and approved
-     */
-    boolean providerCanAddResources(Authentication auth, TrainingResource trainingResource);
-
-    /**
-     * @param auth              Authentication
-     * @param deployableService Deployable Service
-     * @return True if provider where the deployable service is registered is active and approved
-     */
-    boolean providerCanAddResources(Authentication auth, DeployableService deployableService);
-
-    /**
-     * @param auth                   Authentication
-     * @param interoperabilityRecord Interoperability Record
-     * @return True if provider where the interoperability record is registered is active and approved
-     */
-    boolean providerCanAddResources(Authentication auth, InteroperabilityRecord interoperabilityRecord);
+    boolean providerCanAddResources(Authentication auth, LinkedHashMap<String, Object> service, String catalogueId);
 
     /**
      * @param auth       Authentication
@@ -102,59 +92,70 @@ public interface SecurityService {
      * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered
      * and provider is active
      */
-    boolean providerIsActiveAndUserIsAdmin(Authentication auth, String resourceId);
+    boolean resourceIsApprovedAndUserIsAdmin(Authentication auth, String resourceId);
 
     /**
      * @param id          service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if provider is active
      */
-    boolean providerIsActive(String id, String catalogueId, boolean published);
+    boolean providerIsActive(String id, String catalogueId);
 
     /**
      * @param id          service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if service is active
      */
-    boolean serviceIsActive(String id, String catalogueId, boolean published);
+    boolean serviceIsActive(String id, String catalogueId);
 
     /**
-     * @param id          deployable service id
+     * @param id          datasource id
      * @param catalogueId catalogue id
-     * @param published   true/false
+     * @return True if datasource is active
+     */
+    boolean datasourceIsActive(String id, String catalogueId);
+
+    /**
+     * @param id          deployable application id
+     * @param catalogueId catalogue id
      * @return True if service is active
      */
-    boolean deployableServiceIsActive(String id, String catalogueId, boolean published);
+    boolean deployableApplicationIsActive(String id, String catalogueId);
 
     /**
      * @param id          service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if training resource is active
      */
-    boolean trainingResourceIsActive(String id, String catalogueId, boolean published);
+    boolean trainingResourceIsActive(String id, String catalogueId);
 
     /**
      * @param id          service id
      * @param catalogueId catalogue id
-     * @param published   true/false
      * @return True if interoperability record (guideline) is active
      */
-    boolean guidelineIsActive(String id, String catalogueId, boolean published);
+    boolean guidelineIsActive(String id, String catalogueId);
 
     /**
-     * @param auth       Authentication
-     * @param id         Catalogue or Adapter id
-     * @return True if the authenticated user is an Adapter Admin
+     * @param id          adapter id
+     * @param catalogueId catalogue id
+     * @return True if adapter is active
      */
-    boolean hasAdapterAccess(Authentication auth, @NotNull String id);
+    boolean adapterIsActive(String id, String catalogueId);
 
     /**
-     * @param user       User
-     * @param id         Catalogue or Adapter id
-     * @return True if the authenticated user is an Adapter Admin
+     *
+     * @param prefix ID prefix
+     * @param suffix ID suffix
+     * @return True if Provider is approved
      */
-    boolean userHasAdapterAccess(User user, @NotNull String id);
+    boolean isApprovedProvider(String prefix, String suffix);
+
+    /**
+     *
+     * @param id Organisation ID
+     * @return List<User>
+     */
+    List<User> getProviderUsers(String id);
+
 }

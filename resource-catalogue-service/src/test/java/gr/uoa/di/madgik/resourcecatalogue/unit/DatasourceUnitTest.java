@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class DatasourceUnitTest {
+class DatasourceUnitTest {
 
     @Mock
     private Authentication auth;
@@ -51,7 +51,7 @@ public class DatasourceUnitTest {
      * </ul>
      */
     @Test
-    public void addDatasourceSuccess() {
+    void addDatasourceSuccess() {
         DatasourceBundle inputDatasourceBundle = createDatasourceBundle();
         DatasourceBundle expectedDatasourceBundle = createDatasourceBundle();
 
@@ -61,7 +61,7 @@ public class DatasourceUnitTest {
         assertNotNull(result);
         assertEquals(expectedDatasourceBundle, result);
         assertEquals("ds_classification-repository",
-                result.getDatasource().getDatasourceClassification(),
+                result.getDatasource().get("datasourceClassification"),
                 "Datasource classification should be 'ds_classification-repository'");
         verify(datasourceService, times(1)).add(inputDatasourceBundle, auth);
     }
@@ -79,10 +79,10 @@ public class DatasourceUnitTest {
      * @throws ResourceNotFoundException if the datasource to be updated does not exist
      */
     @Test
-    public void updateDatasourceSuccess() {
+    void updateDatasourceSuccess() {
         DatasourceBundle inputDatasourceBundle = createDatasourceBundle();
         DatasourceBundle expectedDatasourceBundle = createDatasourceBundle();
-        expectedDatasourceBundle.getDatasource().setDatasourceClassification("ds_classification-aggregators");
+        expectedDatasourceBundle.getDatasource().put("datasourceClassification", "ds_classification-aggregators");
 
         when(datasourceService.update(inputDatasourceBundle, auth))
                 .thenReturn(expectedDatasourceBundle);
@@ -91,7 +91,7 @@ public class DatasourceUnitTest {
         assertNotNull(result);
         assertEquals(expectedDatasourceBundle, result);
 
-        assertEquals("ds_classification-aggregators", result.getDatasource().getDatasourceClassification(),
+        assertEquals("ds_classification-aggregators", result.getDatasource().get("datasourceClassification"),
                 "Datasource classification should be 'ds_classification-aggregators'");
 
         verify(datasourceService, times(1)).update(inputDatasourceBundle, auth);
@@ -109,7 +109,7 @@ public class DatasourceUnitTest {
      * @throws ResourceNotFoundException if the datasource to be deleted does not exist
      */
     @Test
-    public void deleteDatasourceSuccess() {
+    void deleteDatasourceSuccess() {
         DatasourceBundle inputDatasourceBundle = createDatasourceBundle();
 
         doNothing().when(datasourceService).delete(inputDatasourceBundle);

@@ -12,35 +12,63 @@
       "label": "Catalogue ID",
       "multivalued": false,
       "name": "catalogue_id",
-      "path": "$.interoperabilityRecord.catalogueId",
+      "path": "$.catalogueId",
       "type": "java.lang.String"
     },
     {
-      "label": "Provider ID",
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.interoperabilityRecord.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Interoperability Record Name",
       "multivalued": false,
-      "name": "provider_id",
-      "path": "$.interoperabilityRecord.providerId",
+      "name": "name",
+      "path": "$.interoperabilityRecord.name",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Description",
+      "multivalued": false,
+      "name": "description",
+      "path": "$.interoperabilityRecord.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.interoperabilityRecord.alternativePIDs[*].pid",
       "type": "java.lang.String"
     },
     {
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.interoperabilityRecord.node",
+      "path": "$.interoperabilityRecord.nodePID",
       "type": "java.lang.String"
     },
     {
-      "label": "Title",
+      "label": "Type",
       "multivalued": false,
-      "name": "title",
-      "path": "$.interoperabilityRecord.title",
+      "name": "type",
+      "path": "$.interoperabilityRecord.type",
       "type": "java.lang.String"
     },
     {
-      "label": "Alternative Identifier Value",
-      "multivalued": true,
-      "name": "alternative_identifiers_values",
-      "path": "$.interoperabilityRecord.alternativeIdentifiers[*].value",
+      "label": "Resource Owner",
+      "multivalued": false,
+      "name": "resource_owner",
+      "path": "$.interoperabilityRecord.resourceOwner",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "License",
+      "multivalued": false,
+      "name": "license",
+      "path": "$.interoperabilityRecord.license.licenseName",
       "type": "java.lang.String"
     },
     {
@@ -211,12 +239,12 @@
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "guidelines"
+    "eoscResources"
   ],
   "name": "interoperability_record",
   "payloadType": "json",
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle"
   },
-  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+  "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

@@ -11,7 +11,7 @@
             %style{%notEmpty{user=%X{user}\n}}{yellow}
         </Property>
         <Property name="LOG_PATTERN">
-            %d{yyyy-MM-dd'T'HH:mm:ss.SSSX}{UTC} %highlight{%-5level} [%t] %notEmpty{- %X{traceId,spanId,user,remoteIp} }- %style{%C}{bright,blue}: %m%n%throwable
+            %d{yyyy-MM-dd'T'HH:mm:ss.SSSX}{UTC} %highlight{%-5level} [%t] %notEmpty{- %X{traceId,remoteIp} }- %style{%C}{bright,blue}: %m%n%throwable
         </Property>
     </Properties>
     <Appenders>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,9 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
-import gr.uoa.di.madgik.resourcecatalogue.utils.PidServiceResponse;
-import gr.uoa.di.madgik.resourcecatalogue.utils.RestTemplateTrustManager;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.apache.hc.client5.http.utils.Base64;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -38,21 +31,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
 
-import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +74,7 @@ public class PidIssuer {
         String prefix = pid.split("/")[0];
         ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
         PidIssuerConfig config = resourceProperties.getPidIssuer();
-        RestTemplate restTemplate = createRestTemplate(config);
+        WebClient webClient = createWebClient(config);
         HttpHeaders headers = createHeaders(config);
         if (!delete) {
             String payload;
@@ -88,86 +83,123 @@ public class PidIssuer {
             } else {
                 payload = createPID(pid, config, resourceProperties.getResolveEndpoints(), false);
             }
-            exchange(payload, headers, config, pid, restTemplate, HttpMethod.PUT);
+            exchange(payload, headers, config, pid, webClient, HttpMethod.PUT);
         } else {
-            exchange(null, headers, config, pid, restTemplate,  HttpMethod.DELETE);
+            exchange(null, headers, config, pid, webClient, HttpMethod.DELETE);
         }
     }
 
-    private RestTemplate createRestTemplate(PidIssuerConfig config) {
-        RestTemplate restTemplate;
+    private WebClient createWebClient(PidIssuerConfig config) {
         if (config.getAuth() != null) {
             if (config.getAuth().isSelfSignedCert()) {
-                restTemplate = RestTemplateTrustManager.createRestTemplateWithDisabledSSL();
+                return createSelfSignedWebClient(config.getAuth());
             } else {
-                restTemplate = createCertBasedRestTemplate(
+                return createCertBasedWebClient(
                         config.getAuth().getClientCert(),
                         config.getAuth().getClientKey());
             }
-        } else {
-            restTemplate = new RestTemplate();
         }
-        return restTemplate;
+        return WebClient.builder().build();
     }
 
-    public RestTemplate createCertBasedRestTemplate(String certPath, String keyPath) {
+    /**
+     * Builds a WebClient for PID services whose server certificate is self-signed.
+     * <p>
+     * Server trust: if {@code auth.serverCert} is set, only that certificate is trusted.
+     * Otherwise all certificates are trusted and a warning is logged — this is unsafe on
+     * untrusted networks and should only be used in development or tightly controlled environments.
+     * <p>
+     * Client authentication: if {@code clientCert} and {@code clientKey} are configured,
+     * the client certificate is presented (mTLS). Otherwise the connection relies on the
+     * {@code Authorization} header (basic auth or none).
+     * <p>
+     * Hostname verification is disabled because self-signed certificates typically lack
+     * valid Subject Alternative Names.
+     */
+    private WebClient createSelfSignedWebClient(PidIssuerConfig.IssuerCertificateAuthenticationConfig auth) {
         try {
-            // Load certificate
-            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-            X509Certificate certificate;
-            try (FileReader certReader = new FileReader(certPath)) {
-                certificate = (X509Certificate) certificateFactory
-                        .generateCertificate(new FileInputStream(certPath));
-            }
+            SslContextBuilder builder = SslContextBuilder.forClient();
 
-            // Load private key
-            PrivateKey privateKey;
-            try (PEMParser pemParser = new PEMParser(new FileReader(keyPath))) {
-                Object object = pemParser.readObject();
-                JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-                if (object instanceof PEMKeyPair pemKeyPair) {
-                    KeyPair keyPair = converter.getKeyPair(pemKeyPair);
-                    privateKey = keyPair.getPrivate();
-                } else if (object instanceof PrivateKeyInfo privateKeyInfo) {
-                    privateKey = converter.getPrivateKey(privateKeyInfo);
-                } else {
-                    throw new RuntimeException("Unexpected PEM content");
+            // Configure server trust
+            if (auth.getServerCert() != null && !auth.getServerCert().isBlank()) {
+                try (FileInputStream serverCertStream = new FileInputStream(auth.getServerCert())) {
+                    builder.trustManager(serverCertStream);
                 }
+            } else {
+                logger.warn("selfSignedCert is true but no serverCert path is configured — "
+                        + "trusting all certificates. This is unsafe on untrusted networks.");
+                builder.trustManager(InsecureTrustManagerFactory.INSTANCE);
             }
 
-            // Build the KeyStore with the loaded private key and certificate
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(null, null);
-            char[] emptyPassword = new char[0];
-            keyStore.setKeyEntry("client", privateKey, emptyPassword, new X509Certificate[]{certificate});
+            // Configure client certificate if provided (mTLS)
+            if (!auth.getClientKey().isBlank() && !auth.getClientCert().isBlank()) {
+                PrivateKey privateKey = loadPrivateKey(auth.getClientKey());
+                X509Certificate certificate = loadCertificate(auth.getClientCert());
+                builder.keyManager(privateKey, certificate);
+            }
 
-            // Build the SSL context with the key store
-            SSLContext sslContext = SSLContextBuilder.create()
-                    .loadKeyMaterial(keyStore, emptyPassword)
+            SslContext sslContext = builder.build();
+            HttpClient httpClient = HttpClient.create()
+                    .secure(spec -> spec
+                            .sslContext(sslContext)
+                            .handlerConfigurator(handler -> disableHostnameVerification(handler.engine())));
+            return WebClient.builder()
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .build();
-
-            // Create ConnectionManager with the custom SSL context
-            PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                    .setSSLSocketFactory(
-                            SSLConnectionSocketFactoryBuilder.create()
-                                    .setSslContext(sslContext)
-                                    .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                                    .build()
-                    )
-                    .build();
-
-            // Create HttpClient
-            CloseableHttpClient httpClient = HttpClients
-                    .custom()
-                    .setConnectionManager(connectionManager)
-                    .build();
-
-            // Set the HttpClient on the RestTemplate
-            return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
-
         } catch (Exception e) {
-            throw new RuntimeException("Error configuring RestTemplate with PEM files", e);
+            throw new RuntimeException("Failed to create WebClient for self-signed certificate", e);
         }
+    }
+
+    /**
+     * Builds a WebClient for mutual TLS (mTLS) against a CA-signed server certificate.
+     * The server certificate is verified against the JVM default trust store, and hostname
+     * verification is left enabled.
+     */
+    private WebClient createCertBasedWebClient(String certPath, String keyPath) {
+        try {
+            PrivateKey privateKey = loadPrivateKey(keyPath);
+            X509Certificate certificate = loadCertificate(certPath);
+
+            SslContext sslContext = SslContextBuilder.forClient()
+                    .keyManager(privateKey, certificate)
+                    .build();
+            HttpClient httpClient = HttpClient.create()
+                    .secure(spec -> spec.sslContext(sslContext));
+            return WebClient.builder()
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Error configuring WebClient with PEM files", e);
+        }
+    }
+
+    private X509Certificate loadCertificate(String certPath) throws Exception {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        try (FileInputStream certStream = new FileInputStream(certPath)) {
+            return (X509Certificate) cf.generateCertificate(certStream);
+        }
+    }
+
+    private PrivateKey loadPrivateKey(String keyPath) throws Exception {
+        try (PEMParser pemParser = new PEMParser(new FileReader(keyPath))) {
+            Object object = pemParser.readObject();
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+            if (object instanceof PEMKeyPair pemKeyPair) {
+                KeyPair keyPair = converter.getKeyPair(pemKeyPair);
+                return keyPair.getPrivate();
+            } else if (object instanceof PrivateKeyInfo privateKeyInfo) {
+                return converter.getPrivateKey(privateKeyInfo);
+            } else {
+                throw new RuntimeException("Unexpected PEM content");
+            }
+        }
+    }
+
+    private static void disableHostnameVerification(SSLEngine engine) {
+        SSLParameters params = engine.getSSLParameters();
+        params.setEndpointIdentificationAlgorithm(null);
+        engine.setSSLParameters(params);
     }
 
     private String createPID(String pid, PidIssuerConfig config, List<String> resolveEndpoints, boolean isCustom) {
@@ -241,18 +273,27 @@ public class PidIssuer {
     private String createBasicAuth(String user, String userIndex, String password) {
         String username = userIndex + "%3A" + user;
         String auth = username + ":" + password;
-        byte[] encodedAuth = Base64.encodeBase64(auth.getBytes());
-        return "Basic " + new String(encodedAuth);
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
+        return "Basic " + new String(encodedAuth, StandardCharsets.UTF_8);
     }
 
     private void exchange(String payload, HttpHeaders headers, PidIssuerConfig config, String pid,
-                          RestTemplate restTemplate, HttpMethod method) {
-        HttpEntity<String> request = (payload == null || payload.isEmpty())
-                ? new HttpEntity<>(headers) // delete
-                : new HttpEntity<>(payload, headers); // put
+                          WebClient webClient, HttpMethod method) {
         try {
             URI uri = URI.create(String.join("/", config.getUrl(), pid));
-            ResponseEntity<?> response = restTemplate.exchange(uri, method, request, String.class);
+            WebClient.RequestBodySpec requestSpec = webClient
+                    .method(method)
+                    .uri(uri)
+                    .headers(h -> h.addAll(headers));
+
+            WebClient.RequestHeadersSpec<?> headersSpec = (payload != null && !payload.isEmpty())
+                    ? requestSpec.bodyValue(payload)
+                    : requestSpec;
+
+            ResponseEntity<String> response = headersSpec
+                    .exchangeToMono(clientResponse -> clientResponse.toEntity(String.class))
+                    .block();
+
             logInfo(response, pid, config.getUrl(), method);
         } catch (Exception e) {
             throw new RuntimeException("Error during PID " + method.name() + " request", e);
@@ -287,16 +328,16 @@ public class PidIssuer {
         ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
         PidIssuerConfig config = resourceProperties.getPidIssuer();
 
-        WebClient webClient = WebClient.builder()
-                .baseUrl(config.getUrl())
-                .defaultHeader("Content-Type", "application/json")
-                .build();
+        WebClient webClient = createWebClient(config);
+        HttpHeaders headers = createHeaders(config);
 
         return webClient
                 .get()
-                .uri("/" + pid)
+                .uri(URI.create(String.join("/", config.getUrl(), pid)))
+                .headers(h -> h.addAll(headers))
                 .exchangeToMono(response ->
-                        response.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                        response.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                                })
                                 .map(body -> new PidServiceResponse(response.statusCode(), body))
                 )
                 .block();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,115 +16,57 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import org.apache.commons.beanutils.BeanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("publicDatasourceManager")
-public class PublicDatasourceService extends ResourceCatalogueManager<DatasourceBundle>
-        implements PublicResourceService<DatasourceBundle> {
+public class PublicDatasourceService extends AbstractPublicResourceManager<DatasourceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicDatasourceService.class);
-    private final JmsService jmsService;
-    private final PidIssuer pidIssuer;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final OrganisationService organisationService;
 
-    public PublicDatasourceService(JmsService jmsService,
+    public PublicDatasourceService(GenericResourceService genericResourceService,
+                                   JmsService jmsService,
                                    PidIssuer pidIssuer,
-                                   ServiceBundleService<ServiceBundle> serviceBundleService) {
-        super(DatasourceBundle.class);
-        this.jmsService = jmsService;
-        this.pidIssuer = pidIssuer;
-        this.serviceBundleService = serviceBundleService;
+                                   FacetLabelService facetLabelService,
+                                   OrganisationService organisationService) {
+        super(genericResourceService, jmsService, pidIssuer, facetLabelService);
+        this.organisationService = organisationService;
     }
 
     @Override
-    public String getResourceTypeName() {
+    protected String getResourceTypeName() {
         return "datasource";
     }
 
     @Override
-    public Browsing<DatasourceBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
-        return super.getAll(facetFilter, authentication);
-    }
+    public void updateIdsToPublic(DatasourceBundle datasource) {
+        // Resource Owner
+        OrganisationBundle provider = organisationService.get(
+                (String) datasource.getDatasource().get("resourceOwner"),
+                datasource.getCatalogueId()
+        );
+        datasource.getDatasource().put("resourceOwner", provider.getIdentifiers().getPid());
 
-    public DatasourceBundle getOrElseReturnNull(String id, String catalogueId) {
-        DatasourceBundle datasourceBundle;
-        try {
-            datasourceBundle = get(id, catalogueId, true);
-        } catch (CatalogueResourceNotFoundException e) {
-            return null;
+        // Service Providers
+        Object providersObj = datasource.getDatasource().get("serviceProviders");
+        if (providersObj instanceof List<?> providersList && !providersList.isEmpty()) {
+            List<String> updatedServiceProviders = new ArrayList<>();
+            for (Object providerObj : providersList) {
+                if (providerObj instanceof String providerId) {
+                    OrganisationBundle bundle = organisationService.get(providerId, datasource.getCatalogueId());
+                    updatedServiceProviders.add(bundle.getIdentifiers().getPid());
+                }
+            }
+            datasource.getDatasource().put("serviceProviders", updatedServiceProviders);
         }
-        return datasourceBundle;
-    }
-
-    @Override
-    public DatasourceBundle add(DatasourceBundle datasourceBundle, Authentication authentication) {
-        String lowerLevelResourceId = datasourceBundle.getId();
-        datasourceBundle.setId(datasourceBundle.getIdentifiers().getPid());
-        datasourceBundle.getMetadata().setPublished(true);
-
-        // sets public ids to providerId, serviceId
-        updateIdsToPublic(datasourceBundle);
-
-        DatasourceBundle ret;
-        logger.info("Datasource '{}' is being published with id '{}'", lowerLevelResourceId, datasourceBundle.getId());
-        ret = super.add(datasourceBundle, null);
-        jmsService.convertAndSendTopic("datasource.create", datasourceBundle);
-        return ret;
-    }
-
-    @Override
-    public DatasourceBundle update(DatasourceBundle datasourceBundle, Authentication authentication) {
-        DatasourceBundle published = super.get(datasourceBundle.getIdentifiers().getPid(), datasourceBundle.getDatasource().getCatalogueId(), true);
-        DatasourceBundle ret = super.get(datasourceBundle.getIdentifiers().getPid(), datasourceBundle.getDatasource().getCatalogueId(), true);
-        try {
-            BeanUtils.copyProperties(ret, datasourceBundle);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.info("Could not copy properties.");
-        }
-
-        // sets public ids to providerId, serviceId
-        updateIdsToPublic(datasourceBundle);
-
-        ret.setIdentifiers(published.getIdentifiers());
-        ret.setId(published.getId());
-        ret.getMetadata().setPublished(true);
-        logger.info("Updating public Datasource with id '{}'", ret.getId());
-        ret = super.update(ret, null);
-        jmsService.convertAndSendTopic("datasource.update", ret);
-        return ret;
-    }
-
-    @Override
-    public void delete(DatasourceBundle datasourceBundle) {
-        try {
-            DatasourceBundle publicDatasourceBundle = get(datasourceBundle.getIdentifiers().getPid(),
-                    datasourceBundle.getDatasource().getCatalogueId(), true);
-            logger.info("Deleting public Datasource with id '{}'", publicDatasourceBundle.getId());
-            super.delete(publicDatasourceBundle);
-            jmsService.convertAndSendTopic("datasource.delete", publicDatasourceBundle);
-        } catch (CatalogueResourceNotFoundException ignore) {
-        }
-    }
-
-    @Override
-    public void updateIdsToPublic(DatasourceBundle bundle) {
-        // serviceId
-        ServiceBundle serviceBundle = serviceBundleService.get(
-                bundle.getDatasource().getServiceId(), bundle.getDatasource().getCatalogueId(), false);
-        bundle.getDatasource().setServiceId(serviceBundle.getIdentifiers().getPid());
     }
 }

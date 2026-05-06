@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
+@Deprecated(forRemoval = true)
 public abstract class ResourceCatalogueManager<T extends Identifiable> extends ResourceManager<T> implements ResourceCatalogueService<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceCatalogueManager.class);
@@ -80,37 +81,33 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
     }
 
     protected String getCatalogueId(T t) {
-        if (t instanceof ProviderBundle) {
-            return ((ProviderBundle) t).getProvider().getCatalogueId();
+        if (t instanceof OrganisationBundle) {
+            return ((OrganisationBundle) t).getCatalogueId();
         } else if (t instanceof ServiceBundle) {
-            return ((ServiceBundle) t).getService().getCatalogueId();
+            return ((ServiceBundle) t).getCatalogueId();
         } else if (t instanceof TrainingResourceBundle) {
-            return ((TrainingResourceBundle) t).getTrainingResource().getCatalogueId();
-        } else if (t instanceof DeployableServiceBundle) {
-            return ((DeployableServiceBundle) t).getDeployableService().getCatalogueId();
+            return ((TrainingResourceBundle) t).getCatalogueId();
+        } else if (t instanceof DeployableApplicationBundle) {
+            return ((DeployableApplicationBundle) t).getCatalogueId();
         } else if (t instanceof InteroperabilityRecordBundle) {
-            return ((InteroperabilityRecordBundle) t).getInteroperabilityRecord().getCatalogueId();
+            return ((InteroperabilityRecordBundle) t).getCatalogueId();
         } else if (t instanceof ResourceInteroperabilityRecordBundle) {
-            return ((ResourceInteroperabilityRecordBundle) t).getResourceInteroperabilityRecord().getCatalogueId();
+            return ((ResourceInteroperabilityRecordBundle) t).getCatalogueId();
         } else if (t instanceof DatasourceBundle) {
-            return ((DatasourceBundle) t).getDatasource().getCatalogueId();
-        } else if (t instanceof MonitoringBundle) {
-            return ((MonitoringBundle) t).getMonitoring().getCatalogueId();
-        } else if (t instanceof HelpdeskBundle) {
-            return ((HelpdeskBundle) t).getHelpdesk().getCatalogueId();
+            return ((DatasourceBundle) t).getCatalogueId();
         } else if (t instanceof AdapterBundle) {
-            return ((AdapterBundle) t).getAdapter().getCatalogueId();
+            return ((AdapterBundle) t).getCatalogueId();
         } else if (t instanceof ConfigurationTemplateBundle) {
-            return ((ConfigurationTemplateBundle) t).getConfigurationTemplate().getCatalogueId();
+            return ((ConfigurationTemplateBundle) t).getCatalogueId();
         } else if (t instanceof ConfigurationTemplateInstanceBundle) {
-            return ((ConfigurationTemplateInstanceBundle) t).getConfigurationTemplateInstance().getCatalogueId();
+            return ((ConfigurationTemplateInstanceBundle) t).getCatalogueId();
         }
         return catalogueId;
     }
 
     protected boolean getLevel(T t) {
-        if (t instanceof Bundle) {
-            return ((Bundle<?>) t).getMetadata().isPublished();
+        if (t instanceof Bundle bundle) {
+            return bundle.getMetadata().isPublished();
         }
         return false;
     }
@@ -147,6 +144,15 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
         return ret;
     }
 
+    public T get(String id, boolean published) {
+        Resource resource = getResource(id, published);
+        if (resource == null) {
+            throw new CatalogueResourceNotFoundException(String.format("Could not find %s with id: %s",
+                    typeParameterClass.getSimpleName(), id));
+        }
+        return deserialize(resource);
+    }
+
     public T get(String id, String catalogueId, boolean published) {
         Resource resource = getResource(id, catalogueId, published);
         if (resource == null) {
@@ -154,6 +160,14 @@ public abstract class ResourceCatalogueManager<T extends Identifiable> extends R
                     typeParameterClass.getSimpleName(), id, catalogueId));
         }
         return deserialize(resource);
+    }
+
+    public Resource getResource(String id, boolean published) {
+        return searchService.searchFields(
+                getResourceTypeName(),
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", String.valueOf(published))
+        );
     }
 
     public Resource getResource(String id, String catalogueId, boolean published) {

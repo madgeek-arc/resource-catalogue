@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,23 +22,28 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.service.ParserService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.MapValues;
 import gr.uoa.di.madgik.resourcecatalogue.dto.PlaceCount;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.service.Analytics;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.StatisticsService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.joda.time.DateTime;
+import org.postgresql.jdbc.PgArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,28 +54,28 @@ public class DefaultStatisticsManager implements StatisticsService {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultStatisticsManager.class);
     private final Analytics analyticsService;
-    private final ProviderService providerService;
+    private final OrganisationService organisationService;
     private final SearchService searchService;
     private final ParserService parserService;
-    private final ServiceBundleManager serviceBundleManager;
+    private final ServiceManager serviceBundleManager;
     private final VocabularyService vocabularyService;
-//    private final DataSource dataSource;
+    private final DataSource dataSource;
 
     @org.springframework.beans.factory.annotation.Value("${elastic.index.max_result_window:10000}")
     private int maxQuantity;
 
     DefaultStatisticsManager(Analytics analyticsService,
-                             ProviderService providerService,
+                             OrganisationService organisationService,
                              SearchService searchService, ParserService parserService,
-//                             DataSource dataSource,
-                             ServiceBundleManager serviceBundleManager, VocabularyService vocabularyService) {
+                             DataSource dataSource,
+                             ServiceManager serviceBundleManager, VocabularyService vocabularyService) {
         this.analyticsService = analyticsService;
-        this.providerService = providerService;
+        this.organisationService = organisationService;
         this.searchService = searchService;
         this.parserService = parserService;
         this.serviceBundleManager = serviceBundleManager;
         this.vocabularyService = vocabularyService;
-//        this.dataSource = dataSource;
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -80,7 +85,9 @@ public class DefaultStatisticsManager implements StatisticsService {
 
     @Override
     public Map<String, Integer> providerAddToProject(String id, Interval by) {
-        Map<String, Integer> providerAddToProject = serviceBundleManager.getResourcesByProvider(id)
+        FacetFilter filter = new FacetFilter();
+        filter.addFilter("resource_owner", id);
+        Map<String, Integer> providerAddToProject = serviceBundleManager.getAll(filter).getResults()
                 .stream()
                 .flatMap(s -> addToProject(s.getId(), by).entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
@@ -340,9 +347,9 @@ public class DefaultStatisticsManager implements StatisticsService {
 
         List<ServiceBundle> allServices = serviceBundleManager.getAll(ff, null).getResults();
         for (ServiceBundle serviceBundle : allServices) {
-            Value value = new Value(serviceBundle.getId(), serviceBundle.getService().getName());
+            Value value = new Value(serviceBundle.getId(), (String) serviceBundle.getService().get("name"));
 
-            Set<String> countries = new HashSet<>(providerCountries.get(serviceBundle.getService().getResourceOrganisation()));
+            Set<String> countries = new HashSet<>(providerCountries.get(serviceBundle.getService().get("resourceOwner")));
             for (String country : countries) {
                 if (mapValues.get(country) == null) {
                     continue;
@@ -357,53 +364,52 @@ public class DefaultStatisticsManager implements StatisticsService {
     }
 
     @Override
-    public List<MapValues> mapServicesToVocabulary(String providerId, Vocabulary vocabulary) {
-//        Map<String, Set<Value>> vocabularyServices = new HashMap<>();
-//
-//        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-//        MapSqlParameterSource in = new MapSqlParameterSource();
-//        in.addValue("resource_organisation", providerId);
-//
-//        String query = "SELECT resource_internal_id, name, " + vocabulary.getKey()
-//                + " FROM service_view WHERE active=true ";
-//        if (providerId != null) {
-//            query += " AND :resource_organisation=resource_organisation";
-//        }
-//
-//        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
-//
-//        try {
-//            for (Map<String, Object> entry : records) {
-//                Value value = new Value();
-//                value.setId(entry.get("resource_internal_id").toString());
-//                value.setName(entry.get("name").toString());
-//
-//                // TODO: refactor this code and Vocabulary enum
-//                String[] vocabularyValues;
-//                if (vocabulary != Vocabulary.ORDER_TYPE) { // because order type is not multivalued
-//                    PgArray pgArray = ((PgArray) entry.get(vocabulary.getKey()));
-//                    vocabularyValues = ((String[]) pgArray.getArray());
-//                } else {
-//                    vocabularyValues = new String[]{((String) entry.get(vocabulary.getKey()))};
-//                }
-//
-//                for (String voc : vocabularyValues) {
-//                    Set<Value> values;
-//                    if (vocabularyServices.containsKey(voc)) {
-//                        values = vocabularyServices.get(voc);
-//                    } else {
-//                        values = new HashSet<>();
-//                    }
-//                    values.add(value);
-//                    vocabularyServices.put(voc, values);
-//                }
-//            }
-//        } catch (SQLException throwables) {
-//            logger.error(throwables.getMessage(), throwables);
-//        }
-//
-//        return toListMapValues(vocabularyServices);
-        throw new UnsupportedOperationException("Not Implemented");
+    public List<MapValues> mapServicesToVocabulary(String providerId, String vocType) {
+        Map<String, Set<Value>> vocabularyServices = new HashMap<>();
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        MapSqlParameterSource in = new MapSqlParameterSource();
+        in.addValue("resourceOwner", providerId);
+
+        String query = "select resource_internal_id,name," + vocType +
+                " from service_view where active=true and published=false";
+        if (providerId != null) {
+            query += " and resource_owner='" + providerId + "'";
+        }
+
+        List<Map<String, Object>> records = namedParameterJdbcTemplate.queryForList(query, in);
+
+        try {
+            for (Map<String, Object> entry : records) {
+                Value value = new Value();
+                value.setId(entry.get("resource_internal_id").toString());
+                value.setName(entry.get("name").toString());
+
+                // TODO: refactor this code and Vocabulary enum
+                String[] vocabularyValues;
+                if (!vocType.equals("order_type")) { // because order type is not multivalued
+                    PgArray pgArray = ((PgArray) entry.get(vocType));
+                    vocabularyValues = ((String[]) pgArray.getArray());
+                } else {
+                    vocabularyValues = new String[]{((String) entry.get(vocType))};
+                }
+
+                for (String voc : vocabularyValues) {
+                    Set<Value> values;
+                    if (vocabularyServices.containsKey(voc)) {
+                        values = vocabularyServices.get(voc);
+                    } else {
+                        values = new HashSet<>();
+                    }
+                    values.add(value);
+                    vocabularyServices.put(voc, values);
+                }
+            }
+        } catch (SQLException throwables) {
+            logger.error(throwables.getMessage(), throwables);
+        }
+
+        return toListMapValues(vocabularyServices);
     }
 
     private Map<String, Set<String>> providerCountriesMap() {
@@ -414,9 +420,9 @@ public class DefaultStatisticsManager implements StatisticsService {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(maxQuantity);
 
-        for (ProviderBundle providerBundle : providerService.getAll(ff, null).getResults()) {
+        for (OrganisationBundle organisationBundle : organisationService.getAll(ff, null).getResults()) {
             Set<String> countries = new HashSet<>();
-            String country = providerBundle.getProvider().getLocation().getCountry();
+            String country = (String) organisationBundle.getOrganisation().get("country");
             if (country.equalsIgnoreCase("WW")) {
                 countries.addAll(Arrays.asList(world));
             } else if (country.equalsIgnoreCase("EU")) {
@@ -424,7 +430,7 @@ public class DefaultStatisticsManager implements StatisticsService {
             } else {
                 countries.add(country);
             }
-            providerCountries.put(providerBundle.getId(), countries);
+            providerCountries.put(organisationBundle.getId(), countries);
         }
         return providerCountries;
     }

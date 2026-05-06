@@ -9,6 +9,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Interoperability Record ID",
       "multivalued": false,
       "name": "interoperability_record_id",
@@ -16,17 +23,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.configurationTemplate.catalogueId",
-      "type": "java.lang.String"
-    },
-    {
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.configurationTemplate.node",
+      "path": "$.configurationTemplate.nodePID",
       "type": "java.lang.String"
     },
     {
@@ -104,13 +104,13 @@
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
-  "name": "configuration_template",
   "aliases": [
     "resourceTypes"
   ],
+  "name": "configuration_template",
   "payloadType": "json",
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle"
   },
-  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+  "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,16 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.LinkedHashMap;
 
-public class AdapterBundle extends Bundle<Adapter> {
+public class AdapterBundle extends Bundle {
 
-    @Schema
-    private String status;
-
-    @Schema
-    private String auditState;
-
-    public AdapterBundle() {
-        // no arg constructor
+    public LinkedHashMap<String, Object> getAdapter() {
+        return this.getPayload();
     }
 
-    public AdapterBundle(Adapter adapter) {
-        this.setAdapter(adapter);
-        this.setMetadata(null);
-    }
-
-    public AdapterBundle(Adapter adapter, Metadata metadata) {
-        this.setAdapter(adapter);
-        this.setMetadata(metadata);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
+    public void setAdapter(LinkedHashMap<String, Object> payload) {
+        this.setPayload(payload);
     }
 
     @Override
@@ -58,29 +36,5 @@ public class AdapterBundle extends Bundle<Adapter> {
     @Override
     public void setId(String id) {
         super.setId(id);
-    }
-
-    public Adapter getAdapter() {
-        return this.getPayload();
-    }
-
-    public void setAdapter(Adapter adapter) {
-        this.setPayload(adapter);
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getAuditState() {
-        return auditState;
-    }
-
-    public void setAuditState(String auditState) {
-        this.auditState = auditState;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 }

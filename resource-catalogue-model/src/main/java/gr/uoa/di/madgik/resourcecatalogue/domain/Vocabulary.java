@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,26 +48,21 @@ public class Vocabulary implements Identifiable {
     }
 
     public enum Type {
-        // Node
+        // Generic
         NODE("Node"),
-        // Provider
-        PROVIDER_AREA_OF_ACTIVITY("Provider area of activity"),
-        PROVIDER_ESFRI_TYPE("Provider esfri type"),
-        PROVIDER_ESFRI_DOMAIN("Provider esfri domain"),
+        CREDIT("Credit"),
+        SPDX_LICENSE("Spdx license"),
+        // States
+        RESOURCE_STATE("Resource state"),
+        TEMPLATE_STATE("Template state"),
+        // Organisation
+        PROVIDER_NETWORK("Provider network"), //TODO: used in old Catalogue - delete
         PROVIDER_HOSTING_LEGAL_ENTITY("Provider hosting legal entity"),
         PROVIDER_LEGAL_STATUS("Provider legal status"),
-        PROVIDER_LIFE_CYCLE_STATUS("Provider life cycle status"),
-        PROVIDER_NETWORK("Provider network"),
-        PROVIDER_SOCIETAL_GRAND_CHALLENGE("Provider societal grand challenge"),
-        PROVIDER_STRUCTURE_TYPE("Provider structure type"),
-        PROVIDER_MERIL_SCIENTIFIC_DOMAIN("Provider meril scientific domain"),
-        PROVIDER_MERIL_SCIENTIFIC_SUBDOMAIN("Provider meril scientific subdomain"),
         // Service
-        SUPERCATEGORY("Supercategory"),
         CATEGORY("Category"),
         SUBCATEGORY("Subcategory"),
         LANGUAGE("Language"),
-        GEOGRAPHIC_LOCATION("Geographic location"),
         REGION("Region"),
         COUNTRY("Country"),
         TRL("Technology readiness level"),
@@ -75,30 +70,13 @@ public class Vocabulary implements Identifiable {
         SCIENTIFIC_SUBDOMAIN("Scientific subdomain"),
         TARGET_USER("Target user"),
         ACCESS_TYPE("Access type"),
-        ACCESS_MODE("Access mode"),
         ORDER_TYPE("Order type"),
-        FUNDING_BODY("Funding body"),
-        FUNDING_PROGRAM("Funding program"),
-        LIFE_CYCLE_STATUS("Life cycle status"),
-        RELATED_PLATFORM("Related platform"),
-        SERVICE_CATEGORY("Service category"),
-        MARKETPLACE_LOCATION("Marketplace location"),
-        // States
-        CATALOGUE_STATE("Catalogue state"),
-        PROVIDER_STATE("Provider state"),
-        RESOURCE_STATE("Resource state"),
-        DATASOURCE_STATE("Datasource state"),
-        TEMPLATE_STATE("Template state"),
-        INTEROPERABILITY_RECORD_STATE("Interoperability Record state"),
-        ADAPTER_STATE("Adapter state"),
-        // Datasource
+        // Datasource-specific
         DS_RESEARCH_ENTITY_TYPE("Research entity type"),
         DS_PERSISTENT_IDENTITY_SCHEME("Persistent identity scheme"),
         DS_JURISDICTION("Jurisdiction"),
         DS_CLASSIFICATION("Classification"),
-        DS_COAR_ACCESS_RIGHTS_1_0("COAR access rights 1.0"),
         // Training Resource
-        TR_URL_TYPE("Training Resource url type"),
         TR_ACCESS_RIGHT("Training Resource access right"),
         TR_DCMI_TYPE("Training Resource dcmi type"),
         TR_EXPERTISE_LEVEL("Training Resource expertise level"),
@@ -106,21 +84,11 @@ public class Vocabulary implements Identifiable {
         TR_QUALIFICATION("Training Resource qualification"),
         // Adapter
         ADAPTER_PROGRAMMING_LANGUAGE("Adapter programming language"),
-        ADAPTER_LICENSE("Adapter license"),
-        // Monitoring
-        MONITORING_MONITORED_BY("Monitored by"),
-        // Bundle Extras
-        SEMANTIC_RELATIONSHIP("Semantic relationship"),
-        RESEARCH_CATEGORY("Research category"),
-        // Interoperability Record
-        IR_IDENTIFIER_TYPE("Interoperability Record identifier type"),
-        IR_NAME_TYPE("Interoperability Record name type"),
-        IR_RESOURCE_TYPE_GENERAL("Interoperability Record resource type general"),
-        IR_STATUS("Interoperability Record status"),
-        IR_EOSC_GUIDELINE_TYPE("Interoperability Record eosc guideline type"),
+        SQA_BADGE("Sqa badge"),
         // Configuration Template
         CT_PROTOCOL("Configuration Template protocol"),
         CT_COMPATIBILITY("Configuration Template compatibility");
+
         private final String type;
 
         Type(final String type) {

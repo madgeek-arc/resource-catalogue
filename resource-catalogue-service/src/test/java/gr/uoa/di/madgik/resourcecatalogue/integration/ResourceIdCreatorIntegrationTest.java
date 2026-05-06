@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.integration;
 
-import gr.uoa.di.madgik.registry.service.ResourceTypeService;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceTypes;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceIdCreator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,30 +33,29 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private ResourceIdCreator idCreator;
     @Autowired
-    private ResourceTypeService resourceTypeService;
+    private CatalogueProperties catalogueProperties;
 
-    private List<String> excludedResourceTypes;
     private List<String> resourceTypes;
 
     @BeforeAll
     void setUp() {
-        resourceTypes = Arrays.stream(ResourceTypes.values())
-                .map(resourceType -> resourceType.name().toLowerCase())
-                .collect(Collectors.toList());
+        resourceTypes = catalogueProperties.getResources().keySet().stream()
+                .map(ResourceTypes::toString)
+                .toList();
     }
 
     /**
      * Test to verify that the ID generation process consistently produces unique IDs.
      * <p>
      * This test ensures that when generating a large number of IDs (10,000 in this case)
-     * for a single resource type ("provider"), all IDs are unique and do not overlap.
+     * for a single resource type ("organisation"), all IDs are unique and do not overlap.
      * <p>
      * This test is important for validating that the ID creation logic is robust and
      * does not produce duplicates under normal conditions.
      */
     @Test
     void generateUniqueIds() {
-        IntStream.range(0, 10).forEach(i -> idCreator.generate("provider"));
+        IntStream.range(0, 10).forEach(i -> idCreator.generate("organisation"));
     }
 
     /**

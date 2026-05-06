@@ -9,6 +9,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Resource ID",
       "multivalued": false,
       "name": "resource_id",
@@ -16,17 +23,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Catalogue ID",
-      "multivalued": false,
-      "name": "catalogue_id",
-      "path": "$.resourceInteroperabilityRecord.catalogueId",
-      "type": "java.lang.String"
-    },
-    {
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.resourceInteroperabilityRecord.node",
+      "path": "$.resourceInteroperabilityRecord.nodePID",
       "type": "java.lang.String"
     },
     {
@@ -105,5 +105,5 @@
   "properties": {
     "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle"
   },
-  "schema": "{\n\t\"$schema\": \"https://json-schema.org/draft/2019-09/schema\"\n}"
+  "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

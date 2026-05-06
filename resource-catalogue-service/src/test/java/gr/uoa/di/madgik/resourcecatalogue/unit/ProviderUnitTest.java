@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,59 +17,65 @@
 package gr.uoa.di.madgik.resourcecatalogue.unit;
 
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ProviderBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ProviderService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
-import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createProviderBundle;
+import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createOrganisation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProviderUnitTest {
+class ProviderUnitTest {
 
     @Mock
     private Authentication auth;
     @Mock
-    private ProviderService providerService;
+    private OrganisationService providerService;
 
     /**
      * Test to verify the successful addition of a valid provider using the {@code add} method.
      * <p>
      * This test ensures that:
      * <ul>
-     *   <li>The returned {@link ProviderBundle} is not null.</li>
-     *   <li>The returned {@link ProviderBundle} matches the expected output.</li>
+     *   <li>The returned {@link OrganisationBundle} is not null.</li>
+     *   <li>The returned {@link OrganisationBundle} matches the expected output.</li>
      *   <li>The provider's name is correctly set to "Test Provider".</li>
-     *   <li>The {@code add} method of the {@link ProviderService} is invoked exactly once with the correct arguments.</li>
+     *   <li>The {@code add} method of the {@link OrganisationService} is invoked exactly once with the correct arguments.</li>
      * </ul>
      */
-    @Test
-    public void addProviderSuccess() {
-        ProviderBundle inputProviderBundle = createProviderBundle();
-        ProviderBundle expectedProviderBundle = createProviderBundle();
+    private static OrganisationBundle createOrganisationBundle() {
+        OrganisationBundle bundle = new OrganisationBundle();
+        bundle.setOrganisation(createOrganisation());
+        return bundle;
+    }
 
-        when(providerService.add(inputProviderBundle, auth)).thenReturn(expectedProviderBundle);
-        ProviderBundle result = providerService.add(inputProviderBundle, auth);
+    @Test
+    void addProviderSuccess() {
+        OrganisationBundle inputOrganisationBundle = createOrganisationBundle();
+        OrganisationBundle expectedOrganisationBundle = createOrganisationBundle();
+
+        when(providerService.add(inputOrganisationBundle, auth)).thenReturn(expectedOrganisationBundle);
+        OrganisationBundle result = providerService.add(inputOrganisationBundle, auth);
 
         assertNotNull(result);
-        assertEquals(expectedProviderBundle, result);
-        assertEquals("Test Provider", result.getProvider().getName(),
+        assertEquals(expectedOrganisationBundle, result);
+        assertEquals("Test Provider", result.getOrganisation().get("name"),
                 "Provider name should be 'Test Provider'");
-        verify(providerService, times(1)).add(inputProviderBundle, auth);
+        verify(providerService, times(1)).add(inputOrganisationBundle, auth);
     }
 
     /**
-     * Tests the successful update of a provider using the ProviderService.
+     * Tests the successful update of a provider using the OrganisationService.
      * <p>
-     * This test verifies that the {@code update} method of the {@link ProviderService}:
+     * This test verifies that the {@code update} method of the {@link OrganisationService}:
      * <ul>
-     *   <li>Returns the expected updated {@link ProviderBundle}.</li>
+     *   <li>Returns the expected updated {@link OrganisationBundle}.</li>
      *   <li>Ensures the provider's properties (e.g., name) are updated correctly.</li>
      *   <li>Is called exactly once with the correct arguments.</li>
      * </ul>
@@ -77,35 +83,35 @@ public class ProviderUnitTest {
      * @throws ResourceNotFoundException if the provider to be updated does not exist
      */
     @Test
-    public void updateProviderSuccess() {
-        ProviderBundle inputProviderBundle = createProviderBundle();
-        ProviderBundle expectedProviderBundle = createProviderBundle();
-        expectedProviderBundle.getProvider().setName("Updated Test Provider");
+    void updateProviderSuccess() {
+        OrganisationBundle inputOrganisationBundle = createOrganisationBundle();
+        OrganisationBundle expectedOrganisationBundle = createOrganisationBundle();
+        expectedOrganisationBundle.getOrganisation().put("name", "Updated Test Provider");
 
-        when(providerService.update(inputProviderBundle, auth)).thenReturn(expectedProviderBundle);
-        ProviderBundle result = providerService.update(inputProviderBundle, auth);
+        when(providerService.update(inputOrganisationBundle, auth)).thenReturn(expectedOrganisationBundle);
+        OrganisationBundle result = providerService.update(inputOrganisationBundle, auth);
 
         assertNotNull(result);
-        assertEquals(expectedProviderBundle, result);
+        assertEquals(expectedOrganisationBundle, result);
 
-        assertEquals("Updated Test Provider", result.getProvider().getName(), "Provider name should " +
-                "be 'Updated Test Provider'");
+        assertEquals("Updated Test Provider", result.getOrganisation().put("name", "Provider name should " +
+                "be 'Updated Test Provider'"));
 
-        verify(providerService, times(1)).update(inputProviderBundle, auth);
+        verify(providerService, times(1)).update(inputOrganisationBundle, auth);
     }
 
     /**
-     * Tests the successful deletion of a provider using the ProviderService.
+     * Tests the successful deletion of a provider using the OrganisationService.
      * <p>
-     * This test verifies that the {@code delete} method of the {@link ProviderService}:
+     * This test verifies that the {@code delete} method of the {@link OrganisationService}:
      * <ul>
      *   <li>Is called exactly once with the correct provider ID and authentication.</li>
      *   <li>Does not throw any exceptions for a valid deletion request.</li>
      * </ul>
      */
     @Test
-    public void deleteProviderSuccess() {
-        ProviderBundle inputProviderBundle = createProviderBundle();
+    void deleteProviderSuccess() {
+        OrganisationBundle inputProviderBundle = createOrganisationBundle();
 
         doNothing().when(providerService).delete(inputProviderBundle);
         providerService.delete(inputProviderBundle);

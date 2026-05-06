@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,41 +16,36 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceBundleService;
+import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
+import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import org.apache.commons.beanutils.BeanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 
 @Service("publicConfigurationTemplateInstanceManager")
-public class PublicConfigurationTemplateInstanceService extends ResourceCatalogueManager<ConfigurationTemplateInstanceBundle>
-        implements PublicResourceService<ConfigurationTemplateInstanceBundle> {
+public class PublicConfigurationTemplateInstanceService
+        extends AbstractPublicResourceManager<ConfigurationTemplateInstanceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicConfigurationTemplateInstanceService.class);
-    private final JmsService jmsService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService trainingResourceService;
+    private final ServiceService serviceService;
+    private final DatasourceService datasourceService;
 
-    public PublicConfigurationTemplateInstanceService(JmsService jmsService,
-                                                      ServiceBundleService<ServiceBundle> serviceBundleService,
-                                                      TrainingResourceService trainingResourceService) {
-        super(ConfigurationTemplateInstanceBundle.class);
-        this.jmsService = jmsService;
-        this.serviceBundleService = serviceBundleService;
-        this.trainingResourceService = trainingResourceService;
+    public PublicConfigurationTemplateInstanceService(GenericResourceService genericResourceService,
+                                                      JmsService jmsService,
+                                                      PidIssuer pidIssuer,
+                                                      FacetLabelService facetLabelService,
+                                                      ServiceService serviceService,
+                                                      DatasourceService datasourceService) {
+        super(genericResourceService, jmsService, pidIssuer, facetLabelService);
+        this.serviceService = serviceService;
+        this.datasourceService = datasourceService;
     }
 
     @Override
@@ -58,81 +53,15 @@ public class PublicConfigurationTemplateInstanceService extends ResourceCatalogu
         return "configuration_template_instance";
     }
 
-    @Override
-    public Browsing<ConfigurationTemplateInstanceBundle> getAll(FacetFilter facetFilter, Authentication authentication) {
-        return super.getAll(facetFilter, authentication);
-    }
-
-    // TODO: Refactor id, resourceId, payload's interoperabilityRecordId creations when more Catalogues are supported
-    @Override
-    public ConfigurationTemplateInstanceBundle add(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
-        String lowerLevelResourceId = configurationTemplateInstanceBundle.getId();
-        configurationTemplateInstanceBundle.setId(configurationTemplateInstanceBundle.getIdentifiers().getPid());
-        configurationTemplateInstanceBundle.getMetadata().setPublished(true);
-
-        // set public id to resourceId
-        updateIdsToPublic(configurationTemplateInstanceBundle);
-        ConfigurationTemplateInstanceBundle ret;
-        logger.info("ConfigurationTemplateInstanceBundle '{}' is being published with id '{}'",
-                lowerLevelResourceId, configurationTemplateInstanceBundle.getId());
-        ret = super.add(configurationTemplateInstanceBundle, null);
-        jmsService.convertAndSendTopic("configuration_template_instance.create", configurationTemplateInstanceBundle);
-        return ret;
-    }
-
-    @Override
-    public ConfigurationTemplateInstanceBundle update(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle, Authentication authentication) {
-        ConfigurationTemplateInstanceBundle published = super.get(
-                configurationTemplateInstanceBundle.getIdentifiers().getPid(),
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
-        ConfigurationTemplateInstanceBundle ret = super.get(
-                configurationTemplateInstanceBundle.getIdentifiers().getPid(),
-                configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(), true);
-        try {
-            BeanUtils.copyProperties(ret, configurationTemplateInstanceBundle);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.info("Could not copy properties.");
-        }
-
-        // set public id to resourceId
-        updateIdsToPublic(ret);
-        ret.setIdentifiers(published.getIdentifiers());
-        ret.getConfigurationTemplateInstance().setPayload(published.getConfigurationTemplateInstance().getPayload());
-        ret.setId(published.getId());
-        ret.getMetadata().setPublished(true);
-        logger.info("Updating public ConfigurationTemplateInstance with id '{}'", ret.getId());
-        ret = super.update(ret, null);
-        jmsService.convertAndSendTopic("configuration_template_instance.update", ret);
-        return ret;
-    }
-
-    @Override
-    public void delete(ConfigurationTemplateInstanceBundle configurationTemplateInstanceBundle) {
-        try {
-            ConfigurationTemplateInstanceBundle publicConfigurationTemplateInstanceBundle =
-                    get(configurationTemplateInstanceBundle.getIdentifiers().getPid(),
-                            configurationTemplateInstanceBundle.getConfigurationTemplateInstance().getCatalogueId(),
-                            true);
-            logger.info("Deleting public ConfigurationTemplateInstanceBundle with id '{}'",
-                    publicConfigurationTemplateInstanceBundle.getId());
-            super.delete(publicConfigurationTemplateInstanceBundle);
-            jmsService.convertAndSendTopic("configuration_template_instance.delete",
-                    publicConfigurationTemplateInstanceBundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
-    }
-
-    //TODO: Refactor if CTIs can belong to a different from the Project's Catalogue
     public void updateIdsToPublic(ConfigurationTemplateInstanceBundle bundle) {
         // resourceId
-        Bundle<?> resourceBundle;
+        Bundle resource;
+        String resourceId = (String) bundle.getConfigurationTemplateInstance().get("resourceId");
         try {
-            resourceBundle = serviceBundleService.get(bundle.getConfigurationTemplateInstance().getResourceId(),
-                    bundle.getConfigurationTemplateInstance().getCatalogueId(), false);
-        } catch (CatalogueResourceNotFoundException e) {
-            resourceBundle = trainingResourceService.get(bundle.getConfigurationTemplateInstance().getResourceId(),
-                    bundle.getConfigurationTemplateInstance().getCatalogueId(), false);
+            resource = serviceService.get(resourceId, bundle.getCatalogueId());
+        } catch (ResourceException e) {
+            resource = datasourceService.get(resourceId, bundle.getCatalogueId());
         }
-        bundle.getConfigurationTemplateInstance().setResourceId(resourceBundle.getIdentifiers().getPid());
+        bundle.getConfigurationTemplateInstance().put("resourceId", resource.getIdentifiers().getPid());
     }
 }

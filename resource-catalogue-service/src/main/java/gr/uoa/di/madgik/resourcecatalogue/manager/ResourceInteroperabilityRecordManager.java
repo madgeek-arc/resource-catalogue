@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,69 +17,134 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.service.SearchService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ResourceValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 
-import java.util.Comparator;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 @org.springframework.stereotype.Service("resourceInteroperabilityRecordManager")
-public class ResourceInteroperabilityRecordManager extends ResourceCatalogueManager<ResourceInteroperabilityRecordBundle>
+public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGenericManager<ResourceInteroperabilityRecordBundle>
         implements ResourceInteroperabilityRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceInteroperabilityRecordManager.class);
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService trainingResourceService;
+    private final ServiceService serviceService;
+    private final DatasourceService datasourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
-    private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
-    private final SecurityService securityService;
-    private final ProviderResourcesCommonMethods commonMethods;
-    private final IdCreator idCreator;
     private final RelationshipValidator relationshipValidator;
+    private final GenericResourceService genericResourceService;
+    private final VocabularyService vocabularyService;
     private final ConfigurationTemplateService ctService;
     private final ConfigurationTemplateInstanceService ctiService;
 
-    public ResourceInteroperabilityRecordManager(ServiceBundleService<ServiceBundle> serviceBundleService,
-                                                 TrainingResourceService trainingResourceService,
+    @Value("${catalogue.id}")
+    private String catalogueId;
+
+    public ResourceInteroperabilityRecordManager(@Lazy ServiceService serviceService,
+                                                 @Lazy DatasourceService datasourceService,
                                                  InteroperabilityRecordService interoperabilityRecordService,
-                                                 SecurityService securityService, ProviderResourcesCommonMethods commonMethods,
-                                                 PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
+                                                 SecurityService securityService,
                                                  IdCreator idCreator, @Lazy RelationshipValidator relationshipValidator,
+                                                 GenericResourceService genericResourceService,
+                                                 VocabularyService vocabularyService,
                                                  ConfigurationTemplateService ctService,
-                                                 ConfigurationTemplateInstanceService ctiService) {
-        super(ResourceInteroperabilityRecordBundle.class);
-        this.serviceBundleService = serviceBundleService;
-        this.trainingResourceService = trainingResourceService;
+                                                 ConfigurationTemplateInstanceService ctiService,
+                                                 WorkflowService workflowService) {
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
+        this.serviceService = serviceService;
+        this.datasourceService = datasourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
-        this.securityService = securityService;
-        this.commonMethods = commonMethods;
-        this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
-        this.idCreator = idCreator;
         this.relationshipValidator = relationshipValidator;
+        this.genericResourceService = genericResourceService;
+        this.vocabularyService = vocabularyService;
         this.ctService = ctService;
         this.ctiService = ctiService;
     }
 
-    @Override
     public String getResourceTypeName() {
         return "resource_interoperability_record";
     }
 
     @Override
-    public ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle bundle, String resourceType) {
-        String resourceId = bundle.getResourceInteroperabilityRecord().getResourceId();
-        String catalogueId = bundle.getResourceInteroperabilityRecord().getCatalogueId();
+    public ResourceInteroperabilityRecordBundle getByResourceId(String resourceId) {
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("resource_id", resourceId);
+        ff.addFilter("published", "false");
+        try {
+            ResourceInteroperabilityRecordBundle bundle = genericResourceService.get(getResourceTypeName(),
+                    new SearchService.KeyValue("resource_id", resourceId),
+                    new SearchService.KeyValue("published", "false"));
+            return bundle;
+        } catch (ResourceException e) {
+            return null;
+        }
+    }
 
-        ResourceInteroperabilityRecordBundle existing = getWithResourceId(resourceId);
+    @Override
+    public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle bundle,
+                                                    String resourceType,
+                                                    Authentication auth) {
+        validate(bundle, resourceType);
+        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
+
+        bundle.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
+        bundle.setActive(true);
+        bundle.setCatalogueId(this.catalogueId);
+        this.createIdentifiers(bundle, getResourceTypeName(), false);
+        bundle.setId(bundle.getIdentifiers().getOriginalId());
+
+        ResourceInteroperabilityRecordBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
+        return ret;
+    }
+
+    public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle bundle, String comment, Authentication auth) {
+        ResourceInteroperabilityRecordBundle existing = genericResourceService.get(getResourceTypeName(), bundle.getId());
+        // check if there are actual changes in the Service
+        if (bundle.equals(existing)) {
+            return bundle;
+        }
+        bundle.markUpdate(UserInfo.of(auth), comment);
+        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
+
+        try {
+            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void delete(ResourceInteroperabilityRecordBundle bundle) {
+        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
+        logger.info("Deleting Resource Interoperability Record: {}", bundle.getId());
+        genericResourceService.delete(getResourceTypeName(), bundle.getId());
+
+    }
+
+    @Override
+    public ResourceInteroperabilityRecordBundle validate(ResourceInteroperabilityRecordBundle bundle, String resourceType) {
+        String resourceId = (String) bundle.getResourceInteroperabilityRecord().get("resourceId");
+        String catalogueId = (String) bundle.getResourceInteroperabilityRecord().get("catalogueId");
+
+        ResourceInteroperabilityRecordBundle existing = getByResourceId(resourceId);
         if (existing != null) {
             throw new ValidationException(String.format("Resource [%s] of the Catalogue [%s] has already a Resource " +
                     "Interoperability Record registered, with id: [%s]", resourceId, catalogueId, existing.getId()));
@@ -87,150 +152,64 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
 
         // check if Resource exists and if User belongs to Resource's Provider Admins
         if (resourceType.equals("service")) {
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceBundleService, resourceType);
-        } else if (resourceType.equals("training_resource")) {
-            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, trainingResourceService, resourceType);
+            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, serviceService, resourceType);
+        } else if (resourceType.equals("datasource")) {
+            ResourceValidationUtils.checkIfResourceBundleIsActiveAndApprovedAndNotPublic(resourceId, catalogueId, datasourceService, resourceType);
         } else {
-            throw new ValidationException("Field 'resourceType' should be either 'service' or 'training_resource'");
+            throw new ValidationException("Field 'resourceType' should be either 'service' or 'datasource'");
         }
-
-        super.validate(bundle);
         return checkIfEachInteroperabilityRecordIsApproved(bundle);
     }
 
-    @Override
-    public ResourceInteroperabilityRecordBundle add(ResourceInteroperabilityRecordBundle bundle, String resourceType, Authentication auth) {
-        validate(bundle, resourceType);
-        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
+    //TODO: test me
+    @SuppressWarnings("unchecked")
+    private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle bundle) {
+        List<String> interoperabilityRecordIds = (List<String>) bundle.getResourceInteroperabilityRecord()
+                .get("interoperabilityRecordIds");
 
-        bundle.setId(idCreator.generate(getResourceTypeName()));
-        commonMethods.createIdentifiers(bundle, getResourceTypeName(), false);
-        logger.trace("Attempting to add a new ResourceInteroperabilityRecord: {}", bundle);
-
-        //TODO: refactor getAdminAccess to have more info
-        if (!auth.getName().equals("Administrator")) {
-            bundle.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-        } else {
-            bundle.setMetadata(Metadata.createMetadata("system", "system"));
-        }
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(bundle, auth);
-        bundle.setLoggingInfo(loggingInfoList);
-        bundle.setLatestOnboardingInfo(loggingInfoList.getFirst());
-
-        // active
-        bundle.setActive(true);
-
-        ResourceInteroperabilityRecordBundle ret;
-        ret = super.add(bundle, null);
-        logger.debug("Adding ResourceInteroperabilityRecord: {}", bundle);
-
-        return ret;
-    }
-
-    public ResourceInteroperabilityRecordBundle getWithResourceId(String resourceId) {
-        Resource res = where(false,
-                new SearchService.KeyValue("resource_id", resourceId),
-//                new SearchService.KeyValue("catalogue_id", resourceId), //TODO: enable when RIR from different catalogues is supported
-                new SearchService.KeyValue("published", "false"));
-        return res != null ? deserialize(res) : null;
-    }
-
-    @Override
-    public ResourceInteroperabilityRecordBundle update(ResourceInteroperabilityRecordBundle bundle, Authentication auth) {
-        logger.trace("Attempting to update the ResourceInteroperabilityRecord with id '{}'", bundle.getId());
-
-        ResourceInteroperabilityRecordBundle ret = ObjectUtils.clone(bundle);
-        Resource existingResource = getResource(bundle.getId(),
-                bundle.getResourceInteroperabilityRecord().getCatalogueId(), false);
-        ResourceInteroperabilityRecordBundle existingInteroperabilityRecord = deserialize(existingResource);
-        // check if there are actual changes in the ResourceInteroperabilityRecord
-        if (ret.getResourceInteroperabilityRecord().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord())) {
-            return ret;
-        }
-        relationshipValidator.checkRelatedResourceIDsConsistency(ret);
-
-        // block Public ResourceInteroperabilityRecordBundle updates
-        if (ret.getMetadata().isPublished()) {
-            throw new ValidationException("You cannot directly update a Public Resource Interoperability Record");
-        }
-
-        validate(ret);
-        checkIfEachInteroperabilityRecordIsApproved(ret);
-
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-        ret.setIdentifiers(existingInteroperabilityRecord.getIdentifiers());
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(existingInteroperabilityRecord, auth);
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                LoggingInfo.ActionType.UPDATED.getKey());
-        loggingInfoList.add(loggingInfo);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        ret.setLoggingInfo(loggingInfoList);
-
-        // latestUpdateInfo
-        ret.setLatestUpdateInfo(loggingInfo);
-        ret.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        ret.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-
-        existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(getResourceType());
-
-        // block user from updating resourceId
-        if (!ret.getResourceInteroperabilityRecord().getResourceId().equals(existingInteroperabilityRecord.getResourceInteroperabilityRecord().getResourceId())
-                && !securityService.hasRole(auth, "ROLE_ADMIN")) {
-            throw new ValidationException("You cannot change the Resource Id with which this ResourceInteroperabilityRecord is related");
-        }
-
-        resourceService.updateResource(existingResource);
-        logger.debug("Updating ResourceInteroperabilityRecord: {}", ret);
-
-        return ret;
-    }
-
-    @Override
-    public void delete(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        // block Public ResourceInteroperabilityRecordBundle deletions
-        if (resourceInteroperabilityRecordBundle.getMetadata().isPublished()) {
-            throw new ValidationException("You cannot directly delete a Public Resource Interoperability Record");
-        }
-        logger.trace("User is attempting to delete the ResourceInteroperabilityRecord with id '{}'",
-                resourceInteroperabilityRecordBundle.getId());
-        super.delete(resourceInteroperabilityRecordBundle);
-        logger.debug("Deleting ResourceInteroperabilityRecord: {}", resourceInteroperabilityRecordBundle);
-
-    }
-
-    private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle) {
-        for (String interoperabilityRecord : resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getInteroperabilityRecordIds()) {
-            if (!interoperabilityRecordService.get(interoperabilityRecord).getStatus().equals("approved interoperability record")) {
-                throw new ValidationException("One ore more of the Interoperability Records you have provided is not yet approved.");
+        for (String id : interoperabilityRecordIds) {
+            if (!"approved".equals(interoperabilityRecordService.get(id).getStatus())) {
+                throw new ValidationException(
+                        "One or more of the Interoperability Records you have provided is not yet approved."
+                );
             }
         }
-        return resourceInteroperabilityRecordBundle;
+        return bundle;
     }
 
     @Override
-    public void checkAndRemoveCTI(ResourceInteroperabilityRecord rir) {
-        String resourceId = rir.getResourceId();
-        Set<String> guidelineIds = new HashSet<>(rir.getInteroperabilityRecordIds());
+    public void checkAndRemoveCTI(LinkedHashMap<String, Object> rir) {
+        String resourceId = (String) rir.get("resourceId");
 
-        // Delete CTIs associated with the specific removed Guideline
+        @SuppressWarnings("unchecked")
+        List<String> interoperabilityRecordIds =
+                (List<String>) rir.get("interoperabilityRecordIds");
+        Set<String> guidelineIds = new HashSet<>(interoperabilityRecordIds);
         deleteCTI(resourceId, guidelineIds);
     }
 
     @Override
-    public void checkAndRemoveCTI(ResourceInteroperabilityRecord existingRIR, ResourceInteroperabilityRecord updatedRIR) {
-        String resourceId = existingRIR.getResourceId();
-        List<String> existingGuidelineList = existingRIR.getInteroperabilityRecordIds();
-        List<String> updateGuidelineList = updatedRIR.getInteroperabilityRecordIds();
+    public void checkAndRemoveCTI(LinkedHashMap<String, Object> existingRIR, LinkedHashMap<String, Object> updatedRIR) {
+        String resourceId = (String) existingRIR.get("resourceId");
+
+        @SuppressWarnings("unchecked")
+        List<String> exitingInteroperabilityRecordIds =
+                (List<String>) existingRIR.get("interoperabilityRecordIds");
+        Set<String> existingGuidelineList = new HashSet<>(exitingInteroperabilityRecordIds);
+
+        @SuppressWarnings("unchecked")
+        List<String> updatedInteroperabilityRecordIds =
+                (List<String>) updatedRIR.get("interoperabilityRecordIds");
+        Set<String> updatedGuidelineList = new HashSet<>(updatedInteroperabilityRecordIds);
 
         // If the lists are equal, do nothing
-        if (new HashSet<>(existingGuidelineList).equals(new HashSet<>(updateGuidelineList))) {
+        if (new HashSet<>(existingGuidelineList).equals(new HashSet<>(updatedGuidelineList))) {
             return;
         }
 
         // Identify deleted Guideline IDs
         Set<String> missingGuidelineIds = new HashSet<>(existingGuidelineList);
-        updateGuidelineList.forEach(missingGuidelineIds::remove);
+        updatedGuidelineList.forEach(missingGuidelineIds::remove);
         if (missingGuidelineIds.isEmpty()) {
             return;
         }
@@ -241,31 +220,72 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueMana
 
     private void deleteCTI(String resourceId, Set<String> guidelineIds) {
         for (String guidelineId : guidelineIds) {
-            List<ConfigurationTemplate> ctList = ctService.getAllByInteroperabilityRecordId(null,
+            List<ConfigurationTemplateBundle> ctList = ctService.getAllByInteroperabilityRecordId(null,
                     guidelineId).getResults();
             if (ctList == null || ctList.isEmpty()) {
                 continue;
             }
-            for (ConfigurationTemplate ct : ctList) {
-                ConfigurationTemplateInstance cti = ctiService.getByResourceAndConfigurationTemplateId(resourceId ,ct.getId());
+            for (ConfigurationTemplateBundle ct : ctList) {
+                LinkedHashMap<String, Object> cti = ctiService.getByResourceAndConfigurationTemplateId(resourceId, ct.getId());
                 if (cti != null) {
                     try {
-                        ConfigurationTemplateInstanceBundle ctiBundle = ctiService.get(cti.getId());
+                        ConfigurationTemplateInstanceBundle ctiBundle = ctiService.get((String) cti.get("id"));
                         if (ctiBundle != null) {
-                            logger.info("Deleting CTI with id '{}'", cti.getId());
+                            logger.info("Deleting CTI with id '{}'", cti.get("id"));
                             ctiService.delete(ctiBundle);
                         }
                     } catch (Exception e) {
-                        logger.info("Failed to delete CTI for ID {}: {}", cti.getId(), e.getMessage());
+                        logger.info("Failed to delete CTI for ID {}: {}", cti.get("id"), e.getMessage());
                     }
                 }
             }
         }
     }
 
+    //region not-needed
     @Override
-    public ResourceInteroperabilityRecordBundle createPublicResourceInteroperabilityRecord(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
-        publicResourceInteroperabilityRecordManager.add(resourceInteroperabilityRecordBundle, auth);
-        return resourceInteroperabilityRecordBundle;
+    public Browsing<ResourceInteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication authentication) {
+        return null;
     }
+
+    @Override
+    public ResourceInteroperabilityRecordBundle verify(String id, String status, Boolean active, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public ResourceInteroperabilityRecordBundle setActive(String id, Boolean active, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public ResourceInteroperabilityRecordBundle addDraft(ResourceInteroperabilityRecordBundle bundle, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public ResourceInteroperabilityRecordBundle updateDraft(ResourceInteroperabilityRecordBundle bundle, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public void deleteDraft(ResourceInteroperabilityRecordBundle bundle) {
+
+    }
+
+    @Override
+    public ResourceInteroperabilityRecordBundle finalizeDraft(ResourceInteroperabilityRecordBundle resourceInteroperabilityRecordBundle, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public void addBulk(List<ResourceInteroperabilityRecordBundle> resources, Authentication auth) {
+        super.addBulk(resources, auth);
+    }
+
+    @Override
+    public void updateBulk(List<ResourceInteroperabilityRecordBundle> resources, Authentication auth) {
+        super.updateBulk(resources, auth);
+    }
+    //endregion
 }

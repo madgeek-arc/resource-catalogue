@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class User implements Identifiable {
@@ -85,6 +86,10 @@ public class User implements Identifiable {
             user.surname = principal.getAttribute("family_name");
         } else if (auth instanceof AdminAuthentication) {
             logger.trace("internal admin access");
+            user.id = "system";
+            user.email = "system";
+            user.name = "system";
+            user.surname = "system";
         } else if (auth.isAuthenticated()) {
             logger.warn("Authenticated User has missing information: {}", auth);
             return null;
@@ -92,6 +97,15 @@ public class User implements Identifiable {
             throw new InsufficientAuthenticationException("Could not create user. Insufficient user authentication");
         }
         logger.debug("User from Authentication: {}", user);
+        return user;
+    }
+
+    public static User fromMap(Map<?, ?> userMap) {
+        User user = new User();
+        user.setId((String) userMap.get("id"));
+        user.setName((String) userMap.get("name"));
+        user.setSurname((String) userMap.get("surname"));
+        user.setEmail((String) userMap.get("email"));
         return user;
     }
 

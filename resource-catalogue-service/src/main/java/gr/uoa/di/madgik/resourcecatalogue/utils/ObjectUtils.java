@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,14 @@ import java.lang.reflect.Method;
 
 public class ObjectUtils {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private ObjectUtils() {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(ObjectUtils.class);
 
     public static <T> T clone(T object) {
-        ObjectMapper objectMapper = new ObjectMapper();
         T deepCopy = null;
         try {
             String json = objectMapper.writeValueAsString(object);

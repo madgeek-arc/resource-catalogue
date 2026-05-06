@@ -1,0 +1,26 @@
+[
+  {
+    "id": "sqa_badge-gold",
+    "name": "Gold",
+    "description": "Gold Badge",
+    "parentId": null,
+    "type": "Sqa badge",
+    "extras": {}
+  },
+  {
+    "id": "sqa_badge-silver",
+    "name": "Silver",
+    "description": "Silver Badge",
+    "parentId": null,
+    "type": "Sqa badge",
+    "extras": {}
+  },
+  {
+    "id": "sqa_badge-bronze",
+    "name": "Bronze",
+    "description": "Bronze Badge",
+    "parentId": null,
+    "type": "Sqa badge",
+    "extras": {}
+  }
+]

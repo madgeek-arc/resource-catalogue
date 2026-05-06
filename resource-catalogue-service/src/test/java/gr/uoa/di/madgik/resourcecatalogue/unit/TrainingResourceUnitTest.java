@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TrainingResourceUnitTest {
+class TrainingResourceUnitTest {
 
     @Mock
     private Authentication auth;
@@ -51,7 +51,7 @@ public class TrainingResourceUnitTest {
      * </ul>
      */
     @Test
-    public void addTrainingResourceSuccess() {
+    void addTrainingResourceSuccess() {
         TrainingResourceBundle inputTrainingResourceBundle = createTrainingResourceBundle();
         TrainingResourceBundle expectedTrainingResourceBundle = createTrainingResourceBundle();
 
@@ -60,7 +60,7 @@ public class TrainingResourceUnitTest {
 
         assertNotNull(result);
         assertEquals(expectedTrainingResourceBundle, result);
-        assertEquals("Test Training Resource", result.getTrainingResource().getTitle(),
+        assertEquals("Test Training Resource", result.getTrainingResource().get("title"),
                 "Training Resource name should be 'Test Training Resource'");
         verify(trainingResourceService, times(1)).add(inputTrainingResourceBundle, auth);
     }
@@ -78,10 +78,10 @@ public class TrainingResourceUnitTest {
      * @throws ResourceNotFoundException if the training resource to be updated does not exist
      */
     @Test
-    public void updateTrainingResourceSuccess() {
+    void updateTrainingResourceSuccess() {
         TrainingResourceBundle inputTrainingResourceBundle = createTrainingResourceBundle();
         TrainingResourceBundle expectedTrainingResourceBundle = createTrainingResourceBundle();
-        expectedTrainingResourceBundle.getTrainingResource().setTitle("Updated Test Training Resource");
+        expectedTrainingResourceBundle.getTrainingResource().put("title", "Updated Test Training Resource");
 
         when(trainingResourceService.update(inputTrainingResourceBundle, auth))
                 .thenReturn(expectedTrainingResourceBundle);
@@ -90,7 +90,7 @@ public class TrainingResourceUnitTest {
         assertNotNull(result);
         assertEquals(expectedTrainingResourceBundle, result);
 
-        assertEquals("Updated Test Training Resource", result.getTrainingResource().getTitle(),
+        assertEquals("Updated Test Training Resource", result.getTrainingResource().get("title"),
                 "Training Resource title should be 'Updated Test Training Resource'");
 
         verify(trainingResourceService, times(1)).update(inputTrainingResourceBundle, auth);
@@ -108,7 +108,7 @@ public class TrainingResourceUnitTest {
      * @throws ResourceNotFoundException if the training resource to be deleted does not exist
      */
     @Test
-    public void deleteTrainingResourceSuccess() {
+    void deleteTrainingResourceSuccess() {
         TrainingResourceBundle inputTrainingResourceBundle = createTrainingResourceBundle();
 
         doNothing().when(trainingResourceService).delete(inputTrainingResourceBundle);

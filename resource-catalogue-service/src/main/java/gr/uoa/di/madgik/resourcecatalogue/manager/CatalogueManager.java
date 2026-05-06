@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import gr.uoa.di.madgik.resourcecatalogue.utils.Auditable;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
-import gr.uoa.di.madgik.resourcecatalogue.utils.ProviderResourcesCommonMethods;
-import gr.uoa.di.madgik.resourcecatalogue.validators.FieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,51 +40,33 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import static gr.uoa.di.madgik.resourcecatalogue.utils.VocabularyValidationUtils.validateScientificDomains;
-
 @Service("catalogueManager")
-public class CatalogueManager extends ResourceManager<CatalogueBundle> implements CatalogueService {
+public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueBundle> implements CatalogueService {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogueManager.class);
-    private final SecurityService securityService;
-    private final VocabularyService vocabularyService;
-    private final IdCreator idCreator;
-    private final FieldValidator fieldValidator;
-    private final RegistrationMailService registrationMailService;
-    private final ProviderService providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
-    private final TrainingResourceService trainingResourceService;
-    private final InteroperabilityRecordService interoperabilityRecordService;
-    private final ProviderResourcesCommonMethods commonMethods;
+    private final OrganisationService organisationService;
+    private final ServiceService serviceService;
+    private final GenericResourceService genericResourceService;
 
     @Value("${catalogue.id}")
     private String catalogueId;
 
+    //FIXME: REFACTOR CONCERNING HOW WE MOVE ON
     public CatalogueManager(IdCreator idCreator,
-                            @Lazy ProviderService providerService,
-                            @Lazy ServiceBundleService<ServiceBundle> serviceBundleService,
-                            @Lazy TrainingResourceService trainingResourceService,
-                            @Lazy InteroperabilityRecordService interoperabilityRecordService,
-                            @Lazy FieldValidator fieldValidator,
+                            @Lazy OrganisationService organisationService,
+                            @Lazy ServiceService serviceService,
                             @Lazy SecurityService securityService,
                             @Lazy VocabularyService vocabularyService,
-                            @Lazy RegistrationMailService registrationMailService,
-                            @Lazy ProviderResourcesCommonMethods commonMethods) {
-        super(CatalogueBundle.class);
-        this.securityService = securityService;
-        this.vocabularyService = vocabularyService;
-        this.idCreator = idCreator;
-        this.fieldValidator = fieldValidator;
-        this.registrationMailService = registrationMailService;
-        this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
-        this.trainingResourceService = trainingResourceService;
-        this.interoperabilityRecordService = interoperabilityRecordService;
-        this.commonMethods = commonMethods;
+                            GenericResourceService genericResourceService,
+                            WorkflowService workflowService) {
+        super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
+        this.organisationService = organisationService;
+        this.serviceService = serviceService;
+        this.genericResourceService = genericResourceService;
     }
 
     @Override
@@ -94,28 +76,13 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     @Override
     public CatalogueBundle get(String id) {
-        CatalogueBundle catalogue = super.get(id);
+//        CatalogueBundle catalogue = super.get(id);
+        CatalogueBundle catalogue = genericResourceService.get(getResourceTypeName(), id);
+        //FIXME: never reaches here
         if (catalogue == null) {
             throw new ResourceNotFoundException(id, "Catalogue");
         }
         return catalogue;
-    }
-
-    @Override
-    public CatalogueBundle get(String id, Authentication auth) {
-        CatalogueBundle catalogueBundle = get(id);
-        if (auth != null && auth.isAuthenticated()) {
-            // if user is ADMIN/EPOT or Catalogue Admin on the specific Catalogue, return everything
-            if (securityService.hasRole(auth, "ROLE_ADMIN") || securityService.hasRole(auth, "ROLE_EPOT") ||
-                    securityService.hasAdminAccess(auth, id)) {
-                return catalogueBundle;
-            }
-        }
-        // else return the Catalogue ONLY if it is active
-        if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId())) {
-            return catalogueBundle;
-        }
-        throw new InsufficientAuthenticationException("You cannot view the specific Catalogue");
     }
 
     @Override
@@ -132,7 +99,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
             Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
             for (CatalogueBundle catalogueBundle : catalogues.getResults()) {
-                if (catalogueBundle.getStatus().equals(vocabularyService.get("approved catalogue").getId()) ||
+                if (catalogueBundle.getStatus().equals(vocabularyService.get("approved").getId()) ||
                         securityService.hasAdminAccess(auth, catalogueBundle.getId())) {
                     retList.add(catalogueBundle);
                 }
@@ -152,7 +119,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
 
         // else return ONLY approved Catalogues
-        ff.addFilter("status", "approved catalogue");
+        ff.addFilter("status", "approved");
         Browsing<CatalogueBundle> catalogues = super.getAll(ff, auth);
         retList.addAll(catalogues.getResults());
         catalogues.setResults(retList);
@@ -164,24 +131,16 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle add(CatalogueBundle catalogue, Authentication auth) {
 
         logger.trace("Attempting to add a new Catalogue: {}", catalogue);
-        commonMethods.addAuthenticatedUser(catalogue.getCatalogue(), auth);
+//        commonMethods.addAuthenticatedUser(catalogue.getCatalogue(), auth);
         validate(catalogue);
-        catalogue.setId(idCreator.sanitizeString(catalogue.getCatalogue().getAbbreviation()));
-        catalogue.setMetadata(Metadata.createMetadata(AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
-        catalogue.setLoggingInfo(loggingInfoList);
-        catalogue.setActive(false);
-        catalogue.setStatus(vocabularyService.get("pending catalogue").getId());
-        catalogue.setAuditState(Auditable.NOT_AUDITED);
+        catalogue.setId(idCreator.generate(this.getResourceTypeName()));
 
-        // latestOnboardingInfo
-        catalogue.setLatestOnboardingInfo(loggingInfoList.getFirst());
 
         CatalogueBundle ret;
         ret = super.add(catalogue, null);
         logger.debug("Adding Catalogue: {}", catalogue);
 
-        registrationMailService.sendEmailsToNewlyAddedCatalogueAdmins(catalogue, null);
+//        emailService.sendEmailsToNewlyAddedCatalogueAdmins(catalogue, null);
 
         return ret;
     }
@@ -189,42 +148,26 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     public CatalogueBundle update(CatalogueBundle catalogueBundle, String comment, Authentication auth) {
         logger.trace("Attempting to update the Catalogue with id '{}'", catalogueBundle.getId());
 
-        CatalogueBundle ret = ObjectUtils.clone(catalogueBundle);
-        Resource existingResource = whereID(ret.getId(), true);
-        CatalogueBundle existingCatalogue = deserialize(existingResource);
+        CatalogueBundle existingCatalogue = genericResourceService.get(getResourceTypeName(), catalogueBundle.getId());
         // check if there are actual changes in the Catalogue
-        if (ret.getCatalogue().equals(existingCatalogue.getCatalogue())) {
-            return ret;
+        if (catalogueBundle.getCatalogue().equals(existingCatalogue.getCatalogue())) {
+            return catalogueBundle;
         }
 
-        validate(ret);
-        ret.setMetadata(Metadata.updateMetadata(ret.getMetadata(), AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase()));
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(ret, auth);
-        LoggingInfo loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.UPDATE.getKey(),
-                LoggingInfo.ActionType.UPDATED.getKey(), comment);
-        loggingInfoList.add(loggingInfo);
-        ret.setLoggingInfo(loggingInfoList);
+        catalogueBundle.markUpdate(UserInfo.of(auth), comment);
 
-        // latestUpdateInfo
-        ret.setLatestUpdateInfo(loggingInfo);
-
-        ret.setActive(existingCatalogue.isActive());
-        ret.setStatus(existingCatalogue.getStatus());
-        ret.setSuspended(existingCatalogue.isSuspended());
-        ret.setAuditState(commonMethods.determineAuditState(ret.getLoggingInfo()));
-        existingResource.setPayload(serialize(ret));
-        existingResource.setResourceType(getResourceType());
-        resourceService.updateResource(existingResource);
-        logger.debug("Updating Catalogue: {}", ret);
+        logger.debug("Updating Catalogue: {}", catalogueBundle);
 
         // Send emails to newly added or deleted Admins
-        adminDifferences(ret, existingCatalogue);
+        adminDifferences(catalogueBundle, existingCatalogue);
+
+        CatalogueBundle ret = super.update(catalogueBundle, null);
 
         if (ret.getLatestAuditInfo() != null && ret.getLatestUpdateInfo() != null) {
             long latestAudit = Long.parseLong(ret.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(ret.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && ret.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                registrationMailService.notifyPortalAdminsForInvalidCatalogueUpdate(ret);
+//                emailService.notifyPortalAdminsForInvalidCatalogueUpdate(ret);
             }
         }
 
@@ -234,10 +177,6 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     @Override
     public CatalogueBundle validate(CatalogueBundle catalogue) {
         logger.debug("Validating Catalogue with id: '{}'", catalogue.getId());
-        if (catalogue.getCatalogue().getScientificDomains() != null && !catalogue.getCatalogue().getScientificDomains().isEmpty()) {
-            validateScientificDomains(catalogue.getCatalogue().getScientificDomains());
-        }
-
         return super.validate(catalogue);
     }
 
@@ -253,19 +192,19 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
         // Delete Catalogue along with all its related Resources
         logger.info("Deleting all Catalogue's Providers...");
-        deleteCatalogueResources(id, providerService, securityService.getAdminAccess());
+        deleteCatalogueResources(id, organisationService, securityService.getAdminAccess());
 
         logger.info("Deleting all Catalogue's Services...");
-        deleteCatalogueResources(id, serviceBundleService, securityService.getAdminAccess());
+        deleteCatalogueResources(id, serviceService, securityService.getAdminAccess());
 
-        logger.info("Deleting all Catalogue's Training Resources...");
-        deleteCatalogueResources(id, trainingResourceService, securityService.getAdminAccess());
-
-        logger.info("Deleting all Catalogue's Interoperability Records...");
-        deleteCatalogueResources(id, interoperabilityRecordService, securityService.getAdminAccess());
+//        logger.info("Deleting all Catalogue's Training Resources...");
+//        deleteCatalogueResources(id, trainingResourceService, securityService.getAdminAccess());
+//
+//        logger.info("Deleting all Catalogue's Interoperability Records...");
+//        deleteCatalogueResources(id, interoperabilityRecordService, securityService.getAdminAccess());
 
         logger.info("Deleting Catalogue...");
-        super.delete(catalogueBundle);
+        genericResourceService.delete(getResourceTypeName(), catalogueBundle.getId());
     }
 
     @Override
@@ -275,7 +214,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         }
         if (ff == null) {
             ff = new FacetFilter();
-            ff.setQuantity(maxQuantity);
+//            ff.setQuantity(maxQuantity);
         }
         ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
@@ -284,7 +223,7 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
 
     private <T, I extends ResourceCRUDService<T, Authentication>> void deleteCatalogueResources(String id, I service, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+//        ff.setQuantity(maxQuantity);
         ff.addFilter("catalogue_id", id);
         // Get all Catalogue's Resources
         List<T> allResources = service.getAll(ff, auth).getResults();
@@ -301,42 +240,42 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     private void adminDifferences(CatalogueBundle updatedCatalogue, CatalogueBundle existingCatalogue) {
         List<String> existingAdmins = new ArrayList<>();
         List<String> newAdmins = new ArrayList<>();
-        for (User user : existingCatalogue.getCatalogue().getUsers()) {
-            existingAdmins.add(user.getEmail().toLowerCase());
-        }
-        for (User user : updatedCatalogue.getCatalogue().getUsers()) {
-            newAdmins.add(user.getEmail().toLowerCase());
-        }
+//        for (User user : existingCatalogue.getCatalogue().getUsers()) {
+//            existingAdmins.add(user.getEmail().toLowerCase());
+//        }
+//        for (User user : updatedCatalogue.getCatalogue().getUsers()) {
+//            newAdmins.add(user.getEmail().toLowerCase());
+//        }
         List<String> adminsAdded = new ArrayList<>(newAdmins);
         adminsAdded.removeAll(existingAdmins);
         if (!adminsAdded.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyAddedCatalogueAdmins(updatedCatalogue, adminsAdded);
+//            emailService.sendEmailsToNewlyAddedCatalogueAdmins(updatedCatalogue, adminsAdded);
         }
         List<String> adminsDeleted = new ArrayList<>(existingAdmins);
         adminsDeleted.removeAll(newAdmins);
         if (!adminsDeleted.isEmpty()) {
-            registrationMailService.sendEmailsToNewlyDeletedCatalogueAdmins(updatedCatalogue, adminsDeleted);
+//            emailService.sendEmailsToNewlyDeletedCatalogueAdmins(updatedCatalogue, adminsDeleted);
         }
     }
 
     @Override
     public boolean hasAdminAcceptedTerms(String id, Authentication auth) {
-        CatalogueBundle bundle = get(id);
-        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
-
-        List<String> catalogueAdmins = bundle.getCatalogue().getUsers().stream()
-                .map(user -> user.getEmail().toLowerCase())
-                .toList();
-
-        List<String> acceptedTerms = bundle.getMetadata().getTerms();
-
-        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
-            return !catalogueAdmins.contains(userEmail); // false -> show modal, true -> no modal
-        }
-
-        if (catalogueAdmins.contains(userEmail) && !acceptedTerms.contains(userEmail)) {
-            return false; // Show modal
-        }
+//        CatalogueBundle bundle = get(id);
+//        String userEmail = AuthenticationInfo.getEmail(auth).toLowerCase();
+//
+//        List<String> catalogueAdmins = bundle.getCatalogue().getUsers().stream()
+//                .map(user -> user.getEmail().toLowerCase())
+//                .toList();
+//
+//        List<String> acceptedTerms = bundle.getMetadata().getTerms();
+//
+//        if (acceptedTerms == null || acceptedTerms.isEmpty()) {
+//            return !catalogueAdmins.contains(userEmail); // false -> show modal, true -> no modal
+//        }
+//
+//        if (catalogueAdmins.contains(userEmail) && !acceptedTerms.contains(userEmail)) {
+//            return false; // Show modal
+//        }
         return true; // No modal
     }
 
@@ -360,108 +299,55 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
     }
 
     @Override
-    public CatalogueBundle verify(String id, String status, Boolean active, Authentication auth) {
-        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
-        if (!statusVocabulary.getType().equals("Catalogue state")) {
-            throw new ValidationException(String.format("Vocabulary %s does not consist a Catalogue State!", status));
+    public CatalogueBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
+        CatalogueBundle bundle = get(id);
+        //TODO: enable and fix if Catalogues return to their original state
+//        commonMethods.suspensionValidation(existing, catalogueId, id, suspend);
+
+        logger.info("Suspending Catalogue: {} and all its Resources", bundle.getId());
+        bundle.markSuspend(suspend, auth);
+        //TODO: enable and fix if Catalogues return to their original state
+//        cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
+
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
-        logger.trace("verifyCatalogue with id: '{}' | status: '{}' | active: '{}'", id, status, active);
-        CatalogueBundle catalogue = get(id);
-        catalogue.setStatus(vocabularyService.get(status).getId());
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
-        LoggingInfo loggingInfo = null;
-
-        switch (status) {
-            case "approved catalogue":
-                if (active == null) {
-                    active = true;
-                }
-                catalogue.setActive(active);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.APPROVED.getKey());
-                break;
-            case "rejected catalogue":
-                catalogue.setActive(false);
-                loggingInfo = commonMethods.createLoggingInfo(auth, LoggingInfo.Types.ONBOARD.getKey(),
-                        LoggingInfo.ActionType.REJECTED.getKey());
-                break;
-            default:
-                break;
-        }
-        loggingInfoList.add(loggingInfo);
-        loggingInfoList.sort(Comparator.comparing(LoggingInfo::getDate));
-        catalogue.setLoggingInfo(loggingInfoList);
-
-        // latestOnboardingInfo
-        catalogue.setLatestOnboardingInfo(loggingInfo);
-
-        logger.info("Verifying Catalogue: {}", catalogue);
-        return super.update(catalogue, auth);
     }
 
     @Override
-    public CatalogueBundle publish(String id, Boolean active, Authentication auth) {
-        CatalogueBundle catalogue = get(id);
-        if ((catalogue.getStatus().equals(vocabularyService.get("pending catalogue").getId()) ||
-                catalogue.getStatus().equals(vocabularyService.get("rejected catalogue").getId())) && !catalogue.isActive()) {
-            throw new ResourceException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]",
-                    catalogue.getStatus()), HttpStatus.CONFLICT);
+    public CatalogueBundle verify(String id, String status, Boolean active, Authentication auth) {
+        Vocabulary statusVocabulary = vocabularyService.getOrElseThrow(status);
+        if (!statusVocabulary.getType().equals("Resource state")) {
+            throw new ValidationException(String.format("Vocabulary %s does not consist a Resource State!", status));
         }
-        List<LoggingInfo> loggingInfoList = commonMethods.returnLoggingInfoListAndCreateRegistrationInfoIfEmpty(catalogue, auth);
-        LoggingInfo loggingInfo;
+        logger.trace("verifyCatalogue with id: '{}' | status: '{}' | active: '{}'", id, status, active);
+        CatalogueBundle existingCatalogue = get(id);
+        existingCatalogue.markOnboard(status, active, UserInfo.of(auth), null);
 
-        if (active == null) {
-            active = false;
-        }
-        catalogue.setActive(active);
-        if (!active) {
-            loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.DEACTIVATED.getKey());
-        } else {
-            loggingInfo = LoggingInfo.systemUpdateLoggingInfo(LoggingInfo.ActionType.ACTIVATED.getKey());
-        }
-        loggingInfoList.add(loggingInfo);
-        catalogue.setLoggingInfo(loggingInfoList);
-
-        // latestLoggingInfo
-        catalogue.setLatestUpdateInfo(loggingInfo);
-        catalogue.setLatestOnboardingInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.ONBOARD.getKey()));
-        catalogue.setLatestAuditInfo(commonMethods.setLatestLoggingInfo(loggingInfoList, LoggingInfo.Types.AUDIT.getKey()));
-
-        return super.update(catalogue, auth);
+        logger.info("Verifying Catalogue: {}", existingCatalogue);
+        return super.update(existingCatalogue, auth);
     }
 
-    public CatalogueBundle suspend(String id, String catalogueId, boolean suspend, Authentication auth) {
-        CatalogueBundle catalogueBundle = get(id, auth);
-
-        // Suspend Catalogue
-        commonMethods.suspendResource(catalogueBundle, suspend, auth);
-        super.update(catalogueBundle, auth);
-
-        // Suspend Catalogue's resources
-        List<ProviderBundle> providers = providerService.getAll(createFacetFilter(id), auth).getResults();
-
-        if (providers != null && !providers.isEmpty()) {
-            for (ProviderBundle providerBundle : providers) {
-                providerService.suspend(providerBundle.getId(), id, suspend, auth);
-            }
+    @Override
+    public CatalogueBundle setActive(String id, Boolean active, Authentication auth) {
+        CatalogueBundle existingCatalogue = get(id);
+        if ((existingCatalogue.getStatus().equals(vocabularyService.get("pending").getId()) ||
+                existingCatalogue.getStatus().equals(vocabularyService.get("rejected").getId())) && !existingCatalogue.isActive()) {
+            throw new ResourceException(String.format("You cannot activate this Catalogue, because it's Inactive with status = [%s]",
+                    existingCatalogue.getStatus()), HttpStatus.CONFLICT);
         }
-
-        return catalogueBundle;
+        existingCatalogue.markActive(active, UserInfo.of(auth));
+        return super.update(existingCatalogue, auth);
     }
 
     public CatalogueBundle audit(String id, String catalogueId, String comment, LoggingInfo.ActionType actionType, Authentication auth) {
-        CatalogueBundle catalogue = get(id);
-        commonMethods.auditResource(catalogue, comment, actionType, auth);
-        if (actionType.getKey().equals(LoggingInfo.ActionType.VALID.getKey())) {
-            catalogue.setAuditState(Auditable.VALID);
-        }
-        if (actionType.getKey().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-            catalogue.setAuditState(Auditable.INVALID_AND_NOT_UPDATED);
-        }
-        logger.info("User '{}-{}' audited Catalogue '{}'-'{}' with [actionType: {}]",
-                AuthenticationInfo.getFullName(auth), AuthenticationInfo.getEmail(auth).toLowerCase(),
-                catalogue.getCatalogue().getId(), catalogue.getCatalogue().getName(), actionType);
-        return super.update(catalogue, auth);
+        CatalogueBundle existingCatalogue = get(id);
+        existingCatalogue.markAudit(comment, actionType, auth);
+        logger.info("Audited Catalogue '{}' with [actionType: {}]",
+                existingCatalogue.getId(), actionType);
+        return super.update(existingCatalogue, auth);
     }
 
     @Override
@@ -475,5 +361,25 @@ public class CatalogueManager extends ResourceManager<CatalogueBundle> implement
         ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
         return ff;
+    }
+
+    @Override
+    public CatalogueBundle addDraft(CatalogueBundle bundle, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public CatalogueBundle updateDraft(CatalogueBundle bundle, Authentication auth) {
+        return null;
+    }
+
+    @Override
+    public void deleteDraft(CatalogueBundle bundle) {
+
+    }
+
+    @Override
+    public CatalogueBundle finalizeDraft(CatalogueBundle catalogueBundle, Authentication auth) {
+        return null;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -28,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -41,29 +41,25 @@ public class InternalToPublicConsistency {
 
     private static final Logger logger = LoggerFactory.getLogger(InternalToPublicConsistency.class);
 
-    private final ProviderService providerService;
-    private final ServiceBundleService<ServiceBundle> serviceBundleService;
+    private final OrganisationService organisationService;
+    private final ServiceService serviceService;
     private final TrainingResourceService trainingResourceService;
-    private final DeployableServiceService deployableServiceService;
+    private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final ResourceInteroperabilityRecordService resourceInteroperabilityRecordService;
     private final DatasourceService datasourceService;
-    private final HelpdeskService helpdeskService;
-    private final MonitoringService monitoringService;
     private final ConfigurationTemplateInstanceService configurationTemplateInstanceService;
 
 
-    private final PublicProviderService publicProviderService;
+    private final PublicOrganisationService publicOrganisationService;
     private final PublicServiceService publicServiceManager;
     private final PublicTrainingResourceService publicTrainingResourceManager;
-    private final PublicDeployableServiceService publicDeployableServiceService;
+    private final PublicDeployableApplicationService publicDeployableApplicationService;
     private final PublicAdapterService publicAdapterService;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordManager;
     private final PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager;
     private final PublicDatasourceService publicDatasourceService;
-    private final PublicHelpdeskService publicHelpdeskService;
-    private final PublicMonitoringService publicMonitoringService;
     private final PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceService;
 
     private final SecurityService securityService;
@@ -82,79 +78,84 @@ public class InternalToPublicConsistency {
     @Value("${catalogue.email-properties.resource-consistency.cc:}")
     private String consistencyCC;
 
-    public InternalToPublicConsistency(ProviderService providerService,
-                                       ServiceBundleService<ServiceBundle> serviceBundleService,
+    public InternalToPublicConsistency(OrganisationService organisationService,
+                                       ServiceService serviceService,
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
-                                       DeployableServiceService deployableServiceService,
+                                       DeployableApplicationService deployableApplicationService,
                                        AdapterService adapterService,
                                        ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
-                                       DatasourceService datasourceService, HelpdeskService helpdeskService,
-                                       MonitoringService monitoringService,
+                                       DatasourceService datasourceService,
                                        ConfigurationTemplateInstanceService configurationTemplateInstanceService,
-                                       PublicProviderService publicProviderService, PublicServiceService publicServiceManager,
+                                       PublicOrganisationService publicOrganisationService, PublicServiceService publicServiceManager,
                                        PublicTrainingResourceService publicTrainingResourceManager,
-                                       PublicDeployableServiceService publicDeployableServiceService,
+                                       PublicDeployableApplicationService publicDeployableApplicationService,
                                        PublicAdapterService publicAdapterService,
                                        PublicInteroperabilityRecordService publicInteroperabilityRecordManager,
-                                       PublicDatasourceService publicDatasourceService, PublicHelpdeskService publicHelpdeskService,
-                                       PublicMonitoringService publicMonitoringService,
+                                       PublicDatasourceService publicDatasourceService,
                                        PublicConfigurationTemplateInstanceService publicConfigurationTemplateInstanceService,
                                        PublicResourceInteroperabilityRecordService publicResourceInteroperabilityRecordManager,
                                        SecurityService securityService, Configuration cfg, MailService mailService) {
-        this.providerService = providerService;
-        this.serviceBundleService = serviceBundleService;
+        this.organisationService = organisationService;
+        this.serviceService = serviceService;
         this.trainingResourceService = trainingResourceService;
-        this.deployableServiceService = deployableServiceService;
+        this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.resourceInteroperabilityRecordService = resourceInteroperabilityRecordService;
         this.datasourceService = datasourceService;
-        this.helpdeskService = helpdeskService;
-        this.monitoringService = monitoringService;
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
-        this.publicProviderService = publicProviderService;
+        this.publicOrganisationService = publicOrganisationService;
         this.publicServiceManager = publicServiceManager;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
-        this.publicDeployableServiceService = publicDeployableServiceService;
+        this.publicDeployableApplicationService = publicDeployableApplicationService;
         this.publicAdapterService = publicAdapterService;
         this.publicInteroperabilityRecordManager = publicInteroperabilityRecordManager;
         this.publicResourceInteroperabilityRecordManager = publicResourceInteroperabilityRecordManager;
         this.publicDatasourceService = publicDatasourceService;
-        this.publicHelpdeskService = publicHelpdeskService;
-        this.publicMonitoringService = publicMonitoringService;
         this.publicConfigurationTemplateInstanceService = publicConfigurationTemplateInstanceService;
         this.securityService = securityService;
         this.cfg = cfg;
         this.mailService = mailService;
     }
 
-    //TODO: Add all resource types which get published
-    @Scheduled(cron = "0 0 0 * * *") // At midnight every day
+    //TODO: test that all resources have approved status
+//    @Scheduled(cron = "0 0 0 * * *") // At midnight every day
 //    @Scheduled(initialDelay = 0, fixedRate = 6000) // every 2 min
     protected void logInternalToPublicResourceConsistency() {
-        List<ProviderBundle> allInternalApprovedProviders = providerService.getAll(createFacetFilter("approved provider"), securityService.getAdminAccess()).getResults();
-        List<ServiceBundle> allInternalApprovedServices = serviceBundleService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
-        List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
-        List<DeployableServiceBundle> allInternalApprovedDS = deployableServiceService.getAll(createFacetFilter("approved resource"), securityService.getAdminAccess()).getResults();
-        List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter("approved interoperability record"), securityService.getAdminAccess()).getResults();
-        List<ResourceInteroperabilityRecordBundle> allInternalApprovedRIR = resourceInteroperabilityRecordService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
-        List<DatasourceBundle> allInternalApprovedDatasources = datasourceService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
-        List<HelpdeskBundle> allInternalHelpdesks = helpdeskService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
-        List<MonitoringBundle> allInternalMonitorings = monitoringService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
-        List<ConfigurationTemplateInstanceBundle> allInternalCTI = configurationTemplateInstanceService.getAll(createFacetFilter(null), securityService.getAdminAccess()).getResults();
-        List<AdapterBundle> allInternalApprovedAdapters = adapterService.getAll(createFacetFilter("approved adapter"), securityService.getAdminAccess()).getResults();
+        List<OrganisationBundle> allInternalApprovedProviders = organisationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<ServiceBundle> allInternalApprovedServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<DeployableApplicationBundle> allInternalApprovedDS = deployableApplicationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<ResourceInteroperabilityRecordBundle> allInternalApprovedRIR = resourceInteroperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<DatasourceBundle> allInternalApprovedDatasources = datasourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<ConfigurationTemplateInstanceBundle> allInternalCTI = configurationTemplateInstanceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<AdapterBundle> allInternalApprovedAdapters = adapterService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<String> logs = new ArrayList<>();
 
         // check consistency for Providers
-        for (ProviderBundle providerBundle : allInternalApprovedProviders) {
+        for (OrganisationBundle organisationBundle : allInternalApprovedProviders) {
             // try and get its Public instance
             try {
-                publicProviderService.get(providerBundle.getIdentifiers().getPid(),
-                        providerBundle.getProvider().getCatalogueId(), true);
+                publicOrganisationService.get(organisationBundle.getIdentifiers().getPid(),
+                        organisationBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Provider with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        providerBundle.getId(), providerBundle.getProvider().getCatalogueId(), providerBundle.getIdentifiers().getPid()));
+                        organisationBundle.getId(), organisationBundle.getCatalogueId(), organisationBundle.getIdentifiers().getPid()));
+            }
+        }
+
+        // check consistency for Adapters
+        for (AdapterBundle adapterBundle : allInternalApprovedAdapters) {
+            // try and get its Public instance
+            try {
+                publicAdapterService.get(adapterBundle.getIdentifiers().getPid(),
+                        adapterBundle.getCatalogueId());
+            } catch (CatalogueResourceNotFoundException e) {
+                logs.add(String.format("Adapter with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
+                        adapterBundle.getId(), adapterBundle.getCatalogueId(),
+                        adapterBundle.getIdentifiers().getPid()));
             }
         }
 
@@ -163,10 +164,23 @@ public class InternalToPublicConsistency {
             // try and get its Public instance
             try {
                 publicServiceManager.get(serviceBundle.getIdentifiers().getPid(),
-                        serviceBundle.getService().getCatalogueId(), true);
+                        serviceBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Service with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        serviceBundle.getId(), serviceBundle.getService().getCatalogueId(), serviceBundle.getIdentifiers().getPid()));
+                        serviceBundle.getId(), serviceBundle.getCatalogueId(), serviceBundle.getIdentifiers().getPid()));
+            }
+        }
+
+        // check consistency for Datasources
+        for (DatasourceBundle datasourceBundle : allInternalApprovedDatasources) {
+            // try and get its Public instance
+            try {
+                publicDatasourceService.get(datasourceBundle.getIdentifiers().getPid(),
+                        datasourceBundle.getCatalogueId());
+            } catch (CatalogueResourceNotFoundException e) {
+                logs.add(String.format("Datasource with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
+                        datasourceBundle.getId(), datasourceBundle.getCatalogueId(),
+                        datasourceBundle.getIdentifiers().getPid()));
             }
         }
 
@@ -175,24 +189,24 @@ public class InternalToPublicConsistency {
             // try and get its Public instance
             try {
                 publicTrainingResourceManager.get(trainingResourceBundle.getIdentifiers().getPid(),
-                        trainingResourceBundle.getTrainingResource().getCatalogueId(), true);
+                        trainingResourceBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Training Resource with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        trainingResourceBundle.getId(), trainingResourceBundle.getTrainingResource().getCatalogueId(),
+                        trainingResourceBundle.getId(), trainingResourceBundle.getCatalogueId(),
                         trainingResourceBundle.getIdentifiers().getPid()));
             }
         }
 
-        // check consistency for Deployable Services
-        for (DeployableServiceBundle deployableServiceBundle : allInternalApprovedDS) {
+        // check consistency for Deployable Application
+        for (DeployableApplicationBundle deployableApplicationBundle : allInternalApprovedDS) {
             // try and get its Public instance
             try {
-                publicDeployableServiceService.get(deployableServiceBundle.getIdentifiers().getPid(),
-                        deployableServiceBundle.getDeployableService().getCatalogueId(), true);
+                publicDeployableApplicationService.get(deployableApplicationBundle.getIdentifiers().getPid(),
+                        deployableApplicationBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
-                logs.add(String.format("Deployable Service with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        deployableServiceBundle.getId(), deployableServiceBundle.getDeployableService().getCatalogueId(),
-                        deployableServiceBundle.getIdentifiers().getPid()));
+                logs.add(String.format("Deployable Application with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
+                        deployableApplicationBundle.getId(), deployableApplicationBundle.getCatalogueId(),
+                        deployableApplicationBundle.getIdentifiers().getPid()));
             }
         }
 
@@ -201,10 +215,10 @@ public class InternalToPublicConsistency {
             // try and get its Public instance
             try {
                 publicInteroperabilityRecordManager.get(interoperabilityRecordBundle.getIdentifiers().getPid(),
-                        interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(), true);
+                        interoperabilityRecordBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Interoperability Record with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        interoperabilityRecordBundle.getId(), interoperabilityRecordBundle.getInteroperabilityRecord().getCatalogueId(),
+                        interoperabilityRecordBundle.getId(), interoperabilityRecordBundle.getCatalogueId(),
                         interoperabilityRecordBundle.getIdentifiers().getPid()));
             }
         }
@@ -214,49 +228,12 @@ public class InternalToPublicConsistency {
             // try and get its Public instance
             try {
                 publicResourceInteroperabilityRecordManager.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
-                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(), true);
+                        resourceInteroperabilityRecordBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Resource Interoperability Record with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         resourceInteroperabilityRecordBundle.getId(),
-                        resourceInteroperabilityRecordBundle.getResourceInteroperabilityRecord().getCatalogueId(),
+                        resourceInteroperabilityRecordBundle.getCatalogueId(),
                         resourceInteroperabilityRecordBundle.getIdentifiers().getPid()));
-            }
-        }
-
-        // check consistency for Datasources
-        for (DatasourceBundle datasourceBundle : allInternalApprovedDatasources) {
-            // try and get its Public instance
-            try {
-                publicDatasourceService.get(datasourceBundle.getIdentifiers().getPid(),
-                        datasourceBundle.getDatasource().getCatalogueId(), true);
-            } catch (CatalogueResourceNotFoundException e) {
-                logs.add(String.format("Datasource with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        datasourceBundle.getId(), datasourceBundle.getDatasource().getCatalogueId(),
-                        datasourceBundle.getIdentifiers().getPid()));
-            }
-        }
-
-        // check consistency for Helpdesks
-        for (HelpdeskBundle helpdeskBundle : allInternalHelpdesks) {
-            // try and get its Public instance
-            try {
-                publicHelpdeskService.get(helpdeskBundle.getIdentifiers().getPid(),
-                        helpdeskBundle.getHelpdesk().getCatalogueId(), true);
-            } catch (CatalogueResourceNotFoundException e) {
-                logs.add(String.format("Helpdesk with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        helpdeskBundle.getId(), helpdeskBundle.getHelpdesk().getCatalogueId(), helpdeskBundle.getIdentifiers().getPid()));
-            }
-        }
-
-        // check consistency for Monitorings
-        for (MonitoringBundle monitoringBundle : allInternalMonitorings) {
-            // try and get its Public instance
-            try {
-                publicMonitoringService.get(monitoringBundle.getIdentifiers().getPid(),
-                        monitoringBundle.getMonitoring().getCatalogueId(), true);
-            } catch (CatalogueResourceNotFoundException e) {
-                logs.add(String.format("Monitoring with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        monitoringBundle.getId(), monitoringBundle.getMonitoring().getCatalogueId(), monitoringBundle.getIdentifiers().getPid()));
             }
         }
 
@@ -265,23 +242,11 @@ public class InternalToPublicConsistency {
             // try and get its Public instance
             try {
                 publicConfigurationTemplateInstanceService.get(ctiBundle.getIdentifiers().getPid(),
-                        null, true);
+                        ctiBundle.getCatalogueId());
             } catch (CatalogueResourceNotFoundException e) {
-                logs.add(String.format("Configuration Template Instance with ID [%s] of the internal Catalogue is missing its Public instance [%s]",
+                logs.add(String.format("Configuration Template Instance with ID [%s] of the internal Catalogue " +
+                                "is missing its Public instance [%s]",
                         ctiBundle.getId(), ctiBundle.getIdentifiers().getPid()));
-            }
-        }
-
-        // check consistency for Adapters
-        for (AdapterBundle adapterBundle : allInternalApprovedAdapters) {
-            // try and get its Public instance
-            try {
-                publicAdapterService.get(adapterBundle.getIdentifiers().getPid(),
-                        adapterBundle.getAdapter().getCatalogueId(), true);
-            } catch (CatalogueResourceNotFoundException e) {
-                logs.add(String.format("Adapter with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
-                        adapterBundle.getId(), adapterBundle.getAdapter().getCatalogueId(),
-                        adapterBundle.getIdentifiers().getPid()));
             }
         }
 
@@ -290,13 +255,11 @@ public class InternalToPublicConsistency {
 
     }
 
-    protected FacetFilter createFacetFilter(String status) {
+    protected FacetFilter createFacetFilter() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);
-        if (status != null) {
-            ff.addFilter("status", status);
-        }
+        ff.addFilter("status", "approved");
         return ff;
     }
 

@@ -66,30 +66,6 @@
         }
       },
       "additionalProperties" : false
-    },
-    "MigrationStatus" : {
-      "type" : "object",
-      "properties" : {
-        "comments" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "migrationDate" : {
-          "type" : "string"
-        },
-        "modelVersion" : {
-          "type" : "string"
-        },
-        "modified" : {
-          "type" : "string"
-        },
-        "resolutionDate" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
     }
   },
   "type" : "object",
@@ -98,6 +74,9 @@
       "type" : "boolean"
     },
     "auditState" : {
+      "type" : "string"
+    },
+    "catalogueId" : {
       "type" : "string"
     },
     "draft" : {
@@ -115,6 +94,9 @@
     "latestUpdateInfo" : {
       "$ref" : "#/$defs/LoggingInfo"
     },
+    "legacy" : {
+      "type" : "boolean"
+    },
     "loggingInfo" : {
       "type" : "array",
       "items" : {
@@ -123,9 +105,6 @@
     },
     "metadata" : {
       "$ref" : "#/$defs/Metadata"
-    },
-    "migrationStatus" : {
-      "$ref" : "#/$defs/MigrationStatus"
     },
     "status" : {
       "type" : "string"

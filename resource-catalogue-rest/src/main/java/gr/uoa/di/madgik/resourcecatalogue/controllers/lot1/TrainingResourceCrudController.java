@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -38,10 +36,9 @@ import java.util.List;
 @Tag(name = "training resources")
 public class TrainingResourceCrudController extends ResourceCrudController<TrainingResourceBundle> {
 
-    private static final Logger logger = LoggerFactory.getLogger(TrainingResourceCrudController.class.getName());
-    private final TrainingResourceService trainingResourceService;
+    private final ResourceService<TrainingResourceBundle> trainingResourceService;
 
-    TrainingResourceCrudController(TrainingResourceService trainingResourceService) {
+    TrainingResourceCrudController(ResourceService<TrainingResourceBundle> trainingResourceService) {
         super(trainingResourceService);
         this.trainingResourceService = trainingResourceService;
     }

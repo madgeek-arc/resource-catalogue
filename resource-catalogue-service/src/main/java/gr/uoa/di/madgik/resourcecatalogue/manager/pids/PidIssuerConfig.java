@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 OpenAIRE AMKE & Athena Research and Innovation Center
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,6 +117,13 @@ public class PidIssuerConfig {
         @NotNull
         private Boolean selfSignedCert = false;
 
+        /**
+         * Path to the server's self-signed certificate PEM file.
+         * When provided, only this certificate is trusted instead of disabling all SSL verification.
+         * Optional — if omitted when selfSignedCert is true, all certificates are trusted (insecure).
+         */
+        private String serverCert;
+
         public IssuerCertificateAuthenticationConfig() {
         }
 
@@ -142,6 +149,14 @@ public class PidIssuerConfig {
 
         public void setSelfSignedCert(boolean selfSignedCert) {
             this.selfSignedCert = selfSignedCert;
+        }
+
+        public String getServerCert() {
+            return serverCert;
+        }
+
+        public void setServerCert(String serverCert) {
+            this.serverCert = serverCert;
         }
     }
 }
