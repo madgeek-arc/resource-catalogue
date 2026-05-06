@@ -1257,7 +1257,7 @@
                   "showLess": false
                 },
                 "placeholder": null,
-                "mandatory": true,
+                "mandatory": false,
                 "immutable": true,
                 "display": {
                   "placement": null,
