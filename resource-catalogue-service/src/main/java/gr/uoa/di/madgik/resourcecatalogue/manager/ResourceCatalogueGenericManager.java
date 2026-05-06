@@ -71,14 +71,25 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     public void createIdentifiers(Bundle bundle) {
+        //TODO: find a better way to check for CatalogueBundle if we really need this flexibility
+        //TODO: this way manager loses its generic nature
+        if (bundle instanceof CatalogueBundle) {
+            boolean userProvidedId = bundle.getId() != null && !bundle.getId().isEmpty();
+            if (userProvidedId) {
+                idCreator.validateId(bundle.getId());
+                this.createIdentifiers(bundle, getResourceTypeName(), true);
+            } else {
+                this.createIdentifiers(bundle, getResourceTypeName(), false);
+                bundle.setId(bundle.getIdentifiers().getOriginalId());
+            }
+            return;
+        }
         String catalogueId = bundle.getCatalogueId();
         if (catalogueId == null || catalogueId.isEmpty()) {
             this.createIdentifiers(bundle, getResourceTypeName(), false);
             bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
-            if (!(bundle instanceof CatalogueBundle)) {
-                validateCatalogueExistence(catalogueId);
-            }
+            validateCatalogueExistence(catalogueId);
             idCreator.validateId(bundle.getId());
             this.createIdentifiers(bundle, getResourceTypeName(), true);
         }
