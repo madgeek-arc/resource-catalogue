@@ -32,6 +32,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -220,16 +221,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_owner", providerId);
-        ff.addFilter("published", false);
-        List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();
-        for (TrainingResourceBundle bundle : allProviderTrainingResources) {
-            if (bundle.getStatus().equals(vocabularyService.get("pending").getId())) {
-                return bundle;
-            }
-        }
-        return null;
+        return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
     //endregion
 }
