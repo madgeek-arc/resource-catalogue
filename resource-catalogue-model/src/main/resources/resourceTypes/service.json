@@ -121,6 +121,13 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Access Type",
+      "multivalued": false,
+      "name": "accessTypes",
+      "path": "$.service.accessTypes",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Jurisdiction",
       "multivalued": false,
       "name": "jurisdiction",

@@ -585,6 +585,19 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         OrganisationBundle provider = organisationService.audit(providerId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
+
+    @Hidden
+    @PutMapping(path = {
+            "{catalogueId}/provider/suspend/{providerId}",
+            "{catalogueId}/organisation/suspend/{providerId}"
+    })
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public OrganisationBundle suspendOrganisation(@PathVariable String providerId,
+                                                  @PathVariable String catalogueId,
+                                                  @RequestParam boolean suspend,
+                                                  @Parameter(hidden = true) Authentication auth) {
+        return organisationService.setSuspend(providerId, catalogueId, suspend, auth);
+    }
     //endregion
 
     //region Service
@@ -719,6 +732,16 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                       @Parameter(hidden = true) Authentication auth) {
         ServiceBundle service = serviceService.audit(serviceId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(service, HttpStatus.OK);
+    }
+
+    @Hidden
+    @PutMapping(path = "{catalogueId}/service/suspend/{serviceId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ServiceBundle suspendService(@PathVariable String serviceId,
+                                        @PathVariable String catalogueId,
+                                        @RequestParam boolean suspend,
+                                        @Parameter(hidden = true) Authentication auth) {
+        return serviceService.setSuspend(serviceId, catalogueId, suspend, auth);
     }
     //endregion
 
@@ -855,6 +878,16 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         DatasourceBundle datasource = datasourceService.audit(datasourceId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(datasource, HttpStatus.OK);
     }
+
+    @Hidden
+    @PutMapping(path = "{catalogueId}/service/suspend/{datasourceId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public DatasourceBundle suspendDatasource(@PathVariable String datasourceId,
+                                              @PathVariable String catalogueId,
+                                              @RequestParam boolean suspend,
+                                              @Parameter(hidden = true) Authentication auth) {
+        return datasourceService.setSuspend(datasourceId, catalogueId, suspend, auth);
+    }
     //endregion
 
     //region Adapter
@@ -972,6 +1005,16 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                       @Parameter(hidden = true) Authentication auth) {
         AdapterBundle adapter = adapterService.audit(adapterId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(adapter, HttpStatus.OK);
+    }
+
+    @Hidden
+    @PutMapping(path = "{catalogueId}/adapter/suspend/{adapterId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public AdapterBundle suspendAdapter(@PathVariable String adapterId,
+                                        @PathVariable String catalogueId,
+                                        @RequestParam boolean suspend,
+                                        @Parameter(hidden = true) Authentication auth) {
+        return adapterService.setSuspend(adapterId, catalogueId, suspend, auth);
     }
     //endregion
 
@@ -1110,6 +1153,16 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         TrainingResourceBundle trainingResource = trainingResourceService.audit(trainingResourceId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(trainingResource, HttpStatus.OK);
     }
+
+    @Hidden
+    @PutMapping(path = "{catalogueId}/trainingResource/suspend/{trainingResourceId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public TrainingResourceBundle suspendTrainingResource(@PathVariable String trainingResourceId,
+                                                          @PathVariable String catalogueId,
+                                                          @RequestParam boolean suspend,
+                                                          @Parameter(hidden = true) Authentication auth) {
+        return trainingResourceService.setSuspend(trainingResourceId, catalogueId, suspend, auth);
+    }
     //endregion
 
     //region Deployable Application
@@ -1245,6 +1298,16 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         DeployableApplicationBundle deployableApplication = deployableApplicationService.audit(deployableApplicationId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(deployableApplication, HttpStatus.OK);
     }
+
+    @Hidden
+    @PutMapping(path = "{catalogueId}/deployableApplication/suspend/{deployableApplicationId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public DeployableApplicationBundle suspendDeployableApplication(@PathVariable String deployableApplicationId,
+                                                                    @PathVariable String catalogueId,
+                                                                    @RequestParam boolean suspend,
+                                                                    @Parameter(hidden = true) Authentication auth) {
+        return deployableApplicationService.setSuspend(deployableApplicationId, catalogueId, suspend, auth);
+    }
     //endregion
 
     //region Interoperability Record
@@ -1379,6 +1442,16 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                     @Parameter(hidden = true) Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecord = guidelineService.audit(interoperabilityRecordId, catalogueId, comment, actionType, auth);
         return new ResponseEntity<>(interoperabilityRecord, HttpStatus.OK);
+    }
+
+    @Hidden
+    @PutMapping(path = "{catalogueId}/interoperabilityRecord/suspend/{interoperabilityRecordId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public InteroperabilityRecordBundle suspendInteroperabilityRecord(@PathVariable String interoperabilityRecordId,
+                                                                      @PathVariable String catalogueId,
+                                                                      @RequestParam boolean suspend,
+                                                                      @Parameter(hidden = true) Authentication auth) {
+        return guidelineService.setSuspend(interoperabilityRecordId, catalogueId, suspend, auth);
     }
     //endregion
 }
