@@ -19,5 +19,5 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 
 public interface CatalogueService extends ResourceCatalogueGenericService<CatalogueBundle>,
-        EOSCResourceService<CatalogueBundle>, TemplateOnboardingService, DraftService<CatalogueBundle> {
+        EOSCResourceService<CatalogueBundle>, DraftService<CatalogueBundle> {
 }
