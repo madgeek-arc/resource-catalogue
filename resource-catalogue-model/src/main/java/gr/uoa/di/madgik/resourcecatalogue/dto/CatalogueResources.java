@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.service;
+package gr.uoa.di.madgik.resourcecatalogue.dto;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
-import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueResources;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 
-public interface CatalogueService extends ResourceCatalogueGenericService<CatalogueBundle>,
-        EOSCResourceService<CatalogueBundle>, DraftService<CatalogueBundle> {
+import java.util.List;
 
-    CatalogueResources getAllCatalogueResources(String catalogueId);
+public record CatalogueResources(
+        List<OrganisationBundle> organisations,
+        List<ServiceBundle> services,
+        List<DatasourceBundle> datasources,
+        List<TrainingResourceBundle> trainingResources,
+        List<InteroperabilityRecordBundle> interoperabilityRecords,
+        List<AdapterBundle> adapters,
+        List<DeployableApplicationBundle> deployableApplications
+) {
 }

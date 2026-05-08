@@ -28,9 +28,11 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueResources;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.CatalogueResourceAggregator;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +59,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     private final RelationshipValidator relationshipValidator;
     private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
+    private final CatalogueResourceAggregator cascadeLifecycleManager;
 
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
@@ -68,13 +72,15 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
                             @Lazy RelationshipValidator relationshipValidator,
                             EmailService emailService,
                             ResourceInteroperabilityRecordService rirService,
-                            WorkflowService workflowService) {
+                            WorkflowService workflowService,
+                            @Lazy CatalogueResourceAggregator cascadeLifecycleManager) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
         this.rirService = rirService;
         this.emailService = emailService;
+        this.cascadeLifecycleManager = cascadeLifecycleManager;
     }
 
     @Override
@@ -109,10 +115,30 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     @Override
     @Transactional
     public void delete(CatalogueBundle bundle) {
-        blockResourceDeletion(bundle.getStatus(), bundle.getMetadata().isPublished());
-        deleteResourceInteroperabilityRecords(bundle.getId(), getResourceTypeName());
-        logger.info("Deleting Catalogue: {} and all its Resource Interoperability Records", bundle.getId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // block Public Catalogue deletion
+        if (bundle.getMetadata().isPublished()) {
+            throw new ValidationException("You cannot directly delete a Public Catalogue");
+        }
+        logger.info("Deleting Catalogue: {} and all its resources", bundle.getId());
+        cascadeLifecycleManager.deleteAllCatalogueRelatedResources(bundle.getId(), auth);
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
+    }
+
+    @Override
+    public CatalogueBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
+        CatalogueBundle bundle = get(id, catalogueId);
+        if (bundle.getMetadata().isPublished()) {
+            throw new ResourceException("You cannot directly suspend a Public Catalogue", HttpStatus.FORBIDDEN);
+        }
+        logger.info("{} Catalogue '{}' and all its resources", suspend ? "Suspending" : "Unsuspending", id);
+        bundle.markSuspend(suspend, auth);
+        cascadeLifecycleManager.suspendAllCatalogueRelatedResources(id, suspend, auth);
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Transactional
@@ -204,6 +230,12 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
                 logger.error(e.getMessage(), e);
             }
         }
+    }
+    //endregion
+
+    // region Catalogue-specific
+    public CatalogueResources getAllCatalogueResources(String catalogueId) {
+        return cascadeLifecycleManager.getAllCatalogueResources(catalogueId);
     }
     //endregion
 }

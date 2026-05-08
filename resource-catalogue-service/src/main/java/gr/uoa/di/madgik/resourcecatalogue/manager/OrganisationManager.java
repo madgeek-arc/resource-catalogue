@@ -31,7 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.OrganisationCascadeLifecycleManager;
+import gr.uoa.di.madgik.resourcecatalogue.utils.CatalogueResourceAggregator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     private final GenericResourceService genericResourceService;
     private final ServiceService serviceService;
-    private final OrganisationCascadeLifecycleManager cascadeLifecycleService;
+    private final CatalogueResourceAggregator cascadeLifecycleService;
     private final EmailService emailService;
 
     @Autowired
@@ -72,7 +72,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
                                @Lazy ServiceService serviceService,
                                IdCreator idCreator,
                                SecurityService securityService,
-                               OrganisationCascadeLifecycleManager cascadeLifecycleService,
+                               CatalogueResourceAggregator cascadeLifecycleService,
                                EmailService emailService,
                                WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
@@ -167,13 +167,11 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     public OrganisationBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         OrganisationBundle bundle = get(id, catalogueId);
         if (bundle.getMetadata().isPublished()) {
-            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
+            throw new ResourceException("You cannot directly suspend a Public Organisation", HttpStatus.FORBIDDEN);
         }
-
-        logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
+        logger.info("{} Organisation '{}' and all its resources", suspend ? "Suspending" : "Unsuspending", id);
         bundle.markSuspend(suspend, auth);
         cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
-
         try {
             return genericResourceService.update(getResourceTypeName(), id, bundle);
         } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
