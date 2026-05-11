@@ -67,7 +67,7 @@ public class SupportManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "service")
     public void assignEoscMonitoringGuidelineToService(final ServiceBundle service) {
-        if (service.getStatus().equals("approved")) {
+        if (service.getStatus().equals("approved") && service.getCatalogueId() == null) {
             ResourceInteroperabilityRecordBundle rir = new ResourceInteroperabilityRecordBundle();
             rir.setCatalogueId(service.getCatalogueId());
             rir.getResourceInteroperabilityRecord().put("node", service.getService().get("node"));
@@ -92,7 +92,7 @@ public class SupportManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
             returning = "datasource")
     public void assignEoscMonitoringGuidelineToDatasource(final DatasourceBundle datasource) {
-        if (datasource.getStatus().equals("approved")) {
+        if (datasource.getStatus().equals("approved") && datasource.getCatalogueId() == null) {
             ResourceInteroperabilityRecordBundle rir = new ResourceInteroperabilityRecordBundle();
             rir.setCatalogueId(datasource.getCatalogueId());
             rir.getResourceInteroperabilityRecord().put("node", datasource.getDatasource().get("node"));

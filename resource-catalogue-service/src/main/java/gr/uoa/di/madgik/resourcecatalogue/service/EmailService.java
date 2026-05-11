@@ -275,6 +275,46 @@ public class EmailService {
             );
         }
     }
+
+    public void sendCatalogueOnboardingEmailsToPortalAdmins(CatalogueBundle catalogue,
+                                                            OrganisationBundle organisation) {
+        EmailService.EmailBasicInfo emailBasicInfoUser =
+                initializeEmail("catalogueMailTemplate.ftl", catalogue,
+                        organisation.getOrganisation().get("name").toString());
+
+        EmailService.EmailBasicInfo emailBasicInfoAdmin =
+                initializeEmail("registrationTeamMailCatalogueTemplate.ftl", catalogue,
+                        organisation.getOrganisation().get("name").toString());
+
+        updateRootAccordingToResourceType(catalogue, emailBasicInfoUser);
+        emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
+
+        User registeredUser = extractRegisteredUser(organisation);
+        emailBasicInfoAdmin.updateRoot("user", registeredUser);
+
+        sendMailsFromTemplate(
+                "registrationTeamMailCatalogueTemplate.ftl",
+                emailBasicInfoAdmin.getRoot(),
+                emailBasicInfoAdmin.getSubject(),
+                registrationEmail,
+                "onboarding-team"
+        );
+
+        List<User> users = deduplicateUsersByEmail(
+                securityService.getProviderUsers(organisation.getId())
+        );
+
+        for (User user : users) {
+            emailBasicInfoUser.updateRoot("user", user);
+            sendMailsFromTemplate(
+                    "catalogueMailTemplate.ftl",
+                    emailBasicInfoUser.getRoot(),
+                    emailBasicInfoUser.getSubject(),
+                    user.getEmail().toLowerCase(),
+                    "provider"
+            );
+        }
+    }
     //endregion
 
     //region helper
