@@ -175,11 +175,11 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @Operation(summary = "Adds a new Catalogue.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #serviceMap, null)")
-    public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> catalogueMap,
+            "@securityService.providerCanAddResources(#auth, #catalogue, null)")
+    public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> catalogue,
                                  @Parameter(hidden = true) Authentication auth) {
         CatalogueBundle bundle = new CatalogueBundle();
-        bundle.setCatalogue(catalogueMap);
+        bundle.setCatalogue(catalogue);
         CatalogueBundle ret = service.add(bundle, auth);
         logger.info("Added Catalogue with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getCatalogue(), HttpStatus.CREATED);
@@ -680,7 +680,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @Operation(description = "Creates a new Service for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/service")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #service, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #service, null)")
     public ResponseEntity<?> addCatalogueService(@RequestBody LinkedHashMap<String, Object> service,
                                                  @PathVariable String catalogueId,
                                                  @Parameter(hidden = true) Authentication auth) {
@@ -815,7 +815,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @Operation(description = "Creates a new Datasource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/datasource")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #datasource, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #datasource, null)")
     public ResponseEntity<?> addCatalogueDatasource(@RequestBody LinkedHashMap<String, Object> datasource,
                                                     @PathVariable String catalogueId,
                                                     @Parameter(hidden = true) Authentication auth) {
@@ -933,7 +933,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @Operation(description = "Creates a new Adapter for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/adapter")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #adapter, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #adapter, null)")
     public ResponseEntity<?> addCatalogueAdapter(@RequestBody LinkedHashMap<String, Object> adapter,
                                                  @PathVariable String catalogueId,
                                                  @Parameter(hidden = true) Authentication auth) {
@@ -1069,7 +1069,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @Operation(description = "Creates a new Training Resource for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/trainingResource")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #trainingResource, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #trainingResource, null)")
     public ResponseEntity<?> addCatalogueTrainingResource(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                                           @PathVariable String catalogueId,
                                                           @Parameter(hidden = true) Authentication auth) {
@@ -1205,7 +1205,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @Operation(description = "Creates a new Deployable Application for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/deployableApplication")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #deployableApplication, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #deployableApplication, null)")
     public ResponseEntity<?> addCatalogueDeployableApplication(@RequestBody LinkedHashMap<String, Object> deployableApplication,
                                                                @PathVariable String catalogueId,
                                                                @Parameter(hidden = true) Authentication auth) {
@@ -1340,7 +1340,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @Operation(description = "Creates a new Interoperability Record for the specific Catalogue.")
     @PostMapping(path = "{catalogueId}/interoperabilityRecord")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #interoperabilityRecord, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #interoperabilityRecord, null)")
     public ResponseEntity<?> addCatalogueInteroperabilityRecord(@RequestBody LinkedHashMap<String, Object> interoperabilityRecord,
                                                                 @PathVariable String catalogueId,
                                                                 @Parameter(hidden = true) Authentication auth) {
