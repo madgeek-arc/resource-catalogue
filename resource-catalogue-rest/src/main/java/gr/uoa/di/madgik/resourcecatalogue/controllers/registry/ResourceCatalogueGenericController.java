@@ -27,6 +27,16 @@ public abstract class ResourceCatalogueGenericController<T extends Bundle, S ext
         return service.listResources(catalogueId);
     }
 
+    @GetMapping(path = "list/{id}")
+    public boolean resourceExists(@RequestParam(required = false) String catalogueId,
+                                  @PathVariable String id) {
+        try {
+            return service.get(id, catalogueId) != null;
+        } catch (ResourceException e) {
+            return false;
+        }
+    }
+
     @GetMapping(path = "list/{prefix}/{suffix}")
     public boolean resourceExists(@RequestParam(required = false) String catalogueId,
                                   @PathVariable String prefix,
