@@ -180,6 +180,21 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     }
 
     @Override
+    public OrganisationBundle setSuspendWithoutCascade(String id, String catalogueId, boolean suspend, Authentication auth) {
+        OrganisationBundle bundle = get(id, catalogueId);
+        if (bundle.getMetadata().isPublished()) {
+            throw new ResourceException("You cannot directly suspend a Public Organisation", HttpStatus.FORBIDDEN);
+        }
+        logger.info("{} Organisation '{}'", suspend ? "Suspending" : "Unsuspending", id);
+        bundle.markSuspend(suspend, auth);
+        try {
+            return genericResourceService.update(getResourceTypeName(), id, bundle);
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public Browsing<OrganisationBundle> getMy(FacetFilter ff, Authentication auth) {
         return getMyProviders(ff, auth, getResourceTypeName());
     }

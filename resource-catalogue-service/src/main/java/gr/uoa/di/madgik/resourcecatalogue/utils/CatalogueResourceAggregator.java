@@ -128,7 +128,7 @@ public class CatalogueResourceAggregator {
         deployableApplicationService.getAll(ff).getResults()
                 .forEach(da -> deployableApplicationService.setSuspend(da.getId(), catalogueId, suspended, auth));
         organisationService.getAll(ff).getResults()
-                .forEach(org -> organisationService.setSuspend(org.getId(), catalogueId, suspended, auth));
+                .forEach(org -> organisationService.setSuspendWithoutCascade(org.getId(), catalogueId, suspended, auth));
     }
 
     public CatalogueResources getAllCatalogueResources(String catalogueId) {

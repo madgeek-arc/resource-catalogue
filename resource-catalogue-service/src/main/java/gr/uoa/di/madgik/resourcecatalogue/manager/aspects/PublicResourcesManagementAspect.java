@@ -124,6 +124,7 @@ public class PublicResourcesManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.setSuspend(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.setSuspendWithoutCascade(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "bundle")
     public void updatePublicProvider(final OrganisationBundle bundle) {
