@@ -73,10 +73,12 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     public void createIdentifiers(Bundle bundle) {
         //TODO: find a better way to check for CatalogueBundle if we really need this flexibility
         //TODO: this way manager loses its generic nature
+        Object rawId = bundle.getPayload().get("id");
+        String id = rawId != null ? rawId.toString() : null;
+
         if (bundle instanceof CatalogueBundle) {
-            boolean userProvidedId = bundle.getId() != null && !bundle.getId().isEmpty();
-            if (userProvidedId) {
-                idCreator.validateId(bundle.getId());
+            if (id != null && !id.isEmpty()) {
+                idCreator.validateId(id);
                 this.createIdentifiers(bundle, getResourceTypeName(), true);
             } else {
                 this.createIdentifiers(bundle, getResourceTypeName(), false);
@@ -90,7 +92,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
             bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
             validateCatalogueExistence(catalogueId);
-            idCreator.validateId(bundle.getId());
+            idCreator.validateId(id);
             this.createIdentifiers(bundle, getResourceTypeName(), true);
         }
     }
@@ -112,9 +114,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     private void setNodePid(T bundle) {
-        String resourceNodePid = bundle.getPayload().get("nodePID").toString();
-        //TODO: find a better way to support forced nodePID VS vocabulary
-        if (!resourceNodePid.equals("21.T15999/EOSC-BEYOND")) {
+        Object resourceNodePid = bundle.getPayload().get("nodePID");
+        if (!nodePid.equals("21.T15999/EOSC-BEYOND")
+                || resourceNodePid == null
+                || resourceNodePid.toString().isBlank()) {
             bundle.getPayload().put("nodePID", nodePid);
         }
     }
