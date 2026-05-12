@@ -71,39 +71,24 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     }
 
     public void createIdentifiers(Bundle bundle) {
-        //TODO: find a better way to check for CatalogueBundle if we really need this flexibility
-        //TODO: this way manager loses its generic nature
-        Object rawId = bundle.getPayload().get("id");
-        String id = rawId != null ? rawId.toString() : null;
-
-        if (bundle instanceof CatalogueBundle) {
-            if (id != null && !id.isEmpty()) {
-                idCreator.validateId(id);
-                this.createIdentifiers(bundle, getResourceTypeName(), true);
-            } else {
-                this.createIdentifiers(bundle, getResourceTypeName(), false);
-                bundle.setId(bundle.getIdentifiers().getOriginalId());
-            }
-            return;
-        }
         String catalogueId = bundle.getCatalogueId();
         if (catalogueId == null || catalogueId.isEmpty()) {
             this.createIdentifiers(bundle, getResourceTypeName(), false);
-            bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
             validateCatalogueExistence(catalogueId);
-            idCreator.validateId(id);
             this.createIdentifiers(bundle, getResourceTypeName(), true);
         }
+        bundle.setId(bundle.getIdentifiers().getOriginalId());
     }
 
     public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();
         identifiers.setPid(idCreator.generate(resourceType));
+        identifiers.setOriginalId(identifiers.getPid() + "00");
         if (external) {
-            identifiers.setOriginalId(bundle.getId());
+            identifiers.setExternalId(bundle.getId());
         } else {
-            identifiers.setOriginalId(identifiers.getPid() + "00");
+            identifiers.setExternalId(null);
         }
         bundle.setIdentifiers(identifiers);
     }
