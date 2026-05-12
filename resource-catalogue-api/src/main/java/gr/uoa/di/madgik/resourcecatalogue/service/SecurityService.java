@@ -59,6 +59,14 @@ public interface SecurityService {
     boolean hasAdminAccess(Authentication auth, @NotNull String id);
 
     /**
+     * @param auth        Authentication
+     * @param externalId  external Provider id (as given by the user in the URL)
+     * @param catalogueId Catalogue id
+     * @return True if the authenticated user is a Provider Admin within the given Catalogue
+     */
+    boolean hasAdminAccess(Authentication auth, @NotNull String externalId, @NotNull String catalogueId);
+
+    /**
      * @param user User
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
@@ -71,6 +79,15 @@ public interface SecurityService {
      * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered.
      */
     boolean isResourceAdmin(Authentication auth, String resourceId);
+
+    /**
+     * @param auth        Authentication
+     * @param externalId  external resource id (as given by the user in the URL)
+     * @param catalogueId Catalogue id
+     * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered
+     *         within the given Catalogue
+     */
+    boolean isResourceAdmin(Authentication auth, String externalId, String catalogueId);
 
     /**
      * @param user       User

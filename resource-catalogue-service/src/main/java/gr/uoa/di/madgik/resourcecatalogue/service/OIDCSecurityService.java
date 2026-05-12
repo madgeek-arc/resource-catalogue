@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -179,10 +180,76 @@ public class OIDCSecurityService implements SecurityService {
         return userHasAdminAccess(user, providerId);
     }
 
+    @Override
+    public boolean isResourceAdmin(Authentication auth, String externalId, String catalogueId) {
+        return getAuthenticatedUser(auth)
+                .map(user -> {
+                    Bundle bundle = determineResourceTypeByExternalId(externalId, catalogueId);
+                    if (bundle == null) {
+                        return false;
+                    }
+                    String providerId = getProviderId(bundle);
+                    return userHasAdminAccess(user, providerId);
+                })
+                .orElse(false);
+    }
+
+    @Override
+    public boolean hasAdminAccess(Authentication auth, @NotNull String externalId, @NotNull String catalogueId) {
+        return getAuthenticatedUser(auth)
+                .map(user -> {
+                    OrganisationBundle provider = checkProviderExistence(externalId, catalogueId);
+                    return getProviderUsers(provider).parallelStream()
+                            .filter(Objects::nonNull)
+                            .anyMatch(u -> userMatches(u, user));
+                })
+                .orElse(false);
+    }
+
+    private Bundle determineResourceTypeByExternalId(String externalId, String catalogueId) {
+        try {
+            return serviceService.get(getExternalFilters(externalId, catalogueId));
+        } catch (Exception e) { /* not a service */ }
+        try {
+            return datasourceService.get(getExternalFilters(externalId, catalogueId));
+        } catch (Exception e) { /* not a datasource */ }
+        try {
+            return trainingResourceService.get(getExternalFilters(externalId, catalogueId));
+        } catch (Exception e) { /* not a training resource */ }
+        try {
+            return deployableApplicationService.get(getExternalFilters(externalId, catalogueId));
+        } catch (Exception e) { /* not a deployable application */ }
+        try {
+            return adapterService.get(getExternalFilters(externalId, catalogueId));
+        } catch (Exception e) { /* not an adapter */ }
+        try {
+            return interoperabilityRecordService.get(getExternalFilters(externalId, catalogueId));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private OrganisationBundle checkProviderExistence(String externalId, String catalogueId) {
+        try {
+            return organisationService.get(getExternalFilters(externalId, catalogueId));
+        } catch (ResourceException | ResourceNotFoundException e) {
+            return null;
+        }
+    }
+
+    private SearchService.KeyValue[] getExternalFilters(String resourceId, String catalogueId) {
+        return new SearchService.KeyValue[]{
+                new SearchService.KeyValue("externalId", resourceId),
+                new SearchService.KeyValue("catalogue_id", catalogueId)
+        };
+    }
+
     private String getProviderId(String resourceId) {
-        String providerId;
-        Bundle bundle = determineResourceType(resourceId);
-        providerId = switch (bundle) {
+        return getProviderId(determineResourceType(resourceId));
+    }
+
+    private String getProviderId(Bundle bundle) {
+        return switch (bundle) {
             case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("resourceOwner");
             case CatalogueBundle catalogueBundle -> (String) catalogueBundle.getCatalogue().get("resourceOwner");
             case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("resourceOwner");
@@ -194,7 +261,6 @@ public class OIDCSecurityService implements SecurityService {
             case null, default ->
                     (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("resourceOwner");
         };
-        return providerId;
     }
 
     private Bundle determineResourceType(String id) {
