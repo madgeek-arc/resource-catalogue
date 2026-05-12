@@ -57,13 +57,26 @@
       <conditionExpression xsi:type="tFormalExpression">${catalogue != null &amp;&amp; catalogue['status'] == 'approved'}</conditionExpression>
     </sequenceFlow>
 
-    <sequenceFlow id="Flow_14qjd44" name="not approved" sourceRef="Gateway_1cobda0" targetRef="Event_1or4xu0">
+    <sequenceFlow id="Flow_14qjd44" name="not approved" sourceRef="Gateway_1cobda0" targetRef="Activity_MarkFailureCatalogue">
       <conditionExpression xsi:type="tFormalExpression">${catalogue == null || catalogue['status'] == null || catalogue['status'] != 'approved'}</conditionExpression>
     </sequenceFlow>
 
-    <!-- End if catalogue not approved (no failure result set - matches original behaviour) -->
-    <endEvent id="Event_1or4xu0">
+    <!-- Mark Failure - Catalogue not approved -->
+    <serviceTask id="Activity_MarkFailureCatalogue" name="Mark Failure - Catalogue"
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
+      <extensionElements>
+        <flowable:field name="status" stringValue="FAILURE"/>
+        <flowable:field name="code" stringValue="403"/>
+        <flowable:field name="message" stringValue="Catalogue is not eligible to onboard an organisation."/>
+      </extensionElements>
       <incoming>Flow_14qjd44</incoming>
+      <outgoing>Flow_MarkFailureToEnd</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_MarkFailureToEnd" sourceRef="Activity_MarkFailureCatalogue" targetRef="Event_1or4xu0"/>
+
+    <endEvent id="Event_1or4xu0">
+      <incoming>Flow_MarkFailureToEnd</incoming>
     </endEvent>
 
     <!-- Set Template Status = "approved template" on resource (organisation is stored as "resource") -->
@@ -147,11 +160,24 @@
 
     <sequenceFlow id="Flow_1q1wtm2" sourceRef="Activity_07f9m3j" targetRef="Activity_1fn2t4q"/>
 
-    <endEvent id="Event_0uivhin">
+    <!-- Mark Success -->
+    <serviceTask id="Activity_MarkSuccess" name="Mark Success"
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
+      <extensionElements>
+        <flowable:field name="status" stringValue="SUCCESS"/>
+        <flowable:field name="code" stringValue="200"/>
+        <flowable:field name="message" stringValue="Success"/>
+      </extensionElements>
       <incoming>Flow_091jq6x</incoming>
+      <outgoing>Flow_MarkSuccessToEnd</outgoing>
+    </serviceTask>
+
+    <endEvent id="Event_0uivhin">
+      <incoming>Flow_MarkSuccessToEnd</incoming>
     </endEvent>
 
-    <sequenceFlow id="Flow_091jq6x" sourceRef="Activity_1fn2t4q" targetRef="Event_0uivhin"/>
+    <sequenceFlow id="Flow_091jq6x" sourceRef="Activity_1fn2t4q" targetRef="Activity_MarkSuccess"/>
+    <sequenceFlow id="Flow_MarkSuccessToEnd" sourceRef="Activity_MarkSuccess" targetRef="Event_0uivhin"/>
 
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -172,7 +198,7 @@
         <bpmndi:BPMNLabel><dc:Bounds x="263" y="390" width="62" height="40" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1or4xu0_di" bpmnElement="Event_1or4xu0">
-        <dc:Bounds x="342" y="512" width="36" height="36" />
+        <dc:Bounds x="342" y="600" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_198e1v4_di" bpmnElement="Activity_1otm8rv">
         <dc:Bounds x="520" y="80" width="100" height="80" />
@@ -196,7 +222,7 @@
         <dc:Bounds x="1290" y="230" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0uivhin_di" bpmnElement="Event_0uivhin">
-        <dc:Bounds x="1472" y="252" width="36" height="36" />
+        <dc:Bounds x="1560" y="252" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1cnsxh6_di" bpmnElement="Flow_1cnsxh6">
         <di:waypoint x="218" y="120" /><di:waypoint x="335" y="120" />
@@ -217,8 +243,8 @@
         <bpmndi:BPMNLabel><dc:Bounds x="440" y="392" width="46" height="14" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_14qjd44_di" bpmnElement="Flow_14qjd44">
-        <di:waypoint x="360" y="435" /><di:waypoint x="360" y="512" />
-        <bpmndi:BPMNLabel><dc:Bounds x="343" y="471" width="65" height="14" /></bpmndi:BPMNLabel>
+        <di:waypoint x="360" y="435" /><di:waypoint x="360" y="455" />
+        <bpmndi:BPMNLabel><dc:Bounds x="343" y="443" width="65" height="14" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_15ogdc1_di" bpmnElement="Flow_15ogdc1">
         <di:waypoint x="640" y="410" /><di:waypoint x="780" y="410" />
@@ -239,7 +265,19 @@
         <di:waypoint x="1160" y="270" /><di:waypoint x="1290" y="270" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_091jq6x_di" bpmnElement="Flow_091jq6x">
-        <di:waypoint x="1390" y="270" /><di:waypoint x="1472" y="270" />
+        <di:waypoint x="1390" y="270" /><di:waypoint x="1420" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_MarkFailureCatalogue_di" bpmnElement="Activity_MarkFailureCatalogue">
+        <dc:Bounds x="302" y="455" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_MarkFailureToEnd_di" bpmnElement="Flow_MarkFailureToEnd">
+        <di:waypoint x="352" y="535" /><di:waypoint x="360" y="600" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_MarkSuccess_di" bpmnElement="Activity_MarkSuccess">
+        <dc:Bounds x="1420" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_MarkSuccessToEnd_di" bpmnElement="Flow_MarkSuccessToEnd">
+        <di:waypoint x="1520" y="270" /><di:waypoint x="1560" y="270" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
