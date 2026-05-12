@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Arrays;
@@ -93,6 +94,7 @@ public class CatalogueProperties {
     }
 
     @EventListener
+    @Order(1)
     public void onPropertyChange(PropertyChangeEvent event) {
         if ("catalogue.admins".equals(event.getPropertyName())) {
             String newAdmins = event.getNewValue();

@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -225,6 +226,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     }
 
     @EventListener
+    @Order(2)
     public void onPropertyChange(PropertyChangeEvent event) {
         if ("catalogue.admins".equals(event.getPropertyName())
                 || "catalogue.onboarding-team".equals(event.getPropertyName())) {
@@ -234,11 +236,19 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     private void updateAdminsAndEpot() {
         adminsAndEpot.clear();
-        for (String admin : catalogueProperties.getAdmins()) {
-            adminsAndEpot.put(admin, Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
-        }
-        for (String epot : catalogueProperties.getOnboardingTeam()) {
-            adminsAndEpot.put(epot, Set.of(new SimpleGrantedAuthority("ROLE_EPOT")));
-        }
+        mergeRoles(adminsAndEpot, catalogueProperties.getOnboardingTeam()
+                .stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        e -> new SimpleGrantedAuthority("ROLE_EPOT"))
+                ));
+        mergeRoles(adminsAndEpot, catalogueProperties.getAdmins()
+                .stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
+                ));
     }
 }
