@@ -214,6 +214,20 @@
     {
       "label": null,
       "multivalued": false,
+      "name": "pid",
+      "path": "$.identifiers.pid",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "externalId",
+      "path": "$.identifiers.externalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
       "name": "latestAuditActionType",
       "path": "$.latestAuditInfo.actionType",
       "type": "java.lang.String"
