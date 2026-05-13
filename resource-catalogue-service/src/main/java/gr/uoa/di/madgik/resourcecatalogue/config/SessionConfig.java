@@ -27,8 +27,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.security.jackson.SecurityJacksonModules;
-import org.springframework.security.oauth2.client.jackson.OAuth2ClientJacksonModule;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+
+import java.net.URI;
+import java.net.URL;
 
 @Profile("!no-auth")
 @Configuration
@@ -48,9 +51,13 @@ public class SessionConfig implements BeanClassLoaderAware {
      * @return the {@link ObjectMapper} to use
      */
     private ObjectMapper objectMapper() {
+        BasicPolymorphicTypeValidator.Builder typeValidator = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType(URL.class)
+                .allowIfSubType(URI.class)
+                .allowIfSubType(OrderedJSONObject.class);
+
         return JsonMapper.builder()
-                .addModules(SecurityJacksonModules.getModules(this.loader))
-                .addModule(new OAuth2ClientJacksonModule())
+                .addModules(SecurityJacksonModules.getModules(this.loader, typeValidator))
                 .addMixIn(OrderedJSONObject.class, OrderedJSONObjectMixin.class)
                 .build();
     }
