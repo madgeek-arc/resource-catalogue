@@ -33,6 +33,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +42,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,6 +72,8 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Autowired
     GenericResourceService genericResourceService;
+    @Autowired
+    SecurityService securityService;
 
     @Value("${auditing.interval:6}")
     private int auditingInterval;
@@ -451,26 +457,29 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     //region Organisation
     @Operation(description = "Returns the Organisation of the specific Catalogue with the given id.")
     @GetMapping(path = {
-            "{cataloguePrefix}/{catalogueSuffix}/provider/{providerId}",
-            "{cataloguePrefix}/{catalogueSuffix}/organisation/{providerId}"
+            "{cataloguePrefix}/{catalogueSuffix}/provider/**",
+            "{cataloguePrefix}/{catalogueSuffix}/organisation/**"
     })
     public ResponseEntity<?> getCatalogueOrganisation(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                      @PathVariable String providerId) {
+                                                      HttpServletRequest request) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String providerId = extractWildcardId(request);
         return new ResponseEntity<>(organisationService.get(getExternalFilters(providerId, catalogueId)).getOrganisation(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the OrganisationBundle of the specific Catalogue with the given id.")
     @GetMapping(path = {
-            "{cataloguePrefix}/{catalogueSuffix}/provider/bundle/{providerId}",
-            "{cataloguePrefix}/{catalogueSuffix}/organisation/bundle/{providerId}"
+            "{cataloguePrefix}/{catalogueSuffix}/provider/bundle/**",
+            "{cataloguePrefix}/{catalogueSuffix}/organisation/bundle/**"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<OrganisationBundle> getCatalogueOrganisationBundle(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                             @PathVariable String providerId,
-                                                                             @SuppressWarnings("unused")
+                                                                             HttpServletRequest request,
                                                                              @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String providerId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.hasAdminAccess(auth, providerId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         return new ResponseEntity<>(organisationService.get(getExternalFilters(providerId, catalogueId)), HttpStatus.OK);
     }
 
@@ -517,15 +526,17 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = {
-            "{cataloguePrefix}/{catalogueSuffix}/provider/loggingInfoHistory/{providerId}",
-            "{cataloguePrefix}/{catalogueSuffix}/organisation/loggingInfoHistory/{providerId}"
+            "{cataloguePrefix}/{catalogueSuffix}/provider/loggingInfoHistory/**",
+            "{cataloguePrefix}/{catalogueSuffix}/organisation/loggingInfoHistory/**"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<List<LoggingInfo>> organisationLoggingInfoHistory(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                            @PathVariable String providerId,
-                                                                            @SuppressWarnings("unused")
+                                                                            HttpServletRequest request,
                                                                             @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String providerId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.hasAdminAccess(auth, providerId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         OrganisationBundle bundle = organisationService.get(getExternalFilters(providerId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = organisationService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -602,14 +613,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Provider of the specific Catalogue with the given id.")
     @DeleteMapping(path = {
-            "{cataloguePrefix}/{catalogueSuffix}/provider/{providerId}",
-            "{cataloguePrefix}/{catalogueSuffix}/organisation/{providerId}"
+            "{cataloguePrefix}/{catalogueSuffix}/provider/**",
+            "{cataloguePrefix}/{catalogueSuffix}/organisation/**"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueOrganisation(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                         @PathVariable String providerId,
+                                                         HttpServletRequest request,
                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String providerId = extractWildcardId(request);
         OrganisationBundle provider = organisationService.get(getExternalFilters(providerId, catalogueId));
         organisationService.delete(provider);
         logger.info("Deleted the Provider with id '{}' of the Catalogue '{}'", providerId, catalogueId);
@@ -637,21 +649,24 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     //region Service
     @Operation(description = "Returns the Service of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/{serviceId}")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/**")
     public ResponseEntity<?> getCatalogueService(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                 @PathVariable String serviceId) {
+                                                 HttpServletRequest request) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String serviceId = extractWildcardId(request);
         return new ResponseEntity<>(serviceService.get(getExternalFilters(serviceId, catalogueId)).getService(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the ServiceBundle of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/bundle/{serviceId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/bundle/**")
     public ResponseEntity<ServiceBundle> getCatalogueServiceBundle(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                   @PathVariable String serviceId,
-                                                                   @SuppressWarnings("unused")
+                                                                   HttpServletRequest request,
                                                                    @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String serviceId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, serviceId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         return new ResponseEntity<>(serviceService.get(getExternalFilters(serviceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -709,13 +724,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Hidden
-    @GetMapping(path = {"{cataloguePrefix}/{catalogueSuffix}/service/loggingInfoHistory/{serviceId}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/loggingInfoHistory/**")
     public ResponseEntity<List<LoggingInfo>> serviceLoggingInfoHistory(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                       @PathVariable String serviceId,
-                                                                       @SuppressWarnings("unused")
+                                                                       HttpServletRequest request,
                                                                        @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String serviceId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, serviceId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         ServiceBundle bundle = serviceService.get(getExternalFilters(serviceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = serviceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -754,12 +771,13 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Operation(description = "Deletes the Service of the specific Catalogue with the given id.")
-    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/{serviceId}")
+    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/**")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueService(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                    @PathVariable String serviceId,
+                                                    HttpServletRequest request,
                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String serviceId = extractWildcardId(request);
         ServiceBundle service = serviceService.get(getExternalFilters(serviceId, catalogueId));
         serviceService.delete(service);
         logger.info("Deleted the Service with id '{}' of the Catalogue '{}'", serviceId, catalogueId);
@@ -784,21 +802,24 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     //region Datasource
     @Operation(description = "Returns the Datasource of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/{datasourceId}")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/**")
     public ResponseEntity<?> getCatalogueDatasource(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                    @PathVariable String datasourceId) {
+                                                    HttpServletRequest request) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String datasourceId = extractWildcardId(request);
         return new ResponseEntity<>(datasourceService.get(getExternalFilters(datasourceId, catalogueId)).getDatasource(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the DatasourceBundle of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/bundle/{datasourceId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasourceId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/bundle/**")
     public ResponseEntity<DatasourceBundle> getCatalogueDatasourceBundle(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                         @PathVariable String datasourceId,
-                                                                         @SuppressWarnings("unused")
+                                                                         HttpServletRequest request,
                                                                          @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String datasourceId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, datasourceId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         return new ResponseEntity<>(datasourceService.get(getExternalFilters(datasourceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -856,13 +877,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Hidden
-    @GetMapping(path = {"{cataloguePrefix}/{catalogueSuffix}/datasource/loggingInfoHistory/{datasourceId}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasourceId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/loggingInfoHistory/**")
     public ResponseEntity<List<LoggingInfo>> datasourceLoggingInfoHistory(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                          @PathVariable String datasourceId,
-                                                                          @SuppressWarnings("unused")
+                                                                          HttpServletRequest request,
                                                                           @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String datasourceId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, datasourceId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         DatasourceBundle bundle = datasourceService.get(getExternalFilters(datasourceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = datasourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -901,12 +924,13 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Operation(description = "Deletes the Datasource of the specific Catalogue with the given id.")
-    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/{datasourceId}")
+    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/**")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueDatasource(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                       @PathVariable String datasourceId,
+                                                       HttpServletRequest request,
                                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String datasourceId = extractWildcardId(request);
         DatasourceBundle datasource = datasourceService.get(getExternalFilters(datasourceId, catalogueId));
         datasourceService.delete(datasource);
         logger.info("Deleted the Datasource with id '{}' of the Catalogue '{}'", datasourceId, catalogueId);
@@ -931,21 +955,24 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     //region Adapter
     @Operation(description = "Returns the Adapter of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/{adapterId}")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/**")
     public ResponseEntity<?> getCatalogueAdapter(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                 @PathVariable String adapterId) {
+                                                 HttpServletRequest request) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String adapterId = extractWildcardId(request);
         return new ResponseEntity<>(adapterService.get(getExternalFilters(adapterId, catalogueId)).getAdapter(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the AdapterBundle of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/bundle/{adapterId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #adapterId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/bundle/**")
     public ResponseEntity<AdapterBundle> getCatalogueAdapterBundle(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                   @PathVariable String adapterId,
-                                                                   @SuppressWarnings("unused")
+                                                                   HttpServletRequest request,
                                                                    @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String adapterId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, adapterId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         return new ResponseEntity<>(adapterService.get(getExternalFilters(adapterId, catalogueId)), HttpStatus.OK);
     }
 
@@ -985,13 +1012,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Hidden
-    @GetMapping(path = {"{cataloguePrefix}/{catalogueSuffix}/adapter/loggingInfoHistory/{adapterId}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #adapterId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/loggingInfoHistory/**")
     public ResponseEntity<List<LoggingInfo>> adapterLoggingInfoHistory(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                       @PathVariable String adapterId,
-                                                                       @SuppressWarnings("unused")
+                                                                       HttpServletRequest request,
                                                                        @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String adapterId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, adapterId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         AdapterBundle bundle = adapterService.get(getExternalFilters(adapterId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = adapterService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1030,12 +1059,13 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Operation(description = "Deletes the Adapter of the specific Catalogue with the given id.")
-    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/{adapterId}")
+    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/**")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueAdapter(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                    @PathVariable String adapterId,
+                                                    HttpServletRequest request,
                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String adapterId = extractWildcardId(request);
         AdapterBundle adapter = adapterService.get(getExternalFilters(adapterId, catalogueId));
         adapterService.delete(adapter);
         logger.info("Deleted the Adapter with id '{}' of the Catalogue '{}'", adapterId, catalogueId);
@@ -1060,22 +1090,25 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     //region Training Resource
     @Operation(description = "Returns the Training Resource of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/{trainingResourceId}")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/**")
     public ResponseEntity<?> getCatalogueTrainingResource(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                          @PathVariable String trainingResourceId) {
+                                                          HttpServletRequest request) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String trainingResourceId = extractWildcardId(request);
         return new ResponseEntity<>(trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId))
                 .getTrainingResource(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the TrainingResourceBundle of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/bundle/{trainingResourceId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/bundle/**")
     public ResponseEntity<TrainingResourceBundle> getCatalogueTrainingResourceBundle(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                     @PathVariable String trainingResourceId,
-                                                                                     @SuppressWarnings("unused")
+                                                                                     HttpServletRequest request,
                                                                                      @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String trainingResourceId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, trainingResourceId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         return new ResponseEntity<>(trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1133,13 +1166,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Hidden
-    @GetMapping(path = {"{cataloguePrefix}/{catalogueSuffix}/trainingResource/loggingInfoHistory/{trainingResourceId}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #trainingResourceId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/loggingInfoHistory/**")
     public ResponseEntity<List<LoggingInfo>> trainingResourceLoggingInfoHistory(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                @PathVariable String trainingResourceId,
-                                                                                @SuppressWarnings("unused")
+                                                                                HttpServletRequest request,
                                                                                 @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String trainingResourceId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, trainingResourceId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         TrainingResourceBundle bundle = trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = trainingResourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1178,13 +1213,14 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Operation(description = "Deletes the Training Resource of the specific Catalogue with the given id.")
-    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/{trainingResourceId}")
+    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/**")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueTrainingResource(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                             @PathVariable String trainingResourceId,
+                                                             HttpServletRequest request,
                                                              @SuppressWarnings("unused")
                                                              @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String trainingResourceId = extractWildcardId(request);
         TrainingResourceBundle trainingResource = trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId));
         trainingResourceService.delete(trainingResource);
         logger.info("Deleted the Training Resource with id '{}' of the Catalogue '{}'", trainingResourceId, catalogueId);
@@ -1209,22 +1245,25 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     //region Deployable Application
     @Operation(description = "Returns the Deployable Application of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/{deployableApplicationId}")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/**")
     public ResponseEntity<?> getCatalogueDeployableApplication(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                               @PathVariable String deployableApplicationId) {
+                                                               HttpServletRequest request) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String deployableApplicationId = extractWildcardId(request);
         return new ResponseEntity<>(deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId))
                 .getDeployableApplication(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the DeployableApplicationBundle of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/bundle/{deployableApplicationId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableApplicationId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/bundle/**")
     public ResponseEntity<DeployableApplicationBundle> getCatalogueDeployableApplicationBundle(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                               @PathVariable String deployableApplicationId,
-                                                                                               @SuppressWarnings("unused")
+                                                                                               HttpServletRequest request,
                                                                                                @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String deployableApplicationId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, deployableApplicationId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         return new ResponseEntity<>(deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1282,12 +1321,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Hidden
-    @GetMapping(path = {"{cataloguePrefix}/{catalogueSuffix}/deployableApplication/loggingInfoHistory/{deployableApplicationId}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #deployableApplicationId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/loggingInfoHistory/**")
     public ResponseEntity<List<LoggingInfo>> deployableApplicationLoggingInfoHistory(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                     @PathVariable String deployableApplicationId,
+                                                                                     HttpServletRequest request,
                                                                                      @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String deployableApplicationId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, deployableApplicationId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         DeployableApplicationBundle bundle = deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = deployableApplicationService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1326,12 +1368,13 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Operation(description = "Deletes the Deployable Application of the specific Catalogue with the given id.")
-    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/{deployableApplicationId}")
+    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/**")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueDeployableApplication(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                  @PathVariable String deployableApplicationId,
+                                                                  HttpServletRequest request,
                                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String deployableApplicationId = extractWildcardId(request);
         DeployableApplicationBundle deployableApplication = deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId));
         deployableApplicationService.delete(deployableApplication);
         logger.info("Deleted the Deployable Application with id '{}' of the Catalogue '{}'", deployableApplicationId, catalogueId);
@@ -1356,21 +1399,24 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     //region Interoperability Record
     @Operation(description = "Returns the Interoperability Record of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/{interoperabilityRecordId}")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/**")
     public ResponseEntity<?> getCatalogueInteroperabilityRecord(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                @PathVariable String interoperabilityRecordId) {
+                                                                HttpServletRequest request) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String interoperabilityRecordId = extractWildcardId(request);
         return new ResponseEntity<>(guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId)).getInteroperabilityRecord(), HttpStatus.OK);
     }
 
     @Operation(description = "Returns the InteroperabilityRecordBundle of the specific Catalogue with the given id.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/bundle/{interoperabilityRecordId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecordId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/bundle/**")
     public ResponseEntity<InteroperabilityRecordBundle> getCatalogueInteroperabilityRecordBundle(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                                 @PathVariable String interoperabilityRecordId,
-                                                                                                 @SuppressWarnings("unused")
+                                                                                                 HttpServletRequest request,
                                                                                                  @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String interoperabilityRecordId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, interoperabilityRecordId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         return new ResponseEntity<>(guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1428,13 +1474,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Hidden
-    @GetMapping(path = {"{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/loggingInfoHistory/{interoperabilityRecordId}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #interoperabilityRecordId, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/loggingInfoHistory/**")
     public ResponseEntity<List<LoggingInfo>> interoperabilityRecordLoggingInfoHistory(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                      @PathVariable String interoperabilityRecordId,
-                                                                                      @SuppressWarnings("unused")
+                                                                                      HttpServletRequest request,
                                                                                       @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String interoperabilityRecordId = extractWildcardId(request);
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, interoperabilityRecordId, catalogueId)) {
+            throw new AccessDeniedException("Forbidden");
+        }
         InteroperabilityRecordBundle bundle = guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = guidelineService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1473,12 +1521,13 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @Operation(description = "Deletes the Interoperability Record of the specific Catalogue with the given id.")
-    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/{interoperabilityRecordId}")
+    @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/**")
     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueInteroperabilityRecord(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                   @PathVariable String interoperabilityRecordId,
+                                                                   HttpServletRequest request,
                                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
+        String interoperabilityRecordId = extractWildcardId(request);
         InteroperabilityRecordBundle interoperabilityRecord = guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId));
         guidelineService.delete(interoperabilityRecord);
         logger.info("Deleted the Interoperability Record with id '{}' of the Catalogue '{}'", interoperabilityRecordId, catalogueId);
@@ -1507,6 +1556,12 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                 new SearchService.KeyValue("externalId", resourceId),
                 new SearchService.KeyValue("catalogue_id", catalogueId)
         };
+    }
+
+    private String extractWildcardId(HttpServletRequest request) {
+        String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        return new AntPathMatcher().extractPathWithinPattern(pattern, path);
     }
     //endregion
 }
