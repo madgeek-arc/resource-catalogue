@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:flowable="http://flowable.org/bpmn" targetNamespace="http://flowable.org/bpmn" exporter="Camunda Modeler" exporterVersion="5.41.0">
     <process id="onboard-catalogue-flowable" isExecutable="true">
-        <startEvent id="StartEvent_OnboardResource" name="Start Resource Onboard">
+        <startEvent id="StartEvent_OnboardResource" name="Start Catalogue Onboard">
             <outgoing>Flow_091g5el</outgoing>
         </startEvent>
         <sequenceFlow id="Flow_091g5el" sourceRef="StartEvent_OnboardResource" targetRef="Activity_1otm8rv" />
@@ -43,7 +43,7 @@
             <extensionElements>
                 <flowable:field name="status" stringValue="FAILURE" />
                 <flowable:field name="code" stringValue="403" />
-                <flowable:field name="message" stringValue="Organisation is not eligible to onboard a resource." />
+                <flowable:field name="message" stringValue="Organisation is not eligible to onboard a Catalogue." />
             </extensionElements>
             <incoming>Flow_1ff3515</incoming>
             <outgoing>Flow_19dxg20</outgoing>
@@ -63,7 +63,7 @@
             <outgoing>Flow_0zjya31</outgoing>
         </serviceTask>
         <sequenceFlow id="Flow_1ut3wy5" sourceRef="Activity_0fof8ny" targetRef="Activity_1vdxr7y" />
-        <serviceTask id="Activity_1euokmg" name="Save Resource" flowable:delegateExpression="${updateResourceDelegate}">
+        <serviceTask id="Activity_1euokmg" name="Save Catalogue Resource" flowable:delegateExpression="${updateResourceDelegate}">
             <extensionElements>
                 <flowable:field name="resourceName" stringValue="resource" />
             </extensionElements>
