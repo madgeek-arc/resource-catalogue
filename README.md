@@ -98,7 +98,7 @@ smooth operation of the service.
 
 * Loads necessary controlled vocabularies.
 * Loads required resource models.
-* Creates the default Catalogue.
+* Checks and informs for node registration.
 
 The Setup Wizard should be executed **only once**, immediately after the first
 successful startup.
