@@ -31,6 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,8 +55,6 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
 
@@ -198,7 +197,7 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -210,17 +209,7 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        List<DeployableApplicationBundle> allProviderDeployableApplication = getAll(ff, auth).getResults();
-        for (DeployableApplicationBundle bundle : allProviderDeployableApplication) {
-            if (bundle.getStatus().equals(vocabularyService.get("pending").getId())) {
-                return bundle;
-            }
-        }
-        return null;
+        return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
     //endregion
 }

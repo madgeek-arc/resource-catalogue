@@ -59,6 +59,14 @@ public interface SecurityService {
     boolean hasAdminAccess(Authentication auth, @NotNull String id);
 
     /**
+     * @param auth        Authentication
+     * @param externalId  external Provider id (as given by the user in the URL)
+     * @param catalogueId Catalogue id
+     * @return True if the authenticated user is a Provider Admin within the given Catalogue
+     */
+    boolean hasAdminAccess(Authentication auth, @NotNull String externalId, @NotNull String catalogueId);
+
+    /**
      * @param user User
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
@@ -71,6 +79,15 @@ public interface SecurityService {
      * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered.
      */
     boolean isResourceAdmin(Authentication auth, String resourceId);
+
+    /**
+     * @param auth        Authentication
+     * @param externalId  external resource id (as given by the user in the URL)
+     * @param catalogueId Catalogue id
+     * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered
+     *         within the given Catalogue
+     */
+    boolean isResourceAdmin(Authentication auth, String externalId, String catalogueId);
 
     /**
      * @param user       User
@@ -115,6 +132,12 @@ public interface SecurityService {
      * @return True if datasource is active
      */
     boolean datasourceIsActive(String id, String catalogueId);
+
+    /**
+     * @param id catalogue id
+     * @return True if catalogue is active
+     */
+    boolean catalogueIsActive(String id);
 
     /**
      * @param id          deployable application id
@@ -165,12 +188,4 @@ public interface SecurityService {
      * @return List<User>
      */
     List<User> getProviderUsers(OrganisationBundle organisation);
-
-    /**
-     * Add authenticated user to the Organisation
-     *
-     * @param organisation Organisation
-     * @param auth         Authentication
-     */
-    void addAuthenticatedUser(LinkedHashMap<String, Object> organisation, Authentication auth);
 }

@@ -181,6 +181,9 @@ logging.level.root=INFO
 ##  Spring Properties  ##
 #########################
 
+## Mail Templates ##
+spring.freemarker.template-loader-path=classpath:/mail/
+
 ## Profiles ##
 spring.profiles.active=beyond
 
@@ -274,8 +277,6 @@ catalogue.jms.ams.project=
 ############################
 
 ## Basic Info ##
-catalogue.id=resource-catalogue
-catalogue.name=Resource Catalogue
 catalogue.homepage=
 catalogue.version=@project.version@
 ## Admins / Onboarding Team ##
@@ -286,6 +287,7 @@ catalogue.login-redirect=
 catalogue.logout-redirect=
 ## Resource ID Prefixes ##
 catalogue.resources.adapter.id-prefix=adapter
+catalogue.resources.catalogue.id-prefix=catalogue
 catalogue.resources.configuration-template.id-prefix=configuration_template
 catalogue.resources.configuration-template-instance.id-prefix=configuration_template_instance
 catalogue.resources.datasource.id-prefix=datasource
@@ -322,6 +324,7 @@ catalogue.mailer.ssl=
 
 ## PID Service ##
 pid.service.enabled=false
+pid.service.consistency.enabled=false
 
 ## OpenAIRE Datasource Properties ##
 openaire.ds.api=https://beta.services.openaire.eu/
@@ -351,6 +354,12 @@ accounting.token-endpoint=
 
 ## SQAaaS ##
 sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
+
+## Node Registry ##
+node.pid=
+node.name=
+node.registry.url=
+node.registry.key=
 ```
 
 ### PID Properties Example
@@ -389,6 +398,17 @@ catalogue:
           client-key:
           client-cert:
     datasource:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    catalogue:
       resolve-endpoints:
       pid-issuer:
         url:

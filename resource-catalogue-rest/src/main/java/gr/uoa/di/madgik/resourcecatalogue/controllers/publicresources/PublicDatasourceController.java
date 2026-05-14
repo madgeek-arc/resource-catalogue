@@ -59,7 +59,7 @@ public class PublicDatasourceController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         DatasourceBundle bundle = service.get(id, catalogueId);
@@ -70,13 +70,29 @@ public class PublicDatasourceController {
                 "The specific Datasource is not active"));
     }
 
-    //TODO: change path -> notify cyf
+    @Deprecated
     @GetMapping(path = "public/datasource/datasourceBundle/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> getBundleDeprecated(@PathVariable String prefix,
+                                                 @PathVariable String suffix,
+                                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId,
+                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        DatasourceBundle bundle = service.get(id, catalogueId);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</public/datasource/bundle/{prefix}/{suffix}>; rel=\"successor-version\"")
+                .body(bundle);
+    }
+
+    @GetMapping(path = "public/datasource/bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                       @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         DatasourceBundle bundle = service.get(id, catalogueId);
@@ -96,11 +112,28 @@ public class PublicDatasourceController {
         return ResponseEntity.ok(paging.map(DatasourceBundle::getDatasource));
     }
 
-    //TODO: change path -> notify cyf
+    @Deprecated
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/datasource/adminPage/all") //TODO: rename this ugliness - SOS external teams use it SOS
+    @GetMapping(path = "public/datasource/adminPage/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<DatasourceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
+                                                                            @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("active", true);
+        Paging<DatasourceBundle> paging = service.getAll(ff);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</public/datasource/bundle/all>; rel=\"successor-version\"")
+                .body(paging);
+    }
+
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "public/datasource/bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                   @RequestParam MultiValueMap<String, Object> params) {

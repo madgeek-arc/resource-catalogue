@@ -52,14 +52,14 @@ public class PublicAdapterController {
         this.service = service;
     }
 
-    @Operation(description = "Returns the Public ADapter with the given id.")
+    @Operation(description = "Returns the Public Adapter with the given id.")
     @GetMapping(path = "public/adapter/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.adapterIsActive(#prefix+'/'+#suffix, catalogueId) or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                 @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         AdapterBundle bundle = service.get(id, catalogueId);
@@ -76,7 +76,7 @@ public class PublicAdapterController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                       @RequestParam(name = "catalogue_id", required = false) String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         AdapterBundle bundle = service.get(id, catalogueId);

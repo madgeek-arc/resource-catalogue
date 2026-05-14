@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
+    <!-- ===== matomo-java-tracker =====
+         CVE-2023-6923: Targets the Matomo PHP web analytics application, not the Java client.
+         False positive — CPE matches on product name "matomo"/"piwik" regardless of ecosystem. -->
+    <suppress>
+        <notes><![CDATA[
+            matomo-java-tracker-core-3.0.6.jar: CVE-2023-6923 affects the Matomo PHP server,
+            not the Java tracker client. False positive due to CPE/package name overlap.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.piwik\.java\.tracking/.*@.*$</packageUrl>
+        <cve>CVE-2023-6923</cve>
+    </suppress>
+
 </suppressions>

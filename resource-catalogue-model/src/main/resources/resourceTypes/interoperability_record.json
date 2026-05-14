@@ -47,13 +47,13 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.interoperabilityRecord.node",
+      "path": "$.interoperabilityRecord.nodePID",
       "type": "java.lang.String"
     },
     {
       "label": "Type",
       "multivalued": false,
-      "name": "entity_type",
+      "name": "type",
       "path": "$.interoperabilityRecord.type",
       "type": "java.lang.String"
     },
@@ -111,6 +111,20 @@
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "pid",
+      "path": "$.identifiers.pid",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "externalId",
+      "path": "$.identifiers.externalId",
       "type": "java.lang.String"
     },
     {

@@ -56,8 +56,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     private final ConfigurationTemplateService ctService;
     private final ConfigurationTemplateInstanceService ctiService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
 
     public ResourceInteroperabilityRecordManager(@Lazy ServiceService serviceService,
                                                  @Lazy DatasourceService datasourceService,
@@ -108,7 +106,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
 
         bundle.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         bundle.setActive(true);
-        bundle.setCatalogueId(this.catalogueId);
+        bundle.setCatalogueId(null);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
@@ -157,12 +155,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         return checkIfEachInteroperabilityRecordIsApproved(bundle);
     }
 
-    //TODO: test me
     @SuppressWarnings("unchecked")
     private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle bundle) {
         List<String> interoperabilityRecordIds = (List<String>) bundle.getResourceInteroperabilityRecord()
                 .get("interoperabilityRecordIds");
-
         for (String id : interoperabilityRecordIds) {
             if (!"approved".equals(interoperabilityRecordService.get(id).getStatus())) {
                 throw new ValidationException(

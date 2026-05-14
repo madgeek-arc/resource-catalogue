@@ -27,7 +27,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,9 +49,6 @@ public class ConfigurationTemplateInstanceController
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceController.class);
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService service) {
         super(service, "Configuration Template Instance");
     }
@@ -60,20 +56,18 @@ public class ConfigurationTemplateInstanceController
     @Operation(summary = "Returns the Configuration Template Instance with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
     public ResponseEntity<?> get(@PathVariable String prefix,
-                                 @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                 @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getConfigurationTemplateInstance(), HttpStatus.OK);
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<ConfigurationTemplateInstanceBundle> getBundle(@PathVariable String prefix,
-                                                                         @PathVariable String suffix,
-                                                                         @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                         @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -161,7 +155,7 @@ public class ConfigurationTemplateInstanceController
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = cti.get("id").toString();
-        ConfigurationTemplateInstanceBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id);
         bundle.setConfigurationTemplateInstance(cti);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Configuration Template Instance with id '{}'", cti.get("id"));
@@ -175,7 +169,7 @@ public class ConfigurationTemplateInstanceController
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateInstanceBundle bundle = service.get(id, catalogueId);
+        ConfigurationTemplateInstanceBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Configuration Template Instance with id '{}'", bundle.getId());

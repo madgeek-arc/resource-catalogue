@@ -49,7 +49,7 @@
       "label": "Node",
       "multivalued": false,
       "name": "node",
-      "path": "$.service.node",
+      "path": "$.service.nodePID",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name"
@@ -57,7 +57,7 @@
     {
       "label": "Type",
       "multivalued": false,
-      "name": "entity_type",
+      "name": "type",
       "path": "$.service.type",
       "type": "java.lang.String"
     },
@@ -137,10 +137,17 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Access Type",
+      "multivalued": false,
+      "name": "accessTypes",
+      "path": "$.service.accessTypes",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Jurisdiction",
       "multivalued": false,
       "name": "jurisdiction",
-      "path": "$.service.jurisdiction[*]",
+      "path": "$.service.jurisdiction",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name"
@@ -192,10 +199,10 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Contact",
+      "label": "Public Contacts",
       "multivalued": true,
       "name": "contacts",
-      "path": "$.service.contact.email",
+      "path": "$.service.publicContacts[*]",
       "type": "java.lang.String"
     },
     {
@@ -238,6 +245,20 @@
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "pid",
+      "path": "$.identifiers.pid",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "externalId",
+      "path": "$.identifiers.externalId",
       "type": "java.lang.String"
     },
     {

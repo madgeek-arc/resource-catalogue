@@ -38,4 +38,9 @@ hs_err_pid*
 **/*.yml
 **/*.yaml
 
+CLAUDE.md
 SUMMARY.md
+
+# extras
+log4j2.xml
+debug.sh

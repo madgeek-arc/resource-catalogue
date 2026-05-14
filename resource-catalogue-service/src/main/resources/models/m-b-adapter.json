@@ -387,14 +387,10 @@
               "kind": null,
               "typeInfo": {
                 "vocabulary": null,
-                "type": "vocabulary",
+                "type": "string",
                 "defaultValue": null,
                 "values": null,
-                "properties": {
-                  "url": "/api/vocabulary/types/Node",
-                  "idField": "id",
-                  "labelField": "name"
-                },
+                "properties": {},
                 "multiplicity": false,
                 "prefill": null
               },
@@ -908,7 +904,7 @@
                   "showLess": false
                 },
                 "placeholder": null,
-                "mandatory": true,
+                "mandatory": false,
                 "immutable": true,
                 "display": {
                   "placement": null,
@@ -2438,7 +2434,7 @@
                   "parentId": "sqa",
                   "parent": "sqa",
                   "label": {
-                    "text": "URL",
+                    "text": "Report",
                     "cssClasses": null,
                     "style": null,
                     "showLess": false
@@ -2447,7 +2443,7 @@
                   "kind": null,
                   "typeInfo": {
                     "vocabulary": null,
-                    "type": "url",
+                    "type": "string",
                     "defaultValue": null,
                     "values": null,
                     "properties": {

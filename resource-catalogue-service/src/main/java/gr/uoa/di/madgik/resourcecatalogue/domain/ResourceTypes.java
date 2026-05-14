@@ -17,23 +17,20 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 //TODO: decouple from LOT1 - tool
-//TODO: remove test related resource types
 public enum ResourceTypes {
     ADAPTER,
+    CATALOGUE,
     CONFIGURATION_TEMPLATE,
     CONFIGURATION_TEMPLATE_INSTANCE,
     DATASOURCE,
     DEPLOYABLE_APPLICATION,
-    HELPDESK,
     INTEROPERABILITY_RECORD,
-    MONITORING,
     PROVIDER, //TODO: LOT1 specific
     ORGANISATION,
     RESOURCE_INTEROPERABILITY_RECORD,
     SERVICE,
     TOOL, //TODO: LOT1 specific
-    TRAINING_RESOURCE,
-    VOCABULARY_CURATION;
+    TRAINING_RESOURCE;
 
     @Override
     public String toString() {

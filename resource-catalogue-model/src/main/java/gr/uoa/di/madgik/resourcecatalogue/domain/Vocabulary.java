@@ -56,7 +56,6 @@ public class Vocabulary implements Identifiable {
         RESOURCE_STATE("Resource state"),
         TEMPLATE_STATE("Template state"),
         // Organisation
-        PROVIDER_NETWORK("Provider network"), //TODO: used in old Catalogue - delete
         PROVIDER_HOSTING_LEGAL_ENTITY("Provider hosting legal entity"),
         PROVIDER_LEGAL_STATUS("Provider legal status"),
         // Service

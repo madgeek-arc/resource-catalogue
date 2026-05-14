@@ -60,9 +60,6 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     protected int maxQuantity;
     @Value("${auditing.interval:6}")
     private int auditingInterval;
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     OrganisationController(OrganisationService organisationService) {
         super(organisationService, "Organisation");
     }
@@ -78,7 +75,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
                                  @SuppressWarnings("unused")
                                  @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getOrganisation(), HttpStatus.OK);
     }
 
@@ -89,7 +86,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
                                                         @SuppressWarnings("unused")
                                                         @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -182,7 +179,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = provider.get("id").toString();
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         bundle.setOrganisation(provider);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Provider with id '{}'", id);
@@ -205,7 +202,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle provider = service.get(id, catalogueId);
+        OrganisationBundle provider = service.get(id);
 
         service.delete(provider);
         logger.info("Deleted the Provider with id '{}'", provider.getId());
@@ -246,12 +243,11 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<OrganisationBundle> audit(@PathVariable String prefix,
                                                     @PathVariable String suffix,
-                                                    @RequestParam("catalogueId") String catalogueId,
                                                     @RequestParam(required = false) String comment,
                                                     @RequestParam LoggingInfo.ActionType actionType,
                                                     @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle provider = service.audit(id, catalogueId, comment, actionType, auth);
+        OrganisationBundle provider = service.audit(id, null, comment, actionType, auth);
         return new ResponseEntity<>(provider, HttpStatus.OK);
     }
 
@@ -259,19 +255,17 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public OrganisationBundle suspend(@RequestParam String id,
-                                      @RequestParam String catalogueId,
                                       @RequestParam boolean suspend,
                                       @Parameter(hidden = true) Authentication auth) {
-        return service.setSuspend(id, catalogueId, suspend, auth);
+        return service.setSuspend(id, null, suspend, auth);
     }
 
     @Operation(summary = "Get the LoggingInfo History of a specific Provider.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
-                                                                @PathVariable String suffix,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        OrganisationBundle bundle = service.get(id, catalogueId);
+        OrganisationBundle bundle = service.get(id);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }

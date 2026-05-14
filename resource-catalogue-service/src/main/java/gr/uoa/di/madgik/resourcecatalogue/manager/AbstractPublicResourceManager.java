@@ -45,7 +45,11 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
     @Override
     public T get(String id) {
-        return null;
+        return genericResourceService.get(
+                getResourceTypeName(),
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "true")
+        );
     }
 
     @Override
@@ -56,9 +60,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
                     new SearchService.KeyValue("catalogue_id", catalogueId),
                     new SearchService.KeyValue("published", "true"));
         }
-        return genericResourceService.get(getResourceTypeName(),
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "true"));
+        return get(id);
     }
 
     public Paging<T> getAll(FacetFilter ff) {
@@ -69,7 +71,6 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         ff.setResourceType(getResourceTypeName());
         ff.addFilter("published", true);
         Paging<T> paging = genericResourceService.getResults(ff);
-        //TODO: test if we need this
         if (!paging.getResults().isEmpty() && !paging.getFacets().isEmpty()) {
             paging.setFacets(facetLabelService.generateLabels(paging.getFacets()));
         }
@@ -103,8 +104,12 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
         // Post PID
         if (pidServiceEnabled && registerPID) {
-            logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
-            pidIssuer.postPID(t.getId(), null);
+            try {
+                logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
+                pidIssuer.postPID(t.getId(), null);
+            } catch (Exception e) {
+                logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
+            }
         }
 
         // sets public ids to fields

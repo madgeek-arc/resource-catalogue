@@ -8,9 +8,9 @@ import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -18,8 +18,10 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericServic
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
+import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -47,10 +49,13 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     protected final IdCreator idCreator;
     protected final WorkflowService workflowService;
 
-    @Value("${catalogue.id}")
-    protected String catalogueId;
+    @Autowired
+    private FacetLabelService facetLabelService;
+
     @Value("${elastic.index.max_result_window:10000}")
     protected int maxQuantity;
+    @Value("${node.pid}")
+    private String nodePid;
 
     protected abstract String getResourceTypeName();
 
@@ -68,27 +73,44 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     public void createIdentifiers(Bundle bundle) {
         String catalogueId = bundle.getCatalogueId();
-        if (catalogueId == null || catalogueId.isEmpty() || catalogueId.equals(this.catalogueId)) {
+        if (catalogueId == null || catalogueId.isEmpty()) {
             this.createIdentifiers(bundle, getResourceTypeName(), false);
-            bundle.setId(bundle.getIdentifiers().getOriginalId());
         } else {
-            idCreator.validateId(bundle.getId());
+            validateCatalogueExistence(catalogueId);
             this.createIdentifiers(bundle, getResourceTypeName(), true);
         }
+        bundle.setId(bundle.getIdentifiers().getOriginalId());
     }
 
     public void createIdentifiers(Bundle bundle, String resourceType, boolean external) {
         Identifiers identifiers = new Identifiers();
         identifiers.setPid(idCreator.generate(resourceType));
+        identifiers.setOriginalId(identifiers.getPid() + "00");
         if (external) {
-            identifiers.setOriginalId(bundle.getId());
+            if (bundle.getId() == null || bundle.getId().isEmpty()) {
+                throw new ResourceException("An ID must be provided for external catalogue resources", HttpStatus.BAD_REQUEST);
+            }
+            identifiers.setExternalId(bundle.getId());
         } else {
-            identifiers.setOriginalId(identifiers.getPid() + "00");
+            identifiers.setExternalId(null);
         }
         bundle.setIdentifiers(identifiers);
     }
 
-    //TODO: we don't need this
+    private void validateCatalogueExistence(String catalogueId) {
+        genericResourceService.get("catalogue",
+                new SearchService.KeyValue("resource_internal_id", catalogueId));
+    }
+
+    private void setNodePid(T bundle) {
+        Object resourceNodePid = bundle.getPayload().get("nodePID");
+        if (!nodePid.equals("21.T15999/EOSC-BEYOND")
+                || resourceNodePid == null
+                || resourceNodePid.toString().isBlank()) {
+            bundle.getPayload().put("nodePID", nodePid);
+        }
+    }
+
     @Override
     public T get(String id) {
         return genericResourceService.get(
@@ -106,9 +128,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                     new SearchService.KeyValue("catalogue_id", catalogueId),
                     new SearchService.KeyValue("published", "false"));
         }
-        return genericResourceService.get(getResourceTypeName(),
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "false"));
+        return get(id);
     }
 
     //TODO: probably we do not need this IF we use the same get for drafts and non-drafts
@@ -158,19 +178,18 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     @Override
     public List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> listResources(String catalogueId) {
-        final String effectiveCatalogueId = catalogueId != null ? catalogueId : this.catalogueId;
         List<Bundle> bundles = Stream.concat(
-                this.getAll(createFacetFilter(effectiveCatalogueId, false, getResourceTypeName()))
+                this.getAll(createFacetFilter(catalogueId, false, getResourceTypeName()))
                         .getResults()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(c -> (Bundle) c),
-                this.getAll(createFacetFilter(effectiveCatalogueId, true, getResourceTypeName()))
+                this.getAll(createFacetFilter(catalogueId, true, getResourceTypeName()))
                         .getResults()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(c -> (Bundle) c)
-                        .filter(b -> !Objects.equals(b.getCatalogueId(), effectiveCatalogueId))
+                        .filter(b -> !Objects.equals(b.getCatalogueId(), catalogueId))
         ).toList();
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = bundles.stream()
@@ -192,7 +211,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         if (isPublic) {
             ff.addFilter("published", true);
         } else {
-            ff.addFilter("catalogue_id", catalogueId);
+            //TODO: facetfilter to support null facet values
+            if (catalogueId != null && !catalogueId.isBlank()) {
+                ff.addFilter("catalogue_id", catalogueId);
+            }
             ff.addFilter("published", false);
         }
         ff.setResourceType(resourceType);
@@ -221,12 +243,17 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public Paging<T> getAll(FacetFilter ff) {
         ff.setResourceType(getResourceTypeName());
-        return genericResourceService.getResults(ff);
+        Paging<T> paging = genericResourceService.getResults(ff);
+        if (!paging.getResults().isEmpty() && !paging.getFacets().isEmpty()) {
+            paging.setFacets(facetLabelService.generateLabels(paging.getFacets()));
+        }
+        return paging;
     }
 
     @Override
     public T add(T bundle, Authentication auth) {
         createIdentifiers(bundle);
+        setNodePid(bundle);
         T ret = genericResourceService.add(getResourceTypeName(), bundle);
         try {
             ret = workflowService.onboard(getResourceTypeName(), ret, auth);
@@ -234,6 +261,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         } catch (ResourceException e) {
             genericResourceService.delete(getResourceTypeName(), bundle.getId());
             throw e;
+        } catch (IllegalStateException e) {
+            logger.warn(e.getMessage());
         }
         return ret;
     }
@@ -243,7 +272,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         if (!hasChanged(bundle)) {
             return bundle;
         }
-        bundle.markUpdate(UserInfo.of(auth), null); //TODO: make sure all resources will use this
+        bundle.markUpdate(UserInfo.of(auth), null);
         return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
@@ -270,8 +299,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public T setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         T bundle = get(id, catalogueId);
-        String resourceOwner = (String) bundle.getPayload().get("resourceOwner");
-        suspensionValidation(bundle, resourceOwner, suspend);
+        suspensionValidation(bundle);
 
         logger.info("{} resource '{}' with id: '{}'", suspend ? "Suspending" : "Unsuspending",
                 getResourceTypeName(), bundle.getId());
@@ -280,33 +308,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
-    //TODO: delete catalogueId if not used
-    private void suspensionValidation(Bundle bundle, String resourceOwner, boolean suspend) {
+    private void suspensionValidation(Bundle bundle) {
         if (bundle.getMetadata().isPublished()) {
             throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
         }
-        OrganisationBundle organisationBundle = genericResourceService.get("organisation", resourceOwner);
-        if (organisationBundle.isSuspended() && !suspend) {
-            throw new ResourceException("You cannot unsuspend a Resource when its Provider is suspended",
-                    HttpStatus.CONFLICT);
-        }
-
-        //TODO: enable if Catalogues return.
-//        CatalogueBundle catalogueBundle = catalogueService.get(catalogueId, auth);
-//        if (bundle instanceof OrganisationBundle) {
-//            if (catalogueBundle.isSuspended() && !suspend) {
-//                throw new ResourceException("You cannot unsuspend a Provider when its Catalogue is suspended",
-//                        HttpStatus.CONFLICT);
-//            }
-//        } else {
-//            if (providerId != null && !providerId.isEmpty()) {
-//                OrganisationBundle OrganisationBundle = providerService.get(providerId, catalogueId);
-//                if ((catalogueBundle.isSuspended() || OrganisationBundle.isSuspended()) && !suspend) {
-//                    throw new ResourceException("You cannot unsuspend a Resource when its Provider and/or Catalogue are suspended",
-//                            HttpStatus.CONFLICT);
-//                }
-//            }
-//        }
     }
 
     @Override
