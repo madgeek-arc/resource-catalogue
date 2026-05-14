@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
@@ -70,8 +69,6 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     private final InteroperabilityRecordService guidelineService;
     private final DeployableApplicationService deployableApplicationService;
 
-    @Autowired
-    GenericResourceService genericResourceService;
     @Autowired
     SecurityService securityService;
 
@@ -670,39 +667,21 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         return new ResponseEntity<>(serviceService.get(getExternalFilters(serviceId, catalogueId)), HttpStatus.OK);
     }
 
-    @Operation(description = "Get all the Services of a specific Provider of a specific Catalogue.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/service/all")
-    public ResponseEntity<Paging<?>> getProviderServices(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                         @PathVariable String providerId,
-                                                         @Parameter(hidden = true)
-                                                         @RequestParam MultiValueMap<String, Object> params) {
+    @BrowseParameters
+    @Operation(description = "Get a list of all Services in the specific Catalogue.")
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/all")
+    public ResponseEntity<Paging<?>> getAllCatalogueServices(@Parameter(hidden = true)
+                                                             @RequestParam MultiValueMap<String, Object> params,
+                                                             @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("service");
-        ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<ServiceBundle> paging = serviceService.getAll(ff);
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
-    }
-
-    @Hidden
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/service/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId, #cataloguePrefix+'/'+#catalogueSuffix)")
-    public ResponseEntity<Paging<ServiceBundle>> getProviderServiceBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                           @PathVariable String providerId,
-                                                                           @Parameter(hidden = true)
-                                                                           @RequestParam MultiValueMap<String, Object> params,
-                                                                           @SuppressWarnings("unused")
-                                                                           @Parameter(hidden = true) Authentication auth) {
-        String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
-        FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("service");
-        ff.addFilter("published", false);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
-        Paging<ServiceBundle> paging = serviceService.getAll(ff);
-        return ResponseEntity.ok(paging);
     }
 
     @Hidden
@@ -823,39 +802,21 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         return new ResponseEntity<>(datasourceService.get(getExternalFilters(datasourceId, catalogueId)), HttpStatus.OK);
     }
 
-    @Operation(description = "Get all the Datasources of a specific Provider of a specific Catalogue.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/datasource/all")
-    public ResponseEntity<Paging<?>> getProviderDatasources(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                            @PathVariable String providerId,
-                                                            @Parameter(hidden = true)
-                                                            @RequestParam MultiValueMap<String, Object> params) {
+    @BrowseParameters
+    @Operation(description = "Get a list of all Datasources in the specific Catalogue.")
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/all")
+    public ResponseEntity<Paging<?>> getAllCatalogueDatasources(@Parameter(hidden = true)
+                                                                @RequestParam MultiValueMap<String, Object> params,
+                                                                @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("datasource");
-        ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<DatasourceBundle> paging = datasourceService.getAll(ff);
         return ResponseEntity.ok(paging.map(DatasourceBundle::getDatasource));
-    }
-
-    @Hidden
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/datasource/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId, #cataloguePrefix+'/'+#catalogueSuffix)")
-    public ResponseEntity<Paging<DatasourceBundle>> getProviderDatasourceBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                 @PathVariable String providerId,
-                                                                                 @Parameter(hidden = true)
-                                                                                 @RequestParam MultiValueMap<String, Object> params,
-                                                                                 @SuppressWarnings("unused")
-                                                                                 @Parameter(hidden = true) Authentication auth) {
-        String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
-        FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("datasource");
-        ff.addFilter("published", false);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
-        Paging<DatasourceBundle> paging = datasourceService.getAll(ff);
-        return ResponseEntity.ok(paging);
     }
 
     @Hidden
@@ -868,7 +829,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                      @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("service");
+        ff.setResourceType("datasource");
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         ff.addFilter("catalogue_id", catalogueId);
@@ -1112,39 +1073,21 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         return new ResponseEntity<>(trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId)), HttpStatus.OK);
     }
 
-    @Operation(description = "Get all the Training Resources of a specific Provider of a specific Catalogue.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/trainingResource/all")
-    public ResponseEntity<Paging<?>> getProviderTrainingResources(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                  @PathVariable String providerId,
-                                                                  @Parameter(hidden = true)
-                                                                  @RequestParam MultiValueMap<String, Object> params) {
+    @BrowseParameters
+    @Operation(description = "Get a list of all Training Resources in the specific Catalogue.")
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/all")
+    public ResponseEntity<Paging<?>> getAllCatalogueTrainingResources(@Parameter(hidden = true)
+                                                                      @RequestParam MultiValueMap<String, Object> params,
+                                                                      @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("training_resource");
-        ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<TrainingResourceBundle> paging = trainingResourceService.getAll(ff);
         return ResponseEntity.ok(paging.map(TrainingResourceBundle::getTrainingResource));
-    }
-
-    @Hidden
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/trainingResource/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId, #cataloguePrefix+'/'+#catalogueSuffix)")
-    public ResponseEntity<Paging<TrainingResourceBundle>> getProviderTrainingResourceBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                             @PathVariable String providerId,
-                                                                                             @Parameter(hidden = true)
-                                                                                             @RequestParam MultiValueMap<String, Object> params,
-                                                                                             @SuppressWarnings("unused")
-                                                                                             @Parameter(hidden = true) Authentication auth) {
-        String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
-        FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("training_resource");
-        ff.addFilter("published", false);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
-        Paging<TrainingResourceBundle> paging = trainingResourceService.getAll(ff);
-        return ResponseEntity.ok(paging);
     }
 
     @Hidden
@@ -1267,39 +1210,21 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         return new ResponseEntity<>(deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId)), HttpStatus.OK);
     }
 
-    @Operation(description = "Get all the Deployable Application of a specific Provider of a specific Catalogue.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/deployableApplication/all")
-    public ResponseEntity<Paging<?>> getProviderDeployableApplication(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                      @PathVariable String providerId,
-                                                                      @Parameter(hidden = true)
-                                                                      @RequestParam MultiValueMap<String, Object> params) {
+    @BrowseParameters
+    @Operation(description = "Get a list of all Deployable Applications in the specific Catalogue.")
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/all")
+    public ResponseEntity<Paging<?>> getAllCatalogueDeployableApplications(@Parameter(hidden = true)
+                                                                           @RequestParam MultiValueMap<String, Object> params,
+                                                                           @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("deployable_application");
-        ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<DeployableApplicationBundle> paging = deployableApplicationService.getAll(ff);
         return ResponseEntity.ok(paging.map(DeployableApplicationBundle::getDeployableApplication));
-    }
-
-    @Hidden
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/deployableApplication/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId, #cataloguePrefix+'/'+#catalogueSuffix)")
-    public ResponseEntity<Paging<DeployableApplicationBundle>> getProviderDeployableApplicationBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                                       @PathVariable String providerId,
-                                                                                                       @Parameter(hidden = true)
-                                                                                                       @RequestParam MultiValueMap<String, Object> params,
-                                                                                                       @SuppressWarnings("unused")
-                                                                                                       @Parameter(hidden = true) Authentication auth) {
-        String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
-        FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("deployable_application");
-        ff.addFilter("published", false);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
-        Paging<DeployableApplicationBundle> paging = deployableApplicationService.getAll(ff);
-        return ResponseEntity.ok(paging);
     }
 
     @Hidden
@@ -1420,39 +1345,21 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         return new ResponseEntity<>(guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId)), HttpStatus.OK);
     }
 
-    @Operation(description = "Get all the Interoperability Records of a specific Provider of a specific Catalogue.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/interoperabilityRecord/all")
-    public ResponseEntity<Paging<?>> getProviderInteroperabilityRecords(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                        @PathVariable String providerId,
-                                                                        @Parameter(hidden = true)
-                                                                        @RequestParam MultiValueMap<String, Object> params) {
+    @BrowseParameters
+    @Operation(description = "Get a list of all Interoperability Records in the specific Catalogue.")
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/all")
+    public ResponseEntity<Paging<?>> getAllCatalogueInteroperabilityRecords(@Parameter(hidden = true)
+                                                                            @RequestParam MultiValueMap<String, Object> params,
+                                                                            @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.setResourceType("interoperability_record");
-        ff.addFilter("published", false);
         ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
+        ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<InteroperabilityRecordBundle> paging = guidelineService.getAll(ff);
         return ResponseEntity.ok(paging.map(InteroperabilityRecordBundle::getInteroperabilityRecord));
-    }
-
-    @Operation(description = "Get all the Interoperability Record Bundles of a specific Provider of a specific Catalogue.")
-    @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/{providerId}/interoperabilityRecord/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #providerId, #cataloguePrefix+'/'+#catalogueSuffix)")
-    public ResponseEntity<Paging<InteroperabilityRecordBundle>> getProviderInteroperabilityRecordBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
-                                                                                                         @PathVariable String providerId,
-                                                                                                         @Parameter(hidden = true)
-                                                                                                         @RequestParam MultiValueMap<String, Object> params,
-                                                                                                         @SuppressWarnings("unused")
-                                                                                                         @Parameter(hidden = true) Authentication auth) {
-        String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
-        FacetFilter ff = FacetFilter.from(params);
-        ff.setResourceType("interoperability_record");
-        ff.addFilter("published", false);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("resource_owner", organisationService.get(getExternalFilters(providerId, catalogueId)).getId());
-        Paging<InteroperabilityRecordBundle> paging = guidelineService.getAll(ff);
-        return ResponseEntity.ok(paging);
     }
 
     @Hidden
