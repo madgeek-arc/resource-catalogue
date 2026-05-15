@@ -13,28 +13,36 @@
       "multivalued": false,
       "name": "resource_id",
       "path": "$.configurationTemplateInstance.resourceId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "service",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Configuration Template ID",
       "multivalued": false,
       "name": "configuration_template_id",
       "path": "$.configurationTemplateInstance.configurationTemplateId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "configuration_template",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Catalogue ID",
       "multivalued": false,
       "name": "catalogue_id",
       "path": "$.catalogueId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "catalogue",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Node",
       "multivalued": false,
       "name": "node",
       "path": "$.configurationTemplateInstance.nodePID",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Configuration Template Payload",
@@ -104,7 +112,9 @@
       "multivalued": false,
       "name": "status",
       "path": "$.status",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "defaultValue": "false",

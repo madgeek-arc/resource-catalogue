@@ -13,7 +13,9 @@
       "multivalued": false,
       "name": "catalogue_id",
       "path": "$.catalogueId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "catalogue",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Urls",
@@ -48,7 +50,9 @@
       "multivalued": false,
       "name": "node",
       "path": "$.interoperabilityRecord.nodePID",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Type",
@@ -62,14 +66,27 @@
       "multivalued": false,
       "name": "resource_owner",
       "path": "$.interoperabilityRecord.resourceOwner",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "organisation",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "License",
       "multivalued": false,
       "name": "license",
       "path": "$.interoperabilityRecord.license.licenseName",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Creator Role",
+      "multivalued": true,
+      "name": "creators_role",
+      "path": "$.interoperabilityRecord.creators[*].role",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
@@ -240,20 +257,25 @@
       "multivalued": false,
       "name": "status",
       "path": "$.status",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "audit_state",
       "path": "$.auditState",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
     "resourceTypes",
-    "eoscResources"
+    "eoscResources",
+    "linkedResources"
   ],
   "name": "interoperability_record",
   "payloadType": "json",

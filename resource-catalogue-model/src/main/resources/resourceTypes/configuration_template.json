@@ -13,21 +13,27 @@
       "multivalued": false,
       "name": "catalogue_id",
       "path": "$.catalogueId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "catalogue",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Interoperability Record ID",
       "multivalued": false,
       "name": "interoperability_record_id",
       "path": "$.configurationTemplate.interoperabilityRecordId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "interoperability_record",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Node",
       "multivalued": false,
       "name": "node",
       "path": "$.configurationTemplate.nodePID",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Name",

@@ -13,7 +13,9 @@
       "multivalued": false,
       "name": "catalogue_id",
       "path": "$.catalogueId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "catalogue",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Urls",
@@ -48,7 +50,9 @@
       "multivalued": false,
       "name": "node",
       "path": "$.deployableApplication.nodePID",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Type",
@@ -62,7 +66,9 @@
       "multivalued": false,
       "name": "resource_owner",
       "path": "$.deployableApplication.resourceOwner",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "organisation",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Acronym",
@@ -82,7 +88,7 @@
       "label": "Logo",
       "multivalued": false,
       "name": "logo",
-      "path": "$.service.logo",
+      "path": "$.deployableApplication.logo",
       "type": "java.lang.String"
     },
     {
@@ -90,14 +96,18 @@
       "multivalued": true,
       "name": "scientific_domains",
       "path": "$.deployableApplication.scientificDomains[*].scientificDomain",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Scientific Subdomain",
       "multivalued": true,
       "name": "scientific_subdomains",
       "path": "$.deployableApplication.scientificDomains[*].scientificSubdomain",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Tag",
@@ -118,7 +128,18 @@
       "multivalued": false,
       "name": "license",
       "path": "$.deployableApplication.license.licenseName",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Creator Role",
+      "multivalued": true,
+      "name": "creators_role",
+      "path": "$.deployableApplication.creators[*].role",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
@@ -281,7 +302,9 @@
       "multivalued": false,
       "name": "status",
       "path": "$.status",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "defaultValue": "false",
@@ -296,7 +319,9 @@
       "multivalued": false,
       "name": "audit_state",
       "path": "$.auditState",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",

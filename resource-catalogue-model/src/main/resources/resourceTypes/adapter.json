@@ -13,7 +13,9 @@
       "multivalued": false,
       "name": "catalogue_id",
       "path": "$.catalogueId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "catalogue",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Urls",
@@ -48,7 +50,9 @@
       "multivalued": false,
       "name": "node",
       "path": "$.adapter.nodePID",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Type",
@@ -62,14 +66,18 @@
       "multivalued": false,
       "name": "resource_owner",
       "path": "$.adapter.resourceOwner",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "organisation",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Linked Resource ID",
       "multivalued": false,
       "name": "linked_resource_id",
       "path": "$.adapter.linkedResource.id",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "linkedResources",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Linked Resource Type",
@@ -104,14 +112,18 @@
       "multivalued": false,
       "name": "programming_language",
       "path": "$.adapter.programmingLanguage",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "License",
       "multivalued": false,
       "name": "license",
       "path": "$.adapter.license.licenseName",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Adapter Version",
@@ -133,6 +145,24 @@
       "name": "creators",
       "path": "$.adapter.creators[*].email",
       "type": "java.lang.String"
+    },
+    {
+      "label": "Creator Role",
+      "multivalued": true,
+      "name": "creators_role",
+      "path": "$.adapter.creators[*].role",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "SQA Badge",
+      "multivalued": false,
+      "name": "sqa_badge",
+      "path": "$.adapter.sqa.sqaBadge",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
@@ -195,7 +225,9 @@
       "multivalued": false,
       "name": "status",
       "path": "$.status",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "defaultValue": "false",
@@ -317,7 +349,9 @@
       "multivalued": false,
       "name": "audit_state",
       "path": "$.auditState",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",

@@ -13,7 +13,9 @@
       "multivalued": false,
       "name": "catalogue_id",
       "path": "$.catalogueId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "catalogue",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Organisation Name",
@@ -41,7 +43,9 @@
       "multivalued": false,
       "name": "node",
       "path": "$.organisation.nodePID",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Abbreviation",
@@ -55,7 +59,9 @@
       "multivalued": false,
       "name": "country",
       "path": "$.organisation.country",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Legal Entity",
@@ -69,14 +75,18 @@
       "multivalued": false,
       "name": "legal_status",
       "path": "$.organisation.legalStatus",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Hosting Legal Entity",
       "multivalued": false,
       "name": "hosting_legal_entity",
       "path": "$.organisation.hostingLegalEntity",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Logo",
@@ -97,14 +107,18 @@
       "multivalued": true,
       "name": "scientific_domains",
       "path": "$.organisation.scientificDomains[*].scientificDomain",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Scientific Subdomain",
       "multivalued": true,
       "name": "scientific_subdomains",
       "path": "$.organisation.scientificDomains[*].scientificSubdomain",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Tag",
@@ -119,6 +133,15 @@
       "name": "contacts",
       "path": "$.organisation.publicContacts[*]",
       "type": "java.lang.String"
+    },
+    {
+      "label": "Main Contact Role",
+      "multivalued": false,
+      "name": "main_contact_role",
+      "path": "$.organisation.mainContact.role",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "User",
@@ -296,14 +319,18 @@
       "multivalued": false,
       "name": "status",
       "path": "$.status",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "audit_state",
       "path": "$.auditState",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,

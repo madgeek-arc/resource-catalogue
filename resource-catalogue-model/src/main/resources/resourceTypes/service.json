@@ -141,7 +141,9 @@
       "multivalued": false,
       "name": "accessTypes",
       "path": "$.service.accessTypes",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Jurisdiction",
@@ -204,6 +206,15 @@
       "name": "contacts",
       "path": "$.service.publicContacts[*]",
       "type": "java.lang.String"
+    },
+    {
+      "label": "Main Contact Role",
+      "multivalued": false,
+      "name": "main_contact_role",
+      "path": "$.service.mainContact.role",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
@@ -392,7 +403,8 @@
   "aliases": [
     "resourceTypes",
     "eoscServices",
-    "eoscResources"
+    "eoscResources",
+    "linkedResources"
   ],
   "name": "service",
   "payloadType": "json",
