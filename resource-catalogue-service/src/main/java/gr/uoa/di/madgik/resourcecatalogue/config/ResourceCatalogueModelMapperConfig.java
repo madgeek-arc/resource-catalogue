@@ -5,14 +5,28 @@ import gr.uoa.di.madgik.catalogue.service.ModelResourceTypeMapper;
 import gr.uoa.di.madgik.registry.domain.ResourceType;
 import gr.uoa.di.madgik.registry.domain.index.IndexField;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableApplicationBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Event;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class ResourceCatalogueModelMapperConfig {
@@ -20,6 +34,32 @@ public class ResourceCatalogueModelMapperConfig {
     @Bean
     ModelResourceTypeMapper modelResourceTypeMapper() {
         return new ModelResourceTypeMapper() {
+
+            @Override
+            protected Map<String, String> customResourceTypeProperties(ResourceType resourceType) {
+                Map<String, String> properties = new HashMap<>();
+                String className = switch (resourceType.getName()) {
+                    case "adapter" -> AdapterBundle.class.getName();
+                    case "catalogue" -> CatalogueBundle.class.getName();
+                    case "configuration_template" -> ConfigurationTemplateBundle.class.getName();
+                    case "configuration_template_instance" -> ConfigurationTemplateInstanceBundle.class.getName();
+                    case "datasource" -> DatasourceBundle.class.getName();
+                    case "deployable_application" -> DeployableApplicationBundle.class.getName();
+                    case "event" -> Event.class.getName();
+                    case "interoperability_record" -> InteroperabilityRecordBundle.class.getName();
+                    case "organisation" -> OrganisationBundle.class.getName();
+                    case "resource_interoperability_record" -> ResourceInteroperabilityRecordBundle.class.getName();
+                    case "service" -> ServiceBundle.class.getName();
+                    case "training_resource" -> TrainingResourceBundle.class.getName();
+                    case "vocabulary" -> Vocabulary.class.getName();
+                    default -> null;
+                };
+                if (className != null) {
+                    properties.put("class", className);
+                }
+                return properties;
+            }
+
             @Override
             protected List<IndexField> additionalIndexFields(Model model, ResourceType resourceType) {
                 List<IndexField> fields = new ArrayList<>();
@@ -31,6 +71,10 @@ public class ResourceCatalogueModelMapperConfig {
                 if (OrganisationBundle.class.getName().equals(className)) {
                     fields.add(additionalIndexField(resourceType, "templateStatus", "Template Status", "$.templateStatus", String.class.getName(), false));
                     fields.add(additionalIndexField(resourceType, "users", null, "$.organisation.users[*].email", String.class.getName(), true));
+                }
+
+                if (className == null || className.isBlank()) {
+                    return fields;
                 }
 
                 try {
