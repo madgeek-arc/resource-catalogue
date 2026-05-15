@@ -17,6 +17,111 @@
 * sets specific maven version for java 21 ([bfdff04](https://github.com/madgeek-arc/resource-catalogue/commit/bfdff04e97202433e6634861a3ff685976f30521))
 * token in headers when submitting a ticket ([de32231](https://github.com/madgeek-arc/resource-catalogue/commit/de322315e15e62f0e595fb846c9f194c0e9a1b2e))
 
+## [5.5.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.4.0...v5.5.0) (2026-05-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename deployable software to application
+* rename Deployable Service to Deployable Software
+
+### Features
+
+* Adds new endpoint to retrieve vocabularies by type ([9516601](https://github.com/madgeek-arc/resource-catalogue/commit/9516601c7a1069baac58e2db2b97ddc4ed2bf4ca))
+* **aop:** introduce trigger-based post-processing aspect for resource lifecycle actions ([6d3b4c6](https://github.com/madgeek-arc/resource-catalogue/commit/6d3b4c6f3a1253f187ae8a968b1b2226949dd5df))
+* Create onboarding workflow for services / tranining resources ([c424ef4](https://github.com/madgeek-arc/resource-catalogue/commit/c424ef47a948d267dedfa2330dc80126f9c1c434))
+* Creates vocabularies by type method with parent_id filtering ([43469b3](https://github.com/madgeek-arc/resource-catalogue/commit/43469b39761facf3992f8876f2665b1f3384f847))
+* functionality to retrieve public services with highlights ([c80f6e9](https://github.com/madgeek-arc/resource-catalogue/commit/c80f6e9e7ac23aad743defe36b9e4e8dd9f9bbbe))
+* Implements Flowable onboarding ([c7fcff4](https://github.com/madgeek-arc/resource-catalogue/commit/c7fcff45596a89cbdf4ff65cff360a7b4239cfb9))
+* node registration on node registry during wizard setup ([d03f28e](https://github.com/madgeek-arc/resource-catalogue/commit/d03f28ee0d939b20ef73e2c9b0ce8f0aaa2ef1c4))
+* **onboarding:** Adds Camunda dependencies, element templates, workflows and a basic onboarding service ([78f94dc](https://github.com/madgeek-arc/resource-catalogue/commit/78f94dc33e9b3d2f9d52ff14d88df754f3df5d72))
+* **onboarding:** Creates a controller to test onboaring workflow functionality ([db9b59e](https://github.com/madgeek-arc/resource-catalogue/commit/db9b59e4c9cef6d1b4ef2eec25ef73371e49c8cd))
+* Provider onboarding script and set audit status template ([f00d363](https://github.com/madgeek-arc/resource-catalogue/commit/f00d363d06eb513739e76783b7e859bce763e579))
+* SQA assessment functionality on newly added adapters ([0b621a9](https://github.com/madgeek-arc/resource-catalogue/commit/0b621a9c4767838eff706bad6e92556d95f103f2))
+* workflow service for adapters, guidelines ([cd06262](https://github.com/madgeek-arc/resource-catalogue/commit/cd062625dc9c4388409606d40208cbe836f599a3))
+
+
+### Bug Fixes
+
+* add case for Adapters on getProviderId() method ([419a832](https://github.com/madgeek-arc/resource-catalogue/commit/419a8326e7999720f311a399ba981d50e5170b45))
+* add proper profile on AuthTokenService ([05a2502](https://github.com/madgeek-arc/resource-catalogue/commit/05a25025661879657259679cfd496794d23b6aeb))
+* Adds missing datasource configuration ([5bbdea9](https://github.com/madgeek-arc/resource-catalogue/commit/5bbdea9f216b8694c79e75602fcec35b420dbfd3))
+* align resource type JSON schemas with Everit draft-07 support ([72fee3b](https://github.com/madgeek-arc/resource-catalogue/commit/72fee3bbead4a1e98eeac6b3cc86ffe55d73191f))
+* beforeBodyWrite() now returns null for null objects ([2bd76b7](https://github.com/madgeek-arc/resource-catalogue/commit/2bd76b700343920fc4a1c998f6e6754106309ee9))
+* change 'version' label/name as it is reserved on elastic ([7c7b16b](https://github.com/madgeek-arc/resource-catalogue/commit/7c7b16bb33f192ec8e13d06df0c0523fd7653eba))
+* check for Datasource ID inside the map during add ([218e482](https://github.com/madgeek-arc/resource-catalogue/commit/218e48290c7479dfc9b93c97f2c50513b3675824))
+* circular dependency ([54b9e9b](https://github.com/madgeek-arc/resource-catalogue/commit/54b9e9b1255e1b1ce39e036c71895b87912ce2cf))
+* circural dependency ([c38be65](https://github.com/madgeek-arc/resource-catalogue/commit/c38be65fd45102eb22be2c62c2fd052fa2411432))
+* classpath for configuration template resource types ([aa72122](https://github.com/madgeek-arc/resource-catalogue/commit/aa7212230ed0c31a1fa259d082d34b58ea757f90))
+* correct messages for JMS/AMS ([1f2cebd](https://github.com/madgeek-arc/resource-catalogue/commit/1f2cebd61d93a0b9d1adfb5a831b04720d004eee))
+* Corrects configuration for separate db ([09164ca](https://github.com/madgeek-arc/resource-catalogue/commit/09164cab4bdf56e6dd928cfcd070f38b26ae29dd))
+* Corrects typeInfo properties. ([7d5bb0d](https://github.com/madgeek-arc/resource-catalogue/commit/7d5bb0d799edcbe8e3ae9d563a66f6f5d610f157))
+* Create identifiers before running workflow ([37c6c3a](https://github.com/madgeek-arc/resource-catalogue/commit/37c6c3a0183f479fc5e1674097fc590d4990925b))
+* ct, cti resource type classpath properties ([d5c46b3](https://github.com/madgeek-arc/resource-catalogue/commit/d5c46b3df0e0d7cc40cb3a96fd9a74dd8b602577))
+* Decreases timeout and increases active job count of workers ([c9c94c6](https://github.com/madgeek-arc/resource-catalogue/commit/c9c94c6f6f03fc6c86365ca3dd0d18b01f9c2acd))
+* **deps:** Bumps camunda dependency version to fix issue where @JobWorker custom properties were ignored ([dc60207](https://github.com/madgeek-arc/resource-catalogue/commit/dc60207a29968bb9e20646fb8e49c57ef160bdc1))
+* Draft finalize issue and refactoring ([dccb700](https://github.com/madgeek-arc/resource-catalogue/commit/dccb700d5ec9f8d4eace5d99fbb66332c054d1de))
+* duplicate 'registered' onboarding logging info entry for draft resources ([a1cc1fa](https://github.com/madgeek-arc/resource-catalogue/commit/a1cc1faf44896cd346acd89634bdbbf4aa3d643c))
+* Escapes & in the xml ([80f4d96](https://github.com/madgeek-arc/resource-catalogue/commit/80f4d96b98bc1981a75e123d6b0579c987550ff1))
+* Failures in validation are not masked as RuntimeException from the aspect. ([4badd9a](https://github.com/madgeek-arc/resource-catalogue/commit/4badd9a6d7b37992c24b59c388624f65d3315625))
+* finalize draft methods now pass through workflow service ([6154da9](https://github.com/madgeek-arc/resource-catalogue/commit/6154da959cc35b13f835b22c73d35a54afad0c46))
+* finalize draft methods now pass through workflow service ([d2f7f7e](https://github.com/madgeek-arc/resource-catalogue/commit/d2f7f7eb9887c4d1d18573b3a2add2b8b3bd6ca7))
+* Fix Onboard Provider workflow ([1c0ca9d](https://github.com/madgeek-arc/resource-catalogue/commit/1c0ca9da7d0204f68c6c7a7a67b1e9e5fd2f0b2a))
+* logic on canAddResources() method ([2eeafd2](https://github.com/madgeek-arc/resource-catalogue/commit/2eeafd216c7fb7845105642dab64dc209f56c721))
+* maven POM configurations for additional profile compatibility - lot1 ([1df4c29](https://github.com/madgeek-arc/resource-catalogue/commit/1df4c298281a28f90bae1f687befe0a9a95ba008))
+* minor fix ([2f23873](https://github.com/madgeek-arc/resource-catalogue/commit/2f238735faa3a07c49230dd803523abbd55221ce))
+* minor fix on getMy() method. Move on generic manager ([5d98c13](https://github.com/madgeek-arc/resource-catalogue/commit/5d98c1344c2c1ee0bb5f43c8abf9b3e5890cd715))
+* minor fix on guideline onboarding bpmn ([50ae244](https://github.com/madgeek-arc/resource-catalogue/commit/50ae2446f9fe2e879aa97b3a2b586dd9e3fe4570))
+* minor fix on RIR manager. Add Datasource as an option, removed Training ([73c1933](https://github.com/madgeek-arc/resource-catalogue/commit/73c19333620bbf73fe896835b17c81b4f0f55a02))
+* minor routing fix ([dd9049f](https://github.com/madgeek-arc/resource-catalogue/commit/dd9049fccd448f9bcb1a224cad84e94aec09b2b4))
+* onboard-resource wf ([db067f7](https://github.com/madgeek-arc/resource-catalogue/commit/db067f7494087d1a038ba8a36d1b8a1a57a1a23f))
+* organisation on bpmn workflows ([9c542e4](https://github.com/madgeek-arc/resource-catalogue/commit/9c542e4c43cbe215cb31a5f33c5ca4f35f454a52))
+* organisation on resource types and configuration files ([4cd08eb](https://github.com/madgeek-arc/resource-catalogue/commit/4cd08ebfbeb15fc3c50fe28d5cab983947be5d8e))
+* path fixes on various resource types ([10ff9e7](https://github.com/madgeek-arc/resource-catalogue/commit/10ff9e7186f2c5f0a988feca290794207b5c00ef))
+* Provider onboarding issue with missing templateStatus ([b5633a7](https://github.com/madgeek-arc/resource-catalogue/commit/b5633a7bbbc65afaad2e8dfa4abca6553ba89a75))
+* public getAll method now returns only public resources ([fbd42e7](https://github.com/madgeek-arc/resource-catalogue/commit/fbd42e7b6fbcb47ba02240fe3cfd136466dde598))
+* remove dependency patches that broke swagger ui ([b602a27](https://github.com/madgeek-arc/resource-catalogue/commit/b602a274628329a4225ceaad98a5e1715a1dad03))
+* remove extra update while finalizing drafts, because the update was passing without triggering the validation. remove triggering aspect functionality for emails ([0566afb](https://github.com/madgeek-arc/resource-catalogue/commit/0566afb2b98bec228d4c3a682315c631de711da3))
+* remove unnecessary suspension validation ([de1f36a](https://github.com/madgeek-arc/resource-catalogue/commit/de1f36ad74dd9288add8087d599c619e4b736fc0))
+* Removes Camunda dependency and adds Flowable ([a9afb5f](https://github.com/madgeek-arc/resource-catalogue/commit/a9afb5f02bcb5dce7dc91672210a944910bebc24))
+* Removes dependency to catalogue service causing circular dependency issue ([164f9c2](https://github.com/madgeek-arc/resource-catalogue/commit/164f9c2fafc3cf9306a6c3754628018c8bf6d58e))
+* rename reserved keyword ([63d6c33](https://github.com/madgeek-arc/resource-catalogue/commit/63d6c3310ec6287233b97f80d2caf31004eba60f))
+* Renames 'owner' to 'resourceOwner' in resource-onboard workflow. ([916d5e4](https://github.com/madgeek-arc/resource-catalogue/commit/916d5e4432b4c88702fd4869fc5c65e7055d4162))
+* Renames deployable-software to deployable-application ([d0cd45c](https://github.com/madgeek-arc/resource-catalogue/commit/d0cd45ce91daa4fdc3a9e724d55f429bd134a39b))
+* replace manager executions in various methods on ProviderManagementAspect ([c7192f9](https://github.com/madgeek-arc/resource-catalogue/commit/c7192f9be0a800a33b1690c90baf05e972f65264))
+* Restores separate datasource configuration. Reuses main datasource's connection properties but in a different schema. ([e6c5213](https://github.com/madgeek-arc/resource-catalogue/commit/e6c5213a9bfe980a81fc7ea49baf46abf6f25209))
+* Secures APIs ([c9c1f9f](https://github.com/madgeek-arc/resource-catalogue/commit/c9c1f9fe6097861e59c27b124f54a54cdf7196be))
+* **security:** patch vulnerabilities in dependencies ([0a51e58](https://github.com/madgeek-arc/resource-catalogue/commit/0a51e58b47ba40b0236e80b9eb9ac6b7530053c5))
+* **security:** patch vulnerabilities in dependencies ([f1903c9](https://github.com/madgeek-arc/resource-catalogue/commit/f1903c9e4bbccfd21c2ee13ae2d6a48d3928359b))
+* **security:** patch vulnerabilities in dependencies ([69f74fb](https://github.com/madgeek-arc/resource-catalogue/commit/69f74fb11b6f9c0e2e840ed4d3fbdf8e68194600))
+* **security:** patch vulnerabilities in dependencies ([73cc3df](https://github.com/madgeek-arc/resource-catalogue/commit/73cc3df669b89cf40ec7034714cea94fae1cf152))
+* **security:** patch vulnerabilities in dependencies. Add owasp dataDirectory config for shared NVD cache ([f65282f](https://github.com/madgeek-arc/resource-catalogue/commit/f65282fdfd5bd817d96f583325d319b5ed3b7fb2))
+* Serializes userInfo before passing to variables ([e434976](https://github.com/madgeek-arc/resource-catalogue/commit/e434976fd08652ba6ea039c3d9f5248ff6d445ec))
+* Service onboard moved to bpmn workflow ([add1874](https://github.com/madgeek-arc/resource-catalogue/commit/add1874cda82f97ebca1881f0a929beaa0dc4a41))
+* update catalogue version to fix validation issue ([5d93465](https://github.com/madgeek-arc/resource-catalogue/commit/5d93465c6acbaa916309e0385c80aac8109e1185))
+* update catalogue version to fix validation issue ([e68d3ee](https://github.com/madgeek-arc/resource-catalogue/commit/e68d3ee662cb485c263c341279da566bb8f25929))
+* updating public IDs for RIR and CTI now searches in the correct services ([4033e50](https://github.com/madgeek-arc/resource-catalogue/commit/4033e50acab52d486da4e3f7c6ff8f2a8e1aaf49))
+* User roles mapping issue for non-admin users. ([c8fcd48](https://github.com/madgeek-arc/resource-catalogue/commit/c8fcd48b3f62f2c0d86d5d1a38f5d39b4475d771))
+* Uses default catalogue if not provided ([3c8d4a8](https://github.com/madgeek-arc/resource-catalogue/commit/3c8d4a855b6ff5e4cf06d67860d4e37bc608b884))
+* wizard step3 - adding main/default catalogue ([d90897e](https://github.com/madgeek-arc/resource-catalogue/commit/d90897e259a74b78238dd434237416c4deeef50e))
+
+
+### Documentation
+
+* README and configuration files ([6715463](https://github.com/madgeek-arc/resource-catalogue/commit/67154635104b3e36f37756fa6389dbab6a6e20b7))
+* update README.md ([c874e50](https://github.com/madgeek-arc/resource-catalogue/commit/c874e50f437d0e61998e986ed11d0518a5e72363))
+
+
+### Miscellaneous Chores
+
+* release 5.5.0 ([c203481](https://github.com/madgeek-arc/resource-catalogue/commit/c203481c0ac8be062aea5c65745c49fa259d9745))
+
+
+### Code Refactoring
+
+* rename Deployable Service to Deployable Software ([52e4508](https://github.com/madgeek-arc/resource-catalogue/commit/52e450822d6f88cd5f56c3763869a0dafadb1768))
+* rename deployable software to application ([7800cc1](https://github.com/madgeek-arc/resource-catalogue/commit/7800cc1aab6a21c8a72b8949ad029f3815edfc9e))
+
 ## [5.4.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.3.0...v5.4.0) (2025-12-23)
 
 
