@@ -93,6 +93,12 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return new ResponseEntity<>(vocs, HttpStatus.OK);
     }
 
+    @Operation(summary = "Get a Map of vocabulary types and their respective entries")
+    @GetMapping(path = "/byType", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<Vocabulary.Type, List<Vocabulary>>> getAllVocabulariesByType() {
+        return new ResponseEntity<>(vocabularyService.getAllVocabulariesByType(), HttpStatus.OK);
+    }
+
     @Operation(summary = "Get vocabularies by id")
     @GetMapping(path = "types/{type}/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Vocabulary> getByTypeAndId(@PathVariable(value = "type") String type,

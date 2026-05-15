@@ -16,16 +16,14 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
@@ -36,7 +34,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,6 +114,29 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
         return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
+        Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(maxQuantity);
+        Paging<Vocabulary> allVocs = getAll(ff);
+        allVocabularies = allVocs.getResults()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .collect(Collectors
+                        .groupingBy(value -> Vocabulary.Type.fromString(value.getType()),
+                                Collectors.collectingAndThen(
+                                        Collectors.toList(),
+                                        list -> list.stream()
+                                                .sorted(Comparator.comparing(Vocabulary::getName))
+                                                .collect(Collectors.toList())
+                                )
+                        )
+                );
+        return allVocabularies;
     }
 
     @Override
