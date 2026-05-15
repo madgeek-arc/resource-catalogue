@@ -226,7 +226,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     public Browsing<T> getAll(FacetFilter ff) {
         ff.setResourceType(getResourceTypeName());
         Browsing<T> browsing = genericResourceService.getResults(ff);
-        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
+        if (!browsing.getFacets().isEmpty()) {
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }
         return browsing;

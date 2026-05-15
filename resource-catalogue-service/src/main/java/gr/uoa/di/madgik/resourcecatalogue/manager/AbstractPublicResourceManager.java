@@ -69,7 +69,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         ff.setResourceType(getResourceTypeName());
         ff.addFilter("published", true);
         Browsing<T> browsing = genericResourceService.getResults(ff);
-        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
+        if (!browsing.getFacets().isEmpty()) {
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }
         return browsing;
@@ -80,7 +80,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         ff.setResourceType(getResourceTypeName());
         ff.addFilter("published", true);
         Browsing<HighlightedResult<T>> browsing = genericResourceService.getHighlightedResults(ff);
-        if (!browsing.getResults().isEmpty() && !browsing.getFacets().isEmpty()) {
+        if (!browsing.getFacets().isEmpty()) {
             browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
         }
         return browsing;
