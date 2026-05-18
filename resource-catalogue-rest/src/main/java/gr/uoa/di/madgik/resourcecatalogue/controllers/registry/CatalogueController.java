@@ -328,13 +328,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @BrowseParameters
     @GetMapping(path = {
-            "byProvider/{id}",
-            "byOrganisation/{id}"
+            "byProvider/{prefix}/{suffix}",
+            "byOrganisation/{prefix}/{suffix}"
     })
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
     public ResponseEntity<Paging<CatalogueBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
-                                                                 @PathVariable String id,
+                                                                 @PathVariable String prefix,
+                                                                 @PathVariable String suffix,
                                                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
     }
@@ -389,13 +391,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @BrowseParameters
     @GetMapping(path = {
-            "draft/byProvider/{id}",
-            "draft/byOrganisation/{id}"
+            "draft/byProvider/{prefix}/{suffix}",
+            "draft/byOrganisation/{prefix}/{suffix}"
     })
-    public ResponseEntity<Paging<CatalogueBundle>> getProviderDraftCatalogues(@PathVariable String id,
-                                                                                @Parameter(hidden = true)
-                                                                                @RequestParam MultiValueMap<String, Object> params,
-                                                                                @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Paging<CatalogueBundle>> getProviderDraftCatalogues(@PathVariable String prefix,
+                                                                              @PathVariable String suffix,
+                                                                              @Parameter(hidden = true)
+                                                                              @RequestParam MultiValueMap<String, Object> params,
+                                                                              @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
         ff.addFilter("draft", true);
