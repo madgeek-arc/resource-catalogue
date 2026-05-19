@@ -420,7 +420,7 @@
                   "order": 5,
                   "visible": true,
                   "hasBorder": false,
-                  "cssClasses": null,
+                  "cssClasses": "uk-disabled",
                   "style": null
                 }
               },
