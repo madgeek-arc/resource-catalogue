@@ -35,7 +35,8 @@ public class CatalogueInfoController {
 
     private final ResourceCatalogueInfo resourceCatalogueInfo;
 
-    public record CatalogueConfiguration(String catalogueSupportEmail) {
+    public record CatalogueConfiguration(String catalogueSupportEmail, String nodePid,
+                                         boolean nodePidAllowVocabularyValues) {
     }
 
     public CatalogueInfoController(ResourceCatalogueInfo resourceCatalogueInfo) {
@@ -47,7 +48,9 @@ public class CatalogueInfoController {
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<CatalogueConfiguration> get() {
         CatalogueConfiguration conf = new CatalogueConfiguration(
-                resourceCatalogueInfo.getCatalogueSupportEmail()
+                resourceCatalogueInfo.getCatalogueSupportEmail(),
+                resourceCatalogueInfo.getNodePid(),
+                resourceCatalogueInfo.allowsVocabularyValues()
         );
         return new ResponseEntity<>(conf, HttpStatus.OK);
     }
