@@ -26,16 +26,16 @@ public class ResourceCatalogueInfo {
     private String catalogueSupportEmail;
     @Value("${node.pid}")
     private String nodePid;
-    @Value("${node.pid.allow-vocabulary-values}")
-    private boolean nodePidAllowVocabularyValues;
+    @Value("${node.pid.fixed}")
+    private boolean nodePidFixed;
 
     public ResourceCatalogueInfo() {
     }
 
-    public ResourceCatalogueInfo(String catalogueSupportEmail, String nodePid, boolean nodePidAllowVocabularyValues) {
+    public ResourceCatalogueInfo(String catalogueSupportEmail, String nodePid, boolean nodePidFixed) {
         this.catalogueSupportEmail = catalogueSupportEmail;
         this.nodePid = nodePid;
-        this.nodePidAllowVocabularyValues = nodePidAllowVocabularyValues;
+        this.nodePidFixed = nodePidFixed;
     }
 
     public String getCatalogueSupportEmail() {
@@ -54,11 +54,11 @@ public class ResourceCatalogueInfo {
         this.nodePid = nodePid;
     }
 
-    public boolean allowsVocabularyValues() {
-        return nodePidAllowVocabularyValues;
+    public boolean isNodePidFixed() {
+        return nodePidFixed;
     }
 
-    public void setNodePidAllowVocabularyValues(boolean nodePidAllowVocabularyValues) {
-        this.nodePidAllowVocabularyValues = nodePidAllowVocabularyValues;
+    public void setNodePidFixed(boolean nodePidFixed) {
+        this.nodePidFixed = nodePidFixed;
     }
 }

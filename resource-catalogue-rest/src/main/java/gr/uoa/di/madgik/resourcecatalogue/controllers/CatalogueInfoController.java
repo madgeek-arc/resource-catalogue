@@ -36,7 +36,7 @@ public class CatalogueInfoController {
     private final ResourceCatalogueInfo resourceCatalogueInfo;
 
     public record CatalogueConfiguration(String catalogueSupportEmail, String nodePid,
-                                         boolean nodePidAllowVocabularyValues) {
+                                         boolean nodePidFixed) {
     }
 
     public CatalogueInfoController(ResourceCatalogueInfo resourceCatalogueInfo) {
@@ -50,7 +50,7 @@ public class CatalogueInfoController {
         CatalogueConfiguration conf = new CatalogueConfiguration(
                 resourceCatalogueInfo.getCatalogueSupportEmail(),
                 resourceCatalogueInfo.getNodePid(),
-                resourceCatalogueInfo.allowsVocabularyValues()
+                resourceCatalogueInfo.isNodePidFixed()
         );
         return new ResponseEntity<>(conf, HttpStatus.OK);
     }

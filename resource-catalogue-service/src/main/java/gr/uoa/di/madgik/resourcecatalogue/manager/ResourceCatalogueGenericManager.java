@@ -56,8 +56,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     protected int maxQuantity;
     @Value("${node.pid}")
     private String nodePid;
-    @Value("${node.pid.allow-vocabulary-values}")
-    private boolean nodePidAllowVocabularyValues;
+    @Value("${node.pid.fixed}")
+    private boolean nodePidFixed;
 
     protected abstract String getResourceTypeName();
 
@@ -106,7 +106,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     private void setNodePid(T bundle) {
         Object resourceNodePid = bundle.getPayload().get("nodePID");
-        if (!nodePidAllowVocabularyValues || resourceNodePid == null || resourceNodePid.toString().isBlank()) {
+        if (nodePidFixed || resourceNodePid == null || resourceNodePid.toString().isBlank()) {
             bundle.getPayload().put("nodePID", nodePid);
         }
     }
