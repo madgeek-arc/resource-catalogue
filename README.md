@@ -31,19 +31,22 @@ Follow these steps to set up a development environment for Resource Catalogue:
 
 ### Prerequisites
 
-* Java 21
+* Java 25
 * Maven 3.9+
-* ActiveMQ 5.x.x
-* Elasticsearch 7.17.x
-* PostgreSQL 9.5+
+* ActiveMQ 6.2.x
+* Elasticsearch 9.3.x
+* PostgreSQL 16+ with [pgvector](https://github.com/pgvector/pgvector) extension
+* Redis
 
 ### Installation
 
 1. Create Database and necessary extension
 
    ```sql
-   USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
+   CREATE USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
    CREATE DATABASE <db> WITH OWNER <user>;
+   \c <db>
+   CREATE EXTENSION IF NOT EXISTS vector;
    ```
 
 2. Clone the repository:
