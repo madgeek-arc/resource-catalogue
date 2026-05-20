@@ -34,7 +34,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
 * Java 25
 * Maven 3.9+
 * ActiveMQ 6.2.x
-* Elasticsearch 9.4.x
+* Elasticsearch 9.3.x
 * PostgreSQL 16+ with [pgvector](https://github.com/pgvector/pgvector) extension
 * Redis
 

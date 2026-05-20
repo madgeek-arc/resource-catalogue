@@ -37,7 +37,7 @@
         <jackson2.annotations.version>2.21</jackson2.annotations.version>
         <jackson.version>3.1.1</jackson.version>
         <registry-core.version>5.0.0-SNAPSHOT</registry-core.version>
-        <elasticsearch.version>9.4.1</elasticsearch.version>
+        <elasticsearch.version>9.3.2</elasticsearch.version>
         <springdoc.version>3.0.0</springdoc.version>
         <jakarta.mail.version>2.1.3</jakarta.mail.version>
         <jaxb2-maven-plugin.version>4.1.0</jaxb2-maven-plugin.version>
