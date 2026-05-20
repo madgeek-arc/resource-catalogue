@@ -1,5 +1,5 @@
 ### Build using Maven ###
-FROM maven:3.9 AS maven
+FROM maven:3.9-eclipse-temurin-25 AS maven
 ARG profile
 
 WORKDIR /build
@@ -30,7 +30,7 @@ RUN mvn help:effective-pom
 ## Run maven based on given profile ##
 RUN if [ -z "$profile" ] ; then mvn package ; else mvn package -P $profile ; fi
 
-RUN jdeps -q --ignore-missing-deps --recursive --multi-release 21 \
+RUN jdeps -q --ignore-missing-deps --recursive --multi-release 25 \
     --print-module-deps --class-path BOOT-INF/lib/* \
     resource-catalogue-service/target/resource-catalogue-service-*.jar > modules.txt
 
@@ -45,7 +45,7 @@ RUN $JAVA_HOME/bin/jlink \
 
 ### Create Docker Image ###
 FROM alpine:latest
-ENV JAVA_HOME=/opt/jdk/jdk-21
+ENV JAVA_HOME=/opt/jdk/jdk-25
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 WORKDIR /app
