@@ -17,6 +17,14 @@
 * sets specific maven version for java 21 ([bfdff04](https://github.com/madgeek-arc/resource-catalogue/commit/bfdff04e97202433e6634861a3ff685976f30521))
 * token in headers when submitting a ticket ([de32231](https://github.com/madgeek-arc/resource-catalogue/commit/de322315e15e62f0e595fb846c9f194c0e9a1b2e))
 
+## [5.5.1](https://github.com/madgeek-arc/resource-catalogue/compare/v5.5.0...v5.5.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* always get the non public EOSC Monitoring guideline to assign ([f16c14a](https://github.com/madgeek-arc/resource-catalogue/commit/f16c14a68ffd75f5e6c50ded96205b2f6ca8eeae))
+* TrainingResourceBundle setter name ([b5be67e](https://github.com/madgeek-arc/resource-catalogue/commit/b5be67ea675b194732bc1d97dd1eac9a88d19381))
+
 ## [5.5.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.4.0...v5.5.0) (2026-05-06)
 
 
