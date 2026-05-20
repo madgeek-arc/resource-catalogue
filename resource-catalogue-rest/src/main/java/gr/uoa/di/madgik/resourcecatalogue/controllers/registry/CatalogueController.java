@@ -1135,7 +1135,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                           @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         bundle.setCatalogueId(catalogueId);
         TrainingResourceBundle ret = trainingResourceService.add(bundle, auth);
         logger.info("Added Training Resource with id '{}' in the Catalogue '{}'", trainingResource.get("id"), catalogueId);
@@ -1152,7 +1152,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String id = trainingResource.get("id").toString();
         TrainingResourceBundle bundle = trainingResourceService.get(id, catalogueId);
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         bundle = trainingResourceService.update(bundle, comment, auth);
         logger.info("Updated the Training Resource with id '{}'", bundle.getId());
         return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);

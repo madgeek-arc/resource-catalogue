@@ -17,7 +17,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -167,7 +166,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                  @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         TrainingResourceBundle ret = service.add(bundle, auth);
         logger.info("Added Training Resource with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
@@ -197,7 +196,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                     @Parameter(hidden = true) Authentication auth) {
         String id = trainingResource.get("id").toString();
         TrainingResourceBundle bundle = service.get(id);
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Training Resource with id '{}'", trainingResource.get("id"));
         return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
@@ -292,7 +291,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @PostMapping(path = "validate")
     public ResponseEntity<Void> validate(@RequestBody LinkedHashMap<String, Object> trainingResource) {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         service.validate(bundle);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -364,10 +363,10 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
             "draft/byOrganisation/{prefix}/{suffix}"
     })
     public ResponseEntity<Paging<TrainingResourceBundle>> getProviderDraftTrainingResources(@PathVariable String prefix,
-                                                                                              @PathVariable String suffix,
-                                                                                              @Parameter(hidden = true)
-                                                                                              @RequestParam MultiValueMap<String, Object> params,
-                                                                                              @Parameter(hidden = true) Authentication auth) {
+                                                                                            @PathVariable String suffix,
+                                                                                            @Parameter(hidden = true)
+                                                                                            @RequestParam MultiValueMap<String, Object> params,
+                                                                                            @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("resource_owner", id);
@@ -380,7 +379,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                       @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         TrainingResourceBundle ret = service.addDraft(bundle, auth);
         logger.info("Added Draft Training Resource with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
@@ -392,7 +391,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) trainingResource.get("id");
         TrainingResourceBundle bundle = service.get(id);
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Training Resource with id '{}'", id);
         return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
@@ -414,7 +413,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) trainingResource.get("id");
         TrainingResourceBundle bundle = service.get(id);
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
 
         logger.info("Finalizing Draft Training Resource with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);

@@ -58,7 +58,7 @@ public class TestUtils {
 
     public static TrainingResourceBundle createTrainingResourceBundle() {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.settTrainingResource(createTrainingResource());
+        bundle.setTrainingResource(createTrainingResource());
         return bundle;
     }
 

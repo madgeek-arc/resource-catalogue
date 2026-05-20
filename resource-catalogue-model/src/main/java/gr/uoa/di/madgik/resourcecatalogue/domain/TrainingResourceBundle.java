@@ -24,7 +24,7 @@ public class TrainingResourceBundle extends Bundle {
         return this.getPayload();
     }
 
-    public void settTrainingResource(LinkedHashMap<String, Object> payload) {
+    public void setTrainingResource(LinkedHashMap<String, Object> payload) {
         this.setPayload(payload);
     }
 
