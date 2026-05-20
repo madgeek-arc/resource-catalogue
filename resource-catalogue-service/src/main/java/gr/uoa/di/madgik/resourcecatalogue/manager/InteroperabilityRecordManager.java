@@ -187,6 +187,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     public InteroperabilityRecordBundle getEOSCMonitoringGuideline() {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
+        ff.addFilter("published", false);
         ff.addFilter("name", "EOSC Monitoring: Architecture and Interoperability Guidelines");
         List<InteroperabilityRecordBundle> igList = getAll(ff).getResults();
         if (!igList.isEmpty()) {
