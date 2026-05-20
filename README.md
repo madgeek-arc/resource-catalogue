@@ -46,6 +46,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
    CREATE USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
    CREATE DATABASE <db> WITH OWNER <user>;
    \c <db>
+   CREATE EXTENSION IF NOT EXISTS tablefunc;
    CREATE EXTENSION IF NOT EXISTS vector;
    ```
 
