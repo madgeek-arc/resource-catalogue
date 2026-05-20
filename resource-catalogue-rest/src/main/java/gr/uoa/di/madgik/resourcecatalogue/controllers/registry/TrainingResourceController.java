@@ -148,7 +148,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                  @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         TrainingResourceBundle ret = service.add(bundle, auth);
         logger.info("Added Training Resource with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
@@ -178,7 +178,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                     @Parameter(hidden = true) Authentication auth) {
         String id = trainingResource.get("id").toString();
         TrainingResourceBundle bundle = service.get(id, catalogueId);
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Training Resource with id '{}'", trainingResource.get("id"));
         return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
@@ -276,7 +276,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     @PostMapping(path = "validate")
     public ResponseEntity<Void> validate(@RequestBody LinkedHashMap<String, Object> trainingResource) {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         service.validate(bundle);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -366,7 +366,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     public ResponseEntity<?> addDraft(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                       @Parameter(hidden = true) Authentication auth) {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         TrainingResourceBundle ret = service.addDraft(bundle, auth);
         logger.info("Added Draft Training Resource with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getTrainingResource(), HttpStatus.CREATED);
@@ -378,7 +378,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) trainingResource.get("id");
         TrainingResourceBundle bundle = service.get(id);
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
         bundle = service.updateDraft(bundle, auth);
         logger.info("Updated the Draft Training Resource with id '{}'", id);
         return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
@@ -400,7 +400,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
                                               @Parameter(hidden = true) Authentication auth) {
         String id = (String) trainingResource.get("id");
         TrainingResourceBundle bundle = service.get(id);
-        bundle.settTrainingResource(trainingResource);
+        bundle.setTrainingResource(trainingResource);
 
         logger.info("Finalizing Draft Training Resource with id '{}'", id);
         bundle = service.finalizeDraft(bundle, auth);
