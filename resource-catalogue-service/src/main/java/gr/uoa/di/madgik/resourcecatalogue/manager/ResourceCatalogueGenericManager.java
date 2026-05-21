@@ -89,9 +89,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         identifiers.setPid(idCreator.generate(resourceType));
         identifiers.setOriginalId(identifiers.getPid() + "00");
         if (external) {
-            if (bundle.getId() == null || bundle.getId().isEmpty()) {
-                throw new ResourceException("An ID must be provided for external catalogue resources", HttpStatus.BAD_REQUEST);
-            }
+            idCreator.validateId(bundle.getId());
             identifiers.setExternalId(bundle.getId());
         } else {
             identifiers.setExternalId(null);
