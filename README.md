@@ -63,6 +63,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
     2. `pid.yml` – Create this file only if you plan to use the PID Service.
        See the [PID Properties Example](#PID-Properties-Example) for details.
 4. Build and Package
+
     To build the project and package the code into an executable .jar file with
     an embedded Tomcat server:
     1. Navigate to the project directory
