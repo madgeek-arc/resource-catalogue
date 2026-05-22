@@ -41,7 +41,7 @@ pipeline {
     stage('Build Image') {
       steps{
         script {
-          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond --build-arg skipTests=true --label job=${env.JOB_NAME} .")
+          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond --build-arg skipTests=true .")
         }
       }
     }
