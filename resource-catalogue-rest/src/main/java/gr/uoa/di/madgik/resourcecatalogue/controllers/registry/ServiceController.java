@@ -31,9 +31,10 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import gr.uoa.di.madgik.resourcecatalogue.config.AuditingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -55,8 +56,8 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
 
-    @Value("${auditing.interval:6}")
-    private int auditingInterval;
+    @Autowired
+    private AuditingProperties auditingProperties;
 
     ServiceController(ServiceService serviceService) {
         super(serviceService, "Service");
@@ -161,7 +162,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                            @Parameter(hidden = true) Authentication auth) {
-        Paging<ServiceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+        Paging<ServiceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingProperties.getInterval(), auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 

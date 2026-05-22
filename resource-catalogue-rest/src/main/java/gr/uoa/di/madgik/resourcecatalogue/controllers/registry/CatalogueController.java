@@ -34,8 +34,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import gr.uoa.di.madgik.resourcecatalogue.config.AuditingProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -71,8 +71,8 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @Autowired
     SecurityService securityService;
 
-    @Value("${auditing.interval:6}")
-    private int auditingInterval;
+    @Autowired
+    private AuditingProperties auditingProperties;
 
     CatalogueController(CatalogueService catalogueService,
                         OrganisationService organisationService,
@@ -165,7 +165,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<CatalogueBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                              @Parameter(hidden = true) Authentication auth) {
-        Paging<CatalogueBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+        Paging<CatalogueBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingProperties.getInterval(), auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 

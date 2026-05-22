@@ -25,6 +25,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,8 +35,8 @@ public class OpenApiConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenApiConfig.class);
 
-    @Value("${node.name}")
-    String projectName;
+    @Autowired
+    private NodeProperties nodeProperties;
 
     @Value("${catalogue.version}")
     String projectVersion;
@@ -45,6 +46,7 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI openAPI(OpenApiProperties properties) {
+        String projectName = nodeProperties.getName();
         OpenAPI openAPI = new OpenAPI()
                 .info(new Info().title(projectName + " API")
                         .description("A single platform for providers to onboard their organization, register and manage their resources.")

@@ -7,6 +7,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
@@ -22,7 +23,6 @@ import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -52,10 +52,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Autowired
     private FacetLabelService facetLabelService;
 
-    @Value("${node.pid}")
-    private String nodePid;
-    @Value("${node.pid.fixed}")
-    private boolean nodePidFixed;
+    @Autowired
+    private NodeProperties nodeProperties;
 
     protected abstract String getResourceTypeName();
 
@@ -102,8 +100,8 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     private void setNodePid(T bundle) {
         Object resourceNodePid = bundle.getPayload().get("nodePID");
-        if (nodePidFixed || resourceNodePid == null || resourceNodePid.toString().isBlank()) {
-            bundle.getPayload().put("nodePID", nodePid);
+        if (nodeProperties.getPid().isFixed() || resourceNodePid == null || resourceNodePid.toString().isBlank()) {
+            bundle.getPayload().put("nodePID", nodeProperties.getPid().getValue());
         }
     }
 

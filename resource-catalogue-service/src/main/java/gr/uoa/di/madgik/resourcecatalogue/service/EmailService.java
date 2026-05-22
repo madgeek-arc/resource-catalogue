@@ -20,12 +20,12 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -56,13 +56,11 @@ public class EmailService {
     private final SecurityService securityService;
 
     // Properties
+    private final String nodeName;
     private final String registrationEmail;
     private final String homepage;
     private final boolean enableAdminNotifications;
     private final boolean enableProviderNotifications;
-
-    @Value("${node.name}")
-    private String nodeName;
 
     public EmailService(MailService mailService, Configuration cfg,
                         SecurityService securityService,
@@ -73,7 +71,8 @@ public class EmailService {
                         @Lazy DeployableApplicationManager deployableApplicationManager,
                         @Lazy InteroperabilityRecordManager interoperabilityRecordManager,
                         @Lazy AdapterManager adapterManager,
-                        CatalogueProperties properties) {
+                        CatalogueProperties properties,
+                        NodeProperties nodeProperties) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.securityService = securityService;
@@ -88,6 +87,7 @@ public class EmailService {
         this.registrationEmail = properties.getEmails().getRegistrationEmails().getTo();
         this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
         this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
+        this.nodeName = nodeProperties.getName();
     }
 
     //region mail functionalities

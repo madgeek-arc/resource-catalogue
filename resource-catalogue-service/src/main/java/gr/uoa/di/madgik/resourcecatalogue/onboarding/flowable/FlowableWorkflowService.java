@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable;
 
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
@@ -10,7 +11,6 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -29,16 +29,16 @@ public class FlowableWorkflowService implements WorkflowService {
     private final RuntimeService runtimeService;
     private final HistoryService historyService;
     private final WorkflowVariableMapper helper;
-
-    @Value("${node.pid}")
-    private String nodePid;
+    private final String nodePid;
 
     public FlowableWorkflowService(RuntimeService runtimeService,
                                    HistoryService historyService,
-                                   WorkflowVariableMapper helper) {
+                                   WorkflowVariableMapper helper,
+                                   NodeProperties nodeProperties) {
         this.runtimeService = runtimeService;
         this.historyService = historyService;
         this.helper = helper;
+        this.nodePid = nodeProperties.getPid().getValue();
     }
 
     public enum WorkflowStatus {

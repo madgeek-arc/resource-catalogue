@@ -21,12 +21,14 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -70,8 +72,8 @@ public class InternalToPublicConsistency {
     private final MailService mailService;
 
 
-    @Value("${node.name:Resource Catalogue}")
-    private String nodeName;
+    @Autowired
+    private NodeProperties nodeProperties;
     @Value("${catalogue.homepage}")
     private String projectInstance;
     @Value("${catalogue.email-properties.resource-consistency.enabled:false}")
@@ -289,13 +291,13 @@ public class InternalToPublicConsistency {
         StringWriter out = new StringWriter();
         root.put("logs", logs);
         root.put("projectInstance", projectInstance);
-        root.put("project", nodeName);
+        root.put("project", nodeProperties.getName());
 
         try {
             Template temp = cfg.getTemplate("internalToPublicResourceConsistency.ftl");
             temp.process(root, out);
             String teamMail = out.getBuffer().toString();
-            String subject = String.format("[%s] Internal to Public Resource Consistency Logs", nodeName);
+            String subject = String.format("[%s] Internal to Public Resource Consistency Logs", nodeProperties.getName());
             if (enableConsistencyEmails) {
                 mailService.sendMail(Collections.singletonList(consistencyTo), null, Collections.singletonList(consistencyCC), subject, teamMail);
             }

@@ -34,7 +34,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import gr.uoa.di.madgik.resourcecatalogue.config.AuditingProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,8 +62,8 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     private final OpenAIREDatasourceService openAIREDatasourceService;
 
-    @Value("${auditing.interval:6}")
-    private int auditingInterval;
+    @Autowired
+    private AuditingProperties auditingProperties;
 
     public DatasourceController(DatasourceService datasourceService,
                                 OpenAIREDatasourceService openAIREDatasourceService) {
@@ -157,7 +158,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DatasourceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                               @Parameter(hidden = true) Authentication auth) {
-        Paging<DatasourceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+        Paging<DatasourceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingProperties.getInterval(), auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 

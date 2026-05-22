@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.domain.Facet;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import gr.uoa.di.madgik.resourcecatalogue.service.NodeResolver;
@@ -54,13 +55,13 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 
     public SecureResponseAdvice(SecurityService securityService, AuthoritiesMapper authoritiesMapper,
                                 @Value("${catalogue.email-properties.registration-emails.to:registration@catalogue.eu}") String epotEmail,
-                                @Value("${node.pid}") String nodePid,
+                                NodeProperties nodeProperties,
                                 NodeResolver nodeResolver) {
         this.securityService = securityService;
         this.authoritiesMapper = authoritiesMapper;
         this.epotEmail = epotEmail;
         this.nodeResolver = nodeResolver;
-        this.nodePid = nodePid;
+        this.nodePid = nodeProperties.getPid().getValue();
     }
 
     private static final Logger logger = LoggerFactory.getLogger(SecureResponseAdvice.class);
