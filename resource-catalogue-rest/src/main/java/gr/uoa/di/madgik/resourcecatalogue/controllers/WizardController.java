@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +42,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -86,15 +87,14 @@ public class WizardController {
     @Operation(summary = "Check Vocabularies Existence")
     @GetMapping("/step1")
     public String checkVocabulariesExistence(Model model) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ClassPathResource vocabDir = new ClassPathResource("vocabularies");
-        File[] vocabFiles = vocabDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] vocabFiles = resolver.getResources("classpath:vocabularies/*.json");
 
         Map<String, Boolean> vocabStatus = new TreeMap<>();
         boolean allLoaded = true;
 
-        for (File file : vocabFiles) {
-            List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {
+        for (Resource resource : vocabFiles) {
+            List<Vocabulary> vocabularies = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {
             });
 
             if (!vocabularies.isEmpty()) {
@@ -118,13 +118,12 @@ public class WizardController {
     @Operation(summary = "Load Vocabularies")
     @PostMapping("/step1/loadVocabularies")
     public String loadVocabularies() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ClassPathResource vocabDir = new ClassPathResource("vocabularies");
-        File[] vocabularyFiles = vocabDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] vocabularyFiles = resolver.getResources("classpath:vocabularies/*.json");
 
-        if (vocabularyFiles != null) {
-            for (File file : vocabularyFiles) {
-                List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {
+        if (vocabularyFiles.length > 0) {
+            for (Resource resource : vocabularyFiles) {
+                List<Vocabulary> vocabularies = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {
                 });
 
                 if (!vocabularies.isEmpty()) {
@@ -148,10 +147,10 @@ public class WizardController {
     @Operation(summary = "Check Models Existence")
     @GetMapping("/step2")
     public String checkModelsExistence(Model model) throws IOException {
-        ClassPathResource modelDir = new ClassPathResource("models");
-        File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] modelFiles = resolver.getResources("classpath:models/*.json");
 
-        if (modelFiles == null || modelFiles.length == 0) {
+        if (modelFiles.length == 0) {
             model.addAttribute("modelStatus", Collections.emptyMap());
             model.addAttribute("allModelsLoading", false);
             model.addAttribute("allModelsLoaded", true);
@@ -161,9 +160,9 @@ public class WizardController {
         Map<String, Boolean> modelStatus = new TreeMap<>();
         boolean nonePosted = true;
 
-        for (File file : modelFiles) {
+        for (Resource resource : modelFiles) {
             try {
-                gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.domain.Model.class);
+                gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(resource.getInputStream(), gr.uoa.di.madgik.catalogue.domain.Model.class);
                 boolean exists;
                 try {
                     exists = modelService.get(m.getId()) != null;
@@ -179,7 +178,7 @@ public class WizardController {
                     nonePosted = false;
                 }
             } catch (Exception e) {
-                logger.warn("Skipping model file [{}]: {}", file.getName(), e.getMessage());
+                logger.warn("Skipping model file [{}]: {}", resource.getFilename(), e.getMessage());
             }
         }
 
@@ -196,12 +195,12 @@ public class WizardController {
     @Operation(summary = "Load Models")
     @PostMapping("/step2/loadModels")
     public String loadModels() throws IOException {
-        ClassPathResource modelDir = new ClassPathResource("models");
-        File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] modelFiles = resolver.getResources("classpath:models/*.json");
 
-        for (File file : modelFiles) {
+        for (Resource resource : modelFiles) {
             try {
-                gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.domain.Model.class);
+                gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(resource.getInputStream(), gr.uoa.di.madgik.catalogue.domain.Model.class);
 
                 boolean exists;
                 try {
@@ -221,7 +220,7 @@ public class WizardController {
                 }
 
             } catch (Exception e) {
-                logger.error("Failed to process model file [{}]: {}", file.getName(), e.getMessage());
+                logger.error("Failed to process model file [{}]: {}", resource.getFilename(), e.getMessage());
             }
         }
 
