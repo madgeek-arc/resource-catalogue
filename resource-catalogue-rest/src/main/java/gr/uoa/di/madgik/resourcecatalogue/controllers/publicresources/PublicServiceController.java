@@ -40,9 +40,6 @@ public class PublicServiceController {
 
     @Operation(description = "Returns the Public Service with the given id.")
     @GetMapping(path = "public/service/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.serviceIsActive(#prefix+'/'+#suffix, catalogueId) or " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

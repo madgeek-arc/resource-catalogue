@@ -67,7 +67,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.deployableApplicationIsActive(#prefix+'/'+#suffix, null)")
+            "@securityService.deployableApplicationIsActive(#prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

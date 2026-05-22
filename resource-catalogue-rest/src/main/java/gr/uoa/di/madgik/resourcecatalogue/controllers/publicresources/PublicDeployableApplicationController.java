@@ -54,9 +54,6 @@ public class PublicDeployableApplicationController {
 
     @Operation(description = "Returns the Public Deployable Application with the given id.")
     @GetMapping(path = "public/deployableApplication/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.deployableApplicationIsActive(#prefix+'/'+#suffix, catalogueId) or " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

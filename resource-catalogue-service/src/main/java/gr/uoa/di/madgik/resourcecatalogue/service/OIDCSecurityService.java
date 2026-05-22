@@ -398,20 +398,20 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean providerIsActive(String id, String catalogueId) {
-        OrganisationBundle organisationBundle = organisationService.get(id, catalogueId);
+    public boolean providerIsActive(String id) {
+        OrganisationBundle organisationBundle = organisationService.get(id);
         return organisationBundle.isActive();
     }
 
     @Override
-    public boolean serviceIsActive(String id, String catalogueId) {
-        ServiceBundle serviceBundle = serviceService.get(id, catalogueId);
+    public boolean serviceIsActive(String id) {
+        ServiceBundle serviceBundle = serviceService.get(id);
         return serviceBundle.isActive();
     }
 
     @Override
-    public boolean datasourceIsActive(String id, String catalogueId) {
-        DatasourceBundle datasourceBundle = datasourceService.get(id, catalogueId);
+    public boolean datasourceIsActive(String id) {
+        DatasourceBundle datasourceBundle = datasourceService.get(id);
         return datasourceBundle.isActive();
     }
 
@@ -422,26 +422,26 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean trainingResourceIsActive(String id, String catalogueId) {
-        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id, catalogueId);
+    public boolean trainingResourceIsActive(String id) {
+        TrainingResourceBundle trainingResourceBundle = trainingResourceService.get(id);
         return trainingResourceBundle.isActive();
     }
 
     @Override
-    public boolean guidelineIsActive(String id, String catalogueId) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id, catalogueId);
+    public boolean guidelineIsActive(String id) {
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
         return interoperabilityRecordBundle.isActive();
     }
 
     @Override
-    public boolean deployableApplicationIsActive(String id, String catalogueId) {
-        DeployableApplicationBundle deployableApplicationBundle = deployableApplicationService.get(id, catalogueId);
+    public boolean deployableApplicationIsActive(String id) {
+        DeployableApplicationBundle deployableApplicationBundle = deployableApplicationService.get(id);
         return deployableApplicationBundle.isActive();
     }
 
     @Override
-    public boolean adapterIsActive(String id, String catalogueId) {
-        AdapterBundle adapterBundle = adapterService.get(id, catalogueId);
+    public boolean adapterIsActive(String id) {
+        AdapterBundle adapterBundle = adapterService.get(id);
         return adapterBundle.isActive();
     }
     //endregion

@@ -62,9 +62,6 @@ public class PublicInteroperabilityRecordController {
 
     @Operation(description = "Returns the Public Interoperability Record with the given id.")
     @GetMapping(path = "public/interoperabilityRecord/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.guidelineIsActive(#prefix+'/'+#suffix, catalogueId) or " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

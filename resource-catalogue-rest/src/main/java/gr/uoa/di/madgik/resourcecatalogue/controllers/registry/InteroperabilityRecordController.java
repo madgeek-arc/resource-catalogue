@@ -77,7 +77,7 @@ public class InteroperabilityRecordController
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.guidelineIsActive(#prefix+'/'+#suffix, null)")
+            "@securityService.guidelineIsActive(#prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
