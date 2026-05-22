@@ -54,15 +54,11 @@ public class PublicDeployableApplicationController {
 
     @Operation(description = "Returns the Public Deployable Application with the given id.")
     @GetMapping(path = "public/deployableApplication/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.deployableApplicationIsActive(#prefix+'/'+#suffix, catalogueId) or " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getDeployableApplication(), HttpStatus.OK);
         }
@@ -75,10 +71,9 @@ public class PublicDeployableApplicationController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 

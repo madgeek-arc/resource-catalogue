@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -45,7 +45,11 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
     @Override
     public T get(String id) {
-        return null;
+        return genericResourceService.get(
+                getResourceTypeName(),
+                new SearchService.KeyValue("resource_internal_id", id),
+                new SearchService.KeyValue("published", "true")
+        );
     }
 
     @Override
@@ -56,38 +60,36 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
                     new SearchService.KeyValue("catalogue_id", catalogueId),
                     new SearchService.KeyValue("published", "true"));
         }
-        return genericResourceService.get(getResourceTypeName(),
-                new SearchService.KeyValue("resource_internal_id", id),
-                new SearchService.KeyValue("published", "true"));
+        return get(id);
     }
 
-    public Browsing<T> getAll(FacetFilter ff) {
+    public Paging<T> getAll(FacetFilter ff) {
         return getAll(ff, null);
     }
 
-    public Browsing<T> getAll(FacetFilter ff, Authentication authentication) {
+    public Paging<T> getAll(FacetFilter ff, Authentication authentication) {
         ff.setResourceType(getResourceTypeName());
         ff.addFilter("published", true);
-        Browsing<T> browsing = genericResourceService.getResults(ff);
-        if (!browsing.getFacets().isEmpty()) {
-            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+        Paging<T> paging = genericResourceService.getResults(ff);
+        if (!paging.getResults().isEmpty() && !paging.getFacets().isEmpty()) {
+            paging.setFacets(facetLabelService.generateLabels(paging.getFacets()));
         }
-        return browsing;
+        return paging;
     }
 
     @Override
-    public Browsing<HighlightedResult<T>> searchServices(FacetFilter ff) {
+    public Paging<HighlightedResult<T>> searchServices(FacetFilter ff) {
         ff.setResourceType(getResourceTypeName());
         ff.addFilter("published", true);
-        Browsing<HighlightedResult<T>> browsing = genericResourceService.getHighlightedResults(ff);
-        if (!browsing.getFacets().isEmpty()) {
-            browsing.setFacets(facetLabelService.generateLabels(browsing.getFacets()));
+        Paging<HighlightedResult<T>> paging = genericResourceService.getHighlightedResults(ff);
+        if (!paging.getResults().isEmpty() && !paging.getFacets().isEmpty()) {
+            paging.setFacets(facetLabelService.generateLabels(paging.getFacets()));
         }
-        return browsing;
+        return paging;
     }
 
     @Override
-    public Browsing<T> getMy(FacetFilter filter, Authentication authentication) {
+    public Paging<T> getMy(FacetFilter filter, Authentication authentication) {
         throw new NotImplementedException();
     }
 
@@ -131,11 +133,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
         logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         T ret;
-        try {
-            ret = genericResourceService.update(getResourceTypeName(), t.getId(), t);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        ret = genericResourceService.update(getResourceTypeName(), t);
         jmsService.convertAndSendTopic(getResourceTypeName() + ".update", t);
         return ret;
     }

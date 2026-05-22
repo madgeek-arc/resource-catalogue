@@ -21,17 +21,20 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
@@ -43,6 +46,7 @@ public class InternalToPublicConsistency {
 
     private final OrganisationService organisationService;
     private final ServiceService serviceService;
+    private final CatalogueService catalogueService;
     private final TrainingResourceService trainingResourceService;
     private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
@@ -54,6 +58,7 @@ public class InternalToPublicConsistency {
 
     private final PublicOrganisationService publicOrganisationService;
     private final PublicServiceService publicServiceManager;
+    private final PublicCatalogueService publicCatalogueService;
     private final PublicTrainingResourceService publicTrainingResourceManager;
     private final PublicDeployableApplicationService publicDeployableApplicationService;
     private final PublicAdapterService publicAdapterService;
@@ -67,8 +72,8 @@ public class InternalToPublicConsistency {
     private final MailService mailService;
 
 
-    @Value("${catalogue.name:Resource Catalogue}")
-    private String catalogueName;
+    @Autowired
+    private NodeProperties nodeProperties;
     @Value("${catalogue.homepage}")
     private String projectInstance;
     @Value("${catalogue.email-properties.resource-consistency.enabled:false}")
@@ -80,6 +85,7 @@ public class InternalToPublicConsistency {
 
     public InternalToPublicConsistency(OrganisationService organisationService,
                                        ServiceService serviceService,
+                                       CatalogueService catalogueService,
                                        TrainingResourceService trainingResourceService,
                                        InteroperabilityRecordService interoperabilityRecordService,
                                        DeployableApplicationService deployableApplicationService,
@@ -87,7 +93,9 @@ public class InternalToPublicConsistency {
                                        ResourceInteroperabilityRecordService resourceInteroperabilityRecordService,
                                        DatasourceService datasourceService,
                                        ConfigurationTemplateInstanceService configurationTemplateInstanceService,
-                                       PublicOrganisationService publicOrganisationService, PublicServiceService publicServiceManager,
+                                       PublicOrganisationService publicOrganisationService,
+                                       PublicServiceService publicServiceManager,
+                                       PublicCatalogueService publicCatalogueService,
                                        PublicTrainingResourceService publicTrainingResourceManager,
                                        PublicDeployableApplicationService publicDeployableApplicationService,
                                        PublicAdapterService publicAdapterService,
@@ -98,6 +106,7 @@ public class InternalToPublicConsistency {
                                        SecurityService securityService, Configuration cfg, MailService mailService) {
         this.organisationService = organisationService;
         this.serviceService = serviceService;
+        this.catalogueService = catalogueService;
         this.trainingResourceService = trainingResourceService;
         this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
@@ -107,6 +116,7 @@ public class InternalToPublicConsistency {
         this.configurationTemplateInstanceService = configurationTemplateInstanceService;
         this.publicOrganisationService = publicOrganisationService;
         this.publicServiceManager = publicServiceManager;
+        this.publicCatalogueService = publicCatalogueService;
         this.publicTrainingResourceManager = publicTrainingResourceManager;
         this.publicDeployableApplicationService = publicDeployableApplicationService;
         this.publicAdapterService = publicAdapterService;
@@ -119,12 +129,12 @@ public class InternalToPublicConsistency {
         this.mailService = mailService;
     }
 
-    //TODO: test that all resources have approved status
-//    @Scheduled(cron = "0 0 0 * * *") // At midnight every day
-//    @Scheduled(initialDelay = 0, fixedRate = 6000) // every 2 min
+    @Scheduled(cron = "0 0 0 * * *")
+//    @Scheduled(initialDelay = 0, fixedRate = 6000)
     protected void logInternalToPublicResourceConsistency() {
         List<OrganisationBundle> allInternalApprovedProviders = organisationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<ServiceBundle> allInternalApprovedServices = serviceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
+        List<CatalogueBundle> allInternalApprovedCatalogues = catalogueService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<TrainingResourceBundle> allInternalApprovedTR = trainingResourceService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<DeployableApplicationBundle> allInternalApprovedDS = deployableApplicationService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
         List<InteroperabilityRecordBundle> allInternalApprovedIR = interoperabilityRecordService.getAll(createFacetFilter(), securityService.getAdminAccess()).getResults();
@@ -168,6 +178,18 @@ public class InternalToPublicConsistency {
             } catch (CatalogueResourceNotFoundException e) {
                 logs.add(String.format("Service with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         serviceBundle.getId(), serviceBundle.getCatalogueId(), serviceBundle.getIdentifiers().getPid()));
+            }
+        }
+
+        // check consistency for Catalogues
+        for (CatalogueBundle catalogueBundle : allInternalApprovedCatalogues) {
+            // try and get its Public instance
+            try {
+                publicCatalogueService.get(catalogueBundle.getIdentifiers().getPid(),
+                        catalogueBundle.getCatalogueId());
+            } catch (CatalogueResourceNotFoundException e) {
+                logs.add(String.format("Catalogue with ID [%s] is missing its Public instance [%s]",
+                        catalogueBundle.getId(), catalogueBundle.getIdentifiers().getPid()));
             }
         }
 
@@ -269,13 +291,13 @@ public class InternalToPublicConsistency {
         StringWriter out = new StringWriter();
         root.put("logs", logs);
         root.put("projectInstance", projectInstance);
-        root.put("project", catalogueName);
+        root.put("project", nodeProperties.getName());
 
         try {
             Template temp = cfg.getTemplate("internalToPublicResourceConsistency.ftl");
             temp.process(root, out);
             String teamMail = out.getBuffer().toString();
-            String subject = String.format("[%s] Internal to Public Resource Consistency Logs", catalogueName);
+            String subject = String.format("[%s] Internal to Public Resource Consistency Logs", nodeProperties.getName());
             if (enableConsistencyEmails) {
                 mailService.sendMail(Collections.singletonList(consistencyTo), null, Collections.singletonList(consistencyCC), subject, teamMail);
             }

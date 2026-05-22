@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
@@ -31,7 +31,7 @@ import gr.uoa.di.madgik.resourcecatalogue.manager.aspects.TriggersAspects;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
-import gr.uoa.di.madgik.resourcecatalogue.utils.OrganisationCascadeLifecycleManager;
+import gr.uoa.di.madgik.resourcecatalogue.utils.CatalogueResourceAggregator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +51,9 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     private static final Logger logger = LoggerFactory.getLogger(OrganisationManager.class);
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     private final GenericResourceService genericResourceService;
     private final ServiceService serviceService;
-    private final OrganisationCascadeLifecycleManager cascadeLifecycleService;
+    private final CatalogueResourceAggregator cascadeLifecycleService;
     private final EmailService emailService;
 
     @Autowired
@@ -74,7 +69,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
                                @Lazy ServiceService serviceService,
                                IdCreator idCreator,
                                SecurityService securityService,
-                               OrganisationCascadeLifecycleManager cascadeLifecycleService,
+                               CatalogueResourceAggregator cascadeLifecycleService,
                                EmailService emailService,
                                WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
@@ -108,11 +103,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     @Override
@@ -141,11 +132,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         logger.info("Verifying Organisation: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     @Override
@@ -158,33 +145,34 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     @Override
     public OrganisationBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         OrganisationBundle bundle = get(id, catalogueId);
         if (bundle.getMetadata().isPublished()) {
-            throw new ResourceException("You cannot directly suspend a Public resource", HttpStatus.FORBIDDEN);
+            throw new ResourceException("You cannot directly suspend a Public Organisation", HttpStatus.FORBIDDEN);
         }
-
-        logger.info("Suspending Provider: {} and all its Resources", bundle.getId());
+        logger.info("{} Organisation '{}' and all its resources", suspend ? "Suspending" : "Unsuspending", id);
         bundle.markSuspend(suspend, auth);
         cascadeLifecycleService.suspendAllRelatedResources(bundle, auth);
-
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     @Override
-    public Browsing<OrganisationBundle> getMy(FacetFilter ff, Authentication auth) {
+    public OrganisationBundle setSuspendWithoutCascade(String id, String catalogueId, boolean suspend, Authentication auth) {
+        OrganisationBundle bundle = get(id, catalogueId);
+        if (bundle.getMetadata().isPublished()) {
+            throw new ResourceException("You cannot directly suspend a Public Organisation", HttpStatus.FORBIDDEN);
+        }
+        logger.info("{} Organisation '{}'", suspend ? "Suspending" : "Unsuspending", id);
+        bundle.markSuspend(suspend, auth);
+        return genericResourceService.update(getResourceTypeName(), bundle);
+    }
+
+    @Override
+    public Paging<OrganisationBundle> getMy(FacetFilter ff, Authentication auth) {
         return getMyProviders(ff, auth, getResourceTypeName());
     }
     //endregion
@@ -223,11 +211,9 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
             bundle.getMetadata().setTerms(existingTerms);
 
             try {
-                genericResourceService.update(getResourceTypeName(), id, bundle);
+                genericResourceService.update(getResourceTypeName(), bundle);
             } catch (ResourceException | ResourceNotFoundException e) {
                 logger.info("Could not update terms for Provider with id: '{}'", id);
-            } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-                throw new RuntimeException(e);
             }
         }
     }
@@ -261,7 +247,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     @Override
     public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("hosting_legal_entity", hle);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -287,7 +273,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     private FacetFilter createFacetFilter(String catalogueId) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("catalogue_id", catalogueId);
         return ff;
     }

@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.service.ResourceCRUDService;
@@ -37,17 +37,17 @@ public interface PublicResourceService<T> extends ResourceCRUDService<T, Authent
     /**
      *
      * @param ff FacetFilter
-     * @return {@link Browsing<T>}
+     * @return {@link Paging<T>}
      */
-    Browsing<T> getAll(FacetFilter ff);
+    Paging<T> getAll(FacetFilter ff);
 
     /**
-     * Return a Browsing of Highlighted Service results.
+     * Return a Paging of Highlighted Service results.
      *
      * @param ff FacetFilter
-     * @return {@link Browsing<T>}
+     * @return {@link Paging<T>}
      */
-    Browsing<HighlightedResult<T>> searchServices(FacetFilter ff);
+    Paging<HighlightedResult<T>> searchServices(FacetFilter ff);
 
     /**
      *

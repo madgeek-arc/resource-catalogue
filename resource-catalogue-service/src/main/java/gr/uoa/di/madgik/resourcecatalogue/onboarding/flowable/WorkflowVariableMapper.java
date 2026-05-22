@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import org.springframework.stereotype.Component;

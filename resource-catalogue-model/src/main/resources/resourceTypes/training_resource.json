@@ -13,7 +13,9 @@
       "multivalued": false,
       "name": "catalogue_id",
       "path": "$.catalogueId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "catalogue",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Urls",
@@ -48,7 +50,9 @@
       "multivalued": false,
       "name": "node",
       "path": "$.trainingResource.nodePID",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Type",
@@ -62,49 +66,54 @@
       "multivalued": false,
       "name": "resource_owner",
       "path": "$.trainingResource.resourceOwner",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "organisation",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "EOSC Related Service",
       "multivalued": true,
       "name": "eosc_related_services",
       "path": "$.trainingResource.eoscRelatedServices[*]",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Keyword",
-      "multivalued": true,
-      "name": "keywords",
-      "path": "$.trainingResource.keywords[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "service",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "License",
       "multivalued": false,
       "name": "license",
       "path": "$.trainingResource.license.licenseName",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Access Rights",
       "multivalued": false,
       "name": "access_rights",
       "path": "$.trainingResource.accessRights",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Target Group",
       "multivalued": true,
       "name": "target_groups",
       "path": "$.trainingResource.targetGroups[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Learning Resource Type",
       "multivalued": true,
       "name": "learning_resource_types",
       "path": "$.trainingResource.learningResourceTypes[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Learning Outcomes",
@@ -118,21 +127,27 @@
       "multivalued": false,
       "name": "expertise_level",
       "path": "$.trainingResource.expertiseLevel",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Content Resource Types",
       "multivalued": true,
       "name": "content_resource_types",
       "path": "$.trainingResource.contentResourceTypes[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Qualifications",
       "multivalued": true,
       "name": "qualifications",
       "path": "$.trainingResource.qualifications[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Duration",
@@ -146,28 +161,43 @@
       "multivalued": true,
       "name": "languages",
       "path": "$.trainingResource.languages[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Scientific Domain",
       "multivalued": true,
       "name": "scientific_domains",
       "path": "$.trainingResource.scientificDomains[*].scientificDomain",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Scientific Subdomain",
       "multivalued": true,
       "name": "scientific_subdomains",
       "path": "$.trainingResource.scientificDomains[*].scientificSubdomain",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Keyword",
+      "multivalued": true,
+      "name": "keywords",
+      "path": "$.trainingResource.keywords[*]",
       "type": "java.lang.String"
     },
     {
-      "label": "Tag",
+      "label": "Creator Role",
       "multivalued": true,
-      "name": "tags",
-      "path": "$.provider.tags[*]",
-      "type": "java.lang.String"
+      "name": "creators_role",
+      "path": "$.trainingResource.creators[*].role",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
@@ -188,14 +218,14 @@
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.util.Date"
+      "type": "java.time.Instant"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.util.Date"
+      "type": "java.time.Instant"
     },
     {
       "label": null,
@@ -209,6 +239,20 @@
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "pid",
+      "path": "$.identifiers.pid",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "externalId",
+      "path": "$.identifiers.externalId",
       "type": "java.lang.String"
     },
     {
@@ -324,14 +368,18 @@
       "multivalued": false,
       "name": "status",
       "path": "$.status",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "audit_state",
       "path": "$.auditState",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",

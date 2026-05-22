@@ -27,13 +27,11 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.CatalogueService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
-import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.AuthenticationInfo;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +54,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
     private CatalogueService catalogueService;
     @Autowired
     private SecurityService securityService;
-    @Mock
-    private ServiceService serviceService;
+
     private static String providerId;
 
     /**
@@ -96,7 +93,9 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+
     /**
+     *
      * Test method for adding a provider to the database.
      * <p>
      * This test verifies the functionality of the {@code providerService.add} method by:

@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -30,6 +30,7 @@ import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundEx
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,11 +53,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private final RelationshipValidator relationshipValidator;
     private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
-
-    @Value("${catalogue.id}")
-    private String catalogueId;
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
 
     public DatasourceManager(OrganisationService organisationService,
                              @Lazy VocabularyService vocabularyService,
@@ -95,7 +91,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     @Transactional
 //    @TriggersAspects({"AfterServiceUpdateEmails"})
     public DatasourceBundle update(DatasourceBundle datasource, String comment, Authentication auth) {
-        DatasourceBundle existing = get(datasource.getId(), datasource.getCatalogueId());
+        DatasourceBundle existing = get(datasource.getId());
         // check if there are actual changes in the Service
         if (datasource.equals(existing)) {
             return datasource;
@@ -108,16 +104,11 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), datasource.getId(), datasource);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), datasource);
     }
 
     private void checkAndResetDatasourceOnboarding(DatasourceBundle datasource, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"));
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (datasource.getStatus().equals(vocabularyService.get("rejected").getId())) {
             if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
@@ -150,16 +141,11 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         updateProviderTemplateStatus(existing, status, auth);
 
         logger.info("Verifying Datasource: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     private void updateProviderTemplateStatus(DatasourceBundle datasource, String status, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"));
         switch (status) {
             case "pending":
                 provider.setTemplateStatus("pending template");
@@ -180,8 +166,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     public DatasourceBundle setActive(String id, Boolean active, Authentication auth) {
         DatasourceBundle existing = get(id);
 
-        OrganisationBundle provider = organisationService.get((String) existing.getDatasource().get("resourceOwner"),
-                existing.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) existing.getDatasource().get("resourceOwner"));
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Datasource, as its Provider is inactive", HttpStatus.CONFLICT);
         }
@@ -191,11 +176,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
     //endregion
 
@@ -210,14 +191,13 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         DatasourceBundle datasource = get(id);
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"));
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
         emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(datasource, provider);
     }
 
     @Override
-    public Browsing<DatasourceBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Paging<DatasourceBundle> getMy(FacetFilter filter, Authentication auth) {
         return getMyResources(filter, auth);
     }
 
@@ -228,7 +208,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -241,17 +221,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        List<DatasourceBundle> allProviderServices = getAll(ff, auth).getResults();
-        for (DatasourceBundle bundle : allProviderServices) {
-            if (bundle.getStatus().equals(vocabularyService.get("pending").getId())) {
-                return bundle;
-            }
-        }
-        return null;
+        return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
 
     // OpenAIRE

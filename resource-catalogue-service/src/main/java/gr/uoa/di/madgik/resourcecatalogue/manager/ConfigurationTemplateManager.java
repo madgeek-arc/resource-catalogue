@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -53,9 +53,6 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     private final VocabularyService vocabularyService;
     private final WebClient webClient;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     @Value("${argo.grnet.monitoring.token:}")
     private String monitoringToken;
     @Value("${argo.grnet.monitoring.service.types:}")
@@ -84,7 +81,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     @Override
     public ConfigurationTemplateBundle add(ConfigurationTemplateBundle ct, Authentication auth) {
         InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(
-                (String) ct.getConfigurationTemplate().get("interoperabilityRecordId"), catalogueId);
+                (String) ct.getConfigurationTemplate().get("interoperabilityRecordId"));
         OrganisationBundle organisationBundle = organisationService.get(
                 (String) interoperabilityRecordBundle.getInteroperabilityRecord().get("resourceOwner"),
                 interoperabilityRecordBundle.getCatalogueId());
@@ -95,7 +92,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
 
         ct.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         ct.setActive(true);
-        ct.setCatalogueId(this.catalogueId);
+        ct.setCatalogueId(null);
         this.createIdentifiers(ct, getResourceTypeName(), false);
         ct.setId(ct.getIdentifiers().getOriginalId());
         ConfigurationTemplateBundle ret = genericResourceService.add(getResourceTypeName(), ct, false); //FIXME
@@ -111,11 +108,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
         }
         bundle.markUpdate(UserInfo.of(auth), comment);
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     @Override
@@ -206,7 +199,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
 
     //region Not-Needed
     @Override
-    public Browsing<ConfigurationTemplateBundle> getMy(FacetFilter filter, Authentication authentication) {
+    public Paging<ConfigurationTemplateBundle> getMy(FacetFilter filter, Authentication authentication) {
         return null;
     }
 

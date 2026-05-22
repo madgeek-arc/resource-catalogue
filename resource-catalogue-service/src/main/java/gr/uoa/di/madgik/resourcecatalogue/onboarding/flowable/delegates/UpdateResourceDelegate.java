@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.WorkflowVariableMapper;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -56,11 +56,7 @@ public class UpdateResourceDelegate implements JavaDelegate {
 
         // Validation is disabled by design // TODO: probably enable again now that code is synchronous?
         Bundle updated;
-        try {
-            updated = genericResourceService.update(rType, resource.getId(), resource, false);
-        } catch (NoSuchFieldException | java.lang.reflect.InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException("Failed to update resource of type '" + rType + "' with id '" + resource.getId() + "'", e);
-        }
+        updated = genericResourceService.update(rType, resource, false);
         workflowVariableMapper.putResourceBundle(vars, updated, rName);
 
         execution.setVariable(rName, vars.get(rName));

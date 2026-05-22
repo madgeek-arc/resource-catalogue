@@ -16,21 +16,19 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.AdminAuthentication;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
-import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -43,18 +41,10 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     private final OrganisationManager providerManager;
 
-    private final SecurityService securityService;
-
-    private final IdCreator idCreator;
-
-    public VocabularyManager(@Lazy OrganisationManager providerManager, @Lazy IdCreator idCreator, @Lazy SecurityService securityService) {
-        super(Vocabulary.class);
+    public VocabularyManager(@Lazy OrganisationManager providerManager) {
         this.providerManager = providerManager;
-        this.idCreator = idCreator;
-        this.securityService = securityService;
     }
 
-    @Override
     public String getResourceTypeName() {
         return "vocabulary";
     }
@@ -94,7 +84,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         List<Vocabulary> children = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
 
         List<Vocabulary> allVocs = getAll(ff).getResults();
         for (Vocabulary vocabulary : allVocs) {
@@ -107,10 +97,14 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         return children;
     }
 
-
     @Override
-    public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
-        return super.getAll(ff, auth);
+    public List<Vocabulary> getByType(Vocabulary.Type type) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(Integer.MAX_VALUE);
+        ff.addFilter("type", type.getKey());
+        List<Vocabulary> vocList = getAll(ff, null).getResults();
+        return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
     }
 
     @Override
@@ -118,8 +112,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
-        Browsing<Vocabulary> allVocs = getAll(ff);
+        ff.setQuantity(Integer.MAX_VALUE);
+        Paging<Vocabulary> allVocs = getAll(ff);
         allVocabularies = allVocs.getResults()
                 .parallelStream()
                 .filter(Objects::nonNull)
@@ -137,41 +131,9 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    public List<Vocabulary> getByType(Vocabulary.Type type) {
-        FacetFilter ff = new FacetFilter();
-        ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
-        ff.addFilter("type", type.getKey());
-        List<Vocabulary> vocList = getAll(ff, null).getResults();
-        return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
-    }
-
-    @Override
-    public Map<String, Vocabulary> getVocabulariesMap() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        return getAll(ff, null)
-                .getResults()
-                .stream()
-                .collect(Collectors.toMap(Vocabulary::getId, v -> v));
-    }
-
-    @Override
-    public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
-        super.addBulk(vocabularies, auth);
-    }
-
-    @Override
-    public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
-        for (Vocabulary vocabulary : vocabularies) {
-            update(vocabulary, auth);
-        }
-    }
-
-    @Override
     public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
             delete(vocabulary);
@@ -183,45 +145,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         for (Vocabulary vocabulary : toBeDeleted) {
             super.delete(vocabulary);
         }
-    }
-
-    @Override
-    public VocabularyTree getVocabulariesTree(Vocabulary.Type type) { // TODO: refactor method
-        VocabularyTree root = new VocabularyTree();
-        root.setVocabulary(null);
-        Map<String, List<Vocabulary>> vocabularies = getBy("parent_id");
-        List<VocabularyTree> superTreeList = new ArrayList<>();
-        List<Vocabulary> superVocabularies = getByType(type);
-        if (superVocabularies != null) {
-            for (Vocabulary superVocabulary : superVocabularies) {
-                VocabularyTree superTree = new VocabularyTree();
-                superTree.setVocabulary(superVocabulary);
-                List<VocabularyTree> treeList = new ArrayList<>();
-                List<Vocabulary> vocs = vocabularies.get(superVocabulary.getId());
-                if (vocs != null) {
-                    for (Vocabulary voc : vocs) {
-                        VocabularyTree tree = new VocabularyTree();
-                        tree.setVocabulary(voc);
-                        List<VocabularyTree> subTreeList = new ArrayList<>();
-                        List<Vocabulary> subVocabularies = vocabularies.get(voc.getId());
-                        if (subVocabularies != null) {
-                            for (Vocabulary subVocabulary : subVocabularies) {
-                                VocabularyTree subTree = new VocabularyTree();
-                                subTree.setVocabulary(subVocabulary);
-//                    subTree.setChildren(null);
-                                subTreeList.add(subTree);
-                            }
-                        }
-                        tree.setChildren(subTreeList);
-                        treeList.add(tree);
-                    }
-                }
-                superTree.setChildren(treeList);
-                superTreeList.add(superTree);
-            }
-        }
-        root.setChildren(superTreeList);
-        return root;
     }
 
     @Override
@@ -238,30 +161,15 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         if (exists(vocabulary)) {
             throw new ResourceAlreadyExistsException(String.format("%s already exists!%n%s", getResourceTypeName(), vocabulary));
         }
-        String serialized = serialize(vocabulary);
-        Resource created = new Resource();
-        created.setPayload(serialized);
-        created.setResourceType(getResourceType());
-        resourceService.addResource(created);
+
         logger.debug("Adding Vocabulary {}", vocabulary);
+        super.add(vocabulary, auth);
+
         return vocabulary;
     }
 
-    @Override
-    public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
-        Resource existing = whereID(vocabulary.getId(), true);
-        String serialized = serialize(vocabulary);
-        serialized = serialized.replace(":tns", "");
-        serialized = serialized.replace("tns:", "");
-        existing.setPayload(serialized);
-        existing.setResourceType(getResourceType());
-        resourceService.updateResource(existing);
-        logger.debug("Updating Vocabulary {}", vocabulary);
-        return vocabulary;
-    }
-
+    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00pm, every 7 days starting on Monday, every month
     //    @Scheduled(initialDelay = 0, fixedRate = 120000)
-//    @Scheduled(cron = "0 0 12 ? * 2/7") // At 12:00:00pm, every 7 days starting on Monday, every month
     public void updateHostingLegalEntityVocabularyList() {
         logger.info("Checking for possible new Hosting Legal Entity entries..");
         List<Vocabulary> hostingLegalEntities = getByType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY);
@@ -270,18 +178,21 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             hostingLegalEntityNames.add(hostingLegalEntity.getName());
         }
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("active", true);
         ff.addFilter("status", "approved");
         ff.addFilter("published", false);
-        List<OrganisationBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
-        List<String> providerNames = new ArrayList<>();
+        List<OrganisationBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, new AdminAuthentication()).getResults();
+        Map<String, String> providerNames = new LinkedHashMap<>();
         for (OrganisationBundle organisationBundle : allActiveAndApprovedProviders) {
             if ((boolean) organisationBundle.getOrganisation().get("legalEntity")) {
-                providerNames.add((String) organisationBundle.getOrganisation().get("name"));
+                providerNames.put(
+                        (String) organisationBundle.getOrganisation().get("name"),
+                        organisationBundle.getCatalogueId()
+                );
             }
         }
-        for (Iterator<String> it = providerNames.iterator(); it.hasNext(); ) {
+        for (Iterator<String> it = providerNames.keySet().iterator(); it.hasNext(); ) {
             String providerName = it.next();
             for (String hleName : hostingLegalEntityNames) {
                 if (hleName.contains(providerName)) {
@@ -293,17 +204,18 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         updateHLEVocabularyList(providerNames);
     }
 
-    private void updateHLEVocabularyList(List<String> providerNames) {
-        for (String newHLE : providerNames) {
+    private void updateHLEVocabularyList(Map<String, String> providerNames) {
+        for (Map.Entry<String, String> entry : providerNames.entrySet()) {
             Vocabulary newHostingLegalEntity = new Vocabulary();
-            newHostingLegalEntity.setId(idCreator.sanitizeString(newHLE));
-            newHostingLegalEntity.setName(newHLE);
+            newHostingLegalEntity.setId(idCreator.sanitizeString(entry.getKey()));
+            newHostingLegalEntity.setName(entry.getKey());
             newHostingLegalEntity.setType(Vocabulary.Type.PROVIDER_HOSTING_LEGAL_ENTITY.getKey());
-            //TODO: Also add catalogueId as extras if this method gets activated
+            if (entry.getValue() != null) {
+                newHostingLegalEntity.setExtras(Map.of("catalogueId", entry.getValue()));
+            }
             logger.info("Creating a new Hosting Legal Entity Vocabulary with id: '{}' and name: '{}'",
                     newHostingLegalEntity.getId(), newHostingLegalEntity.getName());
-//                        add(newHostingLegalEntity, null);
+            add(newHostingLegalEntity, null);
         }
     }
-
 }

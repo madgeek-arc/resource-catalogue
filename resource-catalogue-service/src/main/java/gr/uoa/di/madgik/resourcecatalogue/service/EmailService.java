@@ -20,18 +20,18 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Timestamp;
@@ -56,16 +56,11 @@ public class EmailService {
     private final SecurityService securityService;
 
     // Properties
+    private final String nodeName;
     private final String registrationEmail;
     private final String homepage;
     private final boolean enableAdminNotifications;
     private final boolean enableProviderNotifications;
-
-    @Value("${elastic.index.max_result_window:10000}")
-    private int maxQuantity;
-
-    @Value("${catalogue.name}")
-    private String catalogueName;
 
     public EmailService(MailService mailService, Configuration cfg,
                         SecurityService securityService,
@@ -76,7 +71,8 @@ public class EmailService {
                         @Lazy DeployableApplicationManager deployableApplicationManager,
                         @Lazy InteroperabilityRecordManager interoperabilityRecordManager,
                         @Lazy AdapterManager adapterManager,
-                        CatalogueProperties properties) {
+                        CatalogueProperties properties,
+                        NodeProperties nodeProperties) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.securityService = securityService;
@@ -91,6 +87,7 @@ public class EmailService {
         this.registrationEmail = properties.getEmails().getRegistrationEmails().getTo();
         this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
         this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
+        this.nodeName = nodeProperties.getName();
     }
 
     //region mail functionalities
@@ -275,6 +272,46 @@ public class EmailService {
             );
         }
     }
+
+    public void sendCatalogueOnboardingEmailsToPortalAdmins(CatalogueBundle catalogue,
+                                                            OrganisationBundle organisation) {
+        EmailService.EmailBasicInfo emailBasicInfoUser =
+                initializeEmail("catalogueMailTemplate.ftl", catalogue,
+                        organisation.getOrganisation().get("name").toString());
+
+        EmailService.EmailBasicInfo emailBasicInfoAdmin =
+                initializeEmail("registrationTeamMailCatalogueTemplate.ftl", catalogue,
+                        organisation.getOrganisation().get("name").toString());
+
+        updateRootAccordingToResourceType(catalogue, emailBasicInfoUser);
+        emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
+
+        User registeredUser = extractRegisteredUser(organisation);
+        emailBasicInfoAdmin.updateRoot("user", registeredUser);
+
+        sendMailsFromTemplate(
+                "registrationTeamMailCatalogueTemplate.ftl",
+                emailBasicInfoAdmin.getRoot(),
+                emailBasicInfoAdmin.getSubject(),
+                registrationEmail,
+                "onboarding-team"
+        );
+
+        List<User> users = deduplicateUsersByEmail(
+                securityService.getProviderUsers(organisation.getId())
+        );
+
+        for (User user : users) {
+            emailBasicInfoUser.updateRoot("user", user);
+            sendMailsFromTemplate(
+                    "catalogueMailTemplate.ftl",
+                    emailBasicInfoUser.getRoot(),
+                    emailBasicInfoUser.getSubject(),
+                    user.getEmail().toLowerCase(),
+                    "provider"
+            );
+        }
+    }
     //endregion
 
     //region helper
@@ -428,34 +465,34 @@ public class EmailService {
             OrganisationBundle organisationBundle = (OrganisationBundle) bundle;
             String templateStatus = organisationBundle.getTemplateStatus();
             baseMessage = String.format("[%s] %s application for registering [%s]-[%s] as a new %s Resource",
-                    catalogueName, pronoun, bundleName, bundle.getId(), catalogueName);
+                    nodeName, pronoun, bundleName, bundle.getId(), nodeName);
             if (templateStatus.contains("pending")) {
                 return String.format("%s to the %s has been received and %s",
-                        baseMessage, catalogueName, isOnboardingTeam ? "should be reviewed" : "is under review");
+                        baseMessage, nodeName, isOnboardingTeam ? "should be reviewed" : "is under review");
             } else if (templateStatus.contains("approved")) {
                 if (organisationBundle.isActive()) {
                     return String.format("%s has been approved", baseMessage);
                 } else {
-                    return String.format("[%s] The Provider [%s] has been set to inactive", catalogueName, bundleName);
+                    return String.format("[%s] The Provider [%s] has been set to inactive", nodeName, bundleName);
                 }
             } else if (templateStatus.contains("rejected")) {
                 return String.format("%s has been rejected", baseMessage);
             } else {
-                return String.format("[%s] Resource Registration", catalogueName);
+                return String.format("[%s] Resource Registration", nodeName);
             }
         } else {
             baseMessage = String.format("[%s] %s application for registering [%s]-[%s] as a new %s %s",
-                    catalogueName, pronoun, bundleName, bundle.getId(), catalogueName,
+                    nodeName, pronoun, bundleName, bundle.getId(), nodeName,
                     bundle.getClass().getSimpleName());
             if (status.contains("pending")) {
                 return String.format("%s to the %s has been received and %s",
-                        baseMessage, catalogueName, isOnboardingTeam ? "should be reviewed" : "is under review");
+                        baseMessage, nodeName, isOnboardingTeam ? "should be reviewed" : "is under review");
             } else if (status.contains("approved")) {
                 return String.format("%s has been approved", baseMessage);
             } else if (status.contains("rejected")) {
                 return String.format("%s has been rejected", baseMessage);
             } else {
-                return String.format("[%s] Resource Registration", catalogueName);
+                return String.format("[%s] Resource Registration", nodeName);
             }
         }
     }
@@ -466,14 +503,14 @@ public class EmailService {
         switch (template) {
             case "adminDailyDigest.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Daily Notification - Changes to Resources",
-                        catalogueName));
+                        nodeName));
             case "adminOnboardingDigest.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Some new Providers are pending for your approval",
-                        catalogueName));
+                        nodeName));
                 break;
             case "providerOnboarding.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Friendly reminder for your Provider",
-                        catalogueName));
+                        nodeName));
                 break;
             default:
                 break;
@@ -500,42 +537,42 @@ public class EmailService {
                 break;
             case "providerOutdatedResources.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has one or more outdated Resources",
-                        catalogueName, resourceName, bundle.getId()));
+                        nodeName, resourceName, bundle.getId()));
                 break;
             case "providerAdminAdded.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your email has been added as an Administrator for " +
-                        "the Provider '%s'", catalogueName, resourceName));
+                        "the Provider '%s'", nodeName, resourceName));
                 break;
             case "providerAdminDeleted.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your email has been deleted from the Administration " +
-                        "Team of the Provider '%s'", catalogueName, resourceName));
+                        "Team of the Provider '%s'", nodeName, resourceName));
                 break;
             case "providerDeletionRequest.ftl":
-                emailBasicInfo.setSubject(String.format("[%s] Provider Deletion Request", catalogueName));
+                emailBasicInfo.setSubject(String.format("[%s] Provider Deletion Request", nodeName));
                 break;
             case "providerDeletion.ftl":
-                emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has been Deleted", catalogueName,
+                emailBasicInfo.setSubject(String.format("[%s] Your Provider [%s]-[%s] has been Deleted", nodeName,
                         resourceName, bundle.getId()));
                 break;
             case "bundleAudit.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Your %s [%s]-[%s] has been audited by the EPOT team",
-                        catalogueName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
+                        nodeName, bundle.getClass().getSimpleName(), resourceName, bundle.getId()));
                 break;
             case "invalidProviderUpdate.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] The Provider [%s]-[%s] previously marked as " +
-                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                        "[invalid] has been updated", nodeName, resourceName, bundle.getId()));
                 break;
             case "invalidServiceUpdate.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] The Service [%s]-[%s] previously marked as " +
-                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                        "[invalid] has been updated", nodeName, resourceName, bundle.getId()));
                 break;
             case "invalidTrainingResourceUpdate.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] The Training Resource [%s]-[%s] previously marked as " +
-                        "[invalid] has been updated", catalogueName, resourceName, bundle.getId()));
+                        "[invalid] has been updated", nodeName, resourceName, bundle.getId()));
                 break;
             case "interoperabilityRecordOnboardingForPortalAdmins.ftl":
                 emailBasicInfo.setSubject(String.format("[%s] Provider [%s]-[%s] has created a new Interoperability " +
-                        "Record", catalogueName, associatedResource, bundle.getPayload().get("resourceOwner")));
+                        "Record", nodeName, associatedResource, bundle.getPayload().get("resourceOwner")));
                 break;
             case "interoperabilityRecordOnboardingForProviderAdmins.ftl":
                 emailBasicInfo.setSubject(getProviderAdminsSubjectForInteroperabilityRecordOnboarding(
@@ -587,14 +624,14 @@ public class EmailService {
 
     private Map<String, Object> getRootTemplate() {
         Map<String, Object> root = new HashMap<>();
-        root.put("project", catalogueName);
+        root.put("project", nodeName);
         root.put("endpoint", homepage);
         return root;
     }
 
     private FacetFilter createFacetFilter() {
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(maxQuantity);
+        facetFilter.setQuantity(Integer.MAX_VALUE);
         facetFilter.addFilter("published", false);
         return facetFilter;
     }

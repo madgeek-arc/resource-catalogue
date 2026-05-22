@@ -23,7 +23,6 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -37,9 +36,6 @@ public class MailManagementAspect {
     private final OrganisationService organisationService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public MailManagementAspect(OrganisationService organisationService, EmailService emailService) {
         this.organisationService = organisationService;
         this.emailService = emailService;
@@ -52,7 +48,7 @@ public class MailManagementAspect {
             returning = "organisation")
     public void providerRegistrationEmails(final OrganisationBundle organisation) {
         logger.trace("Sending Registration emails");
-        if (!organisation.getMetadata().isPublished() && organisation.getCatalogueId().equals(catalogueId)) {
+        if (!organisation.getMetadata().isPublished() && organisation.getCatalogueId() == null) {
             emailService.sendOnboardingEmailsToProviderAdmins(organisation, "providerManager");
         }
     }
@@ -62,8 +58,8 @@ public class MailManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "service")
     public void providerRegistrationEmails(final ServiceBundle service) {
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
-                service.getCatalogueId());
+        if (service.getCatalogueId() != null) return;
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"), null);
         if (!provider.getTemplateStatus().equals("approved")) {
             logger.trace("Sending Registration emails");
             emailService.sendOnboardingEmailsToProviderAdmins(provider, "serviceManager");
@@ -75,8 +71,8 @@ public class MailManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "datasource")
     public void providerRegistrationEmails(final DatasourceBundle datasource) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"),
-                datasource.getCatalogueId());
+        if (datasource.getCatalogueId() != null) return;
+        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"), null);
         if (!provider.getTemplateStatus().equals("approved")) {
             logger.trace("Sending Registration emails");
             emailService.sendOnboardingEmailsToProviderAdmins(provider, "datasourceManager");
@@ -88,8 +84,8 @@ public class MailManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "training")
     public void providerRegistrationEmails(final TrainingResourceBundle training) {
-        OrganisationBundle provider = organisationService.get((String) training.getTrainingResource().get("resourceOwner"),
-                training.getCatalogueId());
+        if (training.getCatalogueId() != null) return;
+        OrganisationBundle provider = organisationService.get((String) training.getTrainingResource().get("resourceOwner"), null);
         if (!provider.getTemplateStatus().equals("approved")) {
             logger.trace("Sending Registration emails");
             emailService.sendOnboardingEmailsToProviderAdmins(provider, "trainingResourceManager");
@@ -101,8 +97,8 @@ public class MailManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "deployableApplication")
     public void providerRegistrationEmails(final DeployableApplicationBundle deployableApplication) {
-        OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
-                deployableApplication.getCatalogueId());
+        if (deployableApplication.getCatalogueId() != null) return;
+        OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"), null);
         if (!provider.getTemplateStatus().equals("approved")) {
             logger.trace("Sending Registration emails");
             emailService.sendOnboardingEmailsToProviderAdmins(provider, "deployableApplicationManager");
@@ -114,11 +110,24 @@ public class MailManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "guideline")
     public void providerRegistrationEmails(final InteroperabilityRecordBundle guideline) {
-        OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"),
-                guideline.getCatalogueId());
+        if (guideline.getCatalogueId() != null) return;
+        OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"), null);
         if (!provider.getTemplateStatus().equals("approved")) {
             logger.trace("Sending Registration emails");
             emailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(guideline, provider);
+        }
+    }
+
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
+            returning = "catalogue")
+    public void providerRegistrationEmails(final CatalogueBundle catalogue) {
+        if (catalogue.getCatalogueId() != null) return;
+        OrganisationBundle provider = organisationService.get((String) catalogue.getCatalogue().get("resourceOwner"), null);
+        if (!provider.getTemplateStatus().equals("approved")) {
+            logger.trace("Sending Registration emails");
+            emailService.sendCatalogueOnboardingEmailsToPortalAdmins(catalogue, provider);
         }
     }
     //endregion

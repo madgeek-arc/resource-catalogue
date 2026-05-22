@@ -17,20 +17,25 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
+import gr.uoa.di.madgik.registry.controllers.AbstractGenericController;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
+import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MultiValueMap;
@@ -41,14 +46,29 @@ import java.util.List;
 import java.util.Map;
 
 @RequestMapping
-public abstract class ResourceCrudController<T extends Identifiable> {
-    protected final ResourceService<T> service;
+public abstract class ResourceCrudController<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ResourceCrudController.class);
+    /** The service used to perform all read and write operations on the registry. */
+    protected final GenericResourceService service;
 
-    protected ResourceCrudController(ResourceService<T> service) {
-        this.service = service;
+    /**
+     * Constructs the controller with the required service dependency.
+     *
+     * @param genericResourceService the registry service; must not be {@code null}
+     */
+    protected ResourceCrudController(GenericResourceService genericResourceService) {
+        this.service = genericResourceService;
     }
+
+    /**
+     * Returns the registry resource-type name that this controller manages.
+     *
+     * <p>The value must match the {@code name} attribute of a registered {@code ResourceType}.
+     * It is used as the implicit {@code resourceType} argument for every service call.
+     *
+     * @return the resource-type name, never {@code null} or empty
+     */
+    protected abstract String getResourceTypeName();
 
     private String extractPid(String id, HttpServletRequest request) {
         String restOfThePath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
@@ -62,7 +82,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     @GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> get(@PathVariable(value = "id") String id,
                                  @Parameter(hidden = true) Authentication authentication) {
-        return new ResponseEntity<>(service.get(id), HttpStatus.OK);
+        return new ResponseEntity<>((T) service.get(getResourceTypeName(), id), HttpStatus.OK);
     }
 
     /**
@@ -82,41 +102,39 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     public ResponseEntity<T> getByPid(@PathVariable("id") @Parameter(allowReserved = true) String id,
                                       @Parameter(hidden = true) Authentication authentication,
                                       HttpServletRequest request) {
-        return new ResponseEntity<>(service.get(extractPid(id, request)), HttpStatus.OK);
+        return new ResponseEntity<>((T) service.get(getResourceTypeName(), extractPid(id, request)), HttpStatus.OK);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> add(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
-        if (service.exists(t))
-            throw new ResourceAlreadyExistsException();
-        ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.CREATED);
-        logger.debug("Created a new {} with id '{}'", t.getClass().getSimpleName(), t.getId());
-        return ret;
+        return new ResponseEntity<>(service.add(getResourceTypeName(), t), HttpStatus.CREATED);
+    }
+
+    @PostMapping(path = "/bulk")
+    public void addBulk(@RequestBody List<T> bundles, @Parameter(hidden = true) Authentication auth) {
+        for (T resource : bundles) {
+            this.add(resource, auth);
+        }
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> update(@RequestBody T t,
                                     @Parameter(hidden = true) Authentication auth) {
-        if (!service.exists(t))
+        if (!service.exists(getResourceTypeName(), t))
             throw new ResourceNotFoundException();
-        ResponseEntity<T> ret = new ResponseEntity<>(service.save(t), HttpStatus.OK);
-        logger.debug("Updated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
-        return ret;
+        return new ResponseEntity<>(service.update(getResourceTypeName(), t), HttpStatus.OK);
     }
 
     @PostMapping(path = "validate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> validate(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
-        service.validate(t);
-        logger.debug("Validated {} with id '{}'", t.getClass().getSimpleName(), t.getId());
+        service.validate(getResourceTypeName(), t); // TODO : Configure resource validator
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) {
-        T resource = service.get(id);
-        service.delete(resource);
-        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId());
-        return new ResponseEntity<>(resource, HttpStatus.OK);
+        service.delete(getResourceTypeName(), id);
+        return new ResponseEntity<>(HttpStatus.GONE);
     }
 
     @Hidden
@@ -124,10 +142,8 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     public ResponseEntity<T> deleteByPid(@PathVariable("id") @Parameter(allowReserved = true) String id,
                                          @Parameter(hidden = true) Authentication authentication,
                                          HttpServletRequest request) {
-        T resource = service.get(extractPid(id, request));
-        service.delete(resource);
-        logger.debug("Deleted {} with id '{}'", resource.getClass().getSimpleName(), resource.getId());
-        return new ResponseEntity<>(resource, HttpStatus.OK);
+        service.delete(getResourceTypeName(), extractPid(id, request));
+        return new ResponseEntity<>(HttpStatus.GONE);
     }
 
     // Filter a list of Resources based on a set of filters.
@@ -135,16 +151,7 @@ public abstract class ResourceCrudController<T extends Identifiable> {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
-        return new ResponseEntity<>(service.getAll(ff), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "ids", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<T>> getSome(@RequestParam("ids") String[] ids, @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(service.getSome(ids), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "by/{field}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, List<T>>> getBy(@PathVariable String field, @Parameter(hidden = true) Authentication auth) {
-        return new ResponseEntity<>(service.getBy(field), HttpStatus.OK);
+        ff.setResourceType(getResourceTypeName());
+        return new ResponseEntity<>(service.getResults(ff), HttpStatus.OK);
     }
 }

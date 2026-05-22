@@ -16,29 +16,32 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -46,53 +49,48 @@ import java.util.*;
 @Controller
 @RequestMapping("/wizard")
 @Tag(name = "wizard")
+@Hidden
 public class WizardController {
-
-    @Value("${catalogue.id}")
-    private String catalogueId;
-    @Value("${catalogue.homepage}")
-    private String homepage;
-    @Value("${node.pid}")
-    private String nodePid;
-    @Value("${node.registry.url}")
-    private String nodeRegistryUrl;
-    @Value("${node.registry.key}")
-    private String nodeRegistryKey;
 
     private static final Logger logger = LoggerFactory.getLogger(WizardController.class);
 
+    private final NodeProperties nodeProperties;
     private final VocabularyService vocabularyService;
     private final ModelService modelService;
     private final GenericResourceService genericService;
+    private final ObjectMapper objectMapper;
     private WebClient webClient;
 
     @PostConstruct
     public void init() {
         this.webClient = WebClient.builder()
-                .baseUrl(nodeRegistryUrl)
+                .baseUrl(nodeProperties.getRegistry().getUrl())
                 .build();
     }
 
     public WizardController(VocabularyService vocabularyService,
                             ModelService modelService,
-                            GenericResourceService genericService) {
+                            GenericResourceService genericService,
+                            ObjectMapper objectMapper,
+                            NodeProperties nodeProperties) {
         this.vocabularyService = vocabularyService;
         this.modelService = modelService;
         this.genericService = genericService;
+        this.objectMapper = objectMapper;
+        this.nodeProperties = nodeProperties;
     }
 
     @Operation(summary = "Check Vocabularies Existence")
     @GetMapping("/step1")
     public String checkVocabulariesExistence(Model model) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ClassPathResource vocabDir = new ClassPathResource("vocabularies");
-        File[] vocabFiles = vocabDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] vocabFiles = resolver.getResources("classpath:vocabularies/*.json");
 
         Map<String, Boolean> vocabStatus = new TreeMap<>();
         boolean allLoaded = true;
 
-        for (File file : vocabFiles) {
-            List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {
+        for (Resource resource : vocabFiles) {
+            List<Vocabulary> vocabularies = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {
             });
 
             if (!vocabularies.isEmpty()) {
@@ -116,13 +114,12 @@ public class WizardController {
     @Operation(summary = "Load Vocabularies")
     @PostMapping("/step1/loadVocabularies")
     public String loadVocabularies() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ClassPathResource vocabDir = new ClassPathResource("vocabularies");
-        File[] vocabularyFiles = vocabDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] vocabularyFiles = resolver.getResources("classpath:vocabularies/*.json");
 
-        if (vocabularyFiles != null) {
-            for (File file : vocabularyFiles) {
-                List<Vocabulary> vocabularies = objectMapper.readValue(file, new TypeReference<>() {
+        if (vocabularyFiles.length > 0) {
+            for (Resource resource : vocabularyFiles) {
+                List<Vocabulary> vocabularies = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {
                 });
 
                 if (!vocabularies.isEmpty()) {
@@ -146,13 +143,10 @@ public class WizardController {
     @Operation(summary = "Check Models Existence")
     @GetMapping("/step2")
     public String checkModelsExistence(Model model) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] modelFiles = resolver.getResources("classpath:models/*.json");
 
-        ClassPathResource modelDir = new ClassPathResource("models");
-        File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
-
-        if (modelFiles == null || modelFiles.length == 0) {
+        if (modelFiles.length == 0) {
             model.addAttribute("modelStatus", Collections.emptyMap());
             model.addAttribute("allModelsLoading", false);
             model.addAttribute("allModelsLoaded", true);
@@ -162,9 +156,9 @@ public class WizardController {
         Map<String, Boolean> modelStatus = new TreeMap<>();
         boolean nonePosted = true;
 
-        for (File file : modelFiles) {
+        for (Resource resource : modelFiles) {
             try {
-                gr.uoa.di.madgik.catalogue.ui.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
+                gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(resource.getInputStream(), gr.uoa.di.madgik.catalogue.domain.Model.class);
                 boolean exists;
                 try {
                     exists = modelService.get(m.getId()) != null;
@@ -180,7 +174,7 @@ public class WizardController {
                     nonePosted = false;
                 }
             } catch (Exception e) {
-                logger.warn("Skipping model file [{}]: {}", file.getName(), e.getMessage());
+                logger.warn("Skipping model file [{}]: {}", resource.getFilename(), e.getMessage());
             }
         }
 
@@ -197,14 +191,12 @@ public class WizardController {
     @Operation(summary = "Load Models")
     @PostMapping("/step2/loadModels")
     public String loadModels() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ClassPathResource modelDir = new ClassPathResource("models");
-        File[] modelFiles = modelDir.getFile().listFiles((dir, name) -> name.endsWith(".json"));
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] modelFiles = resolver.getResources("classpath:models/*.json");
 
-        for (File file : modelFiles) {
+        for (Resource resource : modelFiles) {
             try {
-                gr.uoa.di.madgik.catalogue.ui.domain.Model m = objectMapper.readValue(file, gr.uoa.di.madgik.catalogue.ui.domain.Model.class);
+                gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(resource.getInputStream(), gr.uoa.di.madgik.catalogue.domain.Model.class);
 
                 boolean exists;
                 try {
@@ -224,58 +216,33 @@ public class WizardController {
                 }
 
             } catch (Exception e) {
-                logger.error("Failed to process model file [{}]: {}", file.getName(), e.getMessage());
+                logger.error("Failed to process model file [{}]: {}", resource.getFilename(), e.getMessage());
             }
         }
 
         return "redirect:/wizard/step2";
     }
 
-    @Operation(summary = "Register node on Node Registry")
+    @Operation(summary = "Node Registry Information")
     @GetMapping("/step3")
-    public String checkNodeRegistration(Model model) {
-        NodeRegistryRequest request = new NodeRegistryRequest();
-        request.setLegalEntity(new NodeRegistryRequest.LegalEntity()); // important
-        model.addAttribute("nodeRequest", request);
-
+    public String nodeRegistryInfo(Model model) {
         boolean isRegistered = false;
         try {
             List<Map<String, Object>> nodes = webClient.get()
-                    .header("x-api-key", nodeRegistryKey)
+                    .header("x-api-key", nodeProperties.getRegistry().getKey())
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+                    .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {
+                    })
                     .block();
             if (nodes != null) {
                 isRegistered = nodes.stream()
-                        .anyMatch(node -> nodePid.equals(node.get("pid")));
+                        .anyMatch(node -> nodeProperties.getPid().getValue().equals(node.get("pid")));
             }
         } catch (Exception e) {
             logger.warn("Could not reach node registry to check registration status: {}", e.getMessage());
         }
-
         model.addAttribute("isRegistered", isRegistered);
         return "wizard-step3";
-    }
-
-    @PostMapping("/step3")
-    public String registerNodeOnNodeRegistry(@ModelAttribute NodeRegistryRequest request,
-                                             @RequestParam(required = false) String skip,
-                                             Model model) {
-        if ("true".equals(skip)) {
-            return "redirect:/wizard/success";
-        }
-        try {
-            webClient.post()
-                    .uri("/nodes")
-                    .bodyValue(request)
-                    .retrieve()
-                    .bodyToMono(Void.class)
-                    .block();
-        } catch (Exception e) {
-            model.addAttribute("error", "Failed to register node: " + e.getMessage());
-            return "wizard-step3";
-        }
-        return "redirect:/wizard/success";
     }
 
     @GetMapping("/success")
@@ -283,63 +250,4 @@ public class WizardController {
         return "wizard-success";
     }
 
-    public class NodeRegistryRequest {
-        private String name;
-        private String logo;
-        private String nodeEndpoint;
-        private LegalEntity legalEntity;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getLogo() {
-            return logo;
-        }
-
-        public void setLogo(String logo) {
-            this.logo = logo;
-        }
-
-        public String getNodeEndpoint() {
-            return nodeEndpoint;
-        }
-
-        public void setNodeEndpoint(String nodeEndpoint) {
-            this.nodeEndpoint = nodeEndpoint;
-        }
-
-        public LegalEntity getLegalEntity() {
-            return legalEntity;
-        }
-
-        public void setLegalEntity(LegalEntity legalEntity) {
-            this.legalEntity = legalEntity;
-        }
-
-        public static class LegalEntity {
-            private String name;
-            private String rorId;
-
-            public String getName() {
-                return name;
-            }
-
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            public String getRorId() {
-                return rorId;
-            }
-
-            public void setRorId(String rorId) {
-                this.rorId = rorId;
-            }
-        }
-    }
 }

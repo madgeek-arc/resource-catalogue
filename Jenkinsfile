@@ -1,6 +1,12 @@
 pipeline {
   agent any
 
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 30, unit: 'MINUTES')
+    timestamps()
+  }
+
   environment {
     IMAGE_NAME = "resource-catalogue"
     REGISTRY = "docker.madgik.di.uoa.gr"
@@ -10,7 +16,6 @@ pipeline {
     DOCKER_BUILDKIT = '1'
   }
   stages {
-
     stage('Determine Docker Tag') {
       steps {
         script {
@@ -21,10 +26,22 @@ pipeline {
       }
     }
 
+    stage('Test') {
+      when { expression { return env.TAG_NAME == null } }
+      steps {
+        sh 'mvn -B verify'
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
+        }
+      }
+    }
+
     stage('Build Image') {
       steps{
         script {
-          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond .")
+          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond --build-arg skipTests=true .")
         }
       }
     }
@@ -87,7 +104,6 @@ pipeline {
     }
 
   }
-  // post-build actions
   post {
     always {
       script {

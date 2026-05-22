@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -49,11 +49,6 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private final OrganisationService organisationService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public AdapterManager(OIDCSecurityService securityService,
                           VocabularyService vocabularyService,
                           IdCreator idCreator,
@@ -82,11 +77,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         }
         bundle.markUpdate(UserInfo.of(auth), comment);
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     @Override
@@ -106,11 +97,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         logger.info("Verifying Adapter: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     @Override
@@ -129,11 +116,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
     //endregion
 
@@ -155,7 +138,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     }
 
     @Override
-    public Browsing<AdapterBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Paging<AdapterBundle> getMy(FacetFilter filter, Authentication auth) {
         return getMyResources(filter, auth);
     }
 
@@ -166,7 +149,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }

@@ -1,9 +1,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -19,17 +19,15 @@ public class NodeResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeResolver.class);
 
-    private String nodeRegistryUrl;
-    private String nodeRegistryKey;
+    private final String nodeRegistryKey;
 
     private WebClient webClient;
 
-    public NodeResolver(@Value("${node.registry.url}") String nodeRegistryUrl,
-                        @Value("${node.registry.key}") String nodeRegistryKey) {
+    public NodeResolver(NodeProperties nodeProperties) {
         this.webClient = WebClient.builder()
-                .baseUrl(nodeRegistryUrl)
+                .baseUrl(nodeProperties.getRegistry().getUrl())
                 .build();
-        this.nodeRegistryKey = nodeRegistryKey;
+        this.nodeRegistryKey = nodeProperties.getRegistry().getKey();
     }
 
     public record CapabilitiesResponse(

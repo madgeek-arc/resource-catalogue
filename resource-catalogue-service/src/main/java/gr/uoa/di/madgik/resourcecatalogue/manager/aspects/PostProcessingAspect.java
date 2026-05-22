@@ -17,7 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
@@ -145,7 +146,7 @@ public class PostProcessingAspect {
                         hle.getId(), hle.getName());
                 vocabularyService.update(hle, null);
             }
-        } catch (ResourceException e) {
+        } catch (ResourceNotFoundException e) {
             hle = new Vocabulary();
             hle.setId(hleId);
             hle.setName(name);

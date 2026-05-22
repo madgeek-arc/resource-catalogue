@@ -58,6 +58,14 @@ public interface SecurityService {
     boolean hasAdminAccess(Authentication auth, @NotNull String id);
 
     /**
+     * @param auth        Authentication
+     * @param externalId  external Provider id (as given by the user in the URL)
+     * @param catalogueId Catalogue id
+     * @return True if the authenticated user is a Provider Admin within the given Catalogue
+     */
+    boolean hasAdminAccess(Authentication auth, @NotNull String externalId, @NotNull String catalogueId);
+
+    /**
      * @param user User
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
@@ -70,6 +78,15 @@ public interface SecurityService {
      * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered.
      */
     boolean isResourceAdmin(Authentication auth, String resourceId);
+
+    /**
+     * @param auth        Authentication
+     * @param externalId  external resource id (as given by the user in the URL)
+     * @param catalogueId Catalogue id
+     * @return True if the authenticated user is a Provider Admin for the provider where the resource is registered
+     * within the given Catalogue
+     */
+    boolean isResourceAdmin(Authentication auth, String externalId, String catalogueId);
 
     /**
      * @param user       User
@@ -95,53 +112,52 @@ public interface SecurityService {
     boolean resourceIsApprovedAndUserIsAdmin(Authentication auth, String resourceId);
 
     /**
-     * @param id          service id
-     * @param catalogueId catalogue id
+     * @param id service id
      * @return True if provider is active
      */
-    boolean providerIsActive(String id, String catalogueId);
+    boolean providerIsActive(String id);
 
     /**
-     * @param id          service id
-     * @param catalogueId catalogue id
+     * @param id service id
      * @return True if service is active
      */
-    boolean serviceIsActive(String id, String catalogueId);
+    boolean serviceIsActive(String id);
 
     /**
-     * @param id          datasource id
-     * @param catalogueId catalogue id
+     * @param id datasource id
      * @return True if datasource is active
      */
-    boolean datasourceIsActive(String id, String catalogueId);
+    boolean datasourceIsActive(String id);
 
     /**
-     * @param id          deployable application id
-     * @param catalogueId catalogue id
+     * @param id catalogue id
+     * @return True if catalogue is active
+     */
+    boolean catalogueIsActive(String id);
+
+    /**
+     * @param id deployable application id
      * @return True if service is active
      */
-    boolean deployableApplicationIsActive(String id, String catalogueId);
+    boolean deployableApplicationIsActive(String id);
 
     /**
-     * @param id          service id
-     * @param catalogueId catalogue id
+     * @param id service id
      * @return True if training resource is active
      */
-    boolean trainingResourceIsActive(String id, String catalogueId);
+    boolean trainingResourceIsActive(String id);
 
     /**
-     * @param id          service id
-     * @param catalogueId catalogue id
+     * @param id service id
      * @return True if interoperability record (guideline) is active
      */
-    boolean guidelineIsActive(String id, String catalogueId);
+    boolean guidelineIsActive(String id);
 
     /**
-     * @param id          adapter id
-     * @param catalogueId catalogue id
+     * @param id adapter id
      * @return True if adapter is active
      */
-    boolean adapterIsActive(String id, String catalogueId);
+    boolean adapterIsActive(String id);
 
     /**
      *

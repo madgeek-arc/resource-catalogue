@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.util.List;
 
 public interface MailService {

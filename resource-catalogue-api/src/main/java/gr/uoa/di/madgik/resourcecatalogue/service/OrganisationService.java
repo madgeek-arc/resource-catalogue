@@ -50,4 +50,16 @@ public interface OrganisationService extends ResourceCatalogueGenericService<Org
      * @return {@link List}&lt;{@link MapValues}&lt;{@link CatalogueValue}&gt;&gt;
      */
     List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth);
+
+    /**
+     * Suspend/unsuspend the organisation bundle only, without cascading to its sub-resources.
+     * Use this when the caller already handles sub-resource suspension independently.
+     *
+     * @param id          organisation ID
+     * @param catalogueId catalogue ID
+     * @param suspend     whether to suspend or unsuspend
+     * @param auth        Authentication
+     * @return {@link OrganisationBundle}
+     */
+    OrganisationBundle setSuspendWithoutCascade(String id, String catalogueId, boolean suspend, Authentication auth);
 }

@@ -16,10 +16,10 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
@@ -48,9 +48,6 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
     private final GenericResourceService genericResourceService;
     private final VocabularyService vocabularyService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
     public ConfigurationTemplateInstanceManager(@Lazy ConfigurationTemplateInstanceService service,
                                                 @Lazy ConfigurationTemplateService configService,
                                                 @Lazy ResourceInteroperabilityRecordService rirService,
@@ -77,7 +74,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
 
         cti.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         cti.setActive(true);
-        cti.setCatalogueId(this.catalogueId);
+        cti.setCatalogueId(null);
         this.createIdentifiers(cti, getResourceTypeName(), false);
         cti.setId(cti.getIdentifiers().getOriginalId());
         //FIXME: should pass validation
@@ -108,12 +105,8 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
                     "ConfigurationTemplateInstance is related");
         }
 
-        try {
-            //FIXME: should pass validation
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle, false);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        //FIXME: should pass validation
+        return genericResourceService.update(getResourceTypeName(), bundle, false);
     }
 
     @Override
@@ -223,7 +216,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
 
     //region Not-Used
     @Override
-    public Browsing<ConfigurationTemplateInstanceBundle> getMy(FacetFilter filter, Authentication authentication) {
+    public Paging<ConfigurationTemplateInstanceBundle> getMy(FacetFilter filter, Authentication authentication) {
         return null;
     }
 
