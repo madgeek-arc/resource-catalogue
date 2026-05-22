@@ -362,7 +362,7 @@ accounting.token-endpoint=
 sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
 
 ## Node Registry ##
-node.pid=
+node.pid.value=
 node.name=
 node.registry.url=
 node.registry.key=
