@@ -718,54 +718,6 @@ Criteria for submitting content to the repository as well as product preparation
       
   </xs:complexType>
     
-  <xs:complexType name="helpdesk">
-        
-    <xs:sequence>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="agents" nillable="true" type="xs:string"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="emails" nillable="true" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="helpdeskType" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="organisation" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="serviceId" type="xs:string"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="services" nillable="true" type="xs:string"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="signatures" nillable="true" type="xs:string"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="supportGroups" nillable="true" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="ticketPreservation" type="xs:boolean"/>
-            
-      <xs:element minOccurs="0" name="webform" type="xs:boolean"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="helpdeskBundle">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="helpdesk" type="helpdesk"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
   <xs:complexType name="interoperabilityRecord">
         
     <xs:sequence>
@@ -1085,22 +1037,6 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
       
   </xs:complexType>
     
-  <xs:complexType name="monitoring">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="monitoredBy" type="xs:string"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="monitoringGroups" nillable="true" type="monitoringGroup"/>
-            
-      <xs:element minOccurs="0" name="serviceId" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:complexType name="monitoringGroup">
         
     <xs:sequence>
@@ -1112,24 +1048,6 @@ versions. The record's primary key for locating it in the EOSC-IF database.]]></
       <xs:element minOccurs="0" name="serviceType" type="xs:string"/>
           
     </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="monitoringBundle">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="monitoring" type="monitoring"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
       
   </xs:complexType>
     
@@ -1389,40 +1307,6 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       <xs:element maxOccurs="unbounded" minOccurs="0" name="eoscIFGuidelines" nillable="true" type="eoscifGuidelines"/>
           
     </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="resourceInteroperabilityRecord">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="catalogueId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="interoperabilityRecordIds" nillable="true" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="resourceInteroperabilityRecordBundle">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="resourceInteroperabilityRecord" type="resourceInteroperabilityRecord"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
       
   </xs:complexType>
     
@@ -2174,32 +2058,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       
   </xs:complexType>
     
-  <xs:complexType name="vocabularyCuration">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="entryValueName" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="parent" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="rejectionReason" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="resolutionDate" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="resolutionUser" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="status" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="vocabulary" type="xs:string"/>
-            
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="vocabularyEntryRequests" nillable="true" type="vocabularyEntryRequest"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:complexType name="vocabularyEntryRequest">
         
     <xs:sequence>
@@ -2218,144 +2076,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       
   </xs:complexType>
     
-  <xs:complexType name="configurationTemplate">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="description" type="xs:string"/>
-            
-      <xs:element name="formModel">
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
-                            
-              <xs:complexType>
-                                
-                <xs:sequence>
-                                    
-                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
-                                    
-                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
-                                  
-                </xs:sequence>
-                              
-              </xs:complexType>
-                          
-            </xs:element>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="interoperabilityRecordId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="name" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplateBundle">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="configurationTemplate" type="configurationTemplate"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplateInstance">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="configurationTemplateId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="payload" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplateInstanceBundle">
-        
-    <xs:complexContent>
-            
-      <xs:extension base="bundle">
-                
-        <xs:sequence>
-                    
-          <xs:element minOccurs="0" name="configurationTemplateInstance" type="configurationTemplateInstance"/>
-                  
-        </xs:sequence>
-              
-      </xs:extension>
-          
-    </xs:complexContent>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="configurationTemplateInstanceDto">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="configurationTemplateId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element name="payload">
-                
-        <xs:complexType>
-                    
-          <xs:sequence>
-                        
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
-                            
-              <xs:complexType>
-                                
-                <xs:sequence>
-                                    
-                  <xs:element minOccurs="0" name="key" type="xs:anyType"/>
-                                    
-                  <xs:element minOccurs="0" name="value" type="xs:anyType"/>
-                                  
-                </xs:sequence>
-                              
-              </xs:complexType>
-                          
-            </xs:element>
-                      
-          </xs:sequence>
-                  
-        </xs:complexType>
-              
-      </xs:element>
-            
-      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:simpleType name="userActionType">
         
     <xs:restriction base="xs:string">
@@ -2369,20 +2089,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:enumeration value="ORDER"/>
             
       <xs:enumeration value="ADD_TO_PROJECT"/>
-          
-    </xs:restriction>
-      
-  </xs:simpleType>
-    
-  <xs:simpleType name="helpdeskType">
-        
-    <xs:restriction base="xs:string">
-            
-      <xs:enumeration value="FULL_INTEGRATION"/>
-            
-      <xs:enumeration value="TICKET_REDIRECTION"/>
-            
-      <xs:enumeration value="DIRECT_USAGE"/>
           
     </xs:restriction>
       
@@ -2669,20 +2375,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:enumeration value="CT_PROTOCOL"/>
             
       <xs:enumeration value="CT_COMPATIBILITY"/>
-          
-    </xs:restriction>
-      
-  </xs:simpleType>
-    
-  <xs:simpleType name="status">
-        
-    <xs:restriction base="xs:string">
-            
-      <xs:enumeration value="PENDING"/>
-            
-      <xs:enumeration value="APPROVED"/>
-            
-      <xs:enumeration value="REJECTED"/>
           
     </xs:restriction>
       

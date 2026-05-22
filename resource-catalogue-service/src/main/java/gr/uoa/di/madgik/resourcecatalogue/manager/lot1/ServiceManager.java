@@ -14,5 +14,21 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.domain.configurationTemplates;
+package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
+import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ServiceManager extends ResourceManager<ServiceBundle> {
+
+    public ServiceManager() {
+        super(ServiceBundle.class);
+    }
+
+    @Override
+    public String getResourceTypeName() {
+        return "service";
+    }
+}

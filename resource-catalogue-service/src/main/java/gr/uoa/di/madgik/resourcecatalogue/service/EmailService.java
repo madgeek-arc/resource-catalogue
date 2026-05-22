@@ -152,7 +152,7 @@ public class EmailService {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminAdded.ftl", organisationBundle,
                 null);
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle)));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
         for (User user : users) {
             String userEmail = user.getEmail().toLowerCase();
             if (admins == null || admins.contains(userEmail)) {
@@ -167,7 +167,7 @@ public class EmailService {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminDeleted.ftl", organisationBundle,
                 null);
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle)));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
         for (User user : users) {
             if (admins.contains(user.getEmail().toLowerCase())) {
                 emailBasicInfo.updateRoot("user", user);

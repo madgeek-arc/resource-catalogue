@@ -1,0 +1,245 @@
+/*
+ * Copyright 2017-2026 OpenAIRE AMKE & Athena Research and Innovation Center
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
+
+import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
+import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
+import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class VocabularyManager extends ResourceManager<Vocabulary> implements VocabularyService {
+
+    private static final Logger logger = LoggerFactory.getLogger(VocabularyManager.class);
+
+    public VocabularyManager() {
+        super(Vocabulary.class);
+    }
+
+    @Override
+    public String getResourceTypeName() {
+        return "vocabulary";
+    }
+
+    @Override
+    public Vocabulary getOrElseThrow(String id) {
+        Vocabulary vocabulary = null;
+        try {
+            vocabulary = get(id);
+        } catch (ResourceException e) {
+            throw new ResourceNotFoundException(id, "Vocabulary");
+        }
+        return vocabulary;
+    }
+
+    @Override
+    public String[] getRegion(String name) {
+        List<Vocabulary> allCountries = getByType(Vocabulary.Type.COUNTRY);
+        if (name.equals("WW")) {
+            return allCountries.stream().map(Vocabulary::getId).toArray(String[]::new);
+        } else {
+            return allCountries.stream()
+                    .filter(vocabulary -> vocabulary.getExtras().containsKey("region"))
+                    .filter(vocabulary -> vocabulary.getExtras().get("region").equals(name))
+                    .map(Vocabulary::getId)
+                    .toArray(String[]::new);
+        }
+    }
+
+    @Override
+    public Vocabulary getParent(String id) {
+        return get(get(id).getParentId());
+    }
+
+    @Override
+    public List<Vocabulary> getChildren(String parentId) {
+        List<Vocabulary> children = new ArrayList<>();
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(maxQuantity);
+        List<Vocabulary> allVocs = getAll(ff).getResults();
+        for (Vocabulary vocabulary : allVocs) {
+            if (parentId.equals(vocabulary.getParentId())) {
+                children.add(vocabulary);
+            }
+        }
+        children.sort(Comparator.comparing(Vocabulary::getName));
+        return children;
+    }
+
+    @Override
+    public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
+        return super.getAll(ff, auth);
+    }
+
+    @Override
+    public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(maxQuantity);
+        Browsing<Vocabulary> allVocs = getAll(ff);
+        return allVocs.getResults()
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(
+                        value -> Vocabulary.Type.fromString(value.getType()),
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> list.stream()
+                                        .sorted(Comparator.comparing(Vocabulary::getName))
+                                        .collect(Collectors.toList())
+                        )
+                ));
+    }
+
+    @Override
+    public List<Vocabulary> getByType(Vocabulary.Type type) {
+        FacetFilter ff = new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
+        ff.setQuantity(maxQuantity);
+        ff.addFilter("type", type.getKey());
+        List<Vocabulary> vocList = getAll(ff, null).getResults();
+        return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Vocabulary> getVocabulariesMap() {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        return getAll(ff, null)
+                .getResults()
+                .stream()
+                .collect(Collectors.toMap(Vocabulary::getId, v -> v));
+    }
+
+    @Override
+    public void addBulk(List<Vocabulary> vocabularies, Authentication auth) {
+        super.addBulk(vocabularies, auth);
+    }
+
+    @Override
+    public void updateBulk(List<Vocabulary> vocabularies, Authentication auth) {
+        for (Vocabulary vocabulary : vocabularies) {
+            update(vocabulary, auth);
+        }
+    }
+
+    @Override
+    public void deleteAll(Authentication auth) {
+        FacetFilter ff = new FacetFilter();
+        ff.setQuantity(maxQuantity);
+        List<Vocabulary> allVocs = getAll(ff, auth).getResults();
+        for (Vocabulary vocabulary : allVocs) {
+            delete(vocabulary);
+        }
+    }
+
+    @Override
+    public void deleteByType(Vocabulary.Type type) {
+        List<Vocabulary> toBeDeleted = getByType(type);
+        for (Vocabulary vocabulary : toBeDeleted) {
+            super.delete(vocabulary);
+        }
+    }
+
+    @Override
+    public VocabularyTree getVocabulariesTree(Vocabulary.Type type) {
+        VocabularyTree root = new VocabularyTree();
+        root.setVocabulary(null);
+        Map<String, List<Vocabulary>> vocabularies = getBy("parent_id");
+        List<VocabularyTree> superTreeList = new ArrayList<>();
+        List<Vocabulary> superVocabularies = getByType(type);
+        if (superVocabularies != null) {
+            for (Vocabulary superVocabulary : superVocabularies) {
+                VocabularyTree superTree = new VocabularyTree();
+                superTree.setVocabulary(superVocabulary);
+                List<VocabularyTree> treeList = new ArrayList<>();
+                List<Vocabulary> vocs = vocabularies.get(superVocabulary.getId());
+                if (vocs != null) {
+                    for (Vocabulary voc : vocs) {
+                        VocabularyTree tree = new VocabularyTree();
+                        tree.setVocabulary(voc);
+                        List<VocabularyTree> subTreeList = new ArrayList<>();
+                        List<Vocabulary> subVocabularies = vocabularies.get(voc.getId());
+                        if (subVocabularies != null) {
+                            for (Vocabulary subVocabulary : subVocabularies) {
+                                VocabularyTree subTree = new VocabularyTree();
+                                subTree.setVocabulary(subVocabulary);
+                                subTreeList.add(subTree);
+                            }
+                        }
+                        tree.setChildren(subTreeList);
+                        treeList.add(tree);
+                    }
+                }
+                superTree.setChildren(treeList);
+                superTreeList.add(superTree);
+            }
+        }
+        root.setChildren(superTreeList);
+        return root;
+    }
+
+    @Override
+    public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
+        if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
+            String id = vocabulary.getName().toLowerCase();
+            id = id.replace(" ", "_");
+            id = id.replace("&", "and");
+            if (vocabulary.getParentId() != null) {
+                id = String.format("%s-%s", vocabulary.getParentId().toLowerCase(), id);
+            }
+            vocabulary.setId(id);
+        }
+        if (exists(vocabulary)) {
+            throw new ResourceAlreadyExistsException(String.format("%s already exists!%n%s", getResourceTypeName(), vocabulary));
+        }
+        String serialized = serialize(vocabulary);
+        Resource created = new Resource();
+        created.setPayload(serialized);
+        created.setResourceType(getResourceType());
+        resourceService.addResource(created);
+        logger.debug("Adding Vocabulary {}", vocabulary);
+        return vocabulary;
+    }
+
+    @Override
+    public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
+        Resource existing = whereID(vocabulary.getId(), true);
+        String serialized = serialize(vocabulary);
+        serialized = serialized.replace(":tns", "");
+        serialized = serialized.replace("tns:", "");
+        existing.setPayload(serialized);
+        existing.setResourceType(getResourceType());
+        resourceService.updateResource(existing);
+        logger.debug("Updating Vocabulary {}", vocabulary);
+        return vocabulary;
+    }
+}

@@ -246,7 +246,7 @@
             <dependency> <!-- CVE-2025-66453: rhino 1.7.7.1 pulled in by json-schema-core:1.2.10 -->
                 <groupId>org.mozilla</groupId>
                 <artifactId>rhino</artifactId>
-                <version>1.7.15</version>
+                <version>1.7.15.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -371,6 +371,9 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <dataDirectory>${user.home}/.owasp/dependency-check-data</dataDirectory>
+                    <nvdValidForHours>24</nvdValidForHours>
+                    <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
                     <failBuildOnCVSS>7.6</failBuildOnCVSS>
                     <formats>
                         <format>JSON</format>

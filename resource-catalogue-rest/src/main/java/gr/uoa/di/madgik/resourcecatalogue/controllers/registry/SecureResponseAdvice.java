@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.domain.Facet;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
@@ -77,6 +78,8 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                              ServerHttpResponse serverHttpResponse) {
         if (t != null) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            // TODO: remove when implemented correctly
+            fixNodeFacets(t, resolveNodeName());
 
             if (t != null && !securityService.hasRole(auth, "ROLE_ADMIN") && !securityService.hasRole(auth, "ROLE_EPOT")) {
                 logger.trace("User is not Admin nor EPOT: attempting to remove sensitive information");
@@ -97,6 +100,24 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             return t;
         }
         return null;
+    }
+
+    private String resolveNodeName() {
+        NodeResolver.Node node = nodeResolver.fetchNodes().stream().filter(f -> f.pid().equals(nodePid)).findFirst().orElseThrow();
+        return node.name();
+    }
+
+    private void fixNodeFacets(T t, String nodeLabel) {
+        if (Paging.class.isAssignableFrom(t.getClass())) {
+            Facet nodeFacet = ((Paging<?>) t).getFacets().stream().filter(f -> f.getField().equals("node")).findFirst().orElse(null);
+            if (nodeFacet != null) {
+                for (gr.uoa.di.madgik.registry.domain.Value value : nodeFacet.getValues()) {
+                    if (!nodeLabel.equalsIgnoreCase(value.getLabel())) {
+                        value.setLabel("%s (%s)".formatted(nodeLabel, value.getLabel()));
+                    }
+                }
+            }
+        }
     }
 
     //TODO: enable for LinkedHasMap too
