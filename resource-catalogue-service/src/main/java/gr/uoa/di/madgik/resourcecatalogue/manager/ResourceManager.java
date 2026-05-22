@@ -22,25 +22,28 @@ import gr.uoa.di.madgik.registry.domain.Resource;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiable;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 
 public abstract class ResourceManager<T extends Identifiable> implements ResourceService<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceManager.class);
 
-    protected final GenericResourceService genericResourceService;
-    protected final IdCreator idCreator;
-    protected final int maxQuantity;
+    @Autowired
+    protected GenericResourceService genericResourceService;
+    @Autowired
+    protected IdCreator idCreator;
+    @Value("${elastic.index.max_result_window:10000}")
+    protected int maxQuantity;
 
-    public ResourceManager(GenericResourceService genericResourceService, IdCreator idCreator, int maxQuantity) {
-        this.genericResourceService = genericResourceService;
-        this.idCreator = idCreator;
-        this.maxQuantity = maxQuantity;
+    public ResourceManager() {
     }
 
     public abstract String getResourceTypeName();
@@ -97,7 +100,6 @@ public abstract class ResourceManager<T extends Identifiable> implements Resourc
 
     @Override
     public final T save(T t) {
-        Resource resource = new Resource();
         if (exists(t)) { // update
             logger.debug("Updated Resource: {}", t);
             t = this.update(t, null);

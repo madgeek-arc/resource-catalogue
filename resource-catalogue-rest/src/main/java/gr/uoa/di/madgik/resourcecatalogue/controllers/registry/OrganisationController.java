@@ -60,6 +60,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     protected int maxQuantity;
     @Value("${auditing.interval:6}")
     private int auditingInterval;
+
     OrganisationController(OrganisationService organisationService) {
         super(organisationService, "Organisation");
     }

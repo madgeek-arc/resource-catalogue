@@ -17,9 +17,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Datasource;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,32 +38,29 @@ import java.util.List;
 @Tag(name = "datasources")
 public class DatasourceCrudController extends ResourceCrudController<DatasourceBundle> {
 
-    private final ResourceService<DatasourceBundle> datasourceService;
+    public DatasourceCrudController(GenericResourceService service) {
+        super(service);
+    }
 
-    public DatasourceCrudController(ResourceService<DatasourceBundle> datasourceService) {
-        super(datasourceService);
-        this.datasourceService = datasourceService;
+    @Override
+    protected String getResourceTypeName() {
+        return "datasource";
     }
 
     @Operation(summary = "Returns the Datasource of the given Service of the given Catalogue.")
     @GetMapping(path = "/byService/{serviceId}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Datasource> getDatasourceByServiceId(@PathVariable("serviceId") String serviceId,
-                                                               @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
-                                                               @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<Object> getDatasourceByServiceId(@PathVariable("serviceId") String serviceId,
+                                                           @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
+                                                           @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(1000);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("service_id", serviceId);
-        List<DatasourceBundle> allDatasources = datasourceService.getAll(ff, auth).getResults();
+        Paging<DatasourceBundle> page = service.getResults(ff);
+        List<DatasourceBundle> allDatasources = page.getResults();
         if (!allDatasources.isEmpty()) {
             return new ResponseEntity<>(allDatasources.getFirst().getDatasource(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(null, HttpStatus.OK);
-    }
-
-    @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<DatasourceBundle> bundles, @Parameter(hidden = true) Authentication auth) {
-        datasourceService.addBulk(bundles, auth);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

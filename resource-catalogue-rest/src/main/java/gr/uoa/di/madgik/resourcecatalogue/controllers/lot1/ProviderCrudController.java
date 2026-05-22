@@ -16,40 +16,25 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
-import io.swagger.v3.oas.annotations.Parameter;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Profile("crud")
 @RestController
 @RequestMapping(path = "providers", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "providers")
-public class ProviderCrudController extends ResourceCrudController<OrganisationBundle> {
+public class ProviderCrudController extends ResourceCrudController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProviderCrudController.class);
-    private final OrganisationService providerService;
-
-    ProviderCrudController(OrganisationService providerService) {
-        super(providerService);
-        this.providerService = providerService;
+    ProviderCrudController(GenericResourceService genericResourceService) {
+        super(genericResourceService);
     }
 
-    @PostMapping(path = "/bulk")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<OrganisationBundle> bundles, @Parameter(hidden = true) Authentication auth) {
-        providerService.addBulk(bundles, auth);
+    @Override
+    protected String getResourceTypeName() {
+        return "provider";
     }
 }

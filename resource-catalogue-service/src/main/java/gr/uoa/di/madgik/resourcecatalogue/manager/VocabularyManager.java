@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.resourcecatalogue.domain.AdminAuthentication;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -43,15 +44,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     private final OrganisationManager providerManager;
 
-    private final SecurityService securityService;
-
-    public VocabularyManager(GenericResourceService genericResourceService,
-                             IdCreator idCreator,
-                             @Lazy OrganisationManager providerManager,
-                             @Lazy SecurityService securityService) {
-        super(genericResourceService, idCreator, 10000);
+    public VocabularyManager(@Lazy OrganisationManager providerManager) {
         this.providerManager = providerManager;
-        this.securityService = securityService;
     }
 
     public String getResourceTypeName() {
@@ -191,7 +185,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.addFilter("active", true);
         ff.addFilter("status", "approved");
         ff.addFilter("published", false);
-        List<OrganisationBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, securityService.getAdminAccess()).getResults();
+        List<OrganisationBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, new AdminAuthentication()).getResults();
         Map<String, String> providerNames = new LinkedHashMap<>();
         for (OrganisationBundle organisationBundle : allActiveAndApprovedProviders) {
             if ((boolean) organisationBundle.getOrganisation().get("legalEntity")) {

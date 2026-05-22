@@ -46,16 +46,13 @@
                             <excludes>
                                 <exclude>**/controllers/MailController.java</exclude>
                                 <exclude>**/controllers/WizardController.java</exclude>
+                                <exclude>**/controllers/StatisticsController.java</exclude>
                                 <exclude>**/controllers/registry/AdapterController.java</exclude>
                                 <exclude>**/controllers/registry/ConfigurationTemplateController.java</exclude>
                                 <exclude>**/controllers/registry/ConfigurationTemplateInstanceController.java</exclude>
                                 <exclude>**/controllers/registry/CSVController.java</exclude>
                                 <exclude>**/controllers/registry/DeployableApplicationController.java</exclude>
                                 <exclude>**/controllers/registry/OrganisationController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicAdapterController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicConfigurationTemplateInstanceController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicDeployableApplicationController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicOrganisationController.java</exclude>
                                 <exclude>**/controllers/registry/CatalogueController.java</exclude>
                                 <exclude>**/controllers/registry/DatasourceController.java</exclude>
                                 <exclude>**/controllers/registry/InteroperabilityRecordController.java</exclude>
@@ -63,15 +60,8 @@
                                 <exclude>**/controllers/registry/SecureResponseAdvice.java</exclude>
                                 <exclude>**/controllers/registry/ServiceController.java</exclude>
                                 <exclude>**/controllers/registry/TrainingResourceController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicDatasourceController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicInteroperabilityRecordController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicResourceInteroperabilityRecordController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicServiceController.java</exclude>
-                                <exclude>**/controllers/publicresources/PublicTrainingResourceController.java</exclude>
-                                <exclude>**/controllers/StatisticsController.java</exclude>
-                                <exclude>**/controllers/registry/sqaaas/SqaaasController.java</exclude>
-                                <exclude>**/controllers/registry/sqaaas/SqaaasClient.java</exclude>
-                                <exclude>**/controllers/registry/sqaaas/SqaaasAssessmentService.java</exclude>
+                                <exclude>**/controllers/registry/sqaaas/**.java</exclude>
+                                <exclude>**/controllers/publicresources/**</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

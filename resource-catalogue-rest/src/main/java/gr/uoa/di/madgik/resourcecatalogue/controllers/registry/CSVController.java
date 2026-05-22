@@ -54,18 +54,15 @@ import java.util.List;
 public class CSVController {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVController.class);
-    private final ServiceService service;
     private final OrganisationService organisationService;
     private final VocabularyService vocabularyService;
     private final CSVService csvService;
     private final ServiceService serviceService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    private int maxQuantity;
-
-    CSVController(ServiceService service, OrganisationService provider,
-                  VocabularyService vocabulary, CSVService csvService, ServiceService serviceService) {
-        this.service = service;
+    CSVController(OrganisationService provider,
+                  VocabularyService vocabulary,
+                  CSVService csvService,
+                  ServiceService serviceService) {
         this.organisationService = provider;
         this.vocabularyService = vocabulary;
         this.csvService = csvService;
@@ -139,7 +136,7 @@ public class CSVController {
 
     private FacetFilter createFacetFilter(Boolean published) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         if (published != null) {
             ff.addFilter("published", published);
         }

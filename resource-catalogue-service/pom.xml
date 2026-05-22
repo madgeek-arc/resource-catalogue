@@ -113,6 +113,7 @@
                                 <arg>-implicit:none</arg>
                             </compilerArgs>
                             <excludes>
+                                <exclude>**/config/ResourceCatalogueModelMapperConfig.java</exclude>
                                 <exclude>**/config/security/SecurityConfig.java</exclude>
                                 <exclude>**/config/security/InMemoryAuthoritiesMapper.java</exclude>
                                 <exclude>**/manager/AdapterManager.java</exclude>
@@ -123,6 +124,7 @@
                                 <exclude>**/service/OIDCSecurityService.java</exclude>
                                 <exclude>**/utils/OrganisationCascadeLifecycleManager.java</exclude>
                                 <exclude>**/utils/RelationshipValidator.java</exclude>
+                                <exclude>**/manager/Public**.java</exclude>
                                 <exclude>**/manager/DatasourceManager.java</exclude>
                                 <exclude>**/manager/InteroperabilityRecordManager.java</exclude>
                                 <exclude>**/manager/ResourceCatalogueGenericManager.java</exclude>
@@ -159,6 +161,7 @@
                                 <exclude>**/manager/DefaultStatisticsManager.java</exclude>
                                 <exclude>**/manager/PublicConfigurationTemplateService.java</exclude>
                                 <exclude>**/utils/DefaultFacetLabelService.java</exclude>
+                                <exclude>**/utils/CatalogueResourceAggregator.java</exclude>
                                 <exclude>**/utils/InternalToPublicConsistency.java</exclude>
                             </excludes>
                                 <testExcludes>

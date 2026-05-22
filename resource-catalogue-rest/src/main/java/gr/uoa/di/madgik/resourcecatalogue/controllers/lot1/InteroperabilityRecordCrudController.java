@@ -16,19 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Profile("crud")
 @RestController
@@ -36,16 +29,12 @@ import java.util.List;
 @Tag(name = "interoperability records")
 public class InteroperabilityRecordCrudController extends ResourceCrudController<InteroperabilityRecordBundle> {
 
-    private final ResourceService<InteroperabilityRecordBundle> interoperabilityRecordService;
-
-    public InteroperabilityRecordCrudController(ResourceService<InteroperabilityRecordBundle> interoperabilityRecordService) {
-        super(interoperabilityRecordService);
-        this.interoperabilityRecordService = interoperabilityRecordService;
+    public InteroperabilityRecordCrudController(GenericResourceService genericResourceService) {
+        super(genericResourceService);
     }
 
-    @PostMapping(path = "/bulk")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<InteroperabilityRecordBundle> bundles, @Parameter(hidden = true) Authentication auth) {
-        interoperabilityRecordService.addBulk(bundles, auth);
+    @Override
+    protected String getResourceTypeName() {
+        return "interoperability_record";
     }
 }

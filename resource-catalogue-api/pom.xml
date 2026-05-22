@@ -65,6 +65,7 @@
                         <configuration>
                             <excludes>
                                 <exclude>**/service/AdapterService.java</exclude>
+                                <exclude>**/service/CatalogueService.java</exclude>
                                 <exclude>**/service/ConfigurationTemplateService.java</exclude>
                                 <exclude>**/service/ConfigurationTemplateInstanceService.java</exclude>
                                 <exclude>**/service/DeployableApplicationService.java</exclude>

@@ -16,14 +16,12 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import gr.uoa.di.madgik.resourcecatalogue.dto.VocabularyTree;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
@@ -40,7 +38,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     private static final Logger logger = LoggerFactory.getLogger(VocabularyManager.class);
 
     public VocabularyManager() {
-        super(Vocabulary.class);
+        super();
     }
 
     @Override
@@ -95,7 +93,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    public Browsing<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
+    public Paging<Vocabulary> getAll(FacetFilter ff, Authentication auth) {
         return super.getAll(ff, auth);
     }
 
@@ -104,7 +102,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
         ff.setQuantity(maxQuantity);
-        Browsing<Vocabulary> allVocs = getAll(ff);
+        Paging<Vocabulary> allVocs = getAll(ff);
         return allVocs.getResults()
                 .parallelStream()
                 .filter(Objects::nonNull)
@@ -127,16 +125,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
         return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
-    }
-
-    @Override
-    public Map<String, Vocabulary> getVocabulariesMap() {
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
-        return getAll(ff, null)
-                .getResults()
-                .stream()
-                .collect(Collectors.toMap(Vocabulary::getId, v -> v));
     }
 
     @Override
@@ -170,44 +158,6 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     }
 
     @Override
-    public VocabularyTree getVocabulariesTree(Vocabulary.Type type) {
-        VocabularyTree root = new VocabularyTree();
-        root.setVocabulary(null);
-        Map<String, List<Vocabulary>> vocabularies = getBy("parent_id");
-        List<VocabularyTree> superTreeList = new ArrayList<>();
-        List<Vocabulary> superVocabularies = getByType(type);
-        if (superVocabularies != null) {
-            for (Vocabulary superVocabulary : superVocabularies) {
-                VocabularyTree superTree = new VocabularyTree();
-                superTree.setVocabulary(superVocabulary);
-                List<VocabularyTree> treeList = new ArrayList<>();
-                List<Vocabulary> vocs = vocabularies.get(superVocabulary.getId());
-                if (vocs != null) {
-                    for (Vocabulary voc : vocs) {
-                        VocabularyTree tree = new VocabularyTree();
-                        tree.setVocabulary(voc);
-                        List<VocabularyTree> subTreeList = new ArrayList<>();
-                        List<Vocabulary> subVocabularies = vocabularies.get(voc.getId());
-                        if (subVocabularies != null) {
-                            for (Vocabulary subVocabulary : subVocabularies) {
-                                VocabularyTree subTree = new VocabularyTree();
-                                subTree.setVocabulary(subVocabulary);
-                                subTreeList.add(subTree);
-                            }
-                        }
-                        tree.setChildren(subTreeList);
-                        treeList.add(tree);
-                    }
-                }
-                superTree.setChildren(treeList);
-                superTreeList.add(superTree);
-            }
-        }
-        root.setChildren(superTreeList);
-        return root;
-    }
-
-    @Override
     public Vocabulary add(Vocabulary vocabulary, Authentication auth) {
         if (vocabulary.getId() == null || "".equals(vocabulary.getId())) {
             String id = vocabulary.getName().toLowerCase();
@@ -221,25 +171,10 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         if (exists(vocabulary)) {
             throw new ResourceAlreadyExistsException(String.format("%s already exists!%n%s", getResourceTypeName(), vocabulary));
         }
-        String serialized = serialize(vocabulary);
-        Resource created = new Resource();
-        created.setPayload(serialized);
-        created.setResourceType(getResourceType());
-        resourceService.addResource(created);
-        logger.debug("Adding Vocabulary {}", vocabulary);
-        return vocabulary;
-    }
 
-    @Override
-    public Vocabulary update(Vocabulary vocabulary, Authentication auth) {
-        Resource existing = whereID(vocabulary.getId(), true);
-        String serialized = serialize(vocabulary);
-        serialized = serialized.replace(":tns", "");
-        serialized = serialized.replace("tns:", "");
-        existing.setPayload(serialized);
-        existing.setResourceType(getResourceType());
-        resourceService.updateResource(existing);
-        logger.debug("Updating Vocabulary {}", vocabulary);
+        logger.debug("Adding Vocabulary {}", vocabulary);
+        super.add(vocabulary, auth);
+
         return vocabulary;
     }
 }
