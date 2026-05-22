@@ -202,6 +202,7 @@ spring.jpa.open-in-view=false
 spring.main.allow-bean-definition-overriding=true
 
 ## Redis Properties ##
+spring.session.data.redis.namespace=eosc:beyond
 spring.data.redis.host=
 spring.data.redis.port=
 spring.data.redis.password=
