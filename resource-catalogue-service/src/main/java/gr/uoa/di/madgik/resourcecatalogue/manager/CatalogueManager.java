@@ -59,9 +59,6 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     private final EmailService emailService;
     private final CatalogueResourceAggregator cascadeLifecycleManager;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public CatalogueManager(OrganisationService organisationService,
                             IdCreator idCreator,
                             SecurityService securityService,

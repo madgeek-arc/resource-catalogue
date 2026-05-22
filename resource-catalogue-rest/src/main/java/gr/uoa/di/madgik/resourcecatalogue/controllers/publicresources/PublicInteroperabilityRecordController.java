@@ -51,9 +51,6 @@ public class PublicInteroperabilityRecordController {
     private final PublicResourceService<InteroperabilityRecordBundle> service;
     private final PublicResourceService<ResourceInteroperabilityRecordBundle> rirService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public PublicInteroperabilityRecordController(PublicResourceService<InteroperabilityRecordBundle> service,
                                                   PublicResourceService<ResourceInteroperabilityRecordBundle> rirService) {
         this.service = service;
@@ -118,7 +115,7 @@ public class PublicInteroperabilityRecordController {
         String id = prefix + "/" + suffix;
         List<String> relatedResources = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         List<ResourceInteroperabilityRecordBundle> list = rirService.getAll(ff).getResults();
         for (ResourceInteroperabilityRecordBundle bundle : list) {
             Object idsObj = bundle.getResourceInteroperabilityRecord().get("interoperabilityRecordIds");

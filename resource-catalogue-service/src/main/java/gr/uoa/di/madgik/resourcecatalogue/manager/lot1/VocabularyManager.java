@@ -81,7 +81,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         List<Vocabulary> children = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         List<Vocabulary> allVocs = getAll(ff).getResults();
         for (Vocabulary vocabulary : allVocs) {
             if (parentId.equals(vocabulary.getParentId())) {
@@ -101,7 +101,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     public Map<Vocabulary.Type, List<Vocabulary>> getAllVocabulariesByType() {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         Paging<Vocabulary> allVocs = getAll(ff);
         return allVocs.getResults()
                 .parallelStream()
@@ -121,7 +121,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
         return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Override
     public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
             delete(vocabulary);

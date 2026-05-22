@@ -52,8 +52,6 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Autowired
     private FacetLabelService facetLabelService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
     @Value("${node.pid}")
     private String nodePid;
     @Value("${node.pid.fixed}")
@@ -150,7 +148,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
     @Override
     public Paging<T> getMyProviders(FacetFilter ff, Authentication auth, String resourceType) {
         ff.setResourceType(resourceType);
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("published", false);
         ff.addFilter("users", AuthenticationInfo.getEmail(auth).toLowerCase());
         ff.addOrderBy("name", "asc");
@@ -167,7 +165,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         }
 
         filter.setResourceType(getResourceTypeName());
-        filter.setQuantity(maxQuantity);
+        filter.setQuantity(Integer.MAX_VALUE);
         filter.addFilter("published", false);
         filter.addFilter("resource_owner", providers.stream().map(T::getId).toList());
         filter.addOrderBy("name", "asc");
@@ -202,7 +200,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
 
     private FacetFilter createFacetFilter(String catalogueId, boolean isPublic, String resourceType) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("status", "approved");
         ff.addFilter("active", true);
         ff.addFilter("draft", false);

@@ -52,7 +52,6 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private Set<String> providerUsers = new HashSet<>();
     private Set<String> catalogueUsers = new HashSet<>();
     private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
-    private final int maxQuantity;
 
     private final OrganisationService organisationService;
 
@@ -63,8 +62,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
-                                     CatalogueProperties catalogueProperties,
+    public InMemoryAuthoritiesMapper(CatalogueProperties catalogueProperties,
                                      OrganisationService manager,
 //                                     CatalogueService catalogueService,
                                      SecurityService securityService) {
@@ -72,7 +70,6 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         this.organisationService = manager;
 //        this.catalogueService = catalogueService;
         this.securityService = securityService;
-        this.maxQuantity = maxQuantity;
         if (catalogueProperties.getAdmins().isEmpty()) {
             throw new ServiceException("No Admins Provided");
         }
@@ -124,7 +121,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         long time = System.nanoTime();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("published", false);
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
 
         List<OrganisationBundle> providers = new ArrayList<>();
         try {

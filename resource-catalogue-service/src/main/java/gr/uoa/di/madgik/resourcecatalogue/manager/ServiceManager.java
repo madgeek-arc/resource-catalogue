@@ -52,9 +52,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public ServiceManager(OrganisationService organisationService,
                           IdCreator idCreator,
                           SecurityService securityService,

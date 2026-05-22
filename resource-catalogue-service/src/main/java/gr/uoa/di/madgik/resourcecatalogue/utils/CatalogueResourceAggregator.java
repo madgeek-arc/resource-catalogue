@@ -4,7 +4,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.CatalogueResources;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -20,9 +19,6 @@ public class CatalogueResourceAggregator {
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final AdapterService adapterService;
     private final DeployableApplicationService deployableApplicationService;
-
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
 
     public CatalogueResourceAggregator(@Lazy OrganisationService organisationService,
                                        @Lazy ServiceService serviceService,
@@ -146,7 +142,7 @@ public class CatalogueResourceAggregator {
 
     private FacetFilter createFacetFilter(String catalogueId) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         if (catalogueId != null && !catalogueId.isBlank()) {
             ff.addFilter("catalogue_id", catalogueId);
         }
@@ -155,7 +151,7 @@ public class CatalogueResourceAggregator {
 
     private FacetFilter createCatalogueFilter(String catalogueId) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("catalogue_id", catalogueId);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);

@@ -55,9 +55,6 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public DeployableApplicationManager(OrganisationService organisationService,
                                         IdCreator idCreator,
                                         @Lazy SecurityService securityService,

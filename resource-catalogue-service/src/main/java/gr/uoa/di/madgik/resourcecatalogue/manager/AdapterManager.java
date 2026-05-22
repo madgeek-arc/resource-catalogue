@@ -49,9 +49,6 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private final OrganisationService organisationService;
     private final EmailService emailService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public AdapterManager(OIDCSecurityService securityService,
                           VocabularyService vocabularyService,
                           IdCreator idCreator,

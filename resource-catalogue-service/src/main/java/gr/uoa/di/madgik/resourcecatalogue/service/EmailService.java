@@ -61,9 +61,6 @@ public class EmailService {
     private final boolean enableAdminNotifications;
     private final boolean enableProviderNotifications;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    private int maxQuantity;
-
     @Value("${node.name}")
     private String nodeName;
 
@@ -634,7 +631,7 @@ public class EmailService {
 
     private FacetFilter createFacetFilter() {
         FacetFilter facetFilter = new FacetFilter();
-        facetFilter.setQuantity(maxQuantity);
+        facetFilter.setQuantity(Integer.MAX_VALUE);
         facetFilter.addFilter("published", false);
         return facetFilter;
     }

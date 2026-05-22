@@ -1282,24 +1282,6 @@ For embedded providers (2) - legal status of the hosting legal entity. It is als
       
   </xs:complexType>
     
-  <xs:complexType name="providerRequest">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="date" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="id" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="message" type="emailMessage"/>
-            
-      <xs:element minOccurs="0" name="providerId" type="xs:string"/>
-            
-      <xs:element name="read" type="xs:boolean"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
   <xs:complexType name="resourceExtras">
         
     <xs:sequence>
@@ -2053,24 +2035,6 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
       <xs:element minOccurs="0" name="parentId" type="xs:string"/>
             
       <xs:element minOccurs="0" name="type" type="xs:string"/>
-          
-    </xs:sequence>
-      
-  </xs:complexType>
-    
-  <xs:complexType name="vocabularyEntryRequest">
-        
-    <xs:sequence>
-            
-      <xs:element minOccurs="0" name="dateOfRequest" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="providerId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="resourceId" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="resourceType" type="xs:string"/>
-            
-      <xs:element minOccurs="0" name="userId" type="xs:string"/>
           
     </xs:sequence>
       

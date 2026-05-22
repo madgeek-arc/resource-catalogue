@@ -21,12 +21,9 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
-import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdminAuthentication;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
-import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +84,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         List<Vocabulary> children = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
 
         List<Vocabulary> allVocs = getAll(ff).getResults();
         for (Vocabulary vocabulary : allVocs) {
@@ -104,7 +101,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     public List<Vocabulary> getByType(Vocabulary.Type type) {
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("type", type.getKey());
         List<Vocabulary> vocList = getAll(ff, null).getResults();
         return vocList.stream().sorted(Comparator.comparing(Vocabulary::getName)).collect(Collectors.toList());
@@ -115,7 +112,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         Map<Vocabulary.Type, List<Vocabulary>> allVocabularies = new HashMap<>();
         FacetFilter ff = new FacetFilter();
         ff.setResourceType(getResourceTypeName());
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         Paging<Vocabulary> allVocs = getAll(ff);
         allVocabularies = allVocs.getResults()
                 .parallelStream()
@@ -136,7 +133,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
     @Override
     public void deleteAll(Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         List<Vocabulary> allVocs = getAll(ff, auth).getResults();
         for (Vocabulary vocabulary : allVocs) {
             delete(vocabulary);
@@ -181,7 +178,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
             hostingLegalEntityNames.add(hostingLegalEntity.getName());
         }
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("active", true);
         ff.addFilter("status", "approved");
         ff.addFilter("published", false);

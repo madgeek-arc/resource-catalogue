@@ -54,9 +54,6 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public DatasourceManager(OrganisationService organisationService,
                              @Lazy VocabularyService vocabularyService,
                              OpenAIREDatasourceManager openAIREDatasourceManager,

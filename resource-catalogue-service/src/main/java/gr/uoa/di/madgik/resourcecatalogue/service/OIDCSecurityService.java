@@ -43,9 +43,6 @@ public class OIDCSecurityService implements SecurityService {
     private final AdapterService adapterService;
     private final Authentication adminAccess = new AdminAuthentication();
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
                                @Lazy OrganisationService organisationService,
                                @Lazy ServiceService serviceService,

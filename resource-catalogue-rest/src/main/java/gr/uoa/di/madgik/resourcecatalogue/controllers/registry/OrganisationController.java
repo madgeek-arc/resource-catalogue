@@ -56,8 +56,6 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
 
     private static final Logger logger = LoggerFactory.getLogger(OrganisationController.class);
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
     @Value("${auditing.interval:6}")
     private int auditingInterval;
 

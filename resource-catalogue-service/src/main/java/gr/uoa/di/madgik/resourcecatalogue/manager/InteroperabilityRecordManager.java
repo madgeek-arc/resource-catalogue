@@ -55,9 +55,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public InteroperabilityRecordManager(OrganisationService organisationService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          GenericResourceService genericResourceService,

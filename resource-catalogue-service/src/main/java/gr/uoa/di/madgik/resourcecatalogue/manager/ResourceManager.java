@@ -40,8 +40,6 @@ public abstract class ResourceManager<T extends Identifiable> implements Resourc
     protected GenericResourceService genericResourceService;
     @Autowired
     protected IdCreator idCreator;
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
 
     public ResourceManager() {
     }

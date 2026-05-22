@@ -51,9 +51,6 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     private static final Logger logger = LoggerFactory.getLogger(OrganisationManager.class);
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     private final GenericResourceService genericResourceService;
     private final ServiceService serviceService;
     private final CatalogueResourceAggregator cascadeLifecycleService;
@@ -250,7 +247,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     @Override
     public List<MapValues<CatalogueValue>> getAllResourcesUnderASpecificHLE(String hle, Authentication auth) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("hosting_legal_entity", hle);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
@@ -276,7 +273,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
 
     private FacetFilter createFacetFilter(String catalogueId) {
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         ff.addFilter("catalogue_id", catalogueId);
         return ff;
     }
