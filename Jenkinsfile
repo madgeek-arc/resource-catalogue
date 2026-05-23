@@ -32,13 +32,17 @@ pipeline {
     stage('Test') {
       when { expression { return env.TAG_NAME == null } }
       steps {
-        withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
-          sh 'mvn -B verify -DnvdApiKey=$NVD_API_KEY'
+        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+          withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+            sh 'mvn -B verify -DnvdApiKey=$NVD_API_KEY'
+          }
         }
       }
       post {
         always {
           junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
+          archiveArtifacts allowEmptyArchive: true, artifacts: '**/dependency-check-report.*'
+          dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
         }
       }
     }

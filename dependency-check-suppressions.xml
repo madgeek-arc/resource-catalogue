@@ -13,4 +13,77 @@
         <cve>CVE-2023-6923</cve>
     </suppress>
 
+    <!-- ===== opentelemetry-semconv (Java) =====
+         CVE-2026-39882, CVE-2026-39883: Both CVEs target the OpenTelemetry Go SDK
+         (go.opentelemetry.io/otel), fixed in Go SDK v1.43.0. They do not apply to the
+         Java Maven artifact io.opentelemetry.semconv:opentelemetry-semconv. The scanner
+         conflates Go SDK version numbers with the Java semconv artifact version numbers.
+         1.41.1 is the latest Java release and is not affected. -->
+    <suppress>
+        <notes><![CDATA[
+            False positive: CVE-2026-39882 and CVE-2026-39883 describe vulnerabilities in the
+            OpenTelemetry Go SDK (memory exhaustion via unbounded OTLP HTTP response body, and
+            BSD kenv PATH hijacking), not in the Java semconv conventions library. NVD's CPE
+            matching hits io.opentelemetry.semconv because the product name "opentelemetry"
+            matches both ecosystems. No Java fix exists or is needed.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.opentelemetry\.semconv/.*@.*$</packageUrl>
+        <cve>CVE-2026-39882</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            False positive: see CVE-2026-39882 note above. Same Go-only advisory, same
+            incorrect CPE match against the Java semconv artifact.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.opentelemetry\.semconv/.*@.*$</packageUrl>
+        <cve>CVE-2026-39883</cve>
+    </suppress>
+
+    <!-- ===== swagger-ui (DOMPurify) =====
+         CVE-2026-41238, CVE-2026-41239, CVE-2026-41240: DOMPurify 3.3.2 bundled in
+         swagger-ui 5.32.2 (shipped with springdoc-openapi 3.0.3). The fix is DOMPurify
+         3.4.0, present in swagger-ui >= 5.32.5. As of 2026-05-23, no springdoc release
+         bundles swagger-ui 5.32.5+. Suppress until springdoc ships an update.
+         These CVEs only affect the developer-facing Swagger UI, not production endpoints. -->
+    <suppress>
+        <notes><![CDATA[
+            swagger-ui 5.32.2 bundles DOMPurify 3.3.2 which contains CVE-2026-41238
+            (prototype pollution XSS bypass via CUSTOM_ELEMENT_HANDLING). Fixed in
+            DOMPurify 3.4.0 / swagger-ui 5.32.5. No springdoc release includes the fix yet
+            (latest is 3.0.3 as of 2026-05-23). Revisit when springdoc > 3.0.3 is released.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
+        <cve>CVE-2026-41238</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            swagger-ui 5.32.2 bundles DOMPurify 3.3.2 which contains CVE-2026-41239
+            (SAFE_FOR_TEMPLATES bypass via RETURN_DOM). Fixed in DOMPurify 3.4.0 /
+            swagger-ui 5.32.5. No springdoc release includes the fix yet. See CVE-2026-41238
+            note above.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
+        <cve>CVE-2026-41239</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            swagger-ui 5.32.2 bundles DOMPurify 3.3.2 which contains CVE-2026-41240
+            (FORBID_TAGS bypass when using function-based ADD_TAGS / tagCheck). Fixed in
+            DOMPurify 3.4.0 / swagger-ui 5.32.5. No springdoc release includes the fix yet.
+            See CVE-2026-41238 note above.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
+        <cve>CVE-2026-41240</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            Same FORBID_TAGS/tagCheck logic flaw as CVE-2026-41240, reported by RetireJS
+            without a CVE assigned yet. Affects DOMPurify 3.3.2 bundled in swagger-ui 5.32.2
+            (springdoc 3.0.3). Fixed in DOMPurify 3.4.0 / swagger-ui 5.32.5. No springdoc
+            release includes the fix yet. Revisit when springdoc > 3.0.3 is released.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
+        <vulnerabilityName regex="true">.*FORBID_TAGS is not checked when a function-based ADD_TAGS.*</vulnerabilityName>
+    </suppress>
+
 </suppressions>

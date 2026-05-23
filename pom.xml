@@ -38,17 +38,19 @@
         <jackson.version>3.1.1</jackson.version>
         <registry-core.version>5.0.0-SNAPSHOT</registry-core.version>
         <elasticsearch.version>9.3.2</elasticsearch.version>
-        <springdoc.version>3.0.0</springdoc.version>
+        <springdoc.version>3.0.3</springdoc.version>
         <jakarta.mail.version>2.1.3</jakarta.mail.version>
         <jaxb2-maven-plugin.version>4.1.0</jaxb2-maven-plugin.version>
 
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <owasp-dependency-check-plugin.version>12.1.9</owasp-dependency-check-plugin.version>
         <testcontainers.version>2.0.3</testcontainers.version>
         <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
         <netty.version>4.2.14.Final</netty.version>
         <tomcat.version>11.0.22</tomcat.version>
+        <postgresql.version>42.7.11</postgresql.version>
         <!-- Preserve test JVM args so modules can append their own flags safely. -->
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
@@ -250,6 +252,11 @@
                 <artifactId>rhino</artifactId>
                 <version>1.7.15.1</version>
             </dependency>
+            <dependency> <!-- CVE-2026-29181: fixed by upgrading to 1.41.1. CVE-2026-39882/39883: Go SDK false positives suppressed in dependency-check-suppressions.xml. Pulled in by micrometer-tracing-bridge-otel. -->
+                <groupId>io.opentelemetry.semconv</groupId>
+                <artifactId>opentelemetry-semconv</artifactId>
+                <version>1.41.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -345,6 +352,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
                 <configuration>
                     <configLocation>google_checks.xml</configLocation>
                     <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
@@ -373,6 +381,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                     <dataDirectory>${user.home}/.owasp/dependency-check-data</dataDirectory>
                     <nvdValidForHours>24</nvdValidForHours>
                     <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
