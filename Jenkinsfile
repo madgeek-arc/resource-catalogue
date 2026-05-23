@@ -1,3 +1,6 @@
+def DOCKER_IMAGE = null
+def DOCKER_TAG = ''
+
 pipeline {
   agent any
 
@@ -11,11 +14,11 @@ pipeline {
     IMAGE_NAME = "resource-catalogue"
     REGISTRY = "docker.madgik.di.uoa.gr"
     REGISTRY_CRED = 'docker-registry'
-    DOCKER_IMAGE = ''
-    DOCKER_TAG = ''
     DOCKER_BUILDKIT = '1'
   }
+
   stages {
+
     stage('Determine Docker Tag') {
       steps {
         script {
@@ -104,6 +107,7 @@ pipeline {
     }
 
   }
+
   post {
     always {
       script {
