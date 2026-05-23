@@ -9,6 +9,20 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Catalogue ID",
+      "multivalued": false,
+      "name": "catalogue_id",
+      "path": "$.catalogueId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Urls",
+      "multivalued": true,
+      "name": "urls",
+      "path": "$.catalogue.urls[*]",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Catalogue Name",
       "multivalued": false,
       "name": "name",
@@ -16,53 +30,102 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Description",
+      "multivalued": false,
+      "name": "description",
+      "path": "$.catalogue.description",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Alternative PIDs",
+      "multivalued": true,
+      "name": "alternative_pids",
+      "path": "$.catalogue.alternativePIDs[*].pid",
+      "type": "java.lang.String"
+    },
+    {
       "label": "Node",
       "multivalued": false,
       "name": "node",
       "path": "$.catalogue.nodePID",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Type",
+      "multivalued": false,
+      "name": "type",
+      "path": "$.catalogue.type",
       "type": "java.lang.String"
     },
     {
-      "label": "Abbreviation",
+      "label": "Resource Owner",
       "multivalued": false,
-      "name": "abbreviation",
-      "path": "$.catalogue.abbreviation",
+      "name": "resource_owner",
+      "path": "$.catalogue.resourceOwner",
+      "type": "java.lang.String",
+      "relatedResourceType": "organisation",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Service Provider",
+      "multivalued": true,
+      "name": "service_providers",
+      "path": "$.catalogue.serviceProviders[*]",
+      "type": "java.lang.String",
+      "relatedResourceType": "organisation",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Webpage",
+      "multivalued": false,
+      "name": "webpage",
+      "path": "$.catalogue.webpage",
       "type": "java.lang.String"
     },
     {
-      "label": "Legal Entity",
+      "label": "Logo",
       "multivalued": false,
-      "name": "legal_entity",
-      "path": "$.catalogue.legalEntity",
-      "type": "java.lang.Boolean"
-    },
-    {
-      "label": "Legal Status",
-      "multivalued": false,
-      "name": "legal_status",
-      "path": "$.catalogue.legalStatus",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Hosting Legal Entity",
-      "multivalued": false,
-      "name": "hosting_legal_entity",
-      "path": "$.catalogue.hostingLegalEntity",
+      "name": "logo",
+      "path": "$.catalogue.logo",
       "type": "java.lang.String"
     },
     {
       "label": "Scientific Domain",
       "multivalued": true,
       "name": "scientific_domains",
-      "path": "$.catalogue.scientificDomains[*]",
-      "type": "java.lang.String"
+      "path": "$.catalogue.scientificDomains[*].scientificDomain",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Scientific Subdomain",
       "multivalued": true,
       "name": "scientific_subdomains",
       "path": "$.catalogue.scientificDomains[*].scientificSubdomain",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Category",
+      "multivalued": true,
+      "name": "categories",
+      "path": "$.catalogue.categories[*].category",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Subcategory",
+      "multivalued": true,
+      "name": "subcategories",
+      "path": "$.catalogue.categories[*].subcategory",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Tag",
@@ -72,25 +135,93 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Affiliation",
-      "multivalued": true,
-      "name": "affiliations",
-      "path": "$.catalogue.affiliations[*]",
+      "label": "Access Type",
+      "multivalued": false,
+      "name": "accessTypes",
+      "path": "$.catalogue.accessTypes",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Jurisdiction",
+      "multivalued": false,
+      "name": "jurisdiction",
+      "path": "$.catalogue.jurisdiction",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "TRL",
+      "multivalued": false,
+      "name": "trl",
+      "path": "$.catalogue.trl",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Terms of Use",
+      "multivalued": false,
+      "name": "terms_of_use",
+      "path": "$.catalogue.termsOfUse",
       "type": "java.lang.String"
     },
     {
-      "label": "Network",
-      "multivalued": true,
-      "name": "networks",
-      "path": "$.catalogue.networks[*]",
+      "label": "Privacy Policy",
+      "multivalued": false,
+      "name": "privacy_policy",
+      "path": "$.catalogue.privacyPolicy",
       "type": "java.lang.String"
     },
     {
-      "label": null,
-      "multivalued": true,
-      "name": "users",
-      "path": "$.catalogue.users[*].email",
+      "label": "Access Policy",
+      "multivalued": false,
+      "name": "access_policy",
+      "path": "$.catalogue.accessPolicy",
       "type": "java.lang.String"
+    },
+    {
+      "label": "Order Type",
+      "multivalued": false,
+      "name": "order_type",
+      "path": "$.catalogue.orderType",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Order",
+      "multivalued": false,
+      "name": "order_link",
+      "path": "$.catalogue.order",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Access Type",
+      "multivalued": false,
+      "name": "accessTypes",
+      "path": "$.catalogue.accessTypes",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": "Public Contacts",
+      "multivalued": true,
+      "name": "contacts",
+      "path": "$.catalogue.publicContacts[*]",
+      "type": "java.lang.String"
+    },
+    {
+      "label": "Main Contact Role",
+      "multivalued": false,
+      "name": "main_contact_role",
+      "path": "$.catalogue.mainContact.role",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
@@ -111,20 +242,41 @@
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.util.Date"
+      "type": "java.time.Instant"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.util.Date"
+      "type": "java.time.Instant"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "published",
+      "path": "$.metadata.published",
+      "type": "java.lang.Boolean"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "pid",
+      "path": "$.identifiers.pid",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "externalId",
+      "path": "$.identifiers.externalId",
       "type": "java.lang.String"
     },
     {
@@ -228,13 +380,6 @@
       "type": "java.lang.Boolean"
     },
     {
-      "label": null,
-      "multivalued": false,
-      "name": "status",
-      "path": "$.status",
-      "type": "java.lang.String"
-    },
-    {
       "defaultValue": "false",
       "label": null,
       "multivalued": false,
@@ -245,14 +390,27 @@
     {
       "label": null,
       "multivalued": false,
+      "name": "status",
+      "path": "$.status",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
+      "label": null,
+      "multivalued": false,
       "name": "audit_state",
       "path": "$.auditState",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
   "aliases": [
-    "resourceTypes"
+    "resourceTypes",
+    "eoscServices",
+    "eoscResources"
   ],
   "name": "catalogue",
   "payloadType": "json",

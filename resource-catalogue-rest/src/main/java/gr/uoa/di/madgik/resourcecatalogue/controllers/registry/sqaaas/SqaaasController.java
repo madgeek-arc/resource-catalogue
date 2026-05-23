@@ -1,15 +1,19 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry.sqaaas;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+@Profile("beyond")
 @RestController
 @RequestMapping("sqaaas")
 @Tag(name = "sqaaas")
+@PreAuthorize("hasRole('ROLE_USER')")
 public class SqaaasController {
 
     private final SqaaasAssessmentService service;

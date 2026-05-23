@@ -51,9 +51,6 @@ public class PublicInteroperabilityRecordController {
     private final PublicResourceService<InteroperabilityRecordBundle> service;
     private final PublicResourceService<ResourceInteroperabilityRecordBundle> rirService;
 
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public PublicInteroperabilityRecordController(PublicResourceService<InteroperabilityRecordBundle> service,
                                                   PublicResourceService<ResourceInteroperabilityRecordBundle> rirService) {
         this.service = service;
@@ -62,15 +59,11 @@ public class PublicInteroperabilityRecordController {
 
     @Operation(description = "Returns the Public Interoperability Record with the given id.")
     @GetMapping(path = "public/interoperabilityRecord/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.guidelineIsActive(#prefix+'/'+#suffix, catalogueId) or " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getInteroperabilityRecord(), HttpStatus.OK);
         }
@@ -83,10 +76,9 @@ public class PublicInteroperabilityRecordController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        InteroperabilityRecordBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -123,7 +115,7 @@ public class PublicInteroperabilityRecordController {
         String id = prefix + "/" + suffix;
         List<String> relatedResources = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
         List<ResourceInteroperabilityRecordBundle> list = rirService.getAll(ff).getResults();
         for (ResourceInteroperabilityRecordBundle bundle : list) {
             Object idsObj = bundle.getResourceInteroperabilityRecord().get("interoperabilityRecordIds");

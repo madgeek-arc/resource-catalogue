@@ -42,7 +42,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public resource interoperability record")
-public class PublicResourceInteroperabilityRecordController {
+public class  PublicResourceInteroperabilityRecordController {
 
     private final PublicResourceService<ResourceInteroperabilityRecordBundle> service;
 
@@ -53,10 +53,9 @@ public class PublicResourceInteroperabilityRecordController {
     @Operation(summary = "Returns the Public Resource Interoperability Record with the given id.")
     @GetMapping(path = "public/resourceInteroperabilityRecord/{prefix}/{suffix}")
     public ResponseEntity<?> get(@PathVariable String prefix,
-                                 @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                 @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
         }
@@ -69,10 +68,9 @@ public class PublicResourceInteroperabilityRecordController {
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ResourceInteroperabilityRecordBundle bundle = service.get(id, catalogueId);
+        ResourceInteroperabilityRecordBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 

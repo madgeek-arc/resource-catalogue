@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry.sqaaas;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 

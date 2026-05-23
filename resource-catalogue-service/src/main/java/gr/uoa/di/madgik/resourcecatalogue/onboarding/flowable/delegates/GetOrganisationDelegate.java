@@ -1,6 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.delegates;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.flowable.WorkflowVariableMapper;
 import org.flowable.engine.delegate.DelegateExecution;

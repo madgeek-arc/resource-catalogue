@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import gr.uoa.di.madgik.resourcecatalogue.controllers.registry.sqaaas.SqaaasAssessmentService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.AdapterService;
@@ -60,12 +60,14 @@ public class SupportManagementAspect {
     }
 
     //region EOSC monitoring assignment
+    //TODO: Should EOSC monitoring get assigned to Catalogues too?
+
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "service")
     public void assignEoscMonitoringGuidelineToService(final ServiceBundle service) {
-        if (service.getStatus().equals("approved")) {
+        if (service.getStatus().equals("approved") && service.getCatalogueId() == null) {
             ResourceInteroperabilityRecordBundle rir = new ResourceInteroperabilityRecordBundle();
             rir.setCatalogueId(service.getCatalogueId());
             rir.getResourceInteroperabilityRecord().put("node", service.getService().get("node"));
@@ -74,7 +76,7 @@ public class SupportManagementAspect {
             InteroperabilityRecordBundle guideline;
             try {
                 guideline = guidelineService.getEOSCMonitoringGuideline();
-            } catch (Exception e) { //TODO: probably needs ResourceException
+            } catch (Exception e) {
                 logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for Service: {}",
                         service.getId());
                 return;
@@ -90,7 +92,7 @@ public class SupportManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
             returning = "datasource")
     public void assignEoscMonitoringGuidelineToDatasource(final DatasourceBundle datasource) {
-        if (datasource.getStatus().equals("approved")) {
+        if (datasource.getStatus().equals("approved") && datasource.getCatalogueId() == null) {
             ResourceInteroperabilityRecordBundle rir = new ResourceInteroperabilityRecordBundle();
             rir.setCatalogueId(datasource.getCatalogueId());
             rir.getResourceInteroperabilityRecord().put("node", datasource.getDatasource().get("node"));
@@ -99,7 +101,7 @@ public class SupportManagementAspect {
             InteroperabilityRecordBundle guideline;
             try {
                 guideline = guidelineService.getEOSCMonitoringGuideline();
-            } catch (Exception e) { //TODO: probably needs ResourceException
+            } catch (Exception e) {
                 logger.info("EOSC Monitoring Guideline not found. Skipping interoperability assignment for Datasource: {}",
                         datasource.getId());
                 return;

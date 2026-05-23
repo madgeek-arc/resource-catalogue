@@ -4,6 +4,9 @@
     "Identifiers" : {
       "type" : "object",
       "properties" : {
+        "externalId" : {
+          "type" : "string"
+        },
         "originalId" : {
           "type" : "string"
         },

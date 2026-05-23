@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Arrays;
@@ -39,20 +40,6 @@ import java.util.stream.Collectors;
 public class CatalogueProperties {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogueProperties.class);
-
-    /**
-     * Catalogue ID.
-     */
-    @NotNull
-    @NotEmpty
-    private String id;
-
-    /**
-     * Catalogue name.
-     */
-    @NotNull
-    @NotEmpty
-    private String name;
 
     /**
      * Catalogue Admins.
@@ -107,6 +94,7 @@ public class CatalogueProperties {
     }
 
     @EventListener
+    @Order(1)
     public void onPropertyChange(PropertyChangeEvent event) {
         if ("catalogue.admins".equals(event.getPropertyName())) {
             String newAdmins = event.getNewValue();
@@ -170,24 +158,6 @@ public class CatalogueProperties {
 
     public CatalogueProperties setLogoutRedirect(String logoutRedirect) {
         this.logoutRedirect = logoutRedirect;
-        return this;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public CatalogueProperties setId(String id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public CatalogueProperties setName(String name) {
-        this.name = name;
         return this;
     }
 

@@ -17,10 +17,9 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
@@ -29,6 +28,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +37,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -52,11 +51,6 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private final RelationshipValidator relationshipValidator;
     private final ResourceInteroperabilityRecordService rirService;
     private final EmailService emailService;
-
-    @Value("${catalogue.id}")
-    private String catalogueId;
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
 
     public ServiceManager(OrganisationService organisationService,
                           IdCreator idCreator,
@@ -85,7 +79,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     @Transactional
 //    @TriggersAspects({"AfterServiceUpdateEmails"})
     public ServiceBundle update(ServiceBundle service, String comment, Authentication auth) {
-        ServiceBundle existing = get(service.getId(), service.getCatalogueId());
+        ServiceBundle existing = get(service.getId());
         // check if there are actual changes in the Service
         if (service.equals(existing)) {
             return service;
@@ -98,16 +92,11 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), service.getId(), service);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), service);
     }
 
     private void checkAndResetServiceOnboarding(ServiceBundle service, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
-                service.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"));
         // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
         if (service.getStatus().equals(vocabularyService.get("rejected").getId())) {
             if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
@@ -140,16 +129,11 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         updateProviderTemplateStatus(existing, status, auth);
 
         logger.info("Verifying Service: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     private void updateProviderTemplateStatus(ServiceBundle service, String status, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
-                service.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"));
         switch (status) {
             case "pending":
                 provider.setTemplateStatus("pending template");
@@ -170,8 +154,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     public ServiceBundle setActive(String id, Boolean active, Authentication auth) {
         ServiceBundle existing = get(id);
 
-        OrganisationBundle provider = organisationService.get((String) existing.getService().get("resourceOwner"),
-                existing.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) existing.getService().get("resourceOwner"));
         if (active && !provider.isActive()) {
             throw new ResourceException("You cannot activate the Service, as its Provider is inactive", HttpStatus.CONFLICT);
         }
@@ -181,11 +164,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
     //endregion
 
@@ -200,14 +179,13 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {
         ServiceBundle service = get(id);
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"),
-                service.getCatalogueId());
+        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"));
         logger.info("Sending email to Provider '{}' for outdated Services", provider.getId());
         emailService.sendEmailNotificationsToProviderAdminsWithOutdatedResources(service, provider);
     }
 
     @Override
-    public Browsing<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Paging<ServiceBundle> getMy(FacetFilter filter, Authentication auth) {
         return getMyResources(filter, auth);
     }
 
@@ -218,7 +196,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -230,17 +208,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        List<ServiceBundle> allProviderServices = getAll(ff, auth).getResults();
-        for (ServiceBundle bundle : allProviderServices) {
-            if (bundle.getStatus().equals(vocabularyService.get("pending").getId())) {
-                return bundle;
-            }
-        }
-        return null;
+        return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
     //endregion
 

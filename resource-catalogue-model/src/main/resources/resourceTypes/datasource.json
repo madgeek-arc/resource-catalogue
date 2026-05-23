@@ -13,7 +13,9 @@
       "multivalued": false,
       "name": "catalogue_id",
       "path": "$.catalogueId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "catalogue",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Urls",
@@ -23,7 +25,7 @@
       "type": "java.lang.String"
     },
     {
-      "label": "Service Name",
+      "label": "Datasource Name",
       "multivalued": false,
       "name": "name",
       "path": "$.datasource.name",
@@ -48,7 +50,9 @@
       "multivalued": false,
       "name": "node",
       "path": "$.datasource.nodePID",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Type",
@@ -62,14 +66,18 @@
       "multivalued": false,
       "name": "resource_owner",
       "path": "$.datasource.resourceOwner",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "organisation",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Service Provider",
       "multivalued": true,
       "name": "service_providers",
       "path": "$.datasource.serviceProviders[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "organisation",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Webpage",
@@ -90,28 +98,36 @@
       "multivalued": true,
       "name": "scientific_domains",
       "path": "$.datasource.scientificDomains[*].scientificDomain",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Scientific Subdomain",
       "multivalued": true,
       "name": "scientific_subdomains",
       "path": "$.datasource.scientificDomains[*].scientificSubdomain",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Category",
       "multivalued": true,
       "name": "categories",
       "path": "$.datasource.categories[*].category",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Subcategory",
       "multivalued": true,
       "name": "subcategories",
       "path": "$.datasource.categories[*].subcategory",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Tag",
@@ -121,18 +137,31 @@
       "type": "java.lang.String"
     },
     {
+      "label": "Access Type",
+      "multivalued": false,
+      "name": "accessTypes",
+      "path": "$.datasource.accessTypes",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
+    },
+    {
       "label": "Jurisdiction",
       "multivalued": false,
       "name": "jurisdiction",
       "path": "$.datasource.jurisdiction",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "TRL",
       "multivalued": false,
       "name": "trl",
       "path": "$.datasource.trl",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Terms of Use",
@@ -160,7 +189,9 @@
       "multivalued": false,
       "name": "order_type",
       "path": "$.datasource.orderType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": "Order",
@@ -173,7 +204,7 @@
       "label": "Public Contacts",
       "multivalued": true,
       "name": "contacts",
-      "path": "$.service.publicContacts[*]",
+      "path": "$.datasource.publicContacts[*]",
       "type": "java.lang.String"
     },
     {
@@ -223,14 +254,14 @@
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.util.Date"
+      "type": "java.time.Instant"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.util.Date"
+      "type": "java.time.Instant"
     },
     {
       "label": null,
@@ -244,6 +275,20 @@
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "pid",
+      "path": "$.identifiers.pid",
+      "type": "java.lang.String"
+    },
+    {
+      "label": null,
+      "multivalued": false,
+      "name": "externalId",
+      "path": "$.identifiers.externalId",
       "type": "java.lang.String"
     },
     {
@@ -359,14 +404,18 @@
       "multivalued": false,
       "name": "status",
       "path": "$.status",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,
       "multivalued": false,
       "name": "audit_state",
       "path": "$.auditState",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name"
     },
     {
       "label": null,

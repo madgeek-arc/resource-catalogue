@@ -1,68 +1,75 @@
+def DOCKER_IMAGE = null
+def DOCKER_TAG = ''
+
 pipeline {
   agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 30, unit: 'MINUTES')
+    timestamps()
+  }
 
   environment {
     IMAGE_NAME = "resource-catalogue"
     REGISTRY = "docker.madgik.di.uoa.gr"
     REGISTRY_CRED = 'docker-registry'
-    DOCKER_IMAGE = ''
-    DOCKER_TAG = ''
+    DOCKER_BUILDKIT = '1'
   }
+
   stages {
-    stage('Validate Version & Determine Docker Tag') {
+
+    stage('Determine Docker Tag') {
       steps {
         script {
-          def POM_VERSION = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout | cut -c 1-5', returnStdout: true).trim()
-          if (env.BRANCH_NAME == 'develop') {
-            VERSION = POM_VERSION
-            DOCKER_TAG = 'dev'
-            echo "Detected development branch."
-          } else if (env.BRANCH_NAME == 'master') {
-            VERSION = POM_VERSION
-            DOCKER_TAG = "${VERSION}"
-            echo "Detected master branch: ${VERSION}"
-          } else {
-            VERSION = POM_VERSION
-            def branch = env.BRANCH_NAME.replace('/', '-')
-            DOCKER_TAG = "${VERSION}-${branch}"
-          }
-          if ( POM_VERSION != VERSION ) {
-            error("Version mismatch. \n\tProject's pom version:\t${POM_VERSION} \n\tBranch|Tag version:\t${VERSION}")
-          }
-
+          DOCKER_TAG = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+          echo "Docker tag: ${DOCKER_TAG}"
           currentBuild.displayName = "${currentBuild.displayName}-${DOCKER_TAG}"
         }
       }
     }
-    stage('Build Image') {
-      steps{
-        script {
-          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond .")
+
+    stage('Test') {
+      when { expression { return env.TAG_NAME == null } }
+      steps {
+        sh 'mvn -B verify'
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
         }
       }
     }
+
+    stage('Build Image') {
+      steps{
+        script {
+          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond --build-arg skipTests=true .")
+        }
+      }
+    }
+
     stage('Upload Image') {
-      when { // upload images only from 'develop' or 'master' branches
+      when { // upload images only from 'develop' or 'master' branches and TAG builds
         expression {
           return env.TAG_NAME != null || env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'master'
         }
       }
-      steps{
+      steps {
         script {
           withCredentials([usernamePassword(credentialsId: "${REGISTRY_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-              sh """
-                  echo "Pushing image: ${DOCKER_IMAGE.id}"
-                  echo "$DOCKER_PASS" | docker login ${REGISTRY} -u "$DOCKER_USER" --password-stdin
-              """
-              DOCKER_IMAGE.push()
+            sh """
+              echo "\$DOCKER_PASS" | docker login ${REGISTRY} -u "\$DOCKER_USER" --password-stdin
+            """
+            DOCKER_IMAGE.push()
+            if (env.TAG_NAME) {
+              def minorTag = DOCKER_TAG.tokenize('.').take(2).join('.')
+              DOCKER_IMAGE.push(minorTag)
+              DOCKER_IMAGE.push("latest")
+            } else if (DOCKER_TAG.endsWith('-SNAPSHOT')) {
+              DOCKER_IMAGE.push("dev")
+            }
           }
-        }
-      }
-    }
-    stage('Remove Image') {
-      steps{
-        script {
-          sh "docker rmi ${DOCKER_IMAGE.id}"
         }
       }
     }
@@ -75,28 +82,61 @@ pipeline {
         }
       }
       steps {
-        lock(resource: 'release-resource-catalogue') {
-          withCredentials([string(credentialsId: 'jenkins-github-pat', variable: 'GH_TOKEN')]) {
-            sh '''
-              . /etc/profile.d/load_nvm.sh > /dev/null 2>&1
-              nvm use 20
-              npx release-please github-release --repo-url ${GIT_URL} --token ${GH_TOKEN}
+        lock(resource: "release-${IMAGE_NAME}") {
+          retry(5) {
+            script {
+              try {
+                withCredentials([string(credentialsId: 'jenkins-github-pat', variable: 'GH_TOKEN')]) {
+                  sh '''
+                    [ -f /etc/profile.d/load_nvm.sh ] || { echo "ERROR: /etc/profile.d/load_nvm.sh not found. NVM is required on this agent."; exit 1; }
+                    . /etc/profile.d/load_nvm.sh
+                    nvm install --lts
+                    npx release-please@17 github-release --repo-url ${GIT_URL} --token ${GH_TOKEN}
 
-              npx release-please release-pr --repo-url ${GIT_URL} --token ${GH_TOKEN}
-            '''
+                    npx release-please@17 release-pr --repo-url ${GIT_URL} --token ${GH_TOKEN}
+                  '''
+                }
+              } catch (e) {
+                sleep time: 45, unit: 'SECONDS'
+                throw e
+              }
+            }
           }
         }
       }
     }
 
   }
-  // post-build actions
+
   post {
-    success {
-      echo 'Build Successful'
+    always {
+      script {
+        if (DOCKER_IMAGE) {
+          sh "docker rmi -f \$(docker inspect --format='{{.Id}}' ${DOCKER_IMAGE.id})"
+        }
+      }
     }
     failure {
-      echo 'Build Failed'
+      emailext(
+        subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        body: """<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> failed.</p>
+                 <p>Branch: <b>${env.BRANCH_NAME}</b></p>
+                 <p>Check the details: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+        mimeType: 'text/html',
+        recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+        to: '$DEFAULT_RECIPIENTS'
+      )
+    }
+    fixed {
+      emailext(
+        subject: "FIXED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        body: """<p>Build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> is back to normal.</p>
+                 <p>Branch: <b>${env.BRANCH_NAME}</b></p>
+                 <p>Check the details: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+        mimeType: 'text/html',
+        recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+        to: '$DEFAULT_RECIPIENTS'
+      )
     }
   }
 }

@@ -31,19 +31,23 @@ Follow these steps to set up a development environment for Resource Catalogue:
 
 ### Prerequisites
 
-* Java 21
+* Java 25
 * Maven 3.9+
-* ActiveMQ 5.x.x
-* Elasticsearch 7.17.x
-* PostgreSQL 9.5+
+* ActiveMQ 6.2.x
+* Elasticsearch 9.3.x
+* PostgreSQL 16+ with [pgvector](https://github.com/pgvector/pgvector) extension
+* Redis
 
 ### Installation
 
 1. Create Database and necessary extension
 
    ```sql
-   USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
+   CREATE USER <user> WITH PASSWORD 'your-password'; -- or use an existing user
    CREATE DATABASE <db> WITH OWNER <user>;
+   \c <db>
+   CREATE EXTENSION IF NOT EXISTS tablefunc;
+   CREATE EXTENSION IF NOT EXISTS vector;
    ```
 
 2. Clone the repository:
@@ -59,6 +63,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
     2. `pid.yml` – Create this file only if you plan to use the PID Service.
        See the [PID Properties Example](#PID-Properties-Example) for details.
 4. Build and Package
+
     To build the project and package the code into an executable .jar file with
     an embedded Tomcat server:
     1. Navigate to the project directory
@@ -98,7 +103,7 @@ smooth operation of the service.
 
 * Loads necessary controlled vocabularies.
 * Loads required resource models.
-* Creates the default Catalogue.
+* Checks and informs for node registration.
 
 The Setup Wizard should be executed **only once**, immediately after the first
 successful startup.
@@ -197,6 +202,7 @@ spring.jpa.open-in-view=false
 spring.main.allow-bean-definition-overriding=true
 
 ## Redis Properties ##
+spring.session.data.redis.namespace=eosc:beyond
 spring.data.redis.host=
 spring.data.redis.port=
 spring.data.redis.password=
@@ -288,6 +294,7 @@ catalogue.login-redirect=
 catalogue.logout-redirect=
 ## Resource ID Prefixes ##
 catalogue.resources.adapter.id-prefix=adapter
+catalogue.resources.catalogue.id-prefix=catalogue
 catalogue.resources.configuration-template.id-prefix=configuration_template
 catalogue.resources.configuration-template-instance.id-prefix=configuration_template_instance
 catalogue.resources.datasource.id-prefix=datasource
@@ -324,6 +331,7 @@ catalogue.mailer.ssl=
 
 ## PID Service ##
 pid.service.enabled=false
+pid.service.consistency.enabled=false
 
 ## OpenAIRE Datasource Properties ##
 openaire.ds.api=https://beta.services.openaire.eu/
@@ -355,7 +363,8 @@ accounting.token-endpoint=
 sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
 
 ## Node Registry ##
-node.pid=
+node.pid.value=
+node.name=
 node.registry.url=
 node.registry.key=
 ```
@@ -396,6 +405,17 @@ catalogue:
           client-key:
           client-cert:
     datasource:
+      resolve-endpoints:
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    catalogue:
       resolve-endpoints:
       pid-issuer:
         url:

@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,16 +38,13 @@ import java.util.List;
 @Tag(name = "services")
 public class ServiceCrudController extends ResourceCrudController<ServiceBundle> {
 
-    private final ResourceService<ServiceBundle> serviceService;
-
-    ServiceCrudController(ResourceService<ServiceBundle> serviceService) {
-        super(serviceService);
-        this.serviceService = serviceService;
+    ServiceCrudController(GenericResourceService genericResourceService) {
+        super(genericResourceService);
     }
 
-    @PostMapping(path = "/bulk", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<ServiceBundle> bundles, @Parameter(hidden = true) Authentication auth) {
-        serviceService.addBulk(bundles, auth);
+    @Override
+    protected String getResourceTypeName() {
+        return "service";
     }
+
 }

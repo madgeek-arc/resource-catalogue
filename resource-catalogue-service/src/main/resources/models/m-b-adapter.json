@@ -387,14 +387,10 @@
               "kind": null,
               "typeInfo": {
                 "vocabulary": null,
-                "type": "vocabulary",
+                "type": "string",
                 "defaultValue": null,
                 "values": null,
-                "properties": {
-                  "url": "/api/vocabulary/types/Node",
-                  "idField": "id",
-                  "labelField": "name"
-                },
+                "properties": {},
                 "multiplicity": false,
                 "prefill": null
               },
@@ -424,7 +420,7 @@
                   "order": 4,
                   "visible": true,
                   "hasBorder": false,
-                  "cssClasses": null,
+                  "cssClasses": "uk-disabled",
                   "style": null
                 }
               },
@@ -625,7 +621,7 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/provider/list",
+                  "url": "/api/organisation/list",
                   "idField": "id",
                   "labelField": "name"
                 },
@@ -908,7 +904,7 @@
                   "showLess": false
                 },
                 "placeholder": null,
-                "mandatory": true,
+                "mandatory": false,
                 "immutable": true,
                 "display": {
                   "placement": null,

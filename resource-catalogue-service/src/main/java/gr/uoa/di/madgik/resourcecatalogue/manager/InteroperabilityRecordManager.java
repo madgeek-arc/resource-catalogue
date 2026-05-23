@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -55,11 +55,6 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
-    @Value("${elastic.index.max_result_window:10000}")
-    protected int maxQuantity;
-
     public InteroperabilityRecordManager(OrganisationService organisationService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          GenericResourceService genericResourceService,
@@ -88,11 +83,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
 
         blockNamingAsEOSCMonitoringGuideline((String) guideline.getInteroperabilityRecord().get("name"),
                 (String) existing.getInteroperabilityRecord().get("name"));
-        try {
-            return genericResourceService.update(getResourceTypeName(), guideline.getId(), guideline);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), guideline);
     }
 
     @Override
@@ -112,11 +103,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         existing.markOnboard(status, active, UserInfo.of(auth), null);
 
         logger.info("Verifying Interoperability Record: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     @Override
@@ -135,11 +122,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
     //endregion
 
@@ -162,7 +145,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     }
 
     @Override
-    public Browsing<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Paging<InteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication auth) {
         return getMyResources(filter, auth);
     }
 
@@ -173,7 +156,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }

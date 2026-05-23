@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -33,7 +33,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import gr.uoa.di.madgik.resourcecatalogue.config.AuditingProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,11 +57,8 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     private static final Logger logger = LoggerFactory.getLogger(DeployableApplicationController.class.getName());
 
 
-    @Value("${auditing.interval:6}")
-    private int auditingInterval;
-    @Value("${catalogue.id}")
-    private String catalogueId;
-
+    @Autowired
+    private AuditingProperties auditingProperties;
     DeployableApplicationController(DeployableApplicationService deployableApplicationService) {
         super(deployableApplicationService, "Deployable Application");
     }
@@ -70,12 +68,12 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.deployableApplicationIsActive(#prefix+'/'+#suffix, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.deployableApplicationIsActive(#prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getDeployableApplication(), HttpStatus.OK);
     }
 
@@ -85,7 +83,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
                                                                  @PathVariable String suffix,
                                                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -138,14 +136,14 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<DeployableApplicationBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                                          @Parameter(hidden = true) Authentication auth) {
-        Paging<DeployableApplicationBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
+        Paging<DeployableApplicationBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingProperties.getInterval(), auth);
         return new ResponseEntity<>(paging, HttpStatus.OK);
     }
 
     @Operation(summary = "Adds a new Deployable Application.")
     @PostMapping()
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.providerCanAddResources(#auth, #deployableApplication, @resourceCatalogueInfo.catalogueId)")
+            "@securityService.providerCanAddResources(#auth, #deployableApplication, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> deployableApplication,
                                  @Parameter(hidden = true) Authentication auth) {
         DeployableApplicationBundle bundle = new DeployableApplicationBundle();
@@ -178,7 +176,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
         String id = deployableApplication.get("id").toString();
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         bundle.setDeployableApplication(deployableApplication);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Deployable Application with id '{}'", deployableApplication.get("id"));
@@ -202,7 +200,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
 
         service.delete(bundle);
         logger.info("Deleted the Deployable Application with id '{}'", bundle.getId());
@@ -243,12 +241,11 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<DeployableApplicationBundle> audit(@PathVariable String prefix,
                                                              @PathVariable String suffix,
-                                                             @RequestParam("catalogueId") String catalogueId,
                                                              @RequestParam(required = false) String comment,
                                                              @RequestParam LoggingInfo.ActionType actionType,
                                                              @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.audit(id, catalogueId, comment, actionType, auth);
+        DeployableApplicationBundle bundle = service.audit(id, null, comment, actionType, auth);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -256,19 +253,17 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     @PutMapping(path = "suspend")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public DeployableApplicationBundle suspend(@RequestParam String id,
-                                               @RequestParam String catalogueId,
                                                @RequestParam boolean suspend,
                                                @Parameter(hidden = true) Authentication auth) {
-        return service.setSuspend(id, catalogueId, suspend, auth);
+        return service.setSuspend(id, null, suspend, auth);
     }
 
     @Operation(summary = "Get the LoggingInfo History of a specific Deployable Application.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,
-                                                                @PathVariable String suffix,
-                                                                @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId) {
+                                                                @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
-        DeployableApplicationBundle bundle = service.get(id, catalogueId);
+        DeployableApplicationBundle bundle = service.get(id);
         List<LoggingInfo> loggingInfoHistory = service.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
     }
@@ -302,11 +297,9 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     public ResponseEntity<Paging<DeployableApplicationBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                              @PathVariable String prefix,
                                                                              @PathVariable String suffix,
-                                                                             @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                                                              @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("catalogue_id", catalogueId);
         return new ResponseEntity<>(service.getAllEOSCResourcesOfAProvider(id, ff, auth), HttpStatus.OK);
     }
 
@@ -350,7 +343,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
             "draft/byProvider/{prefix}/{suffix}",
             "draft/byOrganisation/{prefix}/{suffix}"
     })
-    public ResponseEntity<Browsing<DeployableApplicationBundle>> getProviderDraftDeployableApplication(@PathVariable String prefix,
+    public ResponseEntity<Paging<DeployableApplicationBundle>> getProviderDraftDeployableApplication(@PathVariable String prefix,
                                                                                                        @PathVariable String suffix,
                                                                                                        @Parameter(hidden = true)
                                                                                                        @RequestParam MultiValueMap<String, Object> params,

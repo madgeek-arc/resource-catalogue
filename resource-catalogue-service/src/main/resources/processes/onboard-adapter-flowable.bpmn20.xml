@@ -9,11 +9,11 @@
 
   <process id="onboard-adapter-flowable" isExecutable="true">
 
-    <startEvent id="StartEvent_OnboardResource" name="Start Resource Onboard">
+    <startEvent id="StartEvent_OnboardResource" name="Start Adapter Onboard">
       <outgoing>Flow_11flptb</outgoing>
     </startEvent>
 
-    <exclusiveGateway id="Gateway_0ux95fk" name="Check if Resource is owned by a Catalogue">
+    <exclusiveGateway id="Gateway_0ux95fk" name="Check if Adapter is owned by a Catalogue">
       <incoming>Flow_11flptb</incoming>
       <outgoing>Flow_13cl7fo</outgoing>
       <outgoing>Flow_07azb67</outgoing>
@@ -26,7 +26,7 @@
     </sequenceFlow>
 
     <sequenceFlow id="Flow_07azb67" name="no catalogue" sourceRef="Gateway_0ux95fk" targetRef="Activity_1otm8rv">
-      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] == null || resource['catalogueId'].equals('') || 'eosc'.equals(resource['catalogueId'])}</conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression">${resource['catalogueId'] == null || resource['catalogueId'].equals('')}</conditionExpression>
     </sequenceFlow>
 
     <serviceTask id="Activity_1ewiokm" name="Get Catalogue"
@@ -40,7 +40,6 @@
       <extensionElements>
         <flowable:field name="variableName" stringValue="resource"/>
         <flowable:field name="key" stringValue="catalogueId"/>
-        <flowable:field name="value" stringValue="eosc"/>
       </extensionElements>
       <incoming>Flow_07azb67</incoming>
       <outgoing>Flow_1b9ungf</outgoing>
@@ -67,7 +66,7 @@
       <extensionElements>
         <flowable:field name="status" stringValue="FAILURE"/>
         <flowable:field name="code" stringValue="403"/>
-        <flowable:field name="message" stringValue="Catalogue is not eligible to onboard a resource."/>
+        <flowable:field name="message" stringValue="Catalogue is not eligible to onboard an adapter."/>
       </extensionElements>
       <incoming>Flow_0p1meom</incoming>
       <outgoing>Flow_0f5rjas</outgoing>
@@ -107,7 +106,7 @@
       <extensionElements>
         <flowable:field name="status" stringValue="FAILURE"/>
         <flowable:field name="code" stringValue="403"/>
-        <flowable:field name="message" stringValue="Organisation is not eligible to onboard a resource."/>
+        <flowable:field name="message" stringValue="Organisation is not eligible to onboard an adapter."/>
       </extensionElements>
       <incoming>Flow_1ff3515</incoming>
       <outgoing>Flow_19dxg20</outgoing>
@@ -144,7 +143,7 @@
 
     <sequenceFlow id="Flow_0skdybj" sourceRef="Activity_1lr0vvx" targetRef="Activity_1vdxr7y"/>
 
-    <serviceTask id="Activity_1euokmg" name="Save Resource"
+    <serviceTask id="Activity_1euokmg" name="Save Adapter Resource"
                  flowable:delegateExpression="${updateResourceDelegate}">
       <extensionElements>
         <flowable:field name="resourceName" stringValue="resource"/>

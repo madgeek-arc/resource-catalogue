@@ -3,12 +3,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.12</version>
+        <version>4.0.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>gr.uoa.di.madgik</groupId>
     <artifactId>resource-catalogue</artifactId>
-    <version>5.5.2-SNAPSHOT</version>
+    <version>6.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -30,27 +30,27 @@
     </modules>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version.core>2.18.6</jackson.version.core>
-        <registry-core.version>4.1.1-SNAPSHOT</registry-core.version>
-        <springdoc.version>2.8.16</springdoc.version>
-        <javax.mail-version>1.4.3</javax.mail-version>
+        <jackson2.annotations.version>2.21</jackson2.annotations.version>
+        <jackson.version>3.1.1</jackson.version>
+        <registry-core.version>5.0.0-SNAPSHOT</registry-core.version>
+        <elasticsearch.version>9.3.2</elasticsearch.version>
+        <springdoc.version>3.0.0</springdoc.version>
+        <jakarta.mail.version>2.1.3</jakarta.mail.version>
         <jaxb2-maven-plugin.version>4.1.0</jaxb2-maven-plugin.version>
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-        <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
+
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
-        <netty.version>4.1.132.Final</netty.version> <!-- CVE-2026-33871, CVE-2026-33870: patched in 4.1.132 -->
-        <thymeleaf.version>3.1.4.RELEASE</thymeleaf.version> <!-- CVE-2026-40477, CVE-2026-40478: SSTI RCE; patched in 3.1.4 -->
-        <tomcat.version>10.1.54</tomcat.version> <!-- CVE-2026-29145: patched in 10.1.54 -->
-        <spring-security.version>6.5.9</spring-security.version> <!-- CVE-2026-22732: patched in 6.5.9 -->
-        <log4j2.version>2.25.4</log4j2.version> <!-- CVE-2025-68161: TLS hostname bypass; patched in 2.25.3 -->
         <owasp-dependency-check-plugin.version>12.1.9</owasp-dependency-check-plugin.version>
-        <typescript-generator-maven-plugin.version>2.16.538</typescript-generator-maven-plugin.version>
+        <testcontainers.version>2.0.3</testcontainers.version>
+        <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
+        <netty.version>4.2.14.Final</netty.version>
+        <tomcat.version>11.0.22</tomcat.version>
+        <!-- Preserve test JVM args so modules can append their own flags safely. -->
+        <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
 
     <profiles>
@@ -67,6 +67,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>resource-catalogue-model</artifactId>
@@ -145,12 +152,23 @@
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>catalogue</artifactId>
-                <version>9.1.2-SNAPSHOT</version>
+                <version>10.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>request-logging-starter</artifactId>
                 <version>1.0.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>${elasticsearch.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-rest5-client</artifactId>
+                <version>${elasticsearch.version}</version>
             </dependency>
 
             <dependency>
@@ -175,24 +193,24 @@
                 <version>${springdoc.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.mail</groupId>
-                <artifactId>javax.mail</artifactId>
-                <version>1.6.2</version>
+                <groupId>jakarta.mail</groupId>
+                <artifactId>jakarta.mail-api</artifactId>
+                <version>${jakarta.mail.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version.core}</version>
+                <version>${jackson2.annotations.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
+                <groupId>tools.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>${jackson.version.core}</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
+                <groupId>tools.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version.core}</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.servlet</groupId>
@@ -220,7 +238,7 @@
                 <artifactId>json-simple</artifactId>
                 <version>1.1.1</version>
             </dependency>
-            <dependency> <!-- CVE-2026-34197 (8.8): patched in 6.2.4; CVE-2026-41044, CVE-2026-40466 (8.8): patched in 6.2.5 -->
+            <dependency> <!-- Addresses issues of version shipped by spring-boot 4.0.6 -->
                 <groupId>org.apache.activemq</groupId>
                 <artifactId>activemq-bom</artifactId>
                 <version>6.2.5</version>
@@ -288,7 +306,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -315,7 +332,7 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <skipTests>false</skipTests>
-                        <argLine>-Dfile.encoding=UTF-8</argLine>
+                        <argLine>${argLine}</argLine>
                     </configuration>
                 </plugin>
             </plugins>
@@ -328,7 +345,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.6.0</version>
                 <configuration>
                     <configLocation>google_checks.xml</configLocation>
                     <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>

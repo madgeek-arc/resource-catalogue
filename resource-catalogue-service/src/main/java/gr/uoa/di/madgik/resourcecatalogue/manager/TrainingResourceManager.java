@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
@@ -32,6 +32,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -89,11 +90,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), trainingResource.getId(), trainingResource);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), trainingResource);
     }
 
     private void checkAndResetServiceOnboarding(TrainingResourceBundle trainingResource, Authentication auth) {
@@ -130,11 +127,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         updateProviderTemplateStatus(existing, status, auth);
 
         logger.info("Verifying Training Resource: {}", existing);
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
 
     private void updateProviderTemplateStatus(TrainingResourceBundle trainingResource, String status, Authentication auth) {
@@ -171,11 +164,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         }
 
         existing.markActive(active, UserInfo.of(auth));
-        try {
-            return genericResourceService.update(getResourceTypeName(), id, existing);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), existing);
     }
     //endregion
 
@@ -197,7 +186,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     }
 
     @Override
-    public Browsing<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
+    public Paging<TrainingResourceBundle> getMy(FacetFilter filter, Authentication auth) {
         return getMyResources(filter, auth);
     }
 
@@ -208,7 +197,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
                 .map(id ->
                 {
                     try {
-                        return get(id, catalogueId);
+                        return get(id);
                     } catch (ServiceException | ResourceNotFoundException e) {
                         return null;
                     }
@@ -220,17 +209,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
-        FacetFilter ff = new FacetFilter();
-        ff.addFilter("resource_owner", providerId);
-        ff.addFilter("catalogue_id", catalogueId);
-        ff.addFilter("published", false);
-        List<TrainingResourceBundle> allProviderTrainingResources = getAll(ff, auth).getResults();
-        for (TrainingResourceBundle bundle : allProviderTrainingResources) {
-            if (bundle.getStatus().equals(vocabularyService.get("pending").getId())) {
-                return bundle;
-            }
-        }
-        return null;
+        return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
     //endregion
 }

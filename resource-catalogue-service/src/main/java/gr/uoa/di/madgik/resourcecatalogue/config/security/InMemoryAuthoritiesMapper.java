@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -51,7 +52,6 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     private Set<String> providerUsers = new HashSet<>();
     private Set<String> catalogueUsers = new HashSet<>();
     private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
-    private final int maxQuantity;
 
     private final OrganisationService organisationService;
 
@@ -62,8 +62,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    public InMemoryAuthoritiesMapper(@Value("${elastic.index.max_result_window:10000}") int maxQuantity,
-                                     CatalogueProperties catalogueProperties,
+    public InMemoryAuthoritiesMapper(CatalogueProperties catalogueProperties,
                                      OrganisationService manager,
 //                                     CatalogueService catalogueService,
                                      SecurityService securityService) {
@@ -71,7 +70,6 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         this.organisationService = manager;
 //        this.catalogueService = catalogueService;
         this.securityService = securityService;
-        this.maxQuantity = maxQuantity;
         if (catalogueProperties.getAdmins().isEmpty()) {
             throw new ServiceException("No Admins Provided");
         }
@@ -123,7 +121,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         long time = System.nanoTime();
         FacetFilter ff = new FacetFilter();
         ff.addFilter("published", false);
-        ff.setQuantity(maxQuantity);
+        ff.setQuantity(Integer.MAX_VALUE);
 
         List<OrganisationBundle> providers = new ArrayList<>();
         try {
@@ -227,6 +225,7 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     }
 
     @EventListener
+    @Order(2)
     public void onPropertyChange(PropertyChangeEvent event) {
         if ("catalogue.admins".equals(event.getPropertyName())
                 || "catalogue.onboarding-team".equals(event.getPropertyName())) {
@@ -236,11 +235,19 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     private void updateAdminsAndEpot() {
         adminsAndEpot.clear();
-        for (String admin : catalogueProperties.getAdmins()) {
-            adminsAndEpot.put(admin, Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
-        }
-        for (String epot : catalogueProperties.getOnboardingTeam()) {
-            adminsAndEpot.put(epot, Set.of(new SimpleGrantedAuthority("ROLE_EPOT")));
-        }
+        mergeRoles(adminsAndEpot, catalogueProperties.getOnboardingTeam()
+                .stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        e -> new SimpleGrantedAuthority("ROLE_EPOT"))
+                ));
+        mergeRoles(adminsAndEpot, catalogueProperties.getAdmins()
+                .stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
+                ));
     }
 }

@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
@@ -56,7 +56,6 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
         return "adapter";
     }
 
-    //TODO: test me
     @SuppressWarnings("unchecked")
     public void updateIdsToPublic(AdapterBundle adapter) {
         Map<String, Object> adapterMap = adapter.getAdapter();

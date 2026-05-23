@@ -39,9 +39,12 @@ hs_err_pid*
 **/*.yaml
 
 # claude code
+.claude/
 CLAUDE.md
 SUMMARY.md
-.claude/
+
+# extras
+log4j2.xml
 
 # scripts
 debug.sh

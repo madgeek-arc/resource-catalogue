@@ -17,8 +17,8 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -56,8 +56,6 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     private final ConfigurationTemplateService ctService;
     private final ConfigurationTemplateInstanceService ctiService;
 
-    @Value("${catalogue.id}")
-    private String catalogueId;
 
     public ResourceInteroperabilityRecordManager(@Lazy ServiceService serviceService,
                                                  @Lazy DatasourceService datasourceService,
@@ -108,7 +106,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
 
         bundle.markOnboard(vocabularyService.get("approved").getId(), true, UserInfo.of(auth), null);
         bundle.setActive(true);
-        bundle.setCatalogueId(this.catalogueId);
+        bundle.setCatalogueId(null);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
 
@@ -125,11 +123,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         bundle.markUpdate(UserInfo.of(auth), comment);
         relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
 
-        try {
-            return genericResourceService.update(getResourceTypeName(), bundle.getId(), bundle);
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return genericResourceService.update(getResourceTypeName(), bundle);
     }
 
     public void delete(ResourceInteroperabilityRecordBundle bundle) {
@@ -161,12 +155,10 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         return checkIfEachInteroperabilityRecordIsApproved(bundle);
     }
 
-    //TODO: test me
     @SuppressWarnings("unchecked")
     private ResourceInteroperabilityRecordBundle checkIfEachInteroperabilityRecordIsApproved(ResourceInteroperabilityRecordBundle bundle) {
         List<String> interoperabilityRecordIds = (List<String>) bundle.getResourceInteroperabilityRecord()
                 .get("interoperabilityRecordIds");
-
         for (String id : interoperabilityRecordIds) {
             if (!"approved".equals(interoperabilityRecordService.get(id).getStatus())) {
                 throw new ValidationException(
@@ -244,7 +236,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
 
     //region not-needed
     @Override
-    public Browsing<ResourceInteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication authentication) {
+    public Paging<ResourceInteroperabilityRecordBundle> getMy(FacetFilter filter, Authentication authentication) {
         return null;
     }
 

@@ -246,7 +246,8 @@ public class Bundle {
     }
 
     public String getId() {
-        return this.getPayload().get("id").toString();
+        Object id = this.getPayload().get("id");
+        return id != null ? id.toString() : null;
     }
 
     public void setId(String id) {

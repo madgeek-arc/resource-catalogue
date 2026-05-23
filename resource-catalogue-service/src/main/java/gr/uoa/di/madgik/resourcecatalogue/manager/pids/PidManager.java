@@ -16,11 +16,11 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.catalogue.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PidService;
 import org.springframework.stereotype.Service;
 
@@ -51,9 +51,9 @@ public class PidManager implements PidService {
             ff.setQuantity(10000);
             ff.setResourceType(resourceType);
             ff.addFilter("resource_internal_id", pid);
-            Browsing<Bundle> browsing = genericResourceService.getResults(ff);
-            if (!browsing.getResults().isEmpty()) {
-                return browsing.getResults().getFirst();
+            Paging<Bundle> paging = genericResourceService.getResults(ff);
+            if (!paging.getResults().isEmpty()) {
+                return paging.getResults().getFirst();
             }
         }
         return null;

@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
+package gr.uoa.di.madgik.resourcecatalogue.dto;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
-import org.springframework.stereotype.Service;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 
-@Service
-public class ServiceManager extends ResourceManager<ServiceBundle> {
+import java.util.List;
 
-    public ServiceManager() {
-        super(ServiceBundle.class);
-    }
-
-    @Override
-    public String getResourceTypeName() {
-        return "service";
-    }
+public record CatalogueResources(
+        List<OrganisationBundle> organisations,
+        List<ServiceBundle> services,
+        List<DatasourceBundle> datasources,
+        List<TrainingResourceBundle> trainingResources,
+        List<InteroperabilityRecordBundle> interoperabilityRecords,
+        List<AdapterBundle> adapters,
+        List<DeployableApplicationBundle> deployableApplications
+) {
 }

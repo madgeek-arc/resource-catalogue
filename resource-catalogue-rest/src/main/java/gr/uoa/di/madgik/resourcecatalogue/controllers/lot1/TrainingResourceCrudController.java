@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.lot1;
 
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,16 +37,12 @@ import java.util.List;
 @Tag(name = "training resources")
 public class TrainingResourceCrudController extends ResourceCrudController<TrainingResourceBundle> {
 
-    private final ResourceService<TrainingResourceBundle> trainingResourceService;
-
-    TrainingResourceCrudController(ResourceService<TrainingResourceBundle> trainingResourceService) {
-        super(trainingResourceService);
-        this.trainingResourceService = trainingResourceService;
+    TrainingResourceCrudController(GenericResourceService genericResourceService) {
+        super(genericResourceService);
     }
 
-    @PostMapping(path = "/bulk")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void addBulk(@RequestBody List<TrainingResourceBundle> bundles, @Parameter(hidden = true) Authentication auth) {
-        trainingResourceService.addBulk(bundles, auth);
+    @Override
+    protected String getResourceTypeName() {
+        return "training_resource";
     }
 }

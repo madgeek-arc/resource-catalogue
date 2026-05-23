@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
+package gr.uoa.di.madgik.resourcecatalogue.config;
 
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
-import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@Service
-public class DatasourceManager extends ResourceManager<DatasourceBundle> {
+@Configuration
+@ConfigurationProperties(prefix = "auditing")
+public class AuditingProperties {
 
-    public DatasourceManager() {
-        super(DatasourceBundle.class);
+    private int interval = 6;
+
+    public int getInterval() {
+        return interval;
     }
 
-    @Override
-    public String getResourceTypeName() {
-        return "datasource";
+    public AuditingProperties setInterval(int interval) {
+        this.interval = interval;
+        return this;
     }
 }

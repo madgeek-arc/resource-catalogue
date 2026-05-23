@@ -16,15 +16,17 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
-import gr.uoa.di.madgik.resourcecatalogue.config.ResourceCatalogueInfo;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.context.annotation.Profile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Hidden
 @RestController
@@ -32,12 +34,17 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "config")
 public class CatalogueInfoController {
 
-    private final ResourceCatalogueInfo resourceCatalogueInfo;
+    @Value("${catalogue.emails.support}")
+    private String catalogueSupportEmail;
 
-    public record CatalogueConfiguration(String catalogueId, String catalogueName, String catalogueSupportEmail){}
+    private final NodeProperties nodeProperties;
 
-    public CatalogueInfoController(ResourceCatalogueInfo resourceCatalogueInfo) {
-        this.resourceCatalogueInfo = resourceCatalogueInfo;
+    public record CatalogueConfiguration(String catalogueSupportEmail, String nodePid,
+                                         boolean nodePidFixed) {
+    }
+
+    public CatalogueInfoController(NodeProperties nodeProperties) {
+        this.nodeProperties = nodeProperties;
     }
 
     @Hidden
@@ -45,9 +52,9 @@ public class CatalogueInfoController {
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<CatalogueConfiguration> get() {
         CatalogueConfiguration conf = new CatalogueConfiguration(
-                resourceCatalogueInfo.getCatalogueId(),
-                resourceCatalogueInfo.getCatalogueName(),
-                resourceCatalogueInfo.getCatalogueSupportEmail()
+                catalogueSupportEmail,
+                nodeProperties.getPid().getValue(),
+                nodeProperties.getPid().isFixed()
         );
         return new ResponseEntity<>(conf, HttpStatus.OK);
     }

@@ -1,7 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-import gr.uoa.di.madgik.registry.domain.Browsing;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -40,15 +40,11 @@ public class PublicServiceController {
 
     @Operation(description = "Returns the Public Service with the given id.")
     @GetMapping(path = "public/service/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.serviceIsActive(#prefix+'/'+#suffix, catalogueId) or " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
-                                 @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
         }
@@ -56,16 +52,30 @@ public class PublicServiceController {
                 "The specific Service is not active"));
     }
 
-    //TODO: change path -> notify cyf
+    @Deprecated
     @GetMapping(path = "public/service/infraService/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> getBundleDeprecated(@PathVariable String prefix,
+                                                 @PathVariable String suffix,
+                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        ServiceBundle bundle = service.get(id);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</public/service/bundle/{prefix}/{suffix}>; rel=\"successor-version\"")
+                .body(bundle);
+    }
+
+    @GetMapping(path = "public/service/bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
-                                       @RequestParam(defaultValue = "${catalogue.id}", name = "catalogue_id") String catalogueId,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        ServiceBundle bundle = service.get(id, catalogueId);
+        ServiceBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle, HttpStatus.OK);
     }
 
@@ -82,24 +92,41 @@ public class PublicServiceController {
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
-    @Operation(description = "Get a Browsing of Highlighted Service results, based on a set of filters.")
+    @Operation(description = "Get a Paging of Highlighted Service results, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/service/search")
-    public Browsing<HighlightedResult<ServiceBundle>> searchServices(@Parameter(hidden = true)
+    public Paging<HighlightedResult<ServiceBundle>> searchServices(@Parameter(hidden = true)
                                                                      @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Browsing<HighlightedResult<ServiceBundle>> browsing = service.searchServices(ff);
-        return browsing;
+        Paging<HighlightedResult<ServiceBundle>> paging = service.searchServices(ff);
+        return paging;
     }
 
-    //TODO: change path -> notify cyf
+    @Deprecated
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/service/adminPage/all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    public ResponseEntity<Paging<ServiceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
+                                                                         @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("active", true);
+        Paging<ServiceBundle> paging = service.getAll(ff);
+        return ResponseEntity
+                .ok()
+                .header("Deprecation", "true")
+                .header("Link", "</public/service/bundle/all>; rel=\"successor-version\"")
+                .body(paging);
+    }
+
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "public/service/bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                @RequestParam MultiValueMap<String, Object> params) {

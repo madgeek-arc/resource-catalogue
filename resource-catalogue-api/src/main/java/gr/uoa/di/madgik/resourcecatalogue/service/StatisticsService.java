@@ -24,7 +24,7 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import org.joda.time.DateTime;
 
 import java.util.Arrays;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -85,7 +85,7 @@ public interface StatisticsService {
      * @param by   interval (Day, Week, Month, Year)
      * @return {@link Map}&lt;{@link DateTime},{@link Map}&lt;{@link String},{@link Long}&gt;&gt;
      */
-    Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Date from, Date to, Interval by);
+    Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Instant from, Instant to, Interval by);
 
     enum Interval {
         DAY("day"),

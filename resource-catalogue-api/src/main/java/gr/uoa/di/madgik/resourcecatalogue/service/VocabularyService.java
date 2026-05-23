@@ -73,13 +73,6 @@ public interface VocabularyService extends ResourceService<Vocabulary> {
     List<Vocabulary> getByType(Vocabulary.Type type);
 
     /**
-     * Get all Vocabularies in a Map.
-     *
-     * @return {@link Map}&lt;{@link String}, {@link Vocabulary}&gt;
-     */
-    Map<String, Vocabulary> getVocabulariesMap();
-
-    /**
      * Deletes all Vocabularies.
      */
     void deleteAll(Authentication auth);
@@ -90,12 +83,4 @@ public interface VocabularyService extends ResourceService<Vocabulary> {
      * @param type Vocabulary.Type
      */
     void deleteByType(Vocabulary.Type type);
-
-    /**
-     * Returns a Tree of parents and children for a specific Vocabulary Type
-     *
-     * @param type Vocabulary Type
-     * @return {@link VocabularyTree}
-     */
-    VocabularyTree getVocabulariesTree(Vocabulary.Type type);
 }
