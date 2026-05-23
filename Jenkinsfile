@@ -32,7 +32,9 @@ pipeline {
     stage('Test') {
       when { expression { return env.TAG_NAME == null } }
       steps {
-        sh 'mvn -B verify'
+        withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+          sh 'mvn -B verify -DnvdApiKey=$NVD_API_KEY'
+        }
       }
       post {
         always {
