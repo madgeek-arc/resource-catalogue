@@ -109,8 +109,12 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
     }
 
     private void fixNodeFacets(T t, String nodeLabel) {
-        if (Paging.class.isAssignableFrom(t.getClass())) {
-            Facet nodeFacet = ((Paging<?>) t).getFacets().stream().filter(f -> f.getField().equals("node")).findFirst().orElse(null);
+        if (t instanceof Paging<?> paging && paging.getFacets() != null) {
+            Facet nodeFacet = paging.getFacets()
+                    .stream()
+                    .filter(f -> f.getField().equals("node"))
+                    .findFirst()
+                    .orElse(null);
             if (nodeFacet != null) {
                 for (gr.uoa.di.madgik.registry.domain.Value value : nodeFacet.getValues()) {
                     if (!nodeLabel.equalsIgnoreCase(value.getLabel())) {
