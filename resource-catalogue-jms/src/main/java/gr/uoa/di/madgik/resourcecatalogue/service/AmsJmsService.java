@@ -19,15 +19,12 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import gr.uoa.di.madgik.resourcecatalogue.config.AmsProperties;
-import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.JmsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.*;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -37,9 +34,9 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@Primary
-@ConditionalOnProperty(name = "registry.jms.enabled", havingValue = "true")
-public class AmsJmsService extends DefaultJmsService implements JmsService {
+@Order(0)
+@ConditionalOnProperty(name = "catalogue.jms.ams.enabled", havingValue = "true", matchIfMissing = true)
+public class AmsJmsService implements JmsPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(AmsJmsService.class);
 
@@ -47,15 +44,9 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     private final AmsProperties amsProperties;
     private final ObjectMapper objectMapper;
 
-    @Value("${catalogue.jms.prefix}")
-    private String jmsPrefix;
-
-    public AmsJmsService(@Autowired(required = false) JmsTemplate jmsTopicTemplate,
-                         @Autowired(required = false) JmsTemplate jmsQueueTemplate,
-                         WebClient.Builder webClientBuilder,
+    public AmsJmsService(WebClient.Builder webClientBuilder,
                          AmsProperties amsProperties,
                          ObjectMapper objectMapper) {
-        super(jmsTopicTemplate, jmsQueueTemplate);
         this.webClient = webClientBuilder.build();
         this.amsProperties = amsProperties;
         this.objectMapper = objectMapper;
@@ -65,7 +56,6 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
     public void convertAndSendTopic(String messageDestination, Object message) {
         try {
             publishTopic(messageDestination.replace(".", "-"), message);
-            super.convertAndSendTopic(jmsPrefix + "." + messageDestination, message);
         } catch (WebClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 createTopic(messageDestination.replace(".", "-"));
@@ -76,7 +66,7 @@ public class AmsJmsService extends DefaultJmsService implements JmsService {
 
     @Override
     public void convertAndSendQueue(String messageDestination, Object message) {
-        super.convertAndSendTopic(jmsPrefix + "." + messageDestination, message);
+        logger.debug("AMS queue publishing is not supported for destination: {}", messageDestination);
     }
 
     //region Topics

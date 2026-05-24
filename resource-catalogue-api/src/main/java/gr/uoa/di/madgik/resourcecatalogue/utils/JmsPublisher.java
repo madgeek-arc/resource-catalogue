@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package gr.uoa.di.madgik.resourcecatalogue.service;
+package gr.uoa.di.madgik.resourcecatalogue.utils;
 
-import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
-@Service
-public class NoopJmsService implements JmsService {
+public interface JmsPublisher extends JmsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(NoopJmsService.class);
+    @Override
+    @Retryable(retryFor = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(value = 6000))
+    void convertAndSendTopic(String messageDestination, Object message);
 
-    public NoopJmsService() {
-    }
-
-    public void convertAndSendTopic(String messageDestination, Object message) {
-        logger.debug("No-op");
-    }
-
-    public void convertAndSendQueue(String messageDestination, Object message) {
-        logger.debug("No-op");
-    }
-
+    @Override
+    @Retryable(retryFor = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(value = 6000))
+    void convertAndSendQueue(String messageDestination, Object message);
 }
