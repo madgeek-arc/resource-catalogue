@@ -24,10 +24,6 @@ RUN mvn dependency:go-offline -B
 # Copy the full source
 COPY . .
 
-## For debugging reasons  ##
-RUN if [ -z "$profile" ] ; then echo "Building without profile"; sleep 2 ; else echo "Building using profile: '$profile'"; sleep 2 ; fi
-RUN mvn help:effective-pom
-
 ## Run maven based on given profile ##
 RUN if [ -z "$profile" ] ; then mvn package -Dmaven.test.skip=${skipTests} ; else mvn package -P $profile -Dmaven.test.skip=${skipTests} ; fi
 
