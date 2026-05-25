@@ -6,7 +6,8 @@
       "name": "resource_internal_id",
       "path": "$.adapter.id",
       "primaryKey": true,
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Catalogue ID",
@@ -15,7 +16,8 @@
       "path": "$.catalogueId",
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Urls",
@@ -29,14 +31,16 @@
       "multivalued": false,
       "name": "name",
       "path": "$.adapter.name",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Description",
       "multivalued": false,
       "name": "description",
       "path": "$.adapter.description",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Alternative PIDs",
@@ -68,7 +72,8 @@
       "path": "$.adapter.resourceOwner",
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Linked Resource ID",
@@ -77,7 +82,8 @@
       "path": "$.adapter.linkedResource.id",
       "type": "java.lang.String",
       "relatedResourceType": "linkedResources",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Linked Resource Type",
@@ -114,7 +120,8 @@
       "path": "$.adapter.programmingLanguage",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "License",
@@ -162,7 +169,8 @@
       "path": "$.adapter.sqa.sqaBadge",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": null,
@@ -218,7 +226,8 @@
       "multivalued": false,
       "name": "externalId",
       "path": "$.identifiers.externalId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": null,

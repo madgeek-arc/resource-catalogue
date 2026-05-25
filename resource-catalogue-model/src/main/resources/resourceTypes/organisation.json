@@ -6,7 +6,8 @@
       "name": "resource_internal_id",
       "path": "$.organisation.id",
       "primaryKey": true,
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Catalogue ID",
@@ -15,21 +16,24 @@
       "path": "$.catalogueId",
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Organisation Name",
       "multivalued": false,
       "name": "name",
       "path": "$.organisation.name",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Description",
       "multivalued": false,
       "name": "description",
       "path": "$.organisation.description",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Alternative PIDs",
@@ -52,7 +56,8 @@
       "multivalued": false,
       "name": "abbreviation",
       "path": "$.organisation.abbreviation",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Country",
@@ -125,7 +130,8 @@
       "multivalued": true,
       "name": "tags",
       "path": "$.organisation.tags[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Public Contacts",

@@ -6,7 +6,8 @@
       "name": "resource_internal_id",
       "path": "$.configurationTemplateInstance.id",
       "primaryKey": true,
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Resource ID",
@@ -15,7 +16,8 @@
       "path": "$.configurationTemplateInstance.resourceId",
       "type": "java.lang.String",
       "relatedResourceType": "service",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Configuration Template ID",
@@ -24,7 +26,8 @@
       "path": "$.configurationTemplateInstance.configurationTemplateId",
       "type": "java.lang.String",
       "relatedResourceType": "configuration_template",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Catalogue ID",
@@ -33,7 +36,8 @@
       "path": "$.catalogueId",
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Node",

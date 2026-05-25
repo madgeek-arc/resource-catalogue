@@ -6,7 +6,8 @@
       "name": "resource_internal_id",
       "path": "$.interoperabilityRecord.id",
       "primaryKey": true,
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Catalogue ID",
@@ -15,7 +16,8 @@
       "path": "$.catalogueId",
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Urls",
@@ -29,14 +31,16 @@
       "multivalued": false,
       "name": "name",
       "path": "$.interoperabilityRecord.name",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Description",
       "multivalued": false,
       "name": "description",
       "path": "$.interoperabilityRecord.description",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Alternative PIDs",
@@ -68,7 +72,8 @@
       "path": "$.interoperabilityRecord.resourceOwner",
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "License",

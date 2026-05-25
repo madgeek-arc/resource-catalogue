@@ -6,7 +6,8 @@
       "name": "resource_internal_id",
       "path": "$.configurationTemplate.id",
       "primaryKey": true,
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Catalogue ID",
@@ -15,7 +16,8 @@
       "path": "$.catalogueId",
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Interoperability Record ID",
@@ -24,7 +26,8 @@
       "path": "$.configurationTemplate.interoperabilityRecordId",
       "type": "java.lang.String",
       "relatedResourceType": "interoperability_record",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Node",
@@ -40,7 +43,8 @@
       "multivalued": false,
       "name": "name",
       "path": "$.configurationTemplate.name",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": null,

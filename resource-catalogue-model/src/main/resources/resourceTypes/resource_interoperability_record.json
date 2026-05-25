@@ -6,7 +6,8 @@
       "name": "resource_internal_id",
       "path": "$.resourceInteroperabilityRecord.id",
       "primaryKey": true,
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Catalogue ID",
@@ -15,7 +16,8 @@
       "path": "$.catalogueId",
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Resource ID",
@@ -24,7 +26,8 @@
       "path": "$.resourceInteroperabilityRecord.resourceId",
       "type": "java.lang.String",
       "relatedResourceType": "eoscServices",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": "Node",
@@ -42,7 +45,8 @@
       "path": "$.resourceInteroperabilityRecord.interoperabilityRecordIds[*]",
       "type": "java.lang.String",
       "relatedResourceType": "interoperability_record",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"]
     },
     {
       "label": null,
