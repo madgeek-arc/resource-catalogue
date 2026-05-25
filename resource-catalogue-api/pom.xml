@@ -90,6 +90,11 @@
             <artifactId>registry-core-helper</artifactId>
         </dependency>
         <dependency>
+            <groupId>gr.uoa.di.madgik</groupId>
+            <artifactId>eosc-node-endpoint-client</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
         </dependency>
