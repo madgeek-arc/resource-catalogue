@@ -1,5 +1,6 @@
 def DOCKER_IMAGE = null
 def DOCKER_TAG = ''
+def DOCKER_IMAGE_SHA = ''
 
 pipeline {
   agent any
@@ -51,6 +52,7 @@ pipeline {
       steps{
         script {
           DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond --build-arg skipTests=true .")
+          DOCKER_IMAGE_SHA = sh(script: "docker inspect --format='{{.Id}}' ${DOCKER_IMAGE.id}", returnStdout: true).trim()
         }
       }
     }
@@ -117,8 +119,8 @@ pipeline {
   post {
     always {
       script {
-        if (DOCKER_IMAGE) {
-          sh "docker rmi -f \$(docker inspect --format='{{.Id}}' ${DOCKER_IMAGE.id})"
+        if (DOCKER_IMAGE_SHA) {
+          sh "docker rmi -f ${DOCKER_IMAGE_SHA} || true"
         }
       }
     }
