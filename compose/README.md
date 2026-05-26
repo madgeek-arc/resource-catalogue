@@ -1,5 +1,7 @@
 # Resource Catalogue — Docker Compose
 
+> **This is an example deployment.** The files in this directory are a starting point — review and adjust all configuration, credentials, resource limits, and security settings before using in production.
+
 Runs the full resource-catalogue stack locally or on a server.
 
 ## Services
@@ -23,7 +25,7 @@ All services communicate over the internal `rc-net` bridge network. The applicat
 ### 1. Environment variables
 
 ```bash
-cp .env.example .env
+cp compose/.env.example compose/.env
 ```
 
 Edit `.env` and set passwords for the credentials shared across services:
@@ -38,20 +40,20 @@ REDIS_PASSWORD=<password>
 ### 2. Application config
 
 ```bash
-cp config/application.properties.example config/application.properties
+cp compose/config/application.properties.example compose/config/application.properties
 ```
 
-Edit `config/application.properties` and fill in all deployment-specific settings: OAuth credentials, node identity, admins, redirect URLs, resource ID prefixes, service endpoints, API tokens, etc. The only `${VAR}` placeholders in the file are `${DB_USER}`, `${DB_PASSWORD}`, `${DB_NAME}`, `${REDIS_PASSWORD}`, and `${ES_PASSWORD}` — these are shared with the other compose services and resolved from `.env`.
+Edit `compose/config/application.properties` and fill in all deployment-specific settings: OAuth credentials, node identity, admins, redirect URLs, resource ID prefixes, service endpoints, API tokens, etc. The only `${VAR}` placeholders in the file are `${DB_USER}`, `${DB_PASSWORD}`, `${DB_NAME}`, `${REDIS_PASSWORD}`, and `${ES_PASSWORD}` — these are shared with the other compose services and resolved from `.env`.
 
 This file is mounted as a Docker secret and is never exposed as an environment variable.
 
 ### 3. PID config (optional)
 
 ```bash
-cp config/pid.yaml.example config/pid.yaml
+cp compose/config/pid.yaml.example compose/config/pid.yaml
 ```
 
-Edit `config/pid.yaml` to set the PID issuer URL, credentials (`user`, `user-index`, `password`), and cert paths for each resource type. Place the referenced PEM files in `config/pid_certs/<resource-type>/`. The entire `config/` directory is mounted at `/rc/config` inside the container.
+Edit `compose/config/pid.yaml` to set the PID issuer URL, credentials (`user`, `user-index`, `password`), and cert paths for each resource type. Place the referenced PEM files in `compose/config/pid_certs/<resource-type>/`. The `config/pid_certs` directory is mounted at `/rc/config/pid_certs` inside the container.
 
 If PID support is not needed, leave `pid.yaml` as-is with empty credentials.
 
@@ -59,8 +61,10 @@ If PID support is not needed, leave `pid.yaml` as-is with empty credentials.
 
 ### With the Makefile (from project root)
 
+> **Note:** `make compose` pulls the image from `docker.madgik.di.uoa.gr` if not found locally. Unless you have access to the private registry, the pull will fail. Build the image locally first (see below) and then use `docker compose` directly.
+
 ```bash
-# Pull image and start (runs in the foreground)
+# Pull image and start (runs in the foreground) — requires access to the private registry
 make compose
 
 # Stop and remove containers
@@ -77,13 +81,6 @@ make docker-build
 docker compose -f compose/compose.yaml up
 ```
 
-### Directly with Docker Compose (from this directory)
-
-```bash
-docker compose up -d
-docker compose down
-```
-
 ### Running the JAR locally (dev workflow)
 
 `make run` (from project root) runs the Spring Boot JAR directly on the host. It sources `compose/.env` first (so `${DB_NAME}`, `${DB_PASSWORD}`, etc. are resolved), then by default loads `compose/config/application.properties` and `compose/config/pid.yaml` as Spring additional-location config. Override with `CONFIG=...` to point at a different set of files.
@@ -91,7 +88,7 @@ docker compose down
 Start from the example and edit it to suit your local setup:
 
 ```bash
-cp config/application.properties.example /path/to/local-application.properties
+cp compose/config/application.properties.example /path/to/local-application.properties
 ```
 
 The example file uses Docker service names as hostnames (`postgres`, `elasticsearch`, `redis`). These only resolve inside the Docker network — update them to point at your actual running instances:

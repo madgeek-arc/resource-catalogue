@@ -17,7 +17,7 @@ spring.security.oauth2.client.provider.eosc.issuer-uri=https://aai.example.eu/au
 spring.security.oauth2.client.registration.eosc.client-id=
 spring.security.oauth2.client.registration.eosc.client-name=EOSC
 spring.security.oauth2.client.registration.eosc.client-secret=
-spring.security.oauth2.client.registration.eosc.scope=openid,email,profile,entitlements
+spring.security.oauth2.client.registration.eosc.scope=openid,email,profile
 spring.security.oauth2.client.registration.eosc.redirect-uri=https://catalogue.example.eu/api/login/oauth2/code/eosc
 
 spring.security.oauth2.resourceserver.jwt.issuer-uri=https://aai.example.eu/auth/realms/example
