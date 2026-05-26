@@ -27,6 +27,8 @@ integrated capabilities to researchers.
 
 ## Getting Started
 
+For a Docker Compose based setup, see [compose/README.md](compose/README.md).
+
 Follow these steps to set up a development environment for Resource Catalogue:
 
 ### Prerequisites
