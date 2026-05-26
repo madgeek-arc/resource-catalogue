@@ -1,4 +1,3 @@
-
 logging.file.path=logs/
 
 
@@ -21,6 +20,7 @@ spring.security.oauth2.client.registration.eosc.scope=openid,email,profile
 spring.security.oauth2.client.registration.eosc.redirect-uri=https://catalogue.example.eu/api/login/oauth2/code/eosc
 
 spring.security.oauth2.resourceserver.jwt.issuer-uri=https://aai.example.eu/auth/realms/example
+
 
 ##########################
 ## Mandatory Properties ##
@@ -58,11 +58,16 @@ catalogue.jms.ams.host=
 catalogue.jms.ams.key=
 catalogue.jms.ams.project=
 
-## Catalogue Properties ##
+
+############################
+##  Catalogue Properties  ##
+############################
 ### Basic Info ###
-node.name=My Catalogue
+catalogue.homepage=
+
+## Node Registry ##
+node.name=My Node
 node.pid.value=
-node.pid.fixed=true
 node.registry.url=
 node.registry.key=
 
@@ -84,19 +89,16 @@ catalogue.resources.organisation.id-prefix=
 catalogue.resources.resource-interoperability-record.id-prefix=
 catalogue.resources.service.id-prefix=
 catalogue.resources.training_resource.id-prefix=
-catalogue.resources.tool.id-prefix=
 
 ### Email Notification Properties ###
 catalogue.emails.enabled=false
 catalogue.emails.admin-notifications=false
 catalogue.emails.provider-notifications=false
 catalogue.emails.registration-emails.to=
-catalogue.emails.helpdesk-emails.to=
-catalogue.emails.helpdesk-emails.cc=
-catalogue.emails.monitoring-emails.to=
 catalogue.emails.resource-consistency-notifications=false
 catalogue.emails.resource-consistency-emails.to=
 catalogue.emails.resource-consistency-emails.cc=
+catalogue.emails.support=
 
 ### Mailer Properties ###
 catalogue.mailer.host=
@@ -107,6 +109,15 @@ catalogue.mailer.port=
 catalogue.mailer.protocol=smtp
 catalogue.mailer.auth=true
 catalogue.mailer.ssl=false
+
+
+#########################
+##  External Services  ##
+#########################
+
+## PID Service ##
+pid.service.enabled=false
+pid.service.consistency.enabled=false
 
 ## Matomo Properties ##
 matomo.authorization.header=
@@ -125,14 +136,14 @@ argo.grnet.monitoring.service.types=
 argo.grnet.monitoring.status=
 argo.grnet.monitoring.token=
 
-## Accounting ##
-accounting.enabled=false
-accounting.project-id=
-accounting.endpoint=
-accounting.client-id=
-accounting.client-secret=
-accounting.token-endpoint=
-
 ## Helpdesk ##
 helpdesk.enabled=false
 helpdesk.endpoint=
+
+## Accounting ##
+accounting.enabled=false
+accounting.client-id=
+accounting.client-secret=
+accounting.endpoint=
+accounting.project-id=
+accounting.token-endpoint=
