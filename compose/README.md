@@ -23,7 +23,7 @@ All services communicate over the internal `rc-net` bridge network. The applicat
 ## Setup
 
 ### 1. Environment variables
-
+Copy the example file to the compose directory (needs to be in the same directory as compose.yaml).
 ```bash
 cp compose/.env.example compose/.env
 ```
@@ -38,7 +38,7 @@ REDIS_PASSWORD=<password>
 ```
 
 ### 2. Application config
-
+Copy the example file to the compose/config directory.
 ```bash
 cp compose/config/application.properties.example compose/config/application.properties
 ```
@@ -48,7 +48,7 @@ Edit `compose/config/application.properties` and fill in all deployment-specific
 This file is mounted as a Docker secret and is never exposed as an environment variable.
 
 ### 3. PID config (optional)
-
+Copy the example file to the compose/config directory.
 ```bash
 cp compose/config/pid.yaml.example compose/config/pid.yaml
 ```
