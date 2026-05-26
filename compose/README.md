@@ -28,7 +28,7 @@ Copy the example file to the compose directory (needs to be in the same director
 cp compose/.env.example compose/.env
 ```
 
-Edit `.env` and set passwords for the credentials shared across services:
+Edit `.env` and set passwords for the credentials of the services (postgres, elastic, redis):
 
 ```
 DB_PASSWORD=<password>          # app user password
