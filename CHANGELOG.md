@@ -17,6 +17,30 @@
 * sets specific maven version for java 21 ([bfdff04](https://github.com/madgeek-arc/resource-catalogue/commit/bfdff04e97202433e6634861a3ff685976f30521))
 * token in headers when submitting a ticket ([de32231](https://github.com/madgeek-arc/resource-catalogue/commit/de322315e15e62f0e595fb846c9f194c0e9a1b2e))
 
+## [6.0.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.5.1...v6.0.0) (2026-05-26)
+
+
+### Bug Fixes
+
+* **deps:** bump deps to fix CVEs, update suppressions and make Jenkinsfile tolerate fails in dependency check without canceling the rest of the build ([24a5f55](https://github.com/madgeek-arc/resource-catalogue/commit/24a5f5552201d05ee71a0ce6709864a43c54d17f))
+* enable forwarded header handling in Spring Boot ([6ddde5f](https://github.com/madgeek-arc/resource-catalogue/commit/6ddde5fd3319ce9212fd9c877cef042a556acc23))
+* guard against null facets in SecureResponseAdvice ([225c071](https://github.com/madgeek-arc/resource-catalogue/commit/225c0711904cd4e9273ec50b1e4d1d9547e84afc))
+* lot1 profile build ([8d09757](https://github.com/madgeek-arc/resource-catalogue/commit/8d0975721c65f3a00d1d2977ef52737a2b7fcd60))
+* **property:** use correct property ([e2e9106](https://github.com/madgeek-arc/resource-catalogue/commit/e2e9106a5f35b55a29c048932e6b0d27f014ce2a))
+* reintroduce validateId() method for external catalogue resources ([877602f](https://github.com/madgeek-arc/resource-catalogue/commit/877602f0fb9f4ce1fb9fe54b4efc00e3950ceb3e))
+* replace file-path IO with classpath resource streams on WizardController ([e2d16ed](https://github.com/madgeek-arc/resource-catalogue/commit/e2d16ed6a5e6d7b0b7eade4b08e52168ef6c3acf))
+* replace maxQuantity with Integer.MAX_VALUE ([252c5ae](https://github.com/madgeek-arc/resource-catalogue/commit/252c5aef4132e7e48010fc079b775575206889c6))
+
+
+### Documentation
+
+* **readme:** add reference to compose readme ([a58b0d8](https://github.com/madgeek-arc/resource-catalogue/commit/a58b0d8480de2c247a8897fc62899cbbdc439824))
+
+
+### Miscellaneous Chores
+
+* **release:** release 6.0.0 ([6f189f5](https://github.com/madgeek-arc/resource-catalogue/commit/6f189f5e58742dd6d4f6a0cd8dd2358ef4d3c7c6))
+
 ## [5.5.1](https://github.com/madgeek-arc/resource-catalogue/compare/v5.5.0...v5.5.1) (2026-05-20)
 
 
