@@ -1,0 +1,138 @@
+
+logging.file.path=logs/
+
+
+##########################
+##  Spring Properties   ##
+##########################
+
+### Redis Properties ###
+spring.data.redis.host=redis
+spring.data.redis.port=6379
+spring.data.redis.password=${REDIS_PASSWORD}
+
+### Security Properties ###
+#### EOSC AAI Authentication ####
+spring.security.oauth2.client.provider.eosc.issuer-uri=https://aai.example.eu/auth/realms/example
+spring.security.oauth2.client.registration.eosc.client-id=
+spring.security.oauth2.client.registration.eosc.client-name=EOSC
+spring.security.oauth2.client.registration.eosc.client-secret=
+spring.security.oauth2.client.registration.eosc.scope=openid,email,profile,entitlements
+spring.security.oauth2.client.registration.eosc.redirect-uri=https://catalogue.example.eu/api/login/oauth2/code/eosc
+
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://aai.example.eu/auth/realms/example
+
+##########################
+## Mandatory Properties ##
+##########################
+
+## Catalogue
+catalogue-lib.model.validation.base-url=http://localhost:${server.port}
+
+## Registry Configuration ##
+### DB - Datasource Properties ###
+registry.datasource.configuration.maximum-pool-size=10
+registry.datasource.username=${DB_USER}
+registry.datasource.password=${DB_PASSWORD}
+registry.datasource.url=jdbc:postgresql://postgres:5432/${DB_NAME}
+
+### DB - JPA Properties ###
+registry.jpa.properties.hibernate.hbm2ddl.auto=validate
+
+### Elastic Properties ###
+registry.elasticsearch.enable=false
+registry.elasticsearch.uris=http://elasticsearch:9200
+registry.elasticsearch.username=elastic
+registry.elasticsearch.password=${ES_PASSWORD}
+
+#### JMS Properties ###
+registry.jms.enabled=false
+registry.jms.host=tcp://activemq:61616
+registry.jms.prefix=registry
+registry.jms.username=admin
+registry.jms.password=
+
+catalogue.jms.prefix=eosc-beyond
+catalogue.jms.ams.enabled=true
+catalogue.jms.ams.host=
+catalogue.jms.ams.key=
+catalogue.jms.ams.project=
+
+## Catalogue Properties ##
+### Basic Info ###
+node.name=My Catalogue
+node.pid.value=
+node.pid.fixed=true
+node.registry.url=
+node.registry.key=
+
+### Admins / Onboarding Team ###
+catalogue.admins=admin@example.eu
+catalogue.onboarding-team=admin@example.eu
+### Redirect URLs ###
+catalogue.login-redirect=https://catalogue.example.eu
+catalogue.logout-redirect=https://catalogue.example.eu
+### Resource ID Prefixes ###
+catalogue.resources.adapter.id-prefix=
+catalogue.resources.catalogue.id-prefix=
+catalogue.resources.configuration-template.id-prefix=
+catalogue.resources.configuration-template-instance.id-prefix=
+catalogue.resources.datasource.id-prefix=
+catalogue.resources.deployable-application.id-prefix=
+catalogue.resources.interoperability-record.id-prefix=
+catalogue.resources.organisation.id-prefix=
+catalogue.resources.resource-interoperability-record.id-prefix=
+catalogue.resources.service.id-prefix=
+catalogue.resources.training_resource.id-prefix=
+catalogue.resources.tool.id-prefix=
+
+### Email Notification Properties ###
+catalogue.emails.enabled=false
+catalogue.emails.admin-notifications=false
+catalogue.emails.provider-notifications=false
+catalogue.emails.registration-emails.to=
+catalogue.emails.helpdesk-emails.to=
+catalogue.emails.helpdesk-emails.cc=
+catalogue.emails.monitoring-emails.to=
+catalogue.emails.resource-consistency-notifications=false
+catalogue.emails.resource-consistency-emails.to=
+catalogue.emails.resource-consistency-emails.cc=
+
+### Mailer Properties ###
+catalogue.mailer.host=
+catalogue.mailer.from=
+catalogue.mailer.username=
+catalogue.mailer.password=
+catalogue.mailer.port=
+catalogue.mailer.protocol=smtp
+catalogue.mailer.auth=true
+catalogue.mailer.ssl=false
+
+## Matomo Properties ##
+matomo.authorization.header=
+matomo.host=
+matomo.token=
+matomo.site-id=
+
+## OpenAIRE Datasource Properties ##
+openaire.ds.api=
+openaire.ds.metrics=
+openaire.ds.metrics.validated=
+
+## Monitoring Properties ##
+argo.grnet.monitoring.availability=
+argo.grnet.monitoring.service.types=
+argo.grnet.monitoring.status=
+argo.grnet.monitoring.token=
+
+## Accounting ##
+accounting.enabled=false
+accounting.project-id=
+accounting.endpoint=
+accounting.client-id=
+accounting.client-secret=
+accounting.token-endpoint=
+
+## Helpdesk ##
+helpdesk.enabled=false
+helpdesk.endpoint=

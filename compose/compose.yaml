@@ -1,0 +1,157 @@
+name: resource-catalogue
+
+services:
+
+  backend:
+    image: docker.madgik.di.uoa.gr/resource-catalogue:${TAG:-dev}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+#      activemq:
+#        condition: service_healthy
+    logging:
+      driver: syslog
+      options:
+        tag: "{{.Name}}"
+    secrets:
+      - source: secret_env
+        target: /app/config/application.properties
+      - source: pid_env
+        target: /app/config/pid.yaml
+    env_file:
+      - .env
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: /app/config/application.properties,/app/config/pid.yaml
+    networks:
+      - rc-net
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f --connect-timeout 2 --max-time 4 -s http://localhost:8080/api/actuator/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    volumes:
+      - ./config/pid_certs:/rc/config/pid_certs
+
+  redis:
+    image: redis:8
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+    networks:
+      - rc-net
+    volumes:
+      - rc-redis-data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a $$REDIS_PASSWORD ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.1
+    networks:
+      - rc-net
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=${ES_XPACK_SECURITY_ENABLED}
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+      # allow running with low disk space
+      - cluster.routing.allocation.disk.threshold_enabled=${ES_ALLOCATION_THRESHOLD_ENABLED}
+      # Disable noisy deprecation logs
+      - logger.org.elasticsearch.deprecation="OFF"
+      # Limit memory consumption
+      - bootstrap.memory_lock=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx2048m"
+      - ingest.geoip.downloader.enabled=${ES_GEOIP_DOWNLOADER_ENABLED}
+    volumes:
+      - rc-elastic-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f -u elastic:$$ELASTIC_PASSWORD http://localhost:9200/_cat/health | grep -qE 'green|yellow'" ]
+      interval: 5s
+      retries: 60
+      start_period: 10s
+      timeout: 5s
+    restart: always
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    networks:
+      - rc-net
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - APP_DB=${DB_NAME}
+      - APP_USER=${DB_USER}
+      - APP_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - rc-postgres-data:/var/lib/postgresql/data
+      - ./postgres/init/01-init-db.sh:/docker-entrypoint-initdb.d/01-init-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres && psql -U $$APP_USER -d $$APP_DB -c 'SELECT 1' > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: always
+
+#  activemq:
+#    image: apache/activemq-classic:5.18.3
+#    profiles:
+#      - full
+#    command: activemq console
+#    stdin_open: true
+#    tty: true
+#    ports:
+#      - "127.0.0.1:8161:8161"
+#      - "61616:61616"
+#      - "61613:61613"
+#    environment:
+#      - JOLOKIA_OPTS=--cors-allow-origin=*
+#    volumes:
+#      - rc-activemq-data:/opt/apache-activemq/data
+#      - rc-activemq-conf:/opt/apache-activemq/conf
+#    networks:
+#      - rc-net
+#    healthcheck:
+#      test: ["CMD-SHELL", "/opt/apache-activemq/bin/activemq status | grep running"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 30s
+#    restart: always
+
+volumes:
+  rc-redis-data:
+    driver: local
+  rc-elastic-data:
+    driver: local
+  rc-postgres-data:
+    driver: local
+#  rc-activemq-data:
+#    driver: local
+#  rc-activemq-conf:
+#    driver: local
+
+
+secrets:
+  secret_env:
+    file: ./config/application.properties
+  pid_env:
+    file: ./config/pid.yaml
+
+networks:
+  rc-net:
+    name: rc-net
