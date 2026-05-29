@@ -43,9 +43,9 @@ Copy the example file to the compose/config directory.
 cp compose/config/application.properties.example compose/config/application.properties
 ```
 
-Edit `compose/config/application.properties` and fill in all deployment-specific settings: OAuth credentials, node identity, admins, redirect URLs, resource ID prefixes, service endpoints, API tokens, etc. The only `${VAR}` placeholders in the file are `${DB_USER}`, `${DB_PASSWORD}`, `${DB_NAME}`, `${REDIS_PASSWORD}`, and `${ES_PASSWORD}` — these are shared with the other compose services and resolved from `.env`.
+Edit `compose/config/application.properties` and fill in all deployment-specific settings: OAuth credentials, node identity, admins, redirect URLs, resource ID prefixes, service endpoints, API tokens, etc. 
 
-This file is mounted as a Docker secret and is never exposed as an environment variable.
+Leave the variable placeholders (`${DB_USER}`, `${DB_PASSWORD}`, `${DB_NAME}`, `${REDIS_PASSWORD}`, and `${ES_PASSWORD}`) in the file as is — these are shared with the other compose services and resolved from `.env`.
 
 ### 3. PID config
 Copy the example file to the compose/config directory.
@@ -57,13 +57,18 @@ Edit `compose/config/pid.yaml` to set the PID issuer URL, credentials (`user`, `
 
 If PID support is not needed, leave `pid.yaml` as-is with empty credentials.
 
+> **Note:** The `application.properties` and `pid.yaml` files are mounted as Docker secrets and are not exposed as environment variables.
+
 ## Running
 
 ### With the Makefile (from project root)
 
-> **Note:** `make compose` pulls the image from `docker.madgik.di.uoa.gr` if not found locally. Unless you have access to the private registry, the pull will fail. Build the image locally first (see below) and then use `docker compose` directly.
+> **Note:** Running the `compose.yaml` file pulls the service images if not found locally. The resource-catalogue's image is hosted in `docker.madgik.di.uoa.gr`. Unless you have access to the private registry, the pull will fail. Build the image locally first and then run compose.
 
 ```bash
+# Build the image (Optional)
+make docker-build
+
 # Pull image and start (runs in the foreground) — requires access to the private registry
 make compose
 
@@ -71,41 +76,26 @@ make compose
 make compose-down
 ```
 
-### With a locally built image
-
-```bash
-# Build image first
-make docker-build
-
-# Then start with the local build
-docker compose -f compose/compose.yaml up
-```
-
 ### Running the JAR locally (dev workflow)
 
-`make run` (from project root) runs the Spring Boot JAR directly on the host. It sources `compose/.env` first (so `${DB_NAME}`, `${DB_PASSWORD}`, etc. are resolved), then by default loads `compose/config/application.properties` and `compose/config/pid.yaml` as Spring additional-location config. Override with `CONFIG=...` to point at a different set of files.
+Use `make run` to run Spring Boot JAR directly on the host. 
 
-Start from the example and edit it to suit your local setup:
+By default, it loads the propertiey/env files from the `config` directory.
 
-```bash
-cp compose/config/application.properties.example /path/to/local-application.properties
-```
 
-The example file uses Docker service names as hostnames (`postgres`, `elasticsearch`, `redis`). These only resolve inside the Docker network — update them to point at your actual running instances:
+> **Note:** The `application.properties.example` file uses Docker service names as hostnames (`postgres`, `elasticsearch`, `redis`). These only resolve inside the Docker network — update them to point at your actual running instances.
+> 
+> For a local setup update the properties:
+> 
+> ```properties
+> registry.datasource.url=jdbc:postgresql://localhost:5432/${DB_NAME}
+> registry.elasticsearch.uris=http://localhost:9200
+> spring.data.redis.host=localhost
+> ```
 
-```properties
-registry.datasource.url=jdbc:postgresql://localhost:5432/${DB_NAME}
-registry.elasticsearch.uris=http://localhost:9200
-spring.data.redis.host=localhost
-```
+**To use the compose stack as your infra (postgres, elasticsearch, redis),** you will need to expose their ports to the host. 
 
-Then run:
-
-```bash
-make run CONFIG=file:/path/to/local-application.properties,file:/path/to/local-pid.yaml
-```
-
-**If you use the compose stack as your infra (postgres, elasticsearch, redis),** those services are not exposed to the host by default. Add port mappings to the relevant services in `compose.yaml` before starting the stack:
+Add port mappings to the relevant services in `compose.yaml` before starting the stack:
 
 ```yaml
 postgres:
@@ -125,7 +115,13 @@ Start only the infra services, then run the JAR separately:
 
 ```bash
 docker compose -f compose/compose.yaml up -d postgres elasticsearch redis
-make run CONFIG=file:/path/to/local-application.properties,file:/path/to/local-pid.yaml
+make run
+```
+
+To apply configuration files from another directory, run:
+
+```bash
+make run CONFIG=file:/path/to/application.properties,file:/path/to/pid.yaml
 ```
 
 ## Directory structure
@@ -148,6 +144,6 @@ compose/
 
 ## Notes
 
-- Postgres data, Elasticsearch indices, and Redis snapshots are persisted in named Docker volumes (`rc-postgres-data`, `rc-elastic-data`, `rc-redis-data`). To reset state: `docker compose down -v`.
-- The postgres init script runs only once (on a fresh volume). To re-run it, remove the `rc-postgres-data` volume first.
+- Postgres data, Elasticsearch indices, and Redis snapshots are persisted in named Docker volumes (`rc-postgres-data`, `rc-elastic-data`, `rc-redis-data`). To **remove all data** run: `docker compose down -v`.
+- The postgres init script runs _only once_ (on a fresh volume). Altering the application db, user or password in a second run will have no effect. To re-run it, you have to remove the `rc-postgres-data` volume first (essentially deleting the database).
 - `application.properties` is mounted as a Docker secret (file-based, not an environment variable). Its contents are not visible via `docker inspect`.
