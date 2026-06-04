@@ -78,7 +78,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
     }
 
     @Override
-    public Paging<HighlightedResult<T>> searchServices(FacetFilter ff) {
+    public Paging<HighlightedResult<T>> searchResources(FacetFilter ff) {
         ff.setResourceType(getResourceTypeName());
         ff.addFilter("published", true);
         Paging<HighlightedResult<T>> paging = genericResourceService.getHighlightedResults(ff);

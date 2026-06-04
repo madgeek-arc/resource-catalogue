@@ -1,7 +1,6 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -98,10 +97,10 @@ public class PublicServiceController {
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/service/search")
     public Paging<HighlightedResult<ServiceBundle>> searchServices(@Parameter(hidden = true)
-                                                                     @RequestParam MultiValueMap<String, Object> params) {
+                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<HighlightedResult<ServiceBundle>> paging = service.searchServices(ff);
+        Paging<HighlightedResult<ServiceBundle>> paging = service.searchResources(ff);
         return paging;
     }
 

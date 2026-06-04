@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
@@ -25,6 +26,8 @@ import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -42,7 +45,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public resource interoperability record")
-public class  PublicResourceInteroperabilityRecordController {
+public class PublicResourceInteroperabilityRecordController {
 
     private final PublicResourceService<ResourceInteroperabilityRecordBundle> service;
 
@@ -96,6 +99,19 @@ public class  PublicResourceInteroperabilityRecordController {
         ff.addFilter("active", true);
         Paging<ResourceInteroperabilityRecordBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
+    }
+
+    @Operation(description = "Get a Paging of Highlighted Resource Interoperability Record results, based on a set of filters.")
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "public/resourceInteroperabilityRecord/search")
+    public Paging<HighlightedResult<ResourceInteroperabilityRecordBundle>> searchRIR(@Parameter(hidden = true)
+                                                                                     @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("active", true);
+        Paging<HighlightedResult<ResourceInteroperabilityRecordBundle>> paging = service.searchResources(ff);
+        return paging;
     }
 
     @Hidden
