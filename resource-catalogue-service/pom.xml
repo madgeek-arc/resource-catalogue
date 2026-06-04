@@ -168,11 +168,11 @@
                                     <testExclude>**/utils/TestUtils.java</testExclude>
                                     <testExclude>**/integration/LoggingInfoIntegrationTest.java</testExclude>
                                     <testExclude>**/integration/ProviderIntegrationTest.java</testExclude>
-                                    <testExclude>**/manager/ServiceProviderRegistrationIT.java</testExclude>
-                                    <testExclude>**/unit/ProviderUnitTest.java</testExclude>
-                                    <testExclude>**/unit/ServiceUnitTest.java</testExclude>
-                                    <testExclude>**/unit/TrainingResourceUnitTest.java</testExclude>
-                                    <testExclude>**/unit/DatasourceUnitTest.java</testExclude>
+                                    <testExclude>**/integration/ServiceProviderRegistrationIntegrationTest.java</testExclude>
+                                    <testExclude>**/unit/OrganisationManagerUnitTest.java</testExclude>
+                                    <testExclude>**/unit/ServiceManagerUnitTest.java</testExclude>
+                                    <testExclude>**/unit/TrainingResourceManagerUnitTest.java</testExclude>
+                                    <testExclude>**/unit/DatasourceManagerUnitTest.java</testExclude>
                                 </testExcludes>
                         </configuration>
                     </plugin>
@@ -443,10 +443,24 @@
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
+                        <goals><goal>report-aggregate</goal></goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/site/jacoco-aggregate</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>${argLine} -XX:+EnableDynamicAgentLoading -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
+                    <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
                     <includes>
                         <include>**/*UnitTest.java</include>
                     </includes>
@@ -456,7 +470,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <argLine>${argLine} -XX:+EnableDynamicAgentLoading -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
+                    <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                     </includes>

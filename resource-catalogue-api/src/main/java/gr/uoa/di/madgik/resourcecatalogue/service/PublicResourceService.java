@@ -47,7 +47,7 @@ public interface PublicResourceService<T> extends ResourceCRUDService<T, Authent
      * @param ff FacetFilter
      * @return {@link Paging<T>}
      */
-    Paging<HighlightedResult<T>> searchServices(FacetFilter ff);
+    Paging<HighlightedResult<T>> searchResources(FacetFilter ff);
 
     /**
      *
