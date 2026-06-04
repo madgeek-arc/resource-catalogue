@@ -112,7 +112,7 @@ public class PublicTrainingResourceController {
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/TrainingResourceBundle/search")
+    @GetMapping(path = "public/trainingResource/search")
     public Paging<HighlightedResult<TrainingResourceBundle>> searchTrainingResources(@Parameter(hidden = true)
                                                                                      @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
