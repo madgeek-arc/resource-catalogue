@@ -1,3 +1,5 @@
+# Changelog
+
 ## [6.0.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.5.1...v6.0.0) (2026-05-26)
 
 
