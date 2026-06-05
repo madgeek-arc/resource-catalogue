@@ -78,20 +78,25 @@ Follow these steps to set up a development environment for Resource Catalogue:
 5. Run
     1. without PID Service
 
+   <!-- x-release-please-start-version -->
    ```bash
    java -jar \
-   resource-catalogue-service/target/resource-catalogue-service-X.X.X.jar \
+   resource-catalogue-service/target/resource-catalogue-service-6.0.0.jar \
    --spring.config.additional-location=file:/path/to/application.properties
    ```
+   <!-- x-release-please-end -->
 
     2. with PID Service
 
+   <!-- x-release-please-start-version -->
    ```bash
    java -jar \
-   resource-catalogue-service/target/resource-catalogue-service-X.X.X.jar \
+   resource-catalogue-service/target/resource-catalogue-service-6.0.0.jar \
    --spring.config.additional-location= \
    file:/path/to/application.properties,file:/path/to/pid.yml
    ```
+   <!-- x-release-please-end -->
+
 
 ---
 
