@@ -22,6 +22,19 @@
 
 * **release:** release 6.0.0 ([6f189f5](https://github.com/madgeek-arc/resource-catalogue/commit/6f189f5e58742dd6d4f6a0cd8dd2358ef4d3c7c6))
 
+## [6.1.0](https://github.com/madgeek-arc/resource-catalogue/compare/v6.0.0...v6.1.0) (2026-06-05)
+
+
+### Features
+
+* extend search with highlighted results on all EOSC Resources ([10fba6f](https://github.com/madgeek-arc/resource-catalogue/commit/10fba6f03e7b331bb1277e97e7b53c132428016d))
+
+
+### Bug Fixes
+
+* **deps:** bump activemq-bom to 6.2.6 ([fa4038a](https://github.com/madgeek-arc/resource-catalogue/commit/fa4038a483844b11de6495fbf83482cbb56cebbb))
+* path mapping ([e5a42b7](https://github.com/madgeek-arc/resource-catalogue/commit/e5a42b7e16444d6b0555a92579af2229a0424284))
+
 ## [5.5.1](https://github.com/madgeek-arc/resource-catalogue/compare/v5.5.0...v5.5.1) (2026-05-20)
 
 
