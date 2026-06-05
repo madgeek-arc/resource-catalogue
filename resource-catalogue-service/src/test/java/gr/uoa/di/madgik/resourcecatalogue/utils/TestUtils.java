@@ -56,10 +56,26 @@ public class TestUtils {
         return bundle;
     }
 
+    public static InteroperabilityRecordBundle createInteroperabilityRecordBundle() {
+        InteroperabilityRecordBundle bundle = new InteroperabilityRecordBundle();
+        bundle.setInteroperabilityRecord(createInteroperabilityRecord());
+        bundle.setCatalogueId("eosc");
+        return bundle;
+    }
+
     public static TrainingResourceBundle createTrainingResourceBundle() {
         TrainingResourceBundle bundle = new TrainingResourceBundle();
         bundle.setTrainingResource(createTrainingResource());
         return bundle;
+    }
+
+    public static LinkedHashMap<String, Object> createInteroperabilityRecord() {
+        LinkedHashMap<String, Object> record = new LinkedHashMap<>();
+        record.put("id", "test-interoperability-record");
+        record.put("name", "Test Interoperability Record");
+        record.put("resourceOwner", "test-provider");
+        record.put("catalogueId", "eosc");
+        return record;
     }
 
     public static LinkedHashMap<String, Object> createCatalogue() {

@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,7 +57,12 @@ class ResourceIdCreatorIntegrationTest extends BaseIntegrationTest {
      */
     @Test
     void generateUniqueIds() {
-        IntStream.range(0, 10).forEach(i -> idCreator.generate("organisation"));
+        int count = 50;
+        Set<String> ids = IntStream.range(0, count)
+                .mapToObj(i -> idCreator.generate("organisation"))
+                .collect(Collectors.toSet());
+
+        assertEquals(count, ids.size(), "All generated IDs must be unique");
     }
 
     /**

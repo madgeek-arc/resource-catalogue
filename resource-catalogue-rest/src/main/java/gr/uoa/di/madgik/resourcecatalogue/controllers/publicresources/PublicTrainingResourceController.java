@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
@@ -105,6 +106,19 @@ public class PublicTrainingResourceController {
         ff.addFilter("active", true);
         Paging<TrainingResourceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging.map(TrainingResourceBundle::getTrainingResource));
+    }
+
+    @Operation(description = "Get a Paging of Highlighted Training Resource results, based on a set of filters.")
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "public/trainingResource/search")
+    public Paging<HighlightedResult<TrainingResourceBundle>> searchTrainingResources(@Parameter(hidden = true)
+                                                                                     @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("active", true);
+        Paging<HighlightedResult<TrainingResourceBundle>> paging = service.searchResources(ff);
+        return paging;
     }
 
     @Deprecated

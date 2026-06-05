@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
@@ -29,7 +30,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -93,6 +93,19 @@ public class PublicInteroperabilityRecordController {
         ff.addFilter("active", true);
         Paging<InteroperabilityRecordBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging.map(InteroperabilityRecordBundle::getInteroperabilityRecord));
+    }
+
+    @Operation(description = "Get a Paging of Highlighted Interoperability Record results, based on a set of filters.")
+    @BrowseParameters
+    @BrowseCatalogue
+    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @GetMapping(path = "public/interoperabilityRecord/search")
+    public Paging<HighlightedResult<InteroperabilityRecordBundle>> searchGuidelines(@Parameter(hidden = true)
+                                                                                    @RequestParam MultiValueMap<String, Object> params) {
+        FacetFilter ff = FacetFilter.from(params);
+        ff.addFilter("active", true);
+        Paging<HighlightedResult<InteroperabilityRecordBundle>> paging = service.searchResources(ff);
+        return paging;
     }
 
     @BrowseParameters

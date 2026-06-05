@@ -8,7 +8,7 @@
     </parent>
     <groupId>gr.uoa.di.madgik</groupId>
     <artifactId>resource-catalogue</artifactId>
-    <version>6.0.1-SNAPSHOT</version>
+    <version>6.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -43,6 +43,7 @@
         <jaxb2-maven-plugin.version>4.1.0</jaxb2-maven-plugin.version>
 
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <jacoco.version>0.8.14</jacoco.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <owasp-dependency-check-plugin.version>12.1.9</owasp-dependency-check-plugin.version>
         <testcontainers.version>2.0.3</testcontainers.version>
@@ -240,10 +241,10 @@
                 <artifactId>json-simple</artifactId>
                 <version>1.1.1</version>
             </dependency>
-            <dependency> <!-- Addresses issues of version shipped by spring-boot 4.0.6 -->
+            <dependency> <!-- CVE-2026-49157/45505/42588: fixed in 6.2.6; also addresses version shipped by spring-boot -->
                 <groupId>org.apache.activemq</groupId>
                 <artifactId>activemq-bom</artifactId>
-                <version>6.2.5</version>
+                <version>6.2.6</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -339,8 +340,41 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <skipTests>false</skipTests>
-                        <argLine>${argLine}</argLine>
+                        <argLine>@{argLine}</argLine>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>prepare-agent-integration</id>
+                            <goals>
+                                <goal>prepare-agent-integration</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report-integration</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>report-integration</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -387,6 +421,7 @@
                     <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
                     <failBuildOnCVSS>7.6</failBuildOnCVSS>
                     <formats>
+                        <format>XML</format>
                         <format>JSON</format>
                         <format>HTML</format>
                     </formats>

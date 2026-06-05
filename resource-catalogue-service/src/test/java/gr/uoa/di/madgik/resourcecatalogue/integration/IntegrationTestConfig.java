@@ -23,6 +23,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
+import java.time.Duration;
+
 @Testcontainers
 public class IntegrationTestConfig {
 
@@ -36,8 +38,10 @@ public class IntegrationTestConfig {
     static final ElasticsearchContainer elastic =
             new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.3.2")
                     .withPassword("password")
+                    .withStartupTimeout(Duration.ofMinutes(3))
                     .withEnv("discovery.type", "single-node")
                     .withEnv("cluster.routing.allocation.disk.threshold_enabled", "false")
+                    .withEnv("node.store.allow_mmap", "false")
                     .withEnv("ES_JAVA_OPTS", "-Xms256m -Xmx256m")
                     // disable SSL
                     .withEnv("xpack.security.transport.ssl.enabled", "false")
