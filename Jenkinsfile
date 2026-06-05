@@ -42,6 +42,12 @@ pipeline {
       post {
         always {
           junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
+          jacoco(
+            execPattern: '**/target/jacoco.exec',
+            classPattern: '**/target/classes',
+            sourcePattern: '**/src/main/java',
+            exclusionPattern: '**/test/**'
+          )
           archiveArtifacts allowEmptyArchive: true, artifacts: '**/dependency-check-report.*'
           dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
         }
