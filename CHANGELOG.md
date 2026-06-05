@@ -1,22 +1,3 @@
-## [5.3.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.2.0...v5.3.0) (2025-11-06)
-
-
-### Features
-
-* accounting service functionality ([0e4640c](https://github.com/madgeek-arc/resource-catalogue/commit/0e4640cc3d232541fbe9145f429fad0e86454509))
-* helpdesk functionallity ([547e34c](https://github.com/madgeek-arc/resource-catalogue/commit/547e34cbc6db79cec8a17d532805f69eb7dbff09))
-* **logging:** replace logging pattern and use 'request-logging' lib to display rich access logs respecting user privacy ([5153816](https://github.com/madgeek-arc/resource-catalogue/commit/5153816196af080655149200f936406eccbaa281))
-* **wizard:** basic wizard functionality ([cc02723](https://github.com/madgeek-arc/resource-catalogue/commit/cc0272381b1b3b3a5ad11eb3038d14e627176f41))
-
-
-### Bug Fixes
-
-* ensures the return of non-public Configuration Template Instances through the controller ([36c8d92](https://github.com/madgeek-arc/resource-catalogue/commit/36c8d927c58c275bb934eefa7ce84b6ec7d29457))
-* inits web client ([429224f](https://github.com/madgeek-arc/resource-catalogue/commit/429224fd6f20b696c78aa45dbf9d2580087693f4))
-* set base image back to OpenJDK 21 ([ba2e7d1](https://github.com/madgeek-arc/resource-catalogue/commit/ba2e7d1ae4d983f5588f86f0ed8c7782d41d5073))
-* sets specific maven version for java 21 ([bfdff04](https://github.com/madgeek-arc/resource-catalogue/commit/bfdff04e97202433e6634861a3ff685976f30521))
-* token in headers when submitting a ticket ([de32231](https://github.com/madgeek-arc/resource-catalogue/commit/de322315e15e62f0e595fb846c9f194c0e9a1b2e))
-
 ## [6.0.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.5.1...v6.0.0) (2026-05-26)
 
 
@@ -166,6 +147,25 @@
 
 * creates AuthTokenService responsible of providing valid access tokens for the authenticated user ([c12bd63](https://github.com/madgeek-arc/resource-catalogue/commit/c12bd63c216c9abf67118a8bf90a10f74471f7f3))
 * replaces deprecated annotation ([ad51d86](https://github.com/madgeek-arc/resource-catalogue/commit/ad51d86c8558f0487db943f6ed4e22c04bf92a1a))
+
+## [5.3.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.2.0...v5.3.0) (2025-11-06)
+
+
+### Features
+
+* accounting service functionality ([0e4640c](https://github.com/madgeek-arc/resource-catalogue/commit/0e4640cc3d232541fbe9145f429fad0e86454509))
+* helpdesk functionallity ([547e34c](https://github.com/madgeek-arc/resource-catalogue/commit/547e34cbc6db79cec8a17d532805f69eb7dbff09))
+* **logging:** replace logging pattern and use 'request-logging' lib to display rich access logs respecting user privacy ([5153816](https://github.com/madgeek-arc/resource-catalogue/commit/5153816196af080655149200f936406eccbaa281))
+* **wizard:** basic wizard functionality ([cc02723](https://github.com/madgeek-arc/resource-catalogue/commit/cc0272381b1b3b3a5ad11eb3038d14e627176f41))
+
+
+### Bug Fixes
+
+* ensures the return of non-public Configuration Template Instances through the controller ([36c8d92](https://github.com/madgeek-arc/resource-catalogue/commit/36c8d927c58c275bb934eefa7ce84b6ec7d29457))
+* inits web client ([429224f](https://github.com/madgeek-arc/resource-catalogue/commit/429224fd6f20b696c78aa45dbf9d2580087693f4))
+* set base image back to OpenJDK 21 ([ba2e7d1](https://github.com/madgeek-arc/resource-catalogue/commit/ba2e7d1ae4d983f5588f86f0ed8c7782d41d5073))
+* sets specific maven version for java 21 ([bfdff04](https://github.com/madgeek-arc/resource-catalogue/commit/bfdff04e97202433e6634861a3ff685976f30521))
+* token in headers when submitting a ticket ([de32231](https://github.com/madgeek-arc/resource-catalogue/commit/de322315e15e62f0e595fb846c9f194c0e9a1b2e))
 
 ## [5.2.0](https://github.com/madgeek-arc/resource-catalogue/compare/v5.1.0...v5.2.0) (2025-09-15)
 
