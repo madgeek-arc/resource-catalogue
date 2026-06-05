@@ -8,9 +8,12 @@
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false,
       "draft": false,
-      "prerelease": false
+      "prerelease": false,
+      "extra-files": [
+        {"type": "generic", "path": "README.md"}
+      ]
     }
   },
-  "pull-request-header": "🤖 I have created a release",
-  "pull-request-footer": " "
+  "pull-request-header": "🤖 Automated release PR",
+  "pull-request-footer": "Review the changelog and version updates, then merge this PR to publish the release."
 }
