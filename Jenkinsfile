@@ -35,7 +35,7 @@ pipeline {
       steps {
         catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
           withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
-            sh 'mvn -B verify -DnvdApiKey=$NVD_API_KEY'
+            sh 'mvn -B verify -DnvdApiKey=$NVD_API_KEY -DfailBuildOnCVSS=11'
           }
         }
       }
@@ -43,13 +43,17 @@ pipeline {
         always {
           junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
           jacoco(
-            execPattern: '**/target/jacoco.exec',
+            execPattern: '**/target/jacoco.exec, **/target/jacoco-it.exec',
             classPattern: '**/target/classes',
             sourcePattern: '**/src/main/java',
             exclusionPattern: '**/test/**'
           )
           archiveArtifacts allowEmptyArchive: true, artifacts: '**/dependency-check-report.*'
-          dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+          dependencyCheckPublisher(
+            pattern: '**/dependency-check-report.xml',
+            failedTotalCritical: 1,
+            unstableTotalHigh: 3
+          )
         }
       }
     }
