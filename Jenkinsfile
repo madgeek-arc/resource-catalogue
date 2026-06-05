@@ -31,46 +31,52 @@ pipeline {
       }
     }
 
-    stage('Test') {
-      when { expression { return env.TAG_NAME == null } }
-      steps {
-        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-          withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
-            sh 'mvn -B verify -DnvdApiKey=$NVD_API_KEY -DfailBuildOnCVSS=11'
+    stage('Test and Build Image') {
+      parallel {
+
+        stage('Test') {
+          when { expression { return env.TAG_NAME == null } }
+          steps {
+            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+              withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+                sh 'mvn -B -T 1C verify -DnvdApiKey=$NVD_API_KEY -DfailBuildOnCVSS=11'
+              }
+            }
+          }
+          post {
+            always {
+              junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
+              recordCoverage(
+                tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml, **/target/site/jacoco-it/jacoco.xml, **/target/site/jacoco-aggregate/jacoco.xml']],
+                sourceDirectories: [
+                  [path: 'resource-catalogue-api/src/main/java'],
+                  [path: 'resource-catalogue-elastic/src/main/java'],
+                  [path: 'resource-catalogue-jms/src/main/java'],
+                  [path: 'resource-catalogue-model/src/main/java'],
+                  [path: 'resource-catalogue-model-lot1/src/main/java'],
+                  [path: 'resource-catalogue-rest/src/main/java'],
+                  [path: 'resource-catalogue-service/src/main/java']
+                ]
+              )
+              archiveArtifacts allowEmptyArchive: true, artifacts: '**/dependency-check-report.*'
+              dependencyCheckPublisher(
+                pattern: '**/dependency-check-report.xml',
+                failedTotalCritical: 1,
+                unstableTotalHigh: 3
+              )
+            }
           }
         }
-      }
-      post {
-        always {
-          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
-          recordCoverage(
-            tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml, **/target/site/jacoco-it/jacoco.xml, **/target/site/jacoco-aggregate/jacoco.xml']],
-            sourceDirectories: [
-              [path: 'resource-catalogue-api/src/main/java'],
-              [path: 'resource-catalogue-elastic/src/main/java'],
-              [path: 'resource-catalogue-jms/src/main/java'],
-              [path: 'resource-catalogue-model/src/main/java'],
-              [path: 'resource-catalogue-model-lot1/src/main/java'],
-              [path: 'resource-catalogue-rest/src/main/java'],
-              [path: 'resource-catalogue-service/src/main/java']
-            ]
-          )
-          archiveArtifacts allowEmptyArchive: true, artifacts: '**/dependency-check-report.*'
-          dependencyCheckPublisher(
-            pattern: '**/dependency-check-report.xml',
-            failedTotalCritical: 1,
-            unstableTotalHigh: 3
-          )
-        }
-      }
-    }
 
-    stage('Build Image') {
-      steps{
-        script {
-          DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond --build-arg skipTests=true .")
-          DOCKER_IMAGE_SHA = sh(script: "docker inspect --format='{{.Id}}' ${DOCKER_IMAGE.id}", returnStdout: true).trim()
+        stage('Build Image') {
+          steps {
+            script {
+              DOCKER_IMAGE = docker.build("${REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}", "--build-arg profile=beyond --build-arg skipTests=true .")
+              DOCKER_IMAGE_SHA = sh(script: "docker inspect --format='{{.Id}}' ${DOCKER_IMAGE.id}", returnStdout: true).trim()
+            }
+          }
         }
+
       }
     }
 
