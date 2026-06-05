@@ -43,7 +43,16 @@ pipeline {
         always {
           junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml, **/target/failsafe-reports/TEST-*.xml'
           recordCoverage(
-            tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml, **/target/site/jacoco-it/jacoco.xml, **/target/site/jacoco-aggregate/jacoco.xml']]
+            tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml, **/target/site/jacoco-it/jacoco.xml, **/target/site/jacoco-aggregate/jacoco.xml']],
+            sourceDirectories: [
+              [path: 'resource-catalogue-api/src/main/java'],
+              [path: 'resource-catalogue-elastic/src/main/java'],
+              [path: 'resource-catalogue-jms/src/main/java'],
+              [path: 'resource-catalogue-model/src/main/java'],
+              [path: 'resource-catalogue-model-lot1/src/main/java'],
+              [path: 'resource-catalogue-rest/src/main/java'],
+              [path: 'resource-catalogue-service/src/main/java']
+            ]
           )
           archiveArtifacts allowEmptyArchive: true, artifacts: '**/dependency-check-report.*'
           dependencyCheckPublisher(
