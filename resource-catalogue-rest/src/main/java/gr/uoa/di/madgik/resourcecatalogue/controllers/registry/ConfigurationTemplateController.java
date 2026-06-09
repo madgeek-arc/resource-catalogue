@@ -159,6 +159,17 @@ public class ConfigurationTemplateController {
         return ResponseEntity.ok(paging);
     }
 
+    @Operation(summary = "Returns all Configuration Template Bundles of a specific Interoperability Record,"
+            + " accessible to organisation admins of that Interoperability Record.")
+    @GetMapping(path = "/bundle/getAllByInteroperabilityRecordId/{prefix}/{suffix}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<List<ConfigurationTemplateBundle>> getAllBundlesByInteroperabilityRecordId(@PathVariable String prefix,
+                                                                                                     @PathVariable String suffix,
+                                                                                                     @Parameter(hidden = true) Authentication auth) {
+        Paging<ConfigurationTemplateBundle> paging = service.getAllByInteroperabilityRecordId(null, prefix + "/" + suffix);
+        return ResponseEntity.ok(paging.getResults());
+    }
+
     @Operation(summary = "Returns a mapping of Interoperability Record ID to Configuration Template list.")
     @BrowseParameters
     @GetMapping(path = "/interoperabilityRecordIdToConfigurationTemplateListMap")
