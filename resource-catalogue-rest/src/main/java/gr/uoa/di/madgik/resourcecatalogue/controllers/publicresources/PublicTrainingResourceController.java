@@ -108,7 +108,7 @@ public class PublicTrainingResourceController {
         return ResponseEntity.ok(paging.map(TrainingResourceBundle::getTrainingResource));
     }
 
-    @Operation(description = "Get a Paging of Highlighted Training Resource results, based on a set of filters.")
+    @Operation(tags = {"public training resource", "federated search"}, description = "Get a Paging of Highlighted Training Resource results, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))

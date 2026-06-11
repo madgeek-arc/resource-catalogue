@@ -91,7 +91,7 @@ public class PublicServiceController {
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
-    @Operation(description = "Get a Paging of Highlighted Service results, based on a set of filters.")
+    @Operation(tags = {"public service", "federated search"}, description = "Get a Paging of Highlighted Service results, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
