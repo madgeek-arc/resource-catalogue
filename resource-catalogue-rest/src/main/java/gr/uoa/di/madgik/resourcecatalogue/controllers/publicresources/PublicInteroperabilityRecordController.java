@@ -95,7 +95,7 @@ public class PublicInteroperabilityRecordController {
         return ResponseEntity.ok(paging.map(InteroperabilityRecordBundle::getInteroperabilityRecord));
     }
 
-    @Operation(description = "Get a Paging of Highlighted Interoperability Record results, based on a set of filters.")
+    @Operation(tags = {"public interoperability record", "federated search"}, description = "Get a Paging of Highlighted Interoperability Record results, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))

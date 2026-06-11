@@ -75,7 +75,7 @@ public class PublicCatalogueController {
         return ResponseEntity.ok(paging.map(CatalogueBundle::getCatalogue));
     }
 
-    @Operation(description = "Get a Paging of Highlighted Catalogue results, based on a set of filters.")
+    @Operation(tags = {"public catalogue", "federated search"}, description = "Get a Paging of Highlighted Catalogue results, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
