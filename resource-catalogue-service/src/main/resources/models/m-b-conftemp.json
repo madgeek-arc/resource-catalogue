@@ -7,6 +7,11 @@
   "subType": null,
   "series": null,
   "resourceType": "configuration_template",
+
+  "resourceClass": "ConfigurationTemplate",
+  "bundleClass": "ConfigurationTemplateBundle",
+  "bundlePayloadField": "configurationTemplate",
+
   "creationDate": "2026-01-28T10:08:12.403+00:00",
   "createdBy": null,
   "modificationDate": "2026-01-28T10:08:12.403+00:00",

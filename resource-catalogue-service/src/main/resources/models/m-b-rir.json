@@ -7,6 +7,11 @@
   "subType": null,
   "series": null,
   "resourceType": "resource_interoperability_record",
+
+  "resourceClass": "ResourceInteroperabilityRecord",
+  "bundleClass": "ResourceInteroperabilityRecordBundle",
+  "bundlePayloadField": "resourceInteroperabilityRecord",
+
   "creationDate": "2026-01-28T10:08:12.403+00:00",
   "createdBy": null,
   "modificationDate": "2026-01-28T10:08:12.403+00:00",

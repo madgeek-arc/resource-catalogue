@@ -7,6 +7,11 @@
   "subType": null,
   "series": null,
   "resourceType": "organisation",
+
+  "resourceClass": "Organisation",
+  "bundleClass": "OrganisationBundle",
+  "bundlePayloadField": "organisation",
+
   "creationDate": "2026-01-27T16:34:25.001+00:00",
   "createdBy": null,
   "modificationDate": "2026-01-27T16:34:25.001+00:00",
@@ -1871,7 +1876,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "An administrator has full edit privileges for the provider’s information via the web and the API (add a new service, update information regarding the provider’s organization and services, activate or delete a service, add or remove administrators and issue tokens for API use).",
+                  "text": "An administrator has full edit privileges for the provider\u2019s information via the web and the API (add a new service, update information regarding the provider\u2019s organization and services, activate or delete a service, add or remove administrators and issue tokens for API use).",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
