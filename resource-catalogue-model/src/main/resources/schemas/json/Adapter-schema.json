@@ -1,101 +1,223 @@
 {
-  "$schema" : "https://json-schema.org/draft/2020-12/schema",
-  "$defs" : {
-    "LinkedResource" : {
-      "type" : "object",
-      "properties" : {
-        "id" : {
-          "type" : "string"
-        },
-        "type" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
     },
-    "User" : {
-      "type" : "object",
-      "properties" : {
-        "email" : {
-          "type" : "string"
-        },
-        "id" : {
-          "type" : "string"
-        },
-        "name" : {
-          "type" : "string"
-        },
-        "surname" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
-    }
-  },
-  "type" : "object",
-  "properties" : {
-    "admins" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/User"
+    "name": {
+      "type": "string"
+    },
+    "urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     },
-    "catalogueId" : {
-      "type" : "string"
-    },
-    "changeLog" : {
-      "type" : "string"
-    },
-    "description" : {
-      "type" : "string"
-    },
-    "documentation" : {
-      "type" : "string",
-      "format" : "uri"
-    },
-    "id" : {
-      "type" : "string"
-    },
-    "lastUpdate" : {
-      "type" : "string",
-      "format" : "date-time"
-    },
-    "license" : {
-      "type" : "string"
-    },
-    "linkedResource" : {
-      "$ref" : "#/$defs/LinkedResource"
-    },
-    "logo" : {
-      "type" : "string",
-      "format" : "uri"
-    },
-    "name" : {
-      "type" : "string"
-    },
-    "node" : {
-      "type" : "string"
-    },
-    "programmingLanguage" : {
-      "type" : "string"
-    },
-    "releases" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string",
-        "format" : "uri"
+    "alternativePIDs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pid": {
+            "type": "string"
+          },
+          "pidSchema": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       }
     },
-    "repository" : {
-      "type" : "string",
-      "format" : "uri"
+    "nodePID": {
+      "type": "string"
     },
-    "tagline" : {
-      "type" : "string"
+    "description": {
+      "type": "string"
     },
-    "version" : {
-      "type" : "string"
+    "publishingDate": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "resourceOwner": {
+      "type": "string"
+    },
+    "linkedResource": {
+      "type": "object",
+      "properties": {
+        "resource_type": {
+          "type": "string",
+          "enum": [
+            "interoperability_record",
+            "service"
+          ]
+        },
+        "linkedResourceId": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "resource_type",
+        "linkedResourceId"
+      ]
+    },
+    "tagline": {
+      "type": "string"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "documentation": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "package": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "programmingLanguage": {
+      "type": "string"
+    },
+    "license": {
+      "type": "object",
+      "properties": {
+        "licenseName": {
+          "type": "string"
+        },
+        "licenseURL": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "version": {
+      "type": "string"
+    },
+    "changeLog": {
+      "type": "string"
+    },
+    "lastUpdate": {
+      "type": "string"
+    },
+    "creators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "PIDs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "creatorPID": {
+                  "type": "string"
+                },
+                "creatorPIDScheme": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "creatorPID",
+                "creatorPIDScheme"
+              ]
+            }
+          },
+          "affiliations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "affiliationName": {
+                  "type": "string"
+                },
+                "affiliationIdentifier": {
+                  "type": "object",
+                  "properties": {
+                    "creatorID": {
+                      "type": "string"
+                    },
+                    "creatorType": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "creatorID",
+                    "creatorType"
+                  ]
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "affiliationName"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      }
+    },
+    "publicContacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sqa": {
+      "type": "object",
+      "properties": {
+        "sqaURL": {
+          "type": "string"
+        },
+        "sqaBadge": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     }
   },
-  "additionalProperties" : false
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "nodePID",
+    "description",
+    "publishingDate",
+    "type",
+    "resourceOwner",
+    "linkedResource",
+    "documentation",
+    "repository",
+    "package",
+    "programmingLanguage",
+    "version",
+    "changeLog",
+    "lastUpdate",
+    "creators",
+    "publicContacts"
+  ]
 }

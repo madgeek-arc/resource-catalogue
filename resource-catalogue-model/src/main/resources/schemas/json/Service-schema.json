@@ -1,391 +1,214 @@
 {
-  "$schema" : "https://json-schema.org/draft/2020-12/schema",
-  "$defs" : {
-    "AlternativeIdentifier" : {
-      "type" : "object",
-      "properties" : {
-        "type" : {
-          "type" : "string"
-        },
-        "value" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
     },
-    "MultimediaPair" : {
-      "type" : "object",
-      "properties" : {
-        "multimediaName" : {
-          "type" : "string"
-        },
-        "multimediaURL" : {
-          "$ref" : "#/$defs/URL"
-        }
-      },
-      "additionalProperties" : false
+    "name": {
+      "type": "string"
     },
-    "ServiceCategory" : {
-      "type" : "object",
-      "properties" : {
-        "category" : {
-          "type" : "string"
-        },
-        "subcategory" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
+    "urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
-    "ServiceMainContact" : {
-      "type" : "object",
-      "properties" : {
-        "email" : {
-          "type" : "string"
+    "alternativePIDs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pid": {
+            "type": "string"
+          },
+          "pidSchema": {
+            "type": "string"
+          }
         },
-        "firstName" : {
-          "type" : "string"
-        },
-        "lastName" : {
-          "type" : "string"
-        },
-        "organisation" : {
-          "type" : "string"
-        },
-        "phone" : {
-          "type" : "string"
-        },
-        "position" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
+        "additionalProperties": false
+      }
     },
-    "ServiceProviderDomain" : {
-      "type" : "object",
-      "properties" : {
-        "scientificDomain" : {
-          "type" : "string"
-        },
-        "scientificSubdomain" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
+    "nodePID": {
+      "type": "string"
     },
-    "ServicePublicContact" : {
-      "type" : "object",
-      "properties" : {
-        "email" : {
-          "type" : "string"
-        },
-        "firstName" : {
-          "type" : "string"
-        },
-        "lastName" : {
-          "type" : "string"
-        },
-        "organisation" : {
-          "type" : "string"
-        },
-        "phone" : {
-          "type" : "string"
-        },
-        "position" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
+    "description": {
+      "type": "string"
     },
-    "URL" : {
-      "type" : "object",
-      "properties" : {
-        "authority" : {
-          "type" : "string"
-        },
-        "file" : {
-          "type" : "string"
-        },
-        "host" : {
-          "type" : "string"
-        },
-        "port" : {
-          "type" : "integer"
-        },
-        "protocol" : {
-          "type" : "string"
-        },
-        "ref" : {
-          "type" : "string"
-        }
-      },
-      "additionalProperties" : false
+    "publishingDate": {
+      "type": "string"
     },
-    "UseCasesPair" : {
-      "type" : "object",
-      "properties" : {
-        "useCaseName" : {
-          "type" : "string"
+    "type": {
+      "type": "string"
+    },
+    "resourceOwner": {
+      "type": "string"
+    },
+    "serviceProviders": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "webpage": {
+      "type": "string"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "scientificDomains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scientificDomain": {
+            "type": "string"
+          },
+          "scientificSubdomain": {
+            "type": "string"
+          }
         },
-        "useCaseURL" : {
-          "$ref" : "#/$defs/URL"
+        "additionalProperties": false
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "subcategory": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "accessTypes": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "jurisdiction": {
+      "type": "string"
+    },
+    "trl": {
+      "type": "string"
+    },
+    "termsOfUse": {
+      "type": "string"
+    },
+    "privacyPolicy": {
+      "type": "string"
+    },
+    "accessPolicy": {
+      "type": "string"
+    },
+    "orderType": {
+      "type": "string"
+    },
+    "order": {
+      "type": "string"
+    },
+    "mainContact": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "PIDs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "mainContactPID": {
+                "type": "string"
+              },
+              "mainContactPIDScheme": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "mainContactPID",
+              "mainContactPIDScheme"
+            ]
+          }
+        },
+        "affiliations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "affiliationName": {
+                "type": "string"
+              },
+              "affiliationIdentifier": {
+                "type": "object",
+                "properties": {
+                  "mainContactID": {
+                    "type": "string"
+                  },
+                  "mainContactType": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "mainContactID",
+                  "mainContactType"
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "affiliationName"
+            ]
+          }
         }
       },
-      "additionalProperties" : false
+      "additionalProperties": false,
+      "required": [
+        "firstName",
+        "lastName",
+        "email"
+      ]
+    },
+    "publicContacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
-  "type" : "object",
-  "properties" : {
-    "abbreviation" : {
-      "type" : "string"
-    },
-    "accessModes" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "accessPolicy" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "accessTypes" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "alternativeIdentifiers" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/AlternativeIdentifier"
-      }
-    },
-    "catalogueId" : {
-      "type" : "string"
-    },
-    "categories" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/ServiceCategory"
-      }
-    },
-    "certifications" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "changeLog" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "description" : {
-      "type" : "string"
-    },
-    "fundingBody" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "fundingPrograms" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "geographicalAvailabilities" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "grantProjectNames" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "helpdeskEmail" : {
-      "type" : "string"
-    },
-    "helpdeskPage" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "horizontalService" : {
-      "type" : "boolean"
-    },
-    "id" : {
-      "type" : "string"
-    },
-    "languageAvailabilities" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "lastUpdate" : {
-      "type" : "string",
-      "format" : "date-time"
-    },
-    "lifeCycleStatus" : {
-      "type" : "string"
-    },
-    "logo" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "mainContact" : {
-      "$ref" : "#/$defs/ServiceMainContact"
-    },
-    "maintenance" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "marketplaceLocations" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "multimedia" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/MultimediaPair"
-      }
-    },
-    "name" : {
-      "type" : "string"
-    },
-    "node" : {
-      "type" : "string"
-    },
-    "openSourceTechnologies" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "order" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "orderType" : {
-      "type" : "string"
-    },
-    "paymentModel" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "pricing" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "privacyPolicy" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "publicContacts" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/ServicePublicContact"
-      }
-    },
-    "relatedPlatforms" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "relatedResources" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "requiredResources" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "resourceGeographicLocations" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "resourceLevel" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "resourceOrganisation" : {
-      "type" : "string"
-    },
-    "resourceProviders" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "scientificDomains" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/ServiceProviderDomain"
-      }
-    },
-    "securityContactEmail" : {
-      "type" : "string"
-    },
-    "serviceCategories" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "standards" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "statusMonitoring" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "tagline" : {
-      "type" : "string"
-    },
-    "tags" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "targetUsers" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "termsOfUse" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "trainingInformation" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "trl" : {
-      "type" : "string"
-    },
-    "useCases" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/UseCasesPair"
-      }
-    },
-    "userManual" : {
-      "$ref" : "#/$defs/URL"
-    },
-    "version" : {
-      "type" : "string"
-    },
-    "webpage" : {
-      "$ref" : "#/$defs/URL"
-    }
-  },
-  "additionalProperties" : false
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "nodePID",
+    "description",
+    "publishingDate",
+    "type",
+    "resourceOwner",
+    "webpage",
+    "jurisdiction",
+    "trl",
+    "orderType",
+    "mainContact",
+    "publicContacts"
+  ]
 }

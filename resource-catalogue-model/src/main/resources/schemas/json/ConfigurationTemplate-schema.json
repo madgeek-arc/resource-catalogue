@@ -1,34 +1,31 @@
 {
-  "$schema" : "https://json-schema.org/draft/2020-12/schema",
-  "$defs" : {
-    "Map(String,Object)" : {
-      "type" : "object",
-      "additionalProperties" : false
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "interoperabilityRecordId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "nodePID": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "formModel": {
+      "type": "object"
     }
   },
-  "type" : "object",
-  "properties" : {
-    "catalogueId" : {
-      "type" : "string"
-    },
-    "description" : {
-      "type" : "string"
-    },
-    "formModel" : {
-      "$ref" : "#/$defs/Map(String,Object)"
-    },
-    "id" : {
-      "type" : "string"
-    },
-    "interoperabilityRecordId" : {
-      "type" : "string"
-    },
-    "name" : {
-      "type" : "string"
-    },
-    "node" : {
-      "type" : "string"
-    }
-  },
-  "additionalProperties" : false
+  "additionalProperties": false,
+  "required": [
+    "interoperabilityRecordId",
+    "name",
+    "description",
+    "formModel"
+  ]
 }
