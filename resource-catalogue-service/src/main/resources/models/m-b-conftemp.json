@@ -25,8 +25,8 @@
       "order": 0,
       "subSections": [
         {
-          "id": "rir",
-          "name": "rir",
+          "id": "Basic",
+          "name": "Basic",
           "description": null,
           "subType": null,
           "order": 1,
@@ -91,6 +91,119 @@
               "subFields": []
             },
             {
+              "id": "name",
+              "name": "name",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Name",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "string",
+                "defaultValue": null,
+                "values": null,
+                "properties": {
+                  "minLength": null,
+                  "maxLength": null
+                },
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Full Name of the Configuration Template.",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": "Suggested length is 100 characters",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 1,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
+              "id": "description",
+              "name": "description",
+              "parentId": null,
+              "parent": null,
+              "label": {
+                "text": "Description",
+                "cssClasses": null,
+                "style": null,
+                "showLess": false
+              },
+              "accessPath": null,
+              "kind": null,
+              "typeInfo": {
+                "vocabulary": null,
+                "type": "richText",
+                "defaultValue": null,
+                "values": null,
+                "properties": {},
+                "multiplicity": false,
+                "prefill": null
+              },
+              "includedInSnippet": false,
+              "deprecated": false,
+              "form": {
+                "dependsOn": null,
+                "affects": null,
+                "group": null,
+                "description": {
+                  "text": "Description",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "suggestion": {
+                  "text": "Suggested length is 1000 characters",
+                  "cssClasses": null,
+                  "style": null,
+                  "showLess": false
+                },
+                "placeholder": null,
+                "mandatory": true,
+                "immutable": true,
+                "display": {
+                  "placement": null,
+                  "order": 2,
+                  "visible": true,
+                  "hasBorder": false,
+                  "cssClasses": null,
+                  "style": null
+                }
+              },
+              "display": null,
+              "subFields": []
+            },
+            {
               "id": "interoperabilityRecordId",
               "name": "interoperabilityRecordId",
               "parentId": null,
@@ -139,68 +252,10 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 1,
+                  "order": 3,
                   "visible": false,
                   "hasBorder": false,
                   "cssClasses": "uk-disabled",
-                  "style": null
-                }
-              },
-              "display": null,
-              "subFields": []
-            },
-            {
-              "id": "name",
-              "name": "name",
-              "parentId": null,
-              "parent": null,
-              "label": {
-                "text": "Name",
-                "cssClasses": null,
-                "style": null,
-                "showLess": false
-              },
-              "accessPath": null,
-              "kind": null,
-              "typeInfo": {
-                "vocabulary": null,
-                "type": "string",
-                "defaultValue": null,
-                "values": null,
-                "properties": {
-                  "minLength": null,
-                  "maxLength": null
-                },
-                "multiplicity": false,
-                "prefill": null
-              },
-              "includedInSnippet": false,
-              "deprecated": false,
-              "form": {
-                "dependsOn": null,
-                "affects": null,
-                "group": null,
-                "description": {
-                  "text": "Full Name of the Configuration Template.",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "suggestion": {
-                  "text": "Suggested length is 100 characters",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "placeholder": null,
-                "mandatory": true,
-                "immutable": true,
-                "display": {
-                  "placement": null,
-                  "order": 3,
-                  "visible": true,
-                  "hasBorder": false,
-                  "cssClasses": null,
                   "style": null
                 }
               },
@@ -263,61 +318,6 @@
               "subFields": []
             },
             {
-              "id": "description",
-              "name": "description",
-              "parentId": null,
-              "parent": null,
-              "label": {
-                "text": "Description",
-                "cssClasses": null,
-                "style": null,
-                "showLess": false
-              },
-              "accessPath": null,
-              "kind": null,
-              "typeInfo": {
-                "vocabulary": null,
-                "type": "richText",
-                "defaultValue": null,
-                "values": null,
-                "properties": {},
-                "multiplicity": false,
-                "prefill": null
-              },
-              "includedInSnippet": false,
-              "deprecated": false,
-              "form": {
-                "dependsOn": null,
-                "affects": null,
-                "group": null,
-                "description": {
-                  "text": "Description",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "suggestion": {
-                  "text": "Suggested length is 1000 characters",
-                  "cssClasses": null,
-                  "style": null,
-                  "showLess": false
-                },
-                "placeholder": null,
-                "mandatory": true,
-                "immutable": true,
-                "display": {
-                  "placement": null,
-                  "order": 5,
-                  "visible": true,
-                  "hasBorder": false,
-                  "cssClasses": null,
-                  "style": null
-                }
-              },
-              "display": null,
-              "subFields": []
-            },
-            {
               "id": "formModel",
               "name": "formModel",
               "parentId": null,
@@ -362,7 +362,7 @@
                 "immutable": true,
                 "display": {
                   "placement": null,
-                  "order": 6,
+                  "order": 5,
                   "visible": true,
                   "hasBorder": true,
                   "cssClasses": null,
