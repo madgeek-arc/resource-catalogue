@@ -107,7 +107,7 @@ public class PublicDatasourceController {
         return ResponseEntity.ok(paging.map(DatasourceBundle::getDatasource));
     }
 
-    @Operation(description = "Get a Paging of Highlighted Datasource results, based on a set of filters.")
+    @Operation(tags = {"public datasource", "federated search"}, description = "Get a Paging of Highlighted Datasource results, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))

@@ -91,7 +91,7 @@ public class PublicDeployableApplicationController {
         return ResponseEntity.ok(paging.map(DeployableApplicationBundle::getDeployableApplication));
     }
 
-    @Operation(description = "Get a Paging of Highlighted Deployable Application results, based on a set of filters.")
+    @Operation(tags = {"public deployable application", "federated search"}, description = "Get a Paging of Highlighted Deployable Application results, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))

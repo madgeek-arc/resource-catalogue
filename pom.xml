@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>gr.uoa.di.madgik</groupId>
@@ -45,7 +45,7 @@
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
         <jacoco.version>0.8.14</jacoco.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-        <owasp-dependency-check-plugin.version>12.1.9</owasp-dependency-check-plugin.version>
+        <owasp-dependency-check-plugin.version>12.2.2</owasp-dependency-check-plugin.version>
         <testcontainers.version>2.0.3</testcontainers.version>
         <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
