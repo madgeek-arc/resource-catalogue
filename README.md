@@ -81,7 +81,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
    <!-- x-release-please-start-version -->
    ```bash
    java -jar \
-   resource-catalogue-service/target/resource-catalogue-service-6.1.1-SNAPSHOT.jar \
+   resource-catalogue-service/target/resource-catalogue-service-6.1.1 \
    --spring.config.additional-location=file:/path/to/application.properties
    ```
    <!-- x-release-please-end -->
@@ -91,7 +91,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
    <!-- x-release-please-start-version -->
    ```bash
    java -jar \
-   resource-catalogue-service/target/resource-catalogue-service-6.1.1-SNAPSHOT.jar \
+   resource-catalogue-service/target/resource-catalogue-service-6.1.1 \
    --spring.config.additional-location= \
    file:/path/to/application.properties,file:/path/to/pid.yml
    ```
