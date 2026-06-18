@@ -16,6 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.catalogue.domain.Model;
+import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -50,10 +52,11 @@ public class ConfigurationTemplateController {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateController.class);
 
     private final ConfigurationTemplateService service;
+    private final ModelService modelService;
 
-
-    public ConfigurationTemplateController(ConfigurationTemplateService service) {
+    public ConfigurationTemplateController(ConfigurationTemplateService service, ModelService modelService) {
         this.service = service;
+        this.modelService = modelService;
     }
 
     @Operation(summary = "Returns the Configuration Template with the given id.")
@@ -63,6 +66,16 @@ public class ConfigurationTemplateController {
         String id = prefix + "/" + suffix;
         ConfigurationTemplateBundle bundle = service.get(id);
         return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Returns the Model for the given Configuration Template id.")
+    @GetMapping(path = "{prefix}/{suffix}/model")
+    public ResponseEntity<Model> getModelByConfigurationTemplateId(@PathVariable String prefix,
+                                                                   @PathVariable String suffix) {
+        String id = prefix + "/" + suffix;
+        ConfigurationTemplateBundle bundle = service.get(id);
+        String modelId = (String) bundle.getConfigurationTemplate().get("formModel");
+        return ResponseEntity.ok(modelService.get(modelId));
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
