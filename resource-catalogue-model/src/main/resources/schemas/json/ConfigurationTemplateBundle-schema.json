@@ -76,16 +76,16 @@
         "id": {
           "type": "string"
         },
-        "interoperabilityRecordId": {
-          "type": "string"
-        },
         "name": {
           "type": "string"
         },
-        "nodePID": {
+        "description": {
           "type": "string"
         },
-        "description": {
+        "interoperabilityRecordId": {
+          "type": "string"
+        },
+        "nodePID": {
           "type": "string"
         },
         "formModel": {
@@ -94,9 +94,9 @@
       },
       "additionalProperties": false,
       "required": [
-        "interoperabilityRecordId",
         "name",
         "description",
+        "interoperabilityRecordId",
         "formModel"
       ]
     }
