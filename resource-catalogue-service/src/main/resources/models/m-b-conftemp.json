@@ -308,7 +308,7 @@
                 "display": {
                   "placement": null,
                   "order": 4,
-                  "visible": true,
+                  "visible": false,
                   "hasBorder": false,
                   "cssClasses": null,
                   "style": null
