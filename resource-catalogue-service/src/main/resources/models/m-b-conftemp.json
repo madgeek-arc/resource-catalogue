@@ -139,7 +139,7 @@
                 "display": {
                   "placement": null,
                   "order": 1,
-                  "visible": true,
+                  "visible": false,
                   "hasBorder": false,
                   "cssClasses": null,
                   "style": null
@@ -194,7 +194,7 @@
                 "display": {
                   "placement": null,
                   "order": 2,
-                  "visible": true,
+                  "visible": false,
                   "hasBorder": false,
                   "cssClasses": null,
                   "style": null
@@ -291,7 +291,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": null,
+                  "text": "Node the resource belongs to.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false
@@ -303,14 +303,14 @@
                   "showLess": false
                 },
                 "placeholder": null,
-                "mandatory": false,
+                "mandatory": true,
                 "immutable": true,
                 "display": {
                   "placement": null,
                   "order": 4,
-                  "visible": false,
+                  "visible": true,
                   "hasBorder": false,
-                  "cssClasses": "uk-disabled",
+                  "cssClasses": null,
                   "style": null
                 }
               },
