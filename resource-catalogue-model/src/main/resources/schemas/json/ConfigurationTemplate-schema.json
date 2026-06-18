@@ -26,6 +26,7 @@
     "name",
     "description",
     "interoperabilityRecordId",
+    "nodePID",
     "formModel"
   ]
 }
