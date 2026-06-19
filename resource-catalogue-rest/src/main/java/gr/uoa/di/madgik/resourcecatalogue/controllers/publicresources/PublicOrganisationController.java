@@ -107,12 +107,15 @@ public class PublicOrganisationController {
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/organisation/search")
-    public Paging<HighlightedResult<OrganisationBundle>> searchOrganisations(@Parameter(hidden = true)
-                                                                             @RequestParam MultiValueMap<String, Object> params) {
+    public Paging<HighlightedResult<LinkedHashMap<String, Object>>> searchOrganisations(@Parameter(hidden = true)
+                                                                                       @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<HighlightedResult<OrganisationBundle>> paging = service.searchResources(ff);
-        return paging;
+        return service.searchResources(ff).map(hr -> hr.map(bundle -> {
+            LinkedHashMap<String, Object> result = new LinkedHashMap<>(bundle.getOrganisation());
+            result.put("catalogueId", bundle.getCatalogueId());
+            return result;
+        }));
     }
 
     @BrowseParameters

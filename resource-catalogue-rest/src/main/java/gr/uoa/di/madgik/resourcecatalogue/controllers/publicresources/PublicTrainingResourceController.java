@@ -113,12 +113,15 @@ public class PublicTrainingResourceController {
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/trainingResource/search")
-    public Paging<HighlightedResult<TrainingResourceBundle>> searchTrainingResources(@Parameter(hidden = true)
-                                                                                     @RequestParam MultiValueMap<String, Object> params) {
+    public Paging<HighlightedResult<LinkedHashMap<String, Object>>> searchTrainingResources(@Parameter(hidden = true)
+                                                                                            @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<HighlightedResult<TrainingResourceBundle>> paging = service.searchResources(ff);
-        return paging;
+        return service.searchResources(ff).map(hr -> hr.map(bundle -> {
+            LinkedHashMap<String, Object> result = new LinkedHashMap<>(bundle.getTrainingResource());
+            result.put("catalogueId", bundle.getCatalogueId());
+            return result;
+        }));
     }
 
     @Deprecated

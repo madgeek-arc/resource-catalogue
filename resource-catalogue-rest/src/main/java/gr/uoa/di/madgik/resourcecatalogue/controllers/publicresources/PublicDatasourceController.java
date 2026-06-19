@@ -112,12 +112,15 @@ public class PublicDatasourceController {
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/datasource/search")
-    public Paging<HighlightedResult<DatasourceBundle>> searchDatasources(@Parameter(hidden = true)
-                                                                         @RequestParam MultiValueMap<String, Object> params) {
+    public Paging<HighlightedResult<LinkedHashMap<String, Object>>> searchDatasources(@Parameter(hidden = true)
+                                                                                      @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<HighlightedResult<DatasourceBundle>> paging = service.searchResources(ff);
-        return paging;
+        return service.searchResources(ff).map(hr -> hr.map(bundle -> {
+            LinkedHashMap<String, Object> result = new LinkedHashMap<>(bundle.getDatasource());
+            result.put("catalogueId", bundle.getCatalogueId());
+            return result;
+        }));
     }
 
     @Deprecated

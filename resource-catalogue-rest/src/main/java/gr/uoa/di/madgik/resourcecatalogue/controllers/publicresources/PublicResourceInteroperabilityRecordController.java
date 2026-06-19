@@ -106,12 +106,15 @@ public class PublicResourceInteroperabilityRecordController {
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/resourceInteroperabilityRecord/search")
-    public Paging<HighlightedResult<ResourceInteroperabilityRecordBundle>> searchRIR(@Parameter(hidden = true)
-                                                                                     @RequestParam MultiValueMap<String, Object> params) {
+    public Paging<HighlightedResult<LinkedHashMap<String, Object>>> searchRIR(@Parameter(hidden = true)
+                                                                             @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<HighlightedResult<ResourceInteroperabilityRecordBundle>> paging = service.searchResources(ff);
-        return paging;
+        return service.searchResources(ff).map(hr -> hr.map(bundle -> {
+            LinkedHashMap<String, Object> result = new LinkedHashMap<>(bundle.getResourceInteroperabilityRecord());
+            result.put("catalogueId", bundle.getCatalogueId());
+            return result;
+        }));
     }
 
     @Hidden
