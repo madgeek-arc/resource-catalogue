@@ -66,8 +66,8 @@ Follow these steps to set up a development environment for Resource Catalogue:
        See the [PID Properties Example](#PID-Properties-Example) for details.
 4. Build and Package
 
-    To build the project and package the code into an executable .jar file with
-    an embedded Tomcat server:
+   To build the project and package the code into an executable .jar file with
+   an embedded Tomcat server:
     1. Navigate to the project directory
     2. Execute the following Maven command
 
@@ -96,7 +96,6 @@ Follow these steps to set up a development environment for Resource Catalogue:
    file:/path/to/application.properties,file:/path/to/pid.yml
    ```
    <!-- x-release-please-end -->
-
 
 ---
 
@@ -178,42 +177,31 @@ configuration options.
 #########################
 ##  Server Properties  ##
 #########################
-
 dynamic.properties.path=
-
 ## Server Configuration ##
 server.port=8080
 server.servlet.context-path=/api
-
 ## Logging Configuration ##
 logging.level.root=INFO
-
-
 #########################
 ##  Spring Properties  ##
 #########################
-
 ## Mail Templates ##
 spring.freemarker.template-loader-path=classpath:/mail/
-
 ## Profiles && Configuration ##
 spring.profiles.active=beyond
 spring.autoconfigure.exclude=org.flowable.spring.boot.FlowableJpaAutoConfiguration,org.flowable.spring.boot.eventregistry.EventRegistryAutoConfiguration
-
 ## Servlet ##
 spring.servlet.multipart.max-file-size=50MB
 spring.servlet.multipart.max-request-size=50MB
-
 ## Bean Configuration ##
 spring.jpa.open-in-view=false
 spring.main.allow-bean-definition-overriding=true
-
 ## Redis Properties ##
 spring.session.data.redis.namespace=eosc:beyond
 spring.data.redis.host=
 spring.data.redis.port=
 spring.data.redis.password=
-
 ## Security Properties ##
 ### EOSC AAI Authentication ###
 spring.security.oauth2.client.provider.eosc.issuer-uri=
@@ -223,7 +211,6 @@ spring.security.oauth2.client.registration.eosc.client-secret=
 spring.security.oauth2.client.registration.eosc.scope=
 spring.security.oauth2.client.registration.eosc.redirect-uri=
 spring.security.oauth2.resourceserver.jwt.issuer-uri=
-
 ## Springdoc Configuration ##
 springdoc.api-docs.path=/api-docs
 ### Controllers ###
@@ -242,15 +229,11 @@ springdoc.swagger-ui.operationsSorter=method
 springdoc.swagger-ui.syntaxHighlight.activated=false
 springdoc.swagger-ui.tagsSorter=alpha
 springdoc.swagger-ui.tryItOutEnabled=true
-
-
 ###########################
 ##  Registry Properties  ##
 ###########################
-
 ## Platform Settings ##
 fqdn=
-
 ## Registry Configuration ##
 ### Host ###
 registry.host=http://localhost:${server.port}${server.servlet.context-path}
@@ -284,12 +267,9 @@ catalogue.jms.ams.enabled=true
 catalogue.jms.ams.host=
 catalogue.jms.ams.key=
 catalogue.jms.ams.project=
-
-
 ############################
 ##  Catalogue Properties  ##
 ############################
-
 ## Basic Info ##
 catalogue.homepage=
 catalogue.version=@project.version@
@@ -330,29 +310,22 @@ catalogue.mailer.port=
 catalogue.mailer.protocol=
 catalogue.mailer.auth=
 catalogue.mailer.ssl=
-
-
 #########################
 ##  External Services  ##
 #########################
-
 ## PID Service ##
 pid.service.enabled=false
 pid.service.consistency.enabled=false
-
 ## OpenAIRE Datasource Properties ##
 openaire.ds.api=https://beta.services.openaire.eu/
-
 ## Monitoring Properties ##
 argo.grnet.monitoring.service.types=
 argo.grnet.monitoring.availability=
 argo.grnet.monitoring.status=
 argo.grnet.monitoring.token=
-
 ## Helpdesk ##
 helpdesk.enabled=true
 helpdesk.endpoint=
-
 ## Accounting ##
 accounting.enabled=true
 accounting.project-id=
@@ -360,15 +333,11 @@ accounting.endpoint=
 accounting.client-id=
 accounting.client-secret=
 accounting.token-endpoint=
-
-
 ########################
 ##  Other Properties  ##
 ########################
-
 ## SQAaaS ##
 sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
-
 ## Node Registry ##
 node.pid.value=
 node.name=
@@ -479,12 +448,35 @@ catalogue:
           client-cert:
 ```
 
+## External Service Coordination
+
+Several integrations require coordination with their respective teams before
+they can be fully operational.
+
+| Service           | Contact                                     |
+|-------------------|---------------------------------------------|
+| **AAI**           | Contact the AAI Service team (GRNET)        |
+| **PID**           | Contact the PID Service team (GRNET, GWDG)  |
+| **Helpdesk**      | Contact the Helpdesk team (KIT-SCC)         |
+| **Accounting**    | Contact the Accounting Service team (GRNET) |
+| **Node Registry** | Contact the Node Registry team (GRNET)      |
+
+---
+
 [eosc-logo]: https://eosc.eu/wp-content/uploads/2024/02/EOSC-Beyond-logo.png
+
 [license-badge]: https://img.shields.io/badge/license-Apache%202.0-blue.svg
+
 [license-link]: LICENSE
+
 [coc-badge]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg
+
 [coc-link]: CODE_OF_CONDUCT.md
+
 [sqaaas-badge]: https://img.shields.io/badge/sqaaas%20software-bronze-e6ae77
+
 [sqaaas-link]: https://api.eu.badgr.io/public/assertions/odpAhWUqTNCyZpOYupboVg
+
 [contrib]: https://github.com/madgeek-arc/resource-catalogue/graphs/contributors
+
 [prop]:resource-catalogue-service/src/main/resources/application.properties
