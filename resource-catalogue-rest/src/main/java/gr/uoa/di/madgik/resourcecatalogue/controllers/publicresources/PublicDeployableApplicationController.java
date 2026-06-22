@@ -62,7 +62,7 @@ public class PublicDeployableApplicationController {
         String id = prefix + "/" + suffix;
         DeployableApplicationBundle bundle = service.get(id);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getDeployableApplication(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Deployable Application is not active"));
@@ -89,7 +89,7 @@ public class PublicDeployableApplicationController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<DeployableApplicationBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(DeployableApplicationBundle::getDeployableApplication));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @Operation(tags = {"public deployable application", "federated search"}, description = "Get a Paging of Highlighted Deployable Application results, based on a set of filters.")

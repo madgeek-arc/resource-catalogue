@@ -62,7 +62,7 @@ public class PublicDatasourceController {
         String id = prefix + "/" + suffix;
         DatasourceBundle bundle = service.get(id);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getDatasource(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Datasource is not active"));
@@ -105,7 +105,7 @@ public class PublicDatasourceController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<DatasourceBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(DatasourceBundle::getDatasource));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @Operation(tags = {"public datasource", "federated search"}, description = "Get a Paging of Highlighted Datasource results, based on a set of filters.")

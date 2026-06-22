@@ -73,7 +73,7 @@ public class PublicCatalogueController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<CatalogueBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(CatalogueBundle::getCatalogue));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @Operation(tags = {"public catalogue", "federated search"}, description = "Get a Paging of Highlighted Catalogue results, based on a set of filters.")

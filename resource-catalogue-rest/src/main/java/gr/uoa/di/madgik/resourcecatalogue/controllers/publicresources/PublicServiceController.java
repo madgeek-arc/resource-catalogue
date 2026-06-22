@@ -46,7 +46,7 @@ public class PublicServiceController {
         String id = prefix + "/" + suffix;
         ServiceBundle bundle = service.get(id);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getService(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Service is not active"));
@@ -89,7 +89,7 @@ public class PublicServiceController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<ServiceBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(ServiceBundle::getService));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @Operation(tags = {"public service", "federated search"}, description = "Get a Paging of Highlighted Service results, based on a set of filters.")

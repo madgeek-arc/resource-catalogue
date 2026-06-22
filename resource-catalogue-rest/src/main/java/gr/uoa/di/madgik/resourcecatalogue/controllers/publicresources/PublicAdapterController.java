@@ -90,7 +90,7 @@ public class PublicAdapterController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<AdapterBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(AdapterBundle::getAdapter));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @Operation(tags = {"public adapter", "federated search"}, description = "Get a Paging of Highlighted Adapter results, based on a set of filters.")
@@ -99,7 +99,7 @@ public class PublicAdapterController {
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "public/adapter/search")
     public Paging<HighlightedResult<LinkedHashMap<String, Object>>> searchAdapters(@Parameter(hidden = true)
-                                                                                  @RequestParam MultiValueMap<String, Object> params) {
+                                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         return service.searchResources(ff).map(hr -> hr.map(Bundle::toPublicMap));

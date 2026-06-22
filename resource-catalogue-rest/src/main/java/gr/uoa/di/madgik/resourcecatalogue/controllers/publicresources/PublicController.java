@@ -62,14 +62,15 @@ public class PublicController {
             for (String resourceType : resourceTypes) {
                 try {
                     someResources.add(genericService.get(resourceType, id));
-                } catch (ResourceNotFoundException ignored) {
+                } catch (ResourceNotFoundException _) {
+                    // ignored
                 }
             }
         }
 
         List<?> ret = someResources.stream()
-                .map(r -> ((Bundle) r).getPayload())
-                .collect(Collectors.toList());
+                .map(r -> ((Bundle) r).toPublicMap())
+                .toList();
 
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }

@@ -61,7 +61,7 @@ public class PublicConfigurationTemplateInstanceController {
         String id = prefix + "/" + suffix;
         ConfigurationTemplateInstanceBundle bundle = service.get(id, null);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getConfigurationTemplateInstance(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Configuration Template Instance is not active"));
@@ -85,7 +85,7 @@ public class PublicConfigurationTemplateInstanceController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<ConfigurationTemplateInstanceBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(ConfigurationTemplateInstanceBundle::getConfigurationTemplateInstance));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @Operation(tags = {"public configuration template instance", "federated search"}, description = "Get a Paging of Highlighted Configuration Template Instance results, based on a set of filters.")

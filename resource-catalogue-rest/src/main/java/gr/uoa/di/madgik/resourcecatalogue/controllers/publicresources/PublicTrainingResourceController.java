@@ -63,7 +63,7 @@ public class PublicTrainingResourceController {
         String id = prefix + "/" + suffix;
         TrainingResourceBundle bundle = service.get(id);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getTrainingResource(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Training Resource is not active"));
@@ -106,7 +106,7 @@ public class PublicTrainingResourceController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<TrainingResourceBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(TrainingResourceBundle::getTrainingResource));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @Operation(tags = {"public training resource", "federated search"}, description = "Get a Paging of Highlighted Training Resource results, based on a set of filters.")

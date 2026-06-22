@@ -61,7 +61,7 @@ public class PublicResourceInteroperabilityRecordController {
         String id = prefix + "/" + suffix;
         ResourceInteroperabilityRecordBundle bundle = service.get(id);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getResourceInteroperabilityRecord(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Resource Interoperability Record is not active"));
@@ -87,7 +87,7 @@ public class PublicResourceInteroperabilityRecordController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<ResourceInteroperabilityRecordBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(ResourceInteroperabilityRecordBundle::getResourceInteroperabilityRecord));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @BrowseParameters

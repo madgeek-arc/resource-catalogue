@@ -66,7 +66,7 @@ public class PublicInteroperabilityRecordController {
         String id = prefix + "/" + suffix;
         InteroperabilityRecordBundle bundle = service.get(id);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getInteroperabilityRecord(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Interoperability Record is not active"));
@@ -93,7 +93,7 @@ public class PublicInteroperabilityRecordController {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         Paging<InteroperabilityRecordBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(InteroperabilityRecordBundle::getInteroperabilityRecord));
+        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
     }
 
     @Operation(tags = {"public interoperability record", "federated search"}, description = "Get a Paging of Highlighted Interoperability Record results, based on a set of filters.")
