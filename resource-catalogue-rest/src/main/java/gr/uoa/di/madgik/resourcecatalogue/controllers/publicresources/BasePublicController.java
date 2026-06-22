@@ -22,17 +22,13 @@ import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -42,102 +38,79 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Profile("beyond")
-@RestController
-@RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-@Tag(name = "public organisation")
-public class PublicOrganisationController {
+public abstract class BasePublicController<T extends Bundle> {
 
-    private final PublicResourceService<OrganisationBundle> service;
+    protected final PublicResourceService<T> service;
 
-    public PublicOrganisationController(PublicResourceService<OrganisationBundle> service) {
+    protected BasePublicController(PublicResourceService<T> service) {
         this.service = service;
     }
 
-    @Operation(description = "Returns the Public Organisation with the given id.")
-    @GetMapping(path = {
-            "public/provider/{prefix}/{suffix}",
-            "public/organisation/{prefix}/{suffix}"
-    })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+    @Operation(description = "Returns the Public resource with the given id.")
+    @GetMapping(path = "{prefix}/{suffix}")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        String id = prefix + "/" + suffix;
-        OrganisationBundle bundle = service.get(id);
+        T bundle = service.get(prefix + "/" + suffix);
         if (bundle.isActive()) {
             return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Organisation is not active"));
-
+                "The specific resource is not active"));
     }
 
-    @Operation(description = "Returns the Organisation Bundle with the given id.")
-    @GetMapping(path = {
-            "public/provider/bundle/{prefix}/{suffix}",
-            "public/organisation/bundle/{prefix}/{suffix}"
-    })
+    @Operation(description = "Returns the resource Bundle with the given id.")
+    @GetMapping(path = "bundle/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        String id = prefix + "/" + suffix;
-        OrganisationBundle bundle = service.get(id);
-        return new ResponseEntity<>(bundle, HttpStatus.OK);
+        return new ResponseEntity<>(service.get(prefix + "/" + suffix), HttpStatus.OK);
     }
 
-    @Operation(description = "Get a list of all Public Organisations in the Catalogue, based on a set of filters.")
+    @Operation(description = "Get a list of all Public resources in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = {
-            "public/provider/all",
-            "public/organisation/all"
-    })
-    public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
-                                                                        @RequestParam MultiValueMap<String, Object> params) {
+    @GetMapping(path = "all")
+    public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(
+            @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<OrganisationBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(Bundle::toPublicMap));
+        return ResponseEntity.ok(service.getAll(ff).map(Bundle::toPublicMap));
     }
 
-    @Operation(tags = {"public organisation", "federated search"}, description = "Get a Paging of Highlighted Organisation results, based on a set of filters.")
+    @Operation(description = "Get a Paging of Highlighted resource results, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/organisation/search")
-    public Paging<HighlightedResult<LinkedHashMap<String, Object>>> searchOrganisations(@Parameter(hidden = true)
-                                                                                       @RequestParam MultiValueMap<String, Object> params) {
+    @GetMapping(path = "search")
+    public Paging<HighlightedResult<LinkedHashMap<String, Object>>> search(
+            @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         return service.searchResources(ff).map(hr -> hr.map(Bundle::toPublicMap));
     }
 
-    @Operation(description = "Get a list of all Organisation Bundles in the Catalogue, based on a set of filters.")
+    @Operation(description = "Get a list of all resource Bundles in the Catalogue, based on a set of filters.")
     @BrowseParameters
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = {
-            "public/provider/bundle/all",
-            "public/organisation/bundle/all"
-    })
+    @GetMapping(path = "bundle/all")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<OrganisationBundle>> getAllBundles(@Parameter(hidden = true)
-                                                                    @RequestParam MultiValueMap<String, Object> params) {
+    public ResponseEntity<Paging<T>> getAllBundles(
+            @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        Paging<OrganisationBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging);
+        return ResponseEntity.ok(service.getAll(ff));
     }
 
     @Hidden
-    @PostMapping(path = "public/provider/add")
+    @PostMapping(path = "add")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<OrganisationBundle> createPublicOrganisation(@RequestBody OrganisationBundle bundle,
-                                                                       @Parameter(hidden = true) Authentication auth) {
+    public ResponseEntity<T> createPublicResource(@RequestBody T bundle,
+                                                  @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(service.createPublicResource(bundle, auth));
     }
 }
