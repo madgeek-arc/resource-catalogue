@@ -1,154 +1,120 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$defs": {
-    "Identifiers": {
-      "type": "object",
-      "properties": {
-        "externalId": {
-          "type": "string"
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "Identifiers" : {
+      "type" : "object",
+      "properties" : {
+        "externalId" : {
+          "type" : "string"
         },
-        "originalId": {
-          "type": "string"
+        "originalId" : {
+          "type" : "string"
         },
-        "pid": {
-          "type": "string"
+        "pid" : {
+          "type" : "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties" : false
     },
-    "LoggingInfo": {
-      "type": "object",
-      "properties": {
-        "actionType": {
-          "type": "string"
+    "LoggingInfo" : {
+      "type" : "object",
+      "properties" : {
+        "actionType" : {
+          "type" : "string"
         },
-        "comment": {
-          "type": "string"
+        "comment" : {
+          "type" : "string"
         },
-        "date": {
-          "type": "string"
+        "date" : {
+          "type" : "string"
         },
-        "type": {
-          "type": "string"
+        "type" : {
+          "type" : "string"
         },
-        "userEmail": {
-          "type": "string"
+        "userEmail" : {
+          "type" : "string"
         },
-        "userFullName": {
-          "type": "string"
+        "userFullName" : {
+          "type" : "string"
         },
-        "userRole": {
-          "type": "string"
+        "userRole" : {
+          "type" : "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties" : false
     },
-    "Metadata": {
-      "type": "object",
-      "properties": {
-        "modifiedAt": {
-          "type": "string"
+    "Metadata" : {
+      "type" : "object",
+      "properties" : {
+        "modifiedAt" : {
+          "type" : "string"
         },
-        "modifiedBy": {
-          "type": "string"
+        "modifiedBy" : {
+          "type" : "string"
         },
-        "published": {
-          "type": "boolean"
+        "published" : {
+          "type" : "boolean"
         },
-        "registeredAt": {
-          "type": "string"
+        "registeredAt" : {
+          "type" : "string"
         },
-        "registeredBy": {
-          "type": "string"
+        "registeredBy" : {
+          "type" : "string"
         },
-        "terms": {
-          "type": "array",
-          "items": {
-            "type": "string"
+        "terms" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
           }
         }
       },
-      "additionalProperties": false
-    },
-    "ConfigurationTemplate": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "interoperabilityRecordId": {
-          "type": "string"
-        },
-        "nodePID": {
-          "type": "string"
-        },
-        "formModel": {
-          "type": "object"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "name",
-        "description",
-        "interoperabilityRecordId",
-        "nodePID",
-        "formModel"
-      ]
+      "additionalProperties" : false
     }
   },
-  "type": "object",
-  "properties": {
-    "active": {
-      "type": "boolean"
+  "type" : "object",
+  "properties" : {
+    "active" : {
+      "type" : "boolean"
     },
-    "auditState": {
-      "type": "string"
+    "auditState" : {
+      "type" : "string"
     },
-    "catalogueId": {
-      "type": "string"
+    "catalogueId" : {
+      "type" : "string"
     },
-    "draft": {
-      "type": "boolean"
+    "draft" : {
+      "type" : "boolean"
     },
-    "identifiers": {
-      "$ref": "#/$defs/Identifiers"
+    "identifiers" : {
+      "$ref" : "#/$defs/Identifiers"
     },
-    "latestAuditInfo": {
-      "$ref": "#/$defs/LoggingInfo"
+    "latestAuditInfo" : {
+      "$ref" : "#/$defs/LoggingInfo"
     },
-    "latestOnboardingInfo": {
-      "$ref": "#/$defs/LoggingInfo"
+    "latestOnboardingInfo" : {
+      "$ref" : "#/$defs/LoggingInfo"
     },
-    "latestUpdateInfo": {
-      "$ref": "#/$defs/LoggingInfo"
+    "latestUpdateInfo" : {
+      "$ref" : "#/$defs/LoggingInfo"
     },
-    "legacy": {
-      "type": "boolean"
+    "legacy" : {
+      "type" : "boolean"
     },
-    "loggingInfo": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/LoggingInfo"
+    "loggingInfo" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/LoggingInfo"
       }
     },
-    "metadata": {
-      "$ref": "#/$defs/Metadata"
+    "metadata" : {
+      "$ref" : "#/$defs/Metadata"
     },
-    "status": {
-      "type": "string"
+    "status" : {
+      "type" : "string"
     },
-    "suspended": {
-      "type": "boolean"
-    },
-    "configurationTemplate": {
-      "$ref": "#/$defs/ConfigurationTemplate"
+    "suspended" : {
+      "type" : "boolean"
     }
   },
-  "additionalProperties": false
+  "additionalProperties" : false
 }
