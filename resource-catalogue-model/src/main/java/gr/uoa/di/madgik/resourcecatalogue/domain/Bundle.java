@@ -367,4 +367,10 @@ public class Bundle {
     public void setCatalogueId(String catalogueId) {
         this.catalogueId = catalogueId;
     }
+
+    public LinkedHashMap<String, Object> toPublicMap() {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>(this.payload);
+        result.put("catalogueId", catalogueId);
+        return result;
+    }
 }
