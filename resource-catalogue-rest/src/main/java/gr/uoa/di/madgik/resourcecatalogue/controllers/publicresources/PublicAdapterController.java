@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,7 +62,7 @@ public class PublicAdapterController {
         String id = prefix + "/" + suffix;
         AdapterBundle bundle = service.get(id);
         if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getAdapter(), HttpStatus.OK);
+            return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
                 "The specific Adapter is not active"));
@@ -101,11 +102,7 @@ public class PublicAdapterController {
                                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        return service.searchResources(ff).map(hr -> hr.map(bundle -> {
-            LinkedHashMap<String, Object> result = new LinkedHashMap<>(bundle.getAdapter());
-            result.put("catalogueId", bundle.getCatalogueId());
-            return result;
-        }));
+        return service.searchResources(ff).map(hr -> hr.map(Bundle::toPublicMap));
     }
 
     @BrowseParameters

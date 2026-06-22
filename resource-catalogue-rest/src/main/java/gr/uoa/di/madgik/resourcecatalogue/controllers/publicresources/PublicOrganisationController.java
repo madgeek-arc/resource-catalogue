@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -111,11 +112,7 @@ public class PublicOrganisationController {
                                                                                        @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        return service.searchResources(ff).map(hr -> hr.map(bundle -> {
-            LinkedHashMap<String, Object> result = new LinkedHashMap<>(bundle.getOrganisation());
-            result.put("catalogueId", bundle.getCatalogueId());
-            return result;
-        }));
+        return service.searchResources(ff).map(hr -> hr.map(Bundle::toPublicMap));
     }
 
     @BrowseParameters

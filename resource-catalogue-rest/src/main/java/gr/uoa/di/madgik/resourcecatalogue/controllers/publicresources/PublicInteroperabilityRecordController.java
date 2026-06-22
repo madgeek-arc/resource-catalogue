@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.HighlightedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
@@ -104,11 +105,7 @@ public class PublicInteroperabilityRecordController {
                                                                                     @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
-        return service.searchResources(ff).map(hr -> hr.map(bundle -> {
-            LinkedHashMap<String, Object> result = new LinkedHashMap<>(bundle.getInteroperabilityRecord());
-            result.put("catalogueId", bundle.getCatalogueId());
-            return result;
-        }));
+        return service.searchResources(ff).map(hr -> hr.map(Bundle::toPublicMap));
     }
 
     @BrowseParameters
