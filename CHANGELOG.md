@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.2](https://github.com/madgeek-arc/resource-catalogue/compare/v6.1.1...v6.1.2) (2026-06-23)
+
+
+### Miscellaneous Chores
+
+* release 6.1.2 ([e6fa8ac](https://github.com/madgeek-arc/resource-catalogue/commit/e6fa8ac4d4d39a676c6f5ca451fd5bbf049642b1))
+
 ## [6.1.1](https://github.com/madgeek-arc/resource-catalogue/compare/v6.1.0...v6.1.1) (2026-06-16)
 
 
