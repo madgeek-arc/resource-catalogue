@@ -74,7 +74,7 @@ public class ConfigurationTemplateController {
                                                                    @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
         ConfigurationTemplateBundle bundle = service.get(id);
-        String modelId = (String) bundle.getConfigurationTemplate().get("formModel");
+        String modelId = (String) bundle.getConfigurationTemplate().get("modelId");
         return ResponseEntity.ok(modelService.get(modelId));
     }
 
