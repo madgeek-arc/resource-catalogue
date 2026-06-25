@@ -7,7 +7,8 @@
       "path": "$.organisation.id",
       "primaryKey": true,
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Catalogue ID",
@@ -17,7 +18,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Organisation Name",
@@ -25,7 +27,8 @@
       "name": "name",
       "path": "$.organisation.name",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Description",
@@ -33,14 +36,16 @@
       "name": "description",
       "path": "$.organisation.description",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Alternative PIDs",
       "multivalued": true,
       "name": "alternative_pids",
       "path": "$.organisation.alternativePIDs[*].pid",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Node",
@@ -49,7 +54,8 @@
       "path": "$.organisation.nodePID",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Abbreviation",
@@ -57,7 +63,8 @@
       "name": "abbreviation",
       "path": "$.organisation.abbreviation",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Country",
@@ -66,14 +73,16 @@
       "path": "$.organisation.country",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Legal Entity",
       "multivalued": false,
       "name": "legal_entity",
       "path": "$.organisation.legalEntity",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Legal Status",
@@ -82,7 +91,8 @@
       "path": "$.organisation.legalStatus",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Hosting Legal Entity",
@@ -91,21 +101,24 @@
       "path": "$.organisation.hostingLegalEntity",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Logo",
       "multivalued": false,
       "name": "logo",
       "path": "$.organisation.logo",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Multimedia",
       "multivalued": true,
       "name": "multimedia",
       "path": "$.organisation.multimedia[*].multimediaURL",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Scientific Domain",
@@ -114,7 +127,8 @@
       "path": "$.organisation.scientificDomains[*].scientificDomain",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Scientific Subdomain",
@@ -123,7 +137,8 @@
       "path": "$.organisation.scientificDomains[*].scientificSubdomain",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Tag",
@@ -131,14 +146,16 @@
       "name": "tags",
       "path": "$.organisation.tags[*]",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Public Contacts",
       "multivalued": false,
       "name": "contacts",
       "path": "$.organisation.publicContacts[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Main Contact Role",
@@ -147,154 +164,176 @@
       "path": "$.organisation.mainContact.role",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": "User",
       "multivalued": true,
       "name": "users",
       "path": "$.organisation.users[*].email",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "registeredBy",
       "path": "$.metadata.registeredBy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedBy",
       "path": "$.metadata.modifiedBy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.time.Instant"
+      "type": "java.time.Instant",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.time.Instant"
+      "type": "java.time.Instant",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "published",
       "path": "$.metadata.published",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "pid",
       "path": "$.identifiers.pid",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "externalId",
       "path": "$.identifiers.externalId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditActionType",
       "path": "$.latestAuditInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditDate",
       "path": "$.latestAuditInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditType",
       "path": "$.latestAuditInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditUserEmail",
       "path": "$.latestAuditInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateActionType",
       "path": "$.latestUpdateInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateDate",
       "path": "$.latestUpdateInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateType",
       "path": "$.latestUpdateInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateUserEmail",
       "path": "$.latestUpdateInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingActionType",
       "path": "$.latestOnboardingInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingDate",
       "path": "$.latestOnboardingInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingType",
       "path": "$.latestOnboardingInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingUserEmail",
       "path": "$.latestOnboardingInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -302,7 +341,8 @@
       "multivalued": false,
       "name": "active",
       "path": "$.active",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -310,7 +350,8 @@
       "multivalued": false,
       "name": "suspended",
       "path": "$.suspended",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -318,7 +359,8 @@
       "multivalued": false,
       "name": "draft",
       "path": "$.draft",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
@@ -327,7 +369,8 @@
       "path": "$.status",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
@@ -336,14 +379,16 @@
       "path": "$.auditState",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "templateStatus",
       "path": "$.templateStatus",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",

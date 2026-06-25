@@ -7,7 +7,8 @@
       "path": "$.datasource.id",
       "primaryKey": true,
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Catalogue ID",
@@ -17,14 +18,16 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Urls",
       "multivalued": true,
       "name": "urls",
       "path": "$.datasource.urls[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Datasource Name",
@@ -32,7 +35,8 @@
       "name": "name",
       "path": "$.datasource.name",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Description",
@@ -40,14 +44,16 @@
       "name": "description",
       "path": "$.datasource.description",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Alternative PIDs",
       "multivalued": true,
       "name": "alternative_pids",
       "path": "$.datasource.alternativePIDs[*].pid",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Node",
@@ -56,14 +62,16 @@
       "path": "$.datasource.nodePID",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Type",
       "multivalued": false,
       "name": "type",
       "path": "$.datasource.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Resource Owner",
@@ -73,7 +81,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Service Provider",
@@ -83,21 +92,24 @@
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Webpage",
       "multivalued": false,
       "name": "webpage",
       "path": "$.datasource.webpage",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Logo",
       "multivalued": false,
       "name": "logo",
       "path": "$.datasource.logo",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Scientific Domain",
@@ -106,7 +118,8 @@
       "path": "$.datasource.scientificDomains[*].scientificDomain",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Scientific Subdomain",
@@ -115,7 +128,8 @@
       "path": "$.datasource.scientificDomains[*].scientificSubdomain",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Category",
@@ -124,7 +138,8 @@
       "path": "$.datasource.categories[*].category",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Subcategory",
@@ -133,7 +148,8 @@
       "path": "$.datasource.categories[*].subcategory",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Tag",
@@ -141,16 +157,18 @@
       "name": "tags",
       "path": "$.datasource.tags[*]",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Access Type",
-      "multivalued": false,
-      "name": "accessTypes",
-      "path": "$.datasource.accessTypes",
+      "multivalued": true,
+      "name": "access_types",
+      "path": "$.datasource.accessTypes[*]",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Jurisdiction",
@@ -159,7 +177,8 @@
       "path": "$.datasource.jurisdiction",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "TRL",
@@ -168,28 +187,32 @@
       "path": "$.datasource.trl",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Terms of Use",
       "multivalued": false,
       "name": "terms_of_use",
       "path": "$.datasource.termsOfUse",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Privacy Policy",
       "multivalued": false,
       "name": "privacy_policy",
       "path": "$.datasource.privacyPolicy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Access Policy",
       "multivalued": false,
       "name": "access_policy",
       "path": "$.datasource.accessPolicy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Order Type",
@@ -198,189 +221,216 @@
       "path": "$.datasource.orderType",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Order",
       "multivalued": false,
       "name": "order_link",
       "path": "$.datasource.order",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Public Contacts",
       "multivalued": true,
       "name": "contacts",
       "path": "$.datasource.publicContacts[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Submission Policy URL",
       "multivalued": false,
       "name": "submission_policy_url",
       "path": "$.datasource.submissionPolicyUrl",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Preservation Policy URL",
       "multivalued": false,
       "name": "preservation_policy_url",
       "path": "$.datasource.preservationPolicyUrl",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Version Control",
       "multivalued": false,
       "name": "version_control",
       "path": "$.datasource.versionControl",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Thematic",
       "multivalued": false,
       "name": "thematic",
       "path": "$.datasource.thematic",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "registeredBy",
       "path": "$.metadata.registeredBy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedBy",
       "path": "$.metadata.modifiedBy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.time.Instant"
+      "type": "java.time.Instant",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.time.Instant"
+      "type": "java.time.Instant",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "published",
       "path": "$.metadata.published",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "pid",
       "path": "$.identifiers.pid",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "externalId",
       "path": "$.identifiers.externalId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditActionType",
       "path": "$.latestAuditInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditDate",
       "path": "$.latestAuditInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditType",
       "path": "$.latestAuditInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditUserEmail",
       "path": "$.latestAuditInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateActionType",
       "path": "$.latestUpdateInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateDate",
       "path": "$.latestUpdateInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateType",
       "path": "$.latestUpdateInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateUserEmail",
       "path": "$.latestUpdateInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingActionType",
       "path": "$.latestOnboardingInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingDate",
       "path": "$.latestOnboardingInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingType",
       "path": "$.latestOnboardingInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingUserEmail",
       "path": "$.latestOnboardingInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -388,7 +438,8 @@
       "multivalued": false,
       "name": "active",
       "path": "$.active",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -396,7 +447,8 @@
       "multivalued": false,
       "name": "suspended",
       "path": "$.suspended",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -404,7 +456,8 @@
       "multivalued": false,
       "name": "draft",
       "path": "$.draft",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
@@ -413,7 +466,8 @@
       "path": "$.status",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
@@ -422,14 +476,16 @@
       "path": "$.auditState",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "originalOpenAIREId",
       "path": "$.originalOpenAIREId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",
