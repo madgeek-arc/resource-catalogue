@@ -44,7 +44,7 @@
       "name": "description",
       "path": "$.interoperabilityRecord.description",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["TEXT"],
       "embeddingWeight": 1.0
     },
     {

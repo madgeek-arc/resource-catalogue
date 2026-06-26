@@ -44,7 +44,7 @@
       "name": "description",
       "path": "$.datasource.description",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["TEXT"],
       "embeddingWeight": 1.0
     },
     {

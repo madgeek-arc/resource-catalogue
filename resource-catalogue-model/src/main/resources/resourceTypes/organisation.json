@@ -36,7 +36,7 @@
       "name": "description",
       "path": "$.organisation.description",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["TEXT"],
       "embeddingWeight": 1.0
     },
     {
@@ -138,15 +138,6 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
-    },
-    {
-      "label": "Tag",
-      "multivalued": true,
-      "name": "tags",
-      "path": "$.organisation.tags[*]",
-      "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
       "embeddingWeight": 1.0
     },
     {
