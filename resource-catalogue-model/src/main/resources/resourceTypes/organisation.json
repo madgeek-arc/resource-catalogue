@@ -151,7 +151,7 @@
     },
     {
       "label": "Public Contacts",
-      "multivalued": false,
+      "multivalued": true,
       "name": "contacts",
       "path": "$.organisation.publicContacts[*]",
       "type": "java.lang.String",
