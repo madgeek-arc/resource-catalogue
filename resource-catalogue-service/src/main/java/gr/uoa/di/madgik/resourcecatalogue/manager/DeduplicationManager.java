@@ -40,9 +40,6 @@ public class DeduplicationManager implements DeduplicationService {
 
     private static final int MAX_RESOURCES_PER_SCAN = 10_000;
 
-    @Value("${dedup.candidates-per-resource:5}")
-    private int candidatesPerResource;
-
     private final GenericResourceService genericResourceService;
 
     public DeduplicationManager(GenericResourceService genericResourceService) {
@@ -50,7 +47,7 @@ public class DeduplicationManager implements DeduplicationService {
     }
 
     @Override
-    public List<DuplicatePair> findDuplicates(String resourceType) {
+    public List<DuplicatePair> findDuplicates(String resourceType, int quantity) {
         Paging<?> all = genericResourceService.getResults(publishedFilter(resourceType, MAX_RESOURCES_PER_SCAN));
 
         Set<String> seen = new LinkedHashSet<>();
@@ -63,7 +60,7 @@ public class DeduplicationManager implements DeduplicationService {
             String sourceId = source.getId();
             try {
                 List<?> similar = genericResourceService.recommend(
-                        publishedFilter(resourceType, candidatesPerResource), sourceId);
+                        publishedFilter(resourceType, quantity), sourceId);
                 for (Object candidate : similar) {
                     if (!(candidate instanceof Bundle b)) {
                         continue;
@@ -84,8 +81,8 @@ public class DeduplicationManager implements DeduplicationService {
     }
 
     @Override
-    public List<?> findSimilar(String resourceType, String id) {
-        return genericResourceService.recommend(publishedFilter(resourceType, candidatesPerResource), id);
+    public List<?> findSimilar(String resourceType, String id, int quantity) {
+        return genericResourceService.recommend(publishedFilter(resourceType, quantity), id);
     }
 
     private FacetFilter publishedFilter(String resourceType, int quantity) {

@@ -22,7 +22,7 @@ import java.util.List;
 
 public interface DeduplicationService {
 
-    List<DuplicatePair> findDuplicates(String resourceType);
+    List<DuplicatePair> findDuplicates(String resourceType, int quantity);
 
-    List<?> findSimilar(String resourceType, String id);
+    List<?> findSimilar(String resourceType, String id, int quantity);
 }

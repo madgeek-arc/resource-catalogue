@@ -29,6 +29,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -50,8 +51,9 @@ public class DeduplicationController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<List<DuplicatePair>> findDuplicates(
             @PathVariable String resourceType,
+            @RequestParam(defaultValue = "5") int quantity,
             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(deduplicationService.findDuplicates(resourceType));
+        return ResponseEntity.ok(deduplicationService.findDuplicates(resourceType, quantity));
     }
 
     @Operation(summary = "Find published resources similar to the one identified by {prefix}/{suffix}.")
@@ -61,7 +63,8 @@ public class DeduplicationController {
             @PathVariable String resourceType,
             @PathVariable String prefix,
             @PathVariable String suffix,
+            @RequestParam(defaultValue = "5") int quantity,
             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(deduplicationService.findSimilar(resourceType, prefix + "/" + suffix));
+        return ResponseEntity.ok(deduplicationService.findSimilar(resourceType, prefix + "/" + suffix, quantity));
     }
 }
