@@ -34,7 +34,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "datasources")
+@RequestMapping(path = "datasources", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "datasources")
 public class DatasourceCrudController extends ResourceCrudController<DatasourceBundle> {
 

@@ -45,7 +45,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import java.util.List;
 import java.util.Map;
 
-@RequestMapping
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public abstract class ResourceCrudController<T> {
 
     /** The service used to perform all read and write operations on the registry. */
@@ -79,7 +79,7 @@ public abstract class ResourceCrudController<T> {
         return id;
     }
 
-    @GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "{id}")
     public ResponseEntity<T> get(@PathVariable(value = "id") String id,
                                  @Parameter(hidden = true) Authentication authentication) {
         return new ResponseEntity<>((T) service.get(getResourceTypeName(), id), HttpStatus.OK);
@@ -98,14 +98,14 @@ public abstract class ResourceCrudController<T> {
      * @return the resource identified by the provided pid
      */
     @Hidden
-    @GetMapping(path = "{id}/**", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "{id}/**")
     public ResponseEntity<T> getByPid(@PathVariable("id") @Parameter(allowReserved = true) String id,
                                       @Parameter(hidden = true) Authentication authentication,
                                       HttpServletRequest request) {
         return new ResponseEntity<>((T) service.get(getResourceTypeName(), extractPid(id, request)), HttpStatus.OK);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> add(@RequestBody T t, @Parameter(hidden = true) Authentication auth) {
         return new ResponseEntity<>(service.add(getResourceTypeName(), t), HttpStatus.CREATED);
     }
@@ -117,7 +117,7 @@ public abstract class ResourceCrudController<T> {
         }
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<T> update(@RequestBody T t,
                                     @Parameter(hidden = true) Authentication auth) {
         if (!service.exists(getResourceTypeName(), t))
@@ -131,14 +131,14 @@ public abstract class ResourceCrudController<T> {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "{id}")
     public ResponseEntity<T> delete(@PathVariable String id, @Parameter(hidden = true) Authentication auth) {
         service.delete(getResourceTypeName(), id);
         return new ResponseEntity<>(HttpStatus.GONE);
     }
 
     @Hidden
-    @DeleteMapping(path = "{id}/**", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "{id}/**")
     public ResponseEntity<T> deleteByPid(@PathVariable("id") @Parameter(allowReserved = true) String id,
                                          @Parameter(hidden = true) Authentication authentication,
                                          HttpServletRequest request) {
@@ -148,7 +148,7 @@ public abstract class ResourceCrudController<T> {
 
     // Filter a list of Resources based on a set of filters.
     @BrowseParameters
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping
     public ResponseEntity<Paging<T>> getAll(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> allRequestParams, @Parameter(hidden = true) Authentication auth) {
         FacetFilter ff = FacetFilter.from(allRequestParams);
         ff.setResourceType(getResourceTypeName());
