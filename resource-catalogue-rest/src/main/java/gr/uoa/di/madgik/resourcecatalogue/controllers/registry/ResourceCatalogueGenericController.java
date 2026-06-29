@@ -1,6 +1,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
@@ -32,7 +33,7 @@ public abstract class ResourceCatalogueGenericController<T extends Bundle, S ext
                                   @PathVariable String id) {
         try {
             return service.get(id, catalogueId) != null;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
@@ -44,7 +45,7 @@ public abstract class ResourceCatalogueGenericController<T extends Bundle, S ext
         String id = prefix + "/" + suffix;
         try {
             return service.get(id, catalogueId) != null;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
