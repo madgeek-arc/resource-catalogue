@@ -52,6 +52,17 @@
       "embeddingWeight": 1.0
     },
     {
+      "label": "Model ID",
+      "multivalued": false,
+      "name": "model_id",
+      "path": "$.configurationTemplate.modelId",
+      "type": "java.lang.String",
+      "relatedResourceType": "model",
+      "relatedResourceTypeField": "name",
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
+    },
+    {
       "label": null,
       "multivalued": false,
       "name": "registeredBy",

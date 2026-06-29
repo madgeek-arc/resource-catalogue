@@ -84,7 +84,6 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/resourcesync/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/forms/models").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
                                 .requestMatchers(
                                         "/logs/**",
                                         "/forms/**",

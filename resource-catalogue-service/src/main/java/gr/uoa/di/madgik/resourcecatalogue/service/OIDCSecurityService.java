@@ -284,7 +284,7 @@ public class OIDCSecurityService implements SecurityService {
         try {
             organisationService.get(id);
             return true;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
@@ -293,7 +293,7 @@ public class OIDCSecurityService implements SecurityService {
         try {
             serviceService.get(id);
             return true;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
@@ -302,7 +302,7 @@ public class OIDCSecurityService implements SecurityService {
         try {
             datasourceService.get(id);
             return true;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
@@ -311,7 +311,7 @@ public class OIDCSecurityService implements SecurityService {
         try {
             catalogueService.get(id);
             return true;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
@@ -320,7 +320,7 @@ public class OIDCSecurityService implements SecurityService {
         try {
             trainingResourceService.get(id);
             return true;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
@@ -329,7 +329,7 @@ public class OIDCSecurityService implements SecurityService {
         try {
             deployableApplicationService.get(id);
             return true;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
@@ -338,7 +338,7 @@ public class OIDCSecurityService implements SecurityService {
         try {
             adapterService.get(id);
             return true;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return false;
         }
     }
@@ -442,4 +442,15 @@ public class OIDCSecurityService implements SecurityService {
         return adapterBundle.isActive();
     }
     //endregion
+
+    @Override
+    public boolean isInteroperabilityRecordAdmin(Authentication auth, String interoperabilityRecordId) {
+        return getAuthenticatedUser(auth)
+                .map(user -> {
+                    InteroperabilityRecordBundle ir = interoperabilityRecordService.get(interoperabilityRecordId);
+                    String providerId = (String) ir.getInteroperabilityRecord().get("resourceOwner");
+                    return userHasAdminAccess(user, providerId);
+                })
+                .orElse(false);
+    }
 }

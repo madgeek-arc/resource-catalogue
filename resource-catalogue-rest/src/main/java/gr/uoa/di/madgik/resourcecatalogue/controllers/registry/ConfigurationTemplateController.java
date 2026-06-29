@@ -17,13 +17,16 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.catalogue.domain.Model;
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,10 +55,14 @@ public class ConfigurationTemplateController {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateController.class);
 
     private final ConfigurationTemplateService service;
+    private final ConfigurationTemplateInstanceService instanceService;
     private final ModelService modelService;
 
-    public ConfigurationTemplateController(ConfigurationTemplateService service, ModelService modelService) {
+    public ConfigurationTemplateController(ConfigurationTemplateService service,
+                                           ConfigurationTemplateInstanceService instanceService,
+                                           ModelService modelService) {
         this.service = service;
+        this.instanceService = instanceService;
         this.modelService = modelService;
     }
 
@@ -116,7 +123,7 @@ public class ConfigurationTemplateController {
 
     @Operation(summary = "Adds a new Configuration Template.")
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #ct['interoperabilityRecordId'])")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> ct,
                                  @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateBundle bundle = new ConfigurationTemplateBundle();
@@ -124,6 +131,37 @@ public class ConfigurationTemplateController {
         ConfigurationTemplateBundle ret = service.add(bundle, auth);
         logger.info("Added Configuration Template with id '{}'", bundle.getId());
         return new ResponseEntity<>(ret.getConfigurationTemplate(), HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Creates a Model and a Configuration Template in a single request. "
+            + "The model must be of resourceType 'configuration_template_instance'.")
+    @PostMapping(path = "/{irPrefix}/{irSuffix}/withModel")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #irPrefix+'/'+#irSuffix)")
+    public ResponseEntity<?> addWithModel(@RequestBody Model model,
+                                          @PathVariable String irPrefix,
+                                          @PathVariable String irSuffix,
+                                          @Parameter(hidden = true) Authentication auth) {
+        if (!"configuration_template_instance".equals(model.getResourceType())) {
+            throw new ValidationException("Model resourceType must be 'configuration_template_instance'");
+        }
+        String interoperabilityRecordId = irPrefix + "/" + irSuffix;
+        Model savedModel = modelService.add(model);
+        try {
+            LinkedHashMap<String, Object> ct = new LinkedHashMap<>();
+            ct.put("interoperabilityRecordId", interoperabilityRecordId);
+            ct.put("modelId", savedModel.getId());
+            ct.put("name", savedModel.getName());
+            ct.put("description", savedModel.getDescription());
+            // set nodePID
+            ConfigurationTemplateBundle bundle = new ConfigurationTemplateBundle();
+            bundle.setConfigurationTemplate(ct);
+            ConfigurationTemplateBundle ret = service.add(bundle, auth);
+            logger.info("Added Configuration Template '{}' with Model '{}'", ret.getId(), savedModel.getId());
+            return new ResponseEntity<>(ret.getConfigurationTemplate(), HttpStatus.CREATED);
+        } catch (Exception e) {
+            modelService.delete(savedModel.getId());
+            throw e;
+        }
     }
 
     @PostMapping(path = "/addBulk")
@@ -135,7 +173,7 @@ public class ConfigurationTemplateController {
 
     @Operation(summary = "Updates the Configuration Template with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#ct['interoperabilityRecordId'])")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #ct['interoperabilityRecordId'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> ct,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -144,6 +182,34 @@ public class ConfigurationTemplateController {
         bundle.setConfigurationTemplate(ct);
         bundle = service.update(bundle, comment, auth);
         logger.info("Updated the Configuration Template with id '{}'", ct.get("id"));
+        return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Updates a Model and its corresponding Configuration Template in a single request, "
+            + "propagating name and description from the model to the Configuration Template.")
+    @PutMapping(path = "/{irPrefix}/{irSuffix}/withModel")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #irPrefix+'/'+#irSuffix)")
+    public ResponseEntity<?> updateWithModel(@RequestBody Model model,
+                                             @PathVariable String irPrefix,
+                                             @PathVariable String irSuffix,
+                                             @RequestParam(required = false) String comment,
+                                             @Parameter(hidden = true) Authentication auth) {
+        Model updatedModel = modelService.update(model.getId(), model);
+        FacetFilter ff = new FacetFilter();
+        ff.addFilter("model_id", model.getId());
+        Paging<ConfigurationTemplateBundle> paging = service.getAll(ff);
+        if (paging.getResults().isEmpty()) {
+            throw new ResourceNotFoundException("No Configuration Template found for model id: " + updatedModel.getId());
+        }
+        ConfigurationTemplateBundle bundle = paging.getResults().getFirst();
+        if (!instanceService.getByConfigurationTemplateId(bundle.getId()).isEmpty()) {
+            throw new ValidationException("Cannot update: Configuration Template '" + bundle.getId()
+                    + "' has registered instances. Remove them before updating the model.");
+        }
+        bundle.getConfigurationTemplate().put("name", updatedModel.getName());
+        bundle.getConfigurationTemplate().put("description", updatedModel.getDescription());
+        bundle = service.update(bundle, comment, auth);
+        logger.info("Updated Configuration Template '{}' with Model '{}'", bundle.getId(), updatedModel.getId());
         return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.OK);
     }
 
@@ -175,7 +241,7 @@ public class ConfigurationTemplateController {
     @Operation(summary = "Returns all Configuration Template Bundles of a specific Interoperability Record,"
             + " accessible to organisation admins of that Interoperability Record.")
     @GetMapping(path = "/bundle/getAllByInteroperabilityRecordId/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<List<ConfigurationTemplateBundle>> getAllBundlesByInteroperabilityRecordId(@PathVariable String prefix,
                                                                                                      @PathVariable String suffix,
                                                                                                      @Parameter(hidden = true) Authentication auth) {
