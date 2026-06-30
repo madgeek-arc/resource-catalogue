@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.ScoredResult;
 import gr.uoa.di.madgik.registry.exception.MissingResourceEmbeddingsException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
@@ -25,13 +26,10 @@ import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
 import gr.uoa.di.madgik.resourcecatalogue.service.DeduplicationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DeduplicationManager implements DeduplicationService {
@@ -62,7 +60,7 @@ public class DeduplicationManager implements DeduplicationService {
                 List<?> similar = genericResourceService.recommend(
                         publishedFilter(resourceType, quantity), sourceId);
                 for (Object candidate : similar) {
-                    if (!(candidate instanceof Bundle b)) {
+                    if (!(candidate instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b)) {
                         continue;
                     }
                     String candidateId = b.getId();
@@ -81,8 +79,47 @@ public class DeduplicationManager implements DeduplicationService {
     }
 
     @Override
-    public List<?> findSimilar(String resourceType, String id, int quantity) {
-        return genericResourceService.recommend(publishedFilter(resourceType, quantity), id);
+    public List<LinkedHashMap<String, Object>> findSimilar(String resourceType, String id, int quantity) {
+        return genericResourceService.recommend(publishedFilter(resourceType, quantity), id).stream()
+                .filter(obj -> obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle)
+                .map(obj -> scrubSensitiveFields(((Bundle) ((ScoredResult<?>) obj).getResult()).getPayload(), true))
+                .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    private LinkedHashMap<String, Object> scrubSensitiveFields(Map<?, ?> source, boolean isRoot) {
+        LinkedHashMap<String, Object> copy = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : source.entrySet()) {
+            String key = (String) entry.getKey();
+            if (isRoot && "users".equals(key)) {
+                continue;
+            }
+            if ("email".equals(key)) {
+                continue;
+            }
+            Object value = entry.getValue();
+            if (value instanceof Map<?, ?> nested) {
+                copy.put(key, scrubSensitiveFields(nested, false));
+            } else if (value instanceof List<?> list) {
+                copy.put(key, scrubList(list));
+            } else {
+                copy.put(key, value);
+            }
+        }
+        return copy;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Object> scrubList(List<?> list) {
+        List<Object> result = new ArrayList<>(list.size());
+        for (Object item : list) {
+            if (item instanceof Map<?, ?> nested) {
+                result.add(scrubSensitiveFields(nested, false));
+            } else {
+                result.add(item);
+            }
+        }
+        return result;
     }
 
     private FacetFilter publishedFilter(String resourceType, int quantity) {

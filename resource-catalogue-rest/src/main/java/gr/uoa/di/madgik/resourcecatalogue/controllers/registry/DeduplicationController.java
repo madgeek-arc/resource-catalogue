@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Profile("beyond")
@@ -59,7 +60,7 @@ public class DeduplicationController {
     @Operation(summary = "Find published resources similar to the one identified by {prefix}/{suffix}.")
     @GetMapping(path = "{resourceType}/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<List<?>> findSimilar(
+    public ResponseEntity<List<LinkedHashMap<String, Object>>> findSimilar(
             @PathVariable String resourceType,
             @PathVariable String prefix,
             @PathVariable String suffix,

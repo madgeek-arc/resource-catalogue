@@ -18,11 +18,12 @@ package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public interface DeduplicationService {
 
     List<DuplicatePair> findDuplicates(String resourceType, int quantity);
 
-    List<?> findSimilar(String resourceType, String id, int quantity);
+    List<LinkedHashMap<String, Object>> findSimilar(String resourceType, String id, int quantity);
 }
