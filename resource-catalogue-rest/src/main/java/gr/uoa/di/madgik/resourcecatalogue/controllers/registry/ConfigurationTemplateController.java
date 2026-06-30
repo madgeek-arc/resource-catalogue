@@ -24,6 +24,7 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
+import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
@@ -57,13 +58,16 @@ public class ConfigurationTemplateController {
     private final ConfigurationTemplateService service;
     private final ConfigurationTemplateInstanceService instanceService;
     private final ModelService modelService;
+    private final NodeProperties nodeProperties;
 
     public ConfigurationTemplateController(ConfigurationTemplateService service,
                                            ConfigurationTemplateInstanceService instanceService,
-                                           ModelService modelService) {
+                                           ModelService modelService,
+                                           NodeProperties nodeProperties) {
         this.service = service;
         this.instanceService = instanceService;
         this.modelService = modelService;
+        this.nodeProperties = nodeProperties;
     }
 
     @Operation(summary = "Returns the Configuration Template with the given id.")
@@ -147,12 +151,7 @@ public class ConfigurationTemplateController {
         String interoperabilityRecordId = irPrefix + "/" + irSuffix;
         Model savedModel = modelService.add(model);
         try {
-            LinkedHashMap<String, Object> ct = new LinkedHashMap<>();
-            ct.put("interoperabilityRecordId", interoperabilityRecordId);
-            ct.put("modelId", savedModel.getId());
-            ct.put("name", savedModel.getName());
-            ct.put("description", savedModel.getDescription());
-            // set nodePID
+            LinkedHashMap<String, Object> ct = buildConfigurationTemplate(interoperabilityRecordId, savedModel);
             ConfigurationTemplateBundle bundle = new ConfigurationTemplateBundle();
             bundle.setConfigurationTemplate(ct);
             ConfigurationTemplateBundle ret = service.add(bundle, auth);
@@ -261,5 +260,16 @@ public class ConfigurationTemplateController {
     @GetMapping(path = "/monitoring/serviceTypes", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Vocabulary>> getAvailableServiceTypes() {
         return new ResponseEntity<>(service.getAvailableServiceTypes(), HttpStatus.OK);
+    }
+
+    //helper
+    private LinkedHashMap<String, Object> buildConfigurationTemplate(String interoperabilityRecordId, Model model) {
+        LinkedHashMap<String, Object> ct = new LinkedHashMap<>();
+        ct.put("interoperabilityRecordId", interoperabilityRecordId);
+        ct.put("modelId", model.getId());
+        ct.put("name", model.getName());
+        ct.put("description", model.getDescription());
+        ct.put("nodePID", nodeProperties.getPid().getValue());
+        return ct;
     }
 }
