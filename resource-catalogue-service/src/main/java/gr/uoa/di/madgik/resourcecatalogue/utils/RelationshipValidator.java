@@ -17,12 +17,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,17 +34,14 @@ public class RelationshipValidator {
 
     private final OrganisationService organisationService;
     private final ServiceService serviceService;
-    private final TrainingResourceService trainingResourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
 
     @Autowired
     public RelationshipValidator(OrganisationService organisationService,
                                  ServiceService serviceService,
-                                 TrainingResourceService trainingResourceService,
                                  InteroperabilityRecordService interoperabilityRecordService) {
         this.organisationService = organisationService;
         this.serviceService = serviceService;
-        this.trainingResourceService = trainingResourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
     }
 
@@ -97,7 +93,7 @@ public class RelationshipValidator {
                     if (serviceProvider != null && !serviceProvider.isEmpty()) {
                         try {
                             organisationService.get(serviceProvider, catalogueId);
-                        } catch (CatalogueResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException e) {
                             throw new ValidationException(String.format("Field [resourceProviders]: " +
                                             "There is no Provider with ID '%s' in the %s Catalogue.",
                                     serviceProvider, catalogueId));
@@ -110,7 +106,7 @@ public class RelationshipValidator {
                     if (eoscRelatedService != null && !eoscRelatedService.isEmpty()) {
                         try {
                             serviceService.get(eoscRelatedService, catalogueId);
-                        } catch (CatalogueResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException e) {
                             throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
                                             "There is no Service with ID '%s' in the %s Catalogue. ",
                                     eoscRelatedService, catalogueId));
@@ -123,7 +119,7 @@ public class RelationshipValidator {
                     if (interoperabilityRecordId != null && !interoperabilityRecordId.isEmpty()) {
                         try {
                             interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
-                        } catch (CatalogueResourceNotFoundException e) {
+                        } catch (ResourceNotFoundException e) {
                             throw new ValidationException(String.format("Field [interoperabilityRecordIds]: " +
                                             "There is no Interoperability Record with ID '%s' in the %s Catalogue.",
                                     interoperabilityRecordId, catalogueId));
