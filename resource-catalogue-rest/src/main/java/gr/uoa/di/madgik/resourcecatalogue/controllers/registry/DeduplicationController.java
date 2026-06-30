@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
+import gr.uoa.di.madgik.resourcecatalogue.dto.SimilarResource;
 import gr.uoa.di.madgik.resourcecatalogue.service.DeduplicationService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,12 +30,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Hidden
 @Profile("beyond")
@@ -69,5 +73,16 @@ public class DeduplicationController {
             @RequestParam(defaultValue = "5") int quantity,
             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(deduplicationService.findSimilar(resourceType, prefix + "/" + suffix, quantity));
+    }
+
+    @Operation(summary = "Check if a resource is similar to existing published resources before submitting it.")
+    @PostMapping(path = "{resourceType}/check", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<SimilarResource>> checkBeforeAdd(
+            @PathVariable String resourceType,
+            @RequestParam(defaultValue = "0.95") float threshold,
+            @RequestParam(defaultValue = "5") int quantity,
+            @RequestBody Map<String, Object> resource,
+            @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        return ResponseEntity.ok(deduplicationService.checkBeforeAdd(resourceType, resource, threshold, quantity));
     }
 }

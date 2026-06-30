@@ -20,9 +20,12 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.ScoredResult;
 import gr.uoa.di.madgik.registry.exception.MissingResourceEmbeddingsException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
+import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
+import gr.uoa.di.madgik.resourcecatalogue.dto.SimilarResource;
 import gr.uoa.di.madgik.resourcecatalogue.service.DeduplicationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class DeduplicationManager implements DeduplicationService {
@@ -71,7 +75,7 @@ public class DeduplicationManager implements DeduplicationService {
                         pairs.add(new DuplicatePair(resourceType, sourceId, candidateId));
                     }
                 }
-            } catch (MissingResourceEmbeddingsException e) {
+            } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
                 logger.debug("Skipping resource '{}' — no embeddings available", sourceId);
             }
         }
@@ -80,9 +84,43 @@ public class DeduplicationManager implements DeduplicationService {
 
     @Override
     public List<LinkedHashMap<String, Object>> findSimilar(String resourceType, String id, int quantity) {
-        return genericResourceService.recommend(publishedFilter(resourceType, quantity), id).stream()
+        List<?> results;
+        try {
+            results = genericResourceService.recommend(publishedFilter(resourceType, quantity), id);
+        } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
+            logger.debug("No embeddings available for resourceType '{}' — skipping similarity check", resourceType);
+            return Collections.emptyList();
+        }
+        return results.stream()
                 .filter(obj -> obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle)
                 .map(obj -> scrubSensitiveFields(((Bundle) ((ScoredResult<?>) obj).getResult()).getPayload(), true))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SimilarResource> checkBeforeAdd(String resourceType, Map<String, Object> resource,
+                                                float threshold, int quantity) {
+        FacetFilter ff = publishedFilter(resourceType, quantity);
+        List<?> results;
+        // The registry indexes fields via JSONPath like $.organisation.name, so the payload
+        // must have the resource type as the top-level key to match those paths.
+        Map<String, Object> wrappedResource = new LinkedHashMap<>();
+        wrappedResource.put(resourceType, resource);
+        try {
+            results = genericResourceService.recommend(ff, wrappedResource);
+        } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
+            logger.debug("No embeddings available for resourceType '{}' — skipping similarity check", resourceType);
+            return Collections.emptyList();
+        }
+        return results.stream()
+                .flatMap(obj -> {
+                    if (!(obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b
+                            && sr.getScore() >= threshold)) {
+                        return Stream.empty();
+                    }
+                    return Stream.of(new SimilarResource(sr.getScore(),
+                            scrubSensitiveFields(b.getPayload(), true)));
+                })
                 .collect(Collectors.toList());
     }
 
