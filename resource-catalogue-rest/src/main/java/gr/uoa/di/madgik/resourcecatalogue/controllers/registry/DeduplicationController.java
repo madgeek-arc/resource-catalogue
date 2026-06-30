@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
 import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
 import gr.uoa.di.madgik.resourcecatalogue.service.DeduplicationService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+@Hidden
 @Profile("beyond")
 @RestController
 @RequestMapping(path = "dedup", produces = {MediaType.APPLICATION_JSON_VALUE})
