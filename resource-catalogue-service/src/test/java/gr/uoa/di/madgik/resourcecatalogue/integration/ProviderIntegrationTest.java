@@ -18,7 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.integration;
 
 import gr.uoa.di.madgik.catalogue.config.CatalogueLibProperties;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
@@ -119,7 +119,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
      * The test asserts that:
      * <ul>
      *   <li>The provider exists before deletion.</li>
-     *   <li>After deletion, attempting to retrieve the provider throws a {@link ResourceException} with an appropriate
+     *   <li>After deletion, attempting to retrieve the provider throws a {@link ResourceNotFoundException} with an appropriate
      *   message.</li>
      * </ul>
      * <p>
@@ -137,7 +137,7 @@ class ProviderIntegrationTest extends BaseIntegrationTest {
 
         providerService.delete(providerBundle);
         Thread.sleep(1000); //TODO: find a better way to clear cache
-        assertThrows(ResourceException.class, () -> providerService.get(providerId));
+        assertThrows(ResourceNotFoundException.class, () -> providerService.get(providerId));
     }
 
     /**

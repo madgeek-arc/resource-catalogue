@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("vocabulary")
+@RequestMapping(path = "vocabulary", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "vocabulary")
 public class VocabularyController extends ResourceController<Vocabulary> {
 

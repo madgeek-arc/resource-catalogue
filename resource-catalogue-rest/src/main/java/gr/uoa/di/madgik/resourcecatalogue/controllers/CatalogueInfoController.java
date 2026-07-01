@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Hidden
 @RestController
-@RequestMapping("config")
+@RequestMapping(path = "config", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "config")
 public class CatalogueInfoController {
 

@@ -34,7 +34,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "services")
+@RequestMapping(path = "services", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "services")
 public class ServiceCrudController extends ResourceCrudController<ServiceBundle> {
 

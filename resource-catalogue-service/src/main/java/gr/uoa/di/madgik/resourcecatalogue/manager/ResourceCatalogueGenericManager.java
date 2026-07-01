@@ -28,10 +28,10 @@ import org.springframework.security.core.Authentication;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Stream;
 
 //TODO: resource-specific method -> inside corresponding manager/service
@@ -318,41 +318,43 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         ff.addFilter("draft", false);
 
         Paging<T> resourcesPaging = getAll(ff, auth);
-        List<T> resourcesToBeAudited = new ArrayList<>();
 
-        long todayEpochMillis = System.currentTimeMillis();
-        long intervalEpochSeconds = Instant.ofEpochMilli(todayEpochMillis)
+        long nowSeconds = Instant.now().getEpochSecond();
+        long thresholdSeconds = Instant.now()
                 .atZone(ZoneId.systemDefault())
                 .minusMonths(auditingInterval)
                 .toEpochSecond();
 
-        for (T bundle : resourcesPaging.getResults()) {
-            LoggingInfo auditInfo = bundle.getLatestAuditInfo();
-            if (auditInfo == null) {
-                // Include providers that have never been audited
-                resourcesToBeAudited.add(bundle);
-            } else {
-                try {
-                    long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
-                    if (auditEpochSeconds < intervalEpochSeconds) {
-                        // Include providers that were last audited before the threshold
-                        resourcesToBeAudited.add(bundle);
-                    }
-                } catch (NumberFormatException ignore) {
-                }
+        Random rng = new Random();
+        List<T> selected = resourcesPaging.getResults().stream()
+                .map(bundle -> {
+                    long weight = overdueWeight(bundle, nowSeconds, thresholdSeconds);
+                    return weight > 0 ? Map.entry(bundle, rng.nextDouble() * weight) : null;
+                })
+                .filter(Objects::nonNull)
+                .sorted(Map.Entry.<T, Double>comparingByValue().reversed())
+                .limit(quantity)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        return new Paging<>(selected.size(), 0, selected.size(), selected, resourcesPaging.getFacets());
+    }
+
+    private long overdueWeight(T bundle, long nowSeconds, long thresholdSeconds) {
+        LoggingInfo auditInfo = bundle.getLatestAuditInfo();
+        if (auditInfo == null) {
+            return nowSeconds; // never audited — maximally overdue
+        }
+        try {
+            long auditEpochSeconds = Long.parseLong(auditInfo.getDate());
+            if (auditEpochSeconds < thresholdSeconds) {
+                return nowSeconds - auditEpochSeconds;
             }
+        } catch (NumberFormatException e) {
+            logger.warn("Malformed audit date for {} '{}': '{}'",
+                    getResourceTypeName(), bundle.getId(), auditInfo.getDate());
         }
-
-        // Shuffle the list randomly
-        Collections.shuffle(resourcesToBeAudited);
-
-        // Limit the list to the requested quantity
-        if (resourcesToBeAudited.size() > quantity) {
-            resourcesToBeAudited = resourcesToBeAudited.subList(0, quantity);
-        }
-
-        return new Paging<>(resourcesToBeAudited.size(), 0, resourcesToBeAudited.size(), resourcesToBeAudited,
-                resourcesPaging.getFacets());
+        return 0;
     }
 
     @Override

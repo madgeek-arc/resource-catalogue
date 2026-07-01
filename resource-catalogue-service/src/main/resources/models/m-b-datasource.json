@@ -7,6 +7,11 @@
   "subType": null,
   "series": null,
   "resourceType": "datasource",
+
+  "resourceClass": "Datasource",
+  "bundleClass": "DatasourceBundle",
+  "bundlePayloadField": "datasource",
+
   "creationDate": "2026-01-27T16:34:56.438+00:00",
   "createdBy": null,
   "modificationDate": "2026-01-27T16:34:56.438+00:00",

@@ -44,77 +44,14 @@
     "resourceOwner": {
       "type": "string"
     },
-    "eoscRelatedServices": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "keywords": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "license": {
-      "type": "object",
-      "properties": {
-        "licenseName": {
-          "type": "string"
-        },
-        "licenseURL": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "accessRights": {
+    "acronym": {
       "type": "string"
     },
-    "versionDate": {
+    "tagline": {
       "type": "string"
     },
-    "targetGroups": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "learningResourceTypes": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "learningOutcomes": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "expertiseLevel": {
+    "logo": {
       "type": "string"
-    },
-    "contentResourceTypes": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "qualifications": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "duration": {
-      "type": "string"
-    },
-    "languages": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
     },
     "scientificDomains": {
       "type": "array",
@@ -129,6 +66,12 @@
           }
         },
         "additionalProperties": false
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     },
     "creators": {
@@ -212,6 +155,24 @@
       "items": {
         "type": "string"
       }
+    },
+    "version": {
+      "type": "string"
+    },
+    "lastUpdate": {
+      "type": "string"
+    },
+    "license": {
+      "type": "object",
+      "properties": {
+        "licenseName": {
+          "type": "string"
+        },
+        "licenseURL": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,
@@ -222,13 +183,9 @@
     "publishingDate",
     "type",
     "resourceOwner",
-    "accessRights",
-    "versionDate",
-    "targetGroups",
-    "learningOutcomes",
-    "expertiseLevel",
-    "languages",
+    "acronym",
     "creators",
-    "publicContacts"
+    "publicContacts",
+    "version"
   ]
 }

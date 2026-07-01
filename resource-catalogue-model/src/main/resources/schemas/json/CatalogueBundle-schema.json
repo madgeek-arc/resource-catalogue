@@ -1,120 +1,336 @@
 {
-  "$schema" : "https://json-schema.org/draft/2020-12/schema",
-  "$defs" : {
-    "Identifiers" : {
-      "type" : "object",
-      "properties" : {
-        "externalId" : {
-          "type" : "string"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Identifiers": {
+      "type": "object",
+      "properties": {
+        "externalId": {
+          "type": "string"
         },
-        "originalId" : {
-          "type" : "string"
+        "originalId": {
+          "type": "string"
         },
-        "pid" : {
-          "type" : "string"
+        "pid": {
+          "type": "string"
         }
       },
-      "additionalProperties" : false
+      "additionalProperties": false
     },
-    "LoggingInfo" : {
-      "type" : "object",
-      "properties" : {
-        "actionType" : {
-          "type" : "string"
+    "LoggingInfo": {
+      "type": "object",
+      "properties": {
+        "actionType": {
+          "type": "string"
         },
-        "comment" : {
-          "type" : "string"
+        "comment": {
+          "type": "string"
         },
-        "date" : {
-          "type" : "string"
+        "date": {
+          "type": "string"
         },
-        "type" : {
-          "type" : "string"
+        "type": {
+          "type": "string"
         },
-        "userEmail" : {
-          "type" : "string"
+        "userEmail": {
+          "type": "string"
         },
-        "userFullName" : {
-          "type" : "string"
+        "userFullName": {
+          "type": "string"
         },
-        "userRole" : {
-          "type" : "string"
+        "userRole": {
+          "type": "string"
         }
       },
-      "additionalProperties" : false
+      "additionalProperties": false
     },
-    "Metadata" : {
-      "type" : "object",
-      "properties" : {
-        "modifiedAt" : {
-          "type" : "string"
+    "Metadata": {
+      "type": "object",
+      "properties": {
+        "modifiedAt": {
+          "type": "string"
         },
-        "modifiedBy" : {
-          "type" : "string"
+        "modifiedBy": {
+          "type": "string"
         },
-        "published" : {
-          "type" : "boolean"
+        "published": {
+          "type": "boolean"
         },
-        "registeredAt" : {
-          "type" : "string"
+        "registeredAt": {
+          "type": "string"
         },
-        "registeredBy" : {
-          "type" : "string"
+        "registeredBy": {
+          "type": "string"
         },
-        "terms" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         }
       },
-      "additionalProperties" : false
+      "additionalProperties": false
+    },
+    "Catalogue": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alternativePIDs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pid": {
+                "type": "string"
+              },
+              "pidSchema": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "nodePID": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "publishingDate": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "resourceOwner": {
+          "type": "string"
+        },
+        "serviceProviders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "webpage": {
+          "type": "string"
+        },
+        "logo": {
+          "type": "string"
+        },
+        "scientificDomains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scientificDomain": {
+                "type": "string"
+              },
+              "scientificSubdomain": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "subcategory": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "accessTypes": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "jurisdiction": {
+          "type": "string"
+        },
+        "trl": {
+          "type": "string"
+        },
+        "termsOfUse": {
+          "type": "string"
+        },
+        "privacyPolicy": {
+          "type": "string"
+        },
+        "accessPolicy": {
+          "type": "string"
+        },
+        "orderType": {
+          "type": "string"
+        },
+        "order": {
+          "type": "string"
+        },
+        "mainContact": {
+          "type": "object",
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            },
+            "PIDs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "mainContactPID": {
+                    "type": "string"
+                  },
+                  "mainContactPIDScheme": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "mainContactPID",
+                  "mainContactPIDScheme"
+                ]
+              }
+            },
+            "affiliations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "affiliationName": {
+                    "type": "string"
+                  },
+                  "affiliationIdentifier": {
+                    "type": "object",
+                    "properties": {
+                      "mainContactID": {
+                        "type": "string"
+                      },
+                      "mainContactType": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "mainContactID",
+                      "mainContactType"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "affiliationName"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "firstName",
+            "lastName",
+            "email"
+          ]
+        },
+        "publicContacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "nodePID",
+        "description",
+        "publishingDate",
+        "type",
+        "resourceOwner",
+        "webpage",
+        "jurisdiction",
+        "trl",
+        "orderType",
+        "mainContact",
+        "publicContacts"
+      ]
     }
   },
-  "type" : "object",
-  "properties" : {
-    "active" : {
-      "type" : "boolean"
+  "type": "object",
+  "properties": {
+    "active": {
+      "type": "boolean"
     },
-    "auditState" : {
-      "type" : "string"
+    "auditState": {
+      "type": "string"
     },
-    "catalogueId" : {
-      "type" : "string"
+    "catalogueId": {
+      "type": "string"
     },
-    "draft" : {
-      "type" : "boolean"
+    "draft": {
+      "type": "boolean"
     },
-    "identifiers" : {
-      "$ref" : "#/$defs/Identifiers"
+    "identifiers": {
+      "$ref": "#/$defs/Identifiers"
     },
-    "latestAuditInfo" : {
-      "$ref" : "#/$defs/LoggingInfo"
+    "latestAuditInfo": {
+      "$ref": "#/$defs/LoggingInfo"
     },
-    "latestOnboardingInfo" : {
-      "$ref" : "#/$defs/LoggingInfo"
+    "latestOnboardingInfo": {
+      "$ref": "#/$defs/LoggingInfo"
     },
-    "latestUpdateInfo" : {
-      "$ref" : "#/$defs/LoggingInfo"
+    "latestUpdateInfo": {
+      "$ref": "#/$defs/LoggingInfo"
     },
-    "legacy" : {
-      "type" : "boolean"
+    "legacy": {
+      "type": "boolean"
     },
-    "loggingInfo" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/$defs/LoggingInfo"
+    "loggingInfo": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/LoggingInfo"
       }
     },
-    "metadata" : {
-      "$ref" : "#/$defs/Metadata"
+    "metadata": {
+      "$ref": "#/$defs/Metadata"
     },
-    "status" : {
-      "type" : "string"
+    "status": {
+      "type": "string"
     },
-    "suspended" : {
-      "type" : "boolean"
+    "suspended": {
+      "type": "boolean"
+    },
+    "catalogue": {
+      "$ref": "#/$defs/Catalogue"
     }
   },
-  "additionalProperties" : false
+  "additionalProperties": false
 }

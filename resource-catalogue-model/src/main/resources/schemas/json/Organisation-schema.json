@@ -8,11 +8,8 @@
     "name": {
       "type": "string"
     },
-    "urls": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    "abbreviation": {
+      "type": "string"
     },
     "alternativePIDs": {
       "type": "array",
@@ -32,89 +29,41 @@
     "nodePID": {
       "type": "string"
     },
+    "website": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "legalEntity": {
+      "type": "boolean"
+    },
+    "legalStatus": {
+      "type": "string"
+    },
+    "hostingLegalEntity": {
+      "type": "string"
+    },
     "description": {
-      "type": "string"
-    },
-    "publishingDate": {
-      "type": "string"
-    },
-    "type": {
-      "type": "string"
-    },
-    "resourceOwner": {
-      "type": "string"
-    },
-    "serviceProviders": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "webpage": {
       "type": "string"
     },
     "logo": {
       "type": "string"
     },
-    "scientificDomains": {
+    "multimedia": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "scientificDomain": {
+          "multimediaURL": {
             "type": "string"
           },
-          "scientificSubdomain": {
+          "multimediaName": {
             "type": "string"
           }
         },
         "additionalProperties": false
       }
-    },
-    "categories": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "category": {
-            "type": "string"
-          },
-          "subcategory": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "accessTypes": {
-      "type": "string"
-    },
-    "jurisdiction": {
-      "type": "string"
-    },
-    "tags": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "trl": {
-      "type": "string"
-    },
-    "termsOfUse": {
-      "type": "string"
-    },
-    "privacyPolicy": {
-      "type": "string"
-    },
-    "accessPolicy": {
-      "type": "string"
-    },
-    "orderType": {
-      "type": "string"
-    },
-    "order": {
-      "type": "string"
     },
     "mainContact": {
       "type": "object",
@@ -195,71 +144,44 @@
         "type": "string"
       }
     },
-    "submissionPolicyURL": {
-      "type": "string"
-    },
-    "preservationPolicyURL": {
-      "type": "string"
-    },
-    "versionControl": {
-      "type": "boolean"
-    },
-    "persistentIdentitySystems": {
+    "users": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "persistentIdentityProductType": {
+          "userId": {
             "type": "string"
           },
-          "persistentIdentityProductTypeSchemes": {
+          "userName": {
+            "type": "string"
+          },
+          "userSurname": {
+            "type": "string"
+          },
+          "userEmail": {
             "type": "string"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "required": [
+          "userName",
+          "userSurname",
+          "userEmail"
+        ]
       }
-    },
-    "datasourceClassification": {
-      "type": "string"
-    },
-    "researchProductTypes": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "thematic": {
-      "type": "boolean"
-    },
-    "metadataLicense": {
-      "type": "object",
-      "properties": {
-        "metadataLicenseName": {
-          "type": "string"
-        },
-        "metadataLicenseURL": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
     }
   },
   "additionalProperties": false,
   "required": [
     "name",
+    "abbreviation",
     "nodePID",
+    "website",
+    "country",
+    "legalEntity",
     "description",
-    "publishingDate",
-    "type",
-    "resourceOwner",
-    "webpage",
-    "jurisdiction",
-    "trl",
-    "orderType",
+    "logo",
     "mainContact",
-    "publicContacts",
-    "datasourceClassification",
-    "researchProductTypes",
-    "thematic"
+    "publicContacts"
   ]
 }

@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.config.properties;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.dynamicproperties.PropertyChangeEvent;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceTypes;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -75,6 +76,7 @@ public class CatalogueProperties {
     /**
      * Catalogue resources properties
      */
+    @Valid
     private Map<ResourceTypes, ResourceProperties> resources = new HashMap<>();
 
     /**
@@ -188,7 +190,7 @@ public class CatalogueProperties {
 
     public ResourceProperties getResourcePropertiesFromPrefix(String prefix) {
         for (ResourceProperties rp : resources.values()) {
-            if (rp.getIdPrefix().equals(prefix)) {
+            if (prefix.equals(rp.getIdPrefix())) {
                 return rp;
             }
         }
@@ -197,7 +199,7 @@ public class CatalogueProperties {
 
     public String getResourceTypeFromPrefix(String prefix) {
         for (Map.Entry<ResourceTypes, ResourceProperties> rp : resources.entrySet()) {
-            if (rp.getValue().getIdPrefix().equals(prefix)) {
+            if (prefix.equals(rp.getValue().getIdPrefix())) {
                 return rp.getKey().toString();
             }
         }

@@ -174,4 +174,11 @@ public interface SecurityService {
      */
     List<User> getProviderUsers(String id);
 
+    /**
+     * @param auth Authentication
+     * @param interoperabilityRecordId Interoperability Record ID
+     * @return True if the authenticated user is an admin of the Organisation that owns the given Interoperability Record
+     */
+    boolean isInteroperabilityRecordAdmin(Authentication auth, String interoperabilityRecordId);
+
 }

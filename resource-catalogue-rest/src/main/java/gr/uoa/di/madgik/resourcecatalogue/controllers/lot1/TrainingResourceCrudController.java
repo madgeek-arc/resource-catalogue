@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.resourcecatalogue.service.ResourceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +34,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "training-resources")
+@RequestMapping(path = "training-resources", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "training resources")
 public class TrainingResourceCrudController extends ResourceCrudController<TrainingResourceBundle> {
 

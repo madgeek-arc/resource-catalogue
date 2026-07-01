@@ -21,11 +21,12 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
@@ -82,6 +82,8 @@ public class InternalToPublicConsistency {
     private String consistencyTo;
     @Value("${catalogue.email-properties.resource-consistency.cc:}")
     private String consistencyCC;
+    @Value("${catalogue.resource-consistency.fix-enabled:false}")
+    private boolean enableConsistencyFix;
 
     public InternalToPublicConsistency(OrganisationService organisationService,
                                        ServiceService serviceService,
@@ -150,7 +152,7 @@ public class InternalToPublicConsistency {
             try {
                 publicOrganisationService.get(organisationBundle.getIdentifiers().getPid(),
                         organisationBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Provider with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         organisationBundle.getId(), organisationBundle.getCatalogueId(), organisationBundle.getIdentifiers().getPid()));
             }
@@ -162,7 +164,7 @@ public class InternalToPublicConsistency {
             try {
                 publicAdapterService.get(adapterBundle.getIdentifiers().getPid(),
                         adapterBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Adapter with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         adapterBundle.getId(), adapterBundle.getCatalogueId(),
                         adapterBundle.getIdentifiers().getPid()));
@@ -175,7 +177,7 @@ public class InternalToPublicConsistency {
             try {
                 publicServiceManager.get(serviceBundle.getIdentifiers().getPid(),
                         serviceBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Service with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         serviceBundle.getId(), serviceBundle.getCatalogueId(), serviceBundle.getIdentifiers().getPid()));
             }
@@ -187,7 +189,7 @@ public class InternalToPublicConsistency {
             try {
                 publicCatalogueService.get(catalogueBundle.getIdentifiers().getPid(),
                         catalogueBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Catalogue with ID [%s] is missing its Public instance [%s]",
                         catalogueBundle.getId(), catalogueBundle.getIdentifiers().getPid()));
             }
@@ -199,7 +201,7 @@ public class InternalToPublicConsistency {
             try {
                 publicDatasourceService.get(datasourceBundle.getIdentifiers().getPid(),
                         datasourceBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Datasource with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         datasourceBundle.getId(), datasourceBundle.getCatalogueId(),
                         datasourceBundle.getIdentifiers().getPid()));
@@ -212,7 +214,7 @@ public class InternalToPublicConsistency {
             try {
                 publicTrainingResourceManager.get(trainingResourceBundle.getIdentifiers().getPid(),
                         trainingResourceBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Training Resource with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         trainingResourceBundle.getId(), trainingResourceBundle.getCatalogueId(),
                         trainingResourceBundle.getIdentifiers().getPid()));
@@ -225,7 +227,7 @@ public class InternalToPublicConsistency {
             try {
                 publicDeployableApplicationService.get(deployableApplicationBundle.getIdentifiers().getPid(),
                         deployableApplicationBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Deployable Application with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         deployableApplicationBundle.getId(), deployableApplicationBundle.getCatalogueId(),
                         deployableApplicationBundle.getIdentifiers().getPid()));
@@ -238,7 +240,7 @@ public class InternalToPublicConsistency {
             try {
                 publicInteroperabilityRecordManager.get(interoperabilityRecordBundle.getIdentifiers().getPid(),
                         interoperabilityRecordBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Interoperability Record with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         interoperabilityRecordBundle.getId(), interoperabilityRecordBundle.getCatalogueId(),
                         interoperabilityRecordBundle.getIdentifiers().getPid()));
@@ -251,7 +253,7 @@ public class InternalToPublicConsistency {
             try {
                 publicResourceInteroperabilityRecordManager.get(resourceInteroperabilityRecordBundle.getIdentifiers().getPid(),
                         resourceInteroperabilityRecordBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Resource Interoperability Record with ID [%s] of the Catalogue [%s] is missing its Public instance [%s]",
                         resourceInteroperabilityRecordBundle.getId(),
                         resourceInteroperabilityRecordBundle.getCatalogueId(),
@@ -265,7 +267,7 @@ public class InternalToPublicConsistency {
             try {
                 publicConfigurationTemplateInstanceService.get(ctiBundle.getIdentifiers().getPid(),
                         ctiBundle.getCatalogueId());
-            } catch (CatalogueResourceNotFoundException e) {
+            } catch (ResourceNotFoundException e) {
                 logs.add(String.format("Configuration Template Instance with ID [%s] of the internal Catalogue " +
                                 "is missing its Public instance [%s]",
                         ctiBundle.getId(), ctiBundle.getIdentifiers().getPid()));
@@ -277,11 +279,177 @@ public class InternalToPublicConsistency {
 
     }
 
+    @Scheduled(cron = "0 0 1 * * *")
+    protected void fixInternalToPublicResourceConsistency() {
+        if (!enableConsistencyFix) {
+            return;
+        }
+        logger.info("Starting Internal to Public Resource Consistency Fix...");
+        FacetFilter ff = createFixFacetFilter();
+
+        List<OrganisationBundle> providers = organisationService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (OrganisationBundle bundle : providers) {
+            try {
+                publicOrganisationService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Provider [{}] of Catalogue [{}]",
+                        bundle.getId(), bundle.getCatalogueId());
+                try {
+                    publicOrganisationService.add(ObjectUtils.clone(bundle), true);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Provider [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<AdapterBundle> adapters = adapterService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (AdapterBundle bundle : adapters) {
+            try {
+                publicAdapterService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Adapter [{}] of Catalogue [{}]",
+                        bundle.getId(), bundle.getCatalogueId());
+                try {
+                    publicAdapterService.add(ObjectUtils.clone(bundle), true);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Adapter [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<ServiceBundle> services = serviceService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (ServiceBundle bundle : services) {
+            try {
+                publicServiceManager.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Service [{}] of Catalogue [{}]",
+                        bundle.getId(), bundle.getCatalogueId());
+                try {
+                    publicServiceManager.add(ObjectUtils.clone(bundle), true);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Service [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<CatalogueBundle> catalogues = catalogueService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (CatalogueBundle bundle : catalogues) {
+            try {
+                publicCatalogueService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Catalogue [{}]", bundle.getId());
+                try {
+                    publicCatalogueService.add(ObjectUtils.clone(bundle), true);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Catalogue [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<DatasourceBundle> datasources = datasourceService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (DatasourceBundle bundle : datasources) {
+            try {
+                publicDatasourceService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Datasource [{}] of Catalogue [{}]",
+                        bundle.getId(), bundle.getCatalogueId());
+                try {
+                    publicDatasourceService.add(ObjectUtils.clone(bundle), true);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Datasource [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<TrainingResourceBundle> trainingResources = trainingResourceService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (TrainingResourceBundle bundle : trainingResources) {
+            try {
+                publicTrainingResourceManager.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Training Resource [{}] of Catalogue [{}]",
+                        bundle.getId(), bundle.getCatalogueId());
+                try {
+                    publicTrainingResourceManager.add(ObjectUtils.clone(bundle), true);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Training Resource [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<DeployableApplicationBundle> deployableApplications = deployableApplicationService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (DeployableApplicationBundle bundle : deployableApplications) {
+            try {
+                publicDeployableApplicationService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Deployable Application [{}] of Catalogue [{}]",
+                        bundle.getId(), bundle.getCatalogueId());
+                try {
+                    publicDeployableApplicationService.add(ObjectUtils.clone(bundle), true);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Deployable Application [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<InteroperabilityRecordBundle> interoperabilityRecords = interoperabilityRecordService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (InteroperabilityRecordBundle bundle : interoperabilityRecords) {
+            try {
+                publicInteroperabilityRecordManager.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Interoperability Record [{}] of Catalogue [{}]",
+                        bundle.getId(), bundle.getCatalogueId());
+                try {
+                    publicInteroperabilityRecordManager.add(ObjectUtils.clone(bundle), true);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Interoperability Record [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<ResourceInteroperabilityRecordBundle> resourceInteroperabilityRecords =
+                resourceInteroperabilityRecordService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (ResourceInteroperabilityRecordBundle bundle : resourceInteroperabilityRecords) {
+            try {
+                publicResourceInteroperabilityRecordManager.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Resource Interoperability Record [{}] of Catalogue [{}]",
+                        bundle.getId(), bundle.getCatalogueId());
+                try {
+                    publicResourceInteroperabilityRecordManager.add(ObjectUtils.clone(bundle), false);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Resource Interoperability Record [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        List<ConfigurationTemplateInstanceBundle> ctiList = configurationTemplateInstanceService.getAll(ff, securityService.getAdminAccess()).getResults();
+        for (ConfigurationTemplateInstanceBundle bundle : ctiList) {
+            try {
+                publicConfigurationTemplateInstanceService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+            } catch (ResourceNotFoundException e) {
+                logger.info("Fixing missing public Configuration Template Instance [{}]", bundle.getId());
+                try {
+                    publicConfigurationTemplateInstanceService.add(ObjectUtils.clone(bundle), false);
+                } catch (Exception ex) {
+                    logger.error("Failed to fix public Configuration Template Instance [{}]: {}", bundle.getId(), ex.getMessage(), ex);
+                }
+            }
+        }
+
+        logger.info("Internal to Public Resource Consistency Fix completed.");
+    }
+
     protected FacetFilter createFacetFilter() {
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);
         ff.addFilter("status", "approved");
+        return ff;
+    }
+
+    private FacetFilter createFixFacetFilter() {
+        FacetFilter ff = createFacetFilter();
+        ff.addFilter("active", true);
         return ff;
     }
 
