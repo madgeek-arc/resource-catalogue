@@ -68,7 +68,7 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
         }
 
         Map<String, Object> linkedResource = (Map<String, Object>) linkedResourceObj;
-        Object typeObj = linkedResource.get("type");
+        Object typeObj = linkedResource.get("resource_type");
         Object idObj = linkedResource.get("id");
         if (!(typeObj instanceof String) || !(idObj instanceof String)) {
             return;
