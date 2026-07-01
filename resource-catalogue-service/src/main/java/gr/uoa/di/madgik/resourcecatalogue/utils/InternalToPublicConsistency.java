@@ -82,7 +82,7 @@ public class InternalToPublicConsistency {
     private String consistencyTo;
     @Value("${catalogue.email-properties.resource-consistency.cc:}")
     private String consistencyCC;
-    @Value("${catalogue.resource-consistency.fix-enabled:false}")
+    @Value("${catalogue.resource-consistency.fix-enabled}")
     private boolean enableConsistencyFix;
 
     public InternalToPublicConsistency(OrganisationService organisationService,
