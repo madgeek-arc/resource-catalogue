@@ -16,113 +16,21 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
-import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.HighlightedResult;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Profile("beyond")
 @RestController
-@RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(path = "public/adapter", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(name = "public adapter")
-public class PublicAdapterController {
-
-    private final PublicResourceService<AdapterBundle> service;
+public class PublicAdapterController extends BasePublicController<AdapterBundle> {
 
     public PublicAdapterController(PublicResourceService<AdapterBundle> service) {
-        this.service = service;
-    }
-
-    @Operation(description = "Returns the Public Adapter with the given id.")
-    @GetMapping(path = "public/adapter/{prefix}/{suffix}")
-    public ResponseEntity<?> get(@PathVariable String prefix,
-                                 @PathVariable String suffix,
-                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        String id = prefix + "/" + suffix;
-        AdapterBundle bundle = service.get(id);
-        if (bundle.isActive()) {
-            return new ResponseEntity<>(bundle.getAdapter(), HttpStatus.OK);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
-                "The specific Adapter is not active"));
-
-    }
-
-    @GetMapping(path = "public/adapter/bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<?> getBundle(@PathVariable String prefix,
-                                       @PathVariable String suffix,
-                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        String id = prefix + "/" + suffix;
-        AdapterBundle bundle = service.get(id);
-        return new ResponseEntity<>(bundle, HttpStatus.OK);
-    }
-
-    @Operation(description = "Get a list of all Public Adapters in the Catalogue, based on a set of filters.")
-    @BrowseParameters
-    @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/adapter/all")
-    public ResponseEntity<Paging<LinkedHashMap<String, Object>>> getAll(@Parameter(hidden = true)
-                                                                        @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("active", true);
-        Paging<AdapterBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging.map(AdapterBundle::getAdapter));
-    }
-
-    @Operation(tags = {"public adapter", "federated search"}, description = "Get a Paging of Highlighted Adapter results, based on a set of filters.")
-    @BrowseParameters
-    @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/adapter/search")
-    public Paging<HighlightedResult<AdapterBundle>> searchAdapters(@Parameter(hidden = true)
-                                                                   @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("active", true);
-        Paging<HighlightedResult<AdapterBundle>> paging = service.searchResources(ff);
-        return paging;
-    }
-
-    @BrowseParameters
-    @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "public/adapter/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<Paging<AdapterBundle>> getAllBundles(@Parameter(hidden = true)
-                                                               @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("active", true);
-        Paging<AdapterBundle> paging = service.getAll(ff);
-        return ResponseEntity.ok(paging);
-    }
-
-    @Hidden
-    @PostMapping(path = "public/adapter/add")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<AdapterBundle> createPublicAdapter(@RequestBody AdapterBundle bundle,
-                                                             @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(service.createPublicResource(bundle, auth));
+        super(service);
     }
 }

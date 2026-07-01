@@ -36,13 +36,13 @@ public class IntegrationTestConfig {
 
     @Container
     static final ElasticsearchContainer elastic =
-            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.3.2")
+            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.4.2")
                     .withPassword("password")
-                    .withStartupTimeout(Duration.ofMinutes(3))
+                    .withStartupTimeout(Duration.ofMinutes(5))
                     .withEnv("discovery.type", "single-node")
                     .withEnv("cluster.routing.allocation.disk.threshold_enabled", "false")
                     .withEnv("node.store.allow_mmap", "false")
-                    .withEnv("ES_JAVA_OPTS", "-Xms256m -Xmx256m")
+                    .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
                     // disable SSL
                     .withEnv("xpack.security.transport.ssl.enabled", "false")
                     .withEnv("xpack.security.http.ssl.enabled", "false");

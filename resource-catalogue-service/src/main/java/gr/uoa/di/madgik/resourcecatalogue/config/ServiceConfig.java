@@ -31,6 +31,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UrlPathHelper;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
@@ -52,7 +53,7 @@ public class ServiceConfig {
     ObjectMapper objectMapper() {
         return JsonMapper.builder()
                 .findAndAddModules()
-//                .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"))
+                .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .build();
     }
 

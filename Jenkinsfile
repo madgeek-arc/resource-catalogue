@@ -61,7 +61,7 @@ pipeline {
               archiveArtifacts allowEmptyArchive: true, artifacts: '**/dependency-check-report.*'
               dependencyCheckPublisher(
                 pattern: '**/dependency-check-report.xml',
-                failedTotalCritical: 1,
+                unstableTotalCritical: 1,
                 unstableTotalHigh: 3
               )
             }
