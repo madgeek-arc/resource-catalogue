@@ -1115,7 +1115,7 @@
                 "properties": {
                   "strictValidation": true
                 },
-                "multiplicity": true,
+                "multiplicity": false,
                 "prefill": null
               },
               "includedInSnippet": false,

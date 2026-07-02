@@ -77,10 +77,7 @@
       "type": "string"
     },
     "package": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "type": "string"
     },
     "programmingLanguage": {
       "type": "string"

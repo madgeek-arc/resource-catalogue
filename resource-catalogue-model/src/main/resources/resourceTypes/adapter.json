@@ -119,10 +119,10 @@
       "embeddingWeight": 1.0
     },
     {
-      "label": "Packages",
-      "multivalued": true,
-      "name": "packages",
-      "path": "$.adapter.packages[*]",
+      "label": "Package",
+      "multivalued": false,
+      "name": "package",
+      "path": "$.adapter.package",
       "type": "java.lang.String",
       "embeddingWeight": 1.0
     },
