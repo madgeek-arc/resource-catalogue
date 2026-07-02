@@ -25,7 +25,7 @@ RUN mvn dependency:go-offline -B
 COPY . .
 
 ## Run maven based on given profile ##
-RUN if [ -z "$profile" ] ; then mvn package -Dmaven.test.skip=${skipTests} ; else mvn package -P $profile -Dmaven.test.skip=${skipTests} ; fi
+RUN if [ -z "$profile" ] ; then mvn package -U -Dmaven.test.skip=${skipTests} ; else mvn package -U -P $profile -Dmaven.test.skip=${skipTests} ; fi
 
 
 ### Create Docker Image ###
