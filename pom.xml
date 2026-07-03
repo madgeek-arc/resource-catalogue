@@ -50,7 +50,7 @@
         <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
         <netty.version>4.2.15.Final</netty.version>
-        <tomcat.version>11.0.22</tomcat.version>
+        <tomcat.version>11.0.23</tomcat.version>
         <postgresql.version>42.7.11</postgresql.version>
         <!-- Preserve test JVM args so modules can append their own flags safely. -->
         <argLine>-Dfile.encoding=UTF-8</argLine>
@@ -241,10 +241,10 @@
                 <artifactId>json-simple</artifactId>
                 <version>1.1.1</version>
             </dependency>
-            <dependency> <!-- CVE-2026-49157/45505/42588: fixed in 6.2.6; also addresses version shipped by spring-boot -->
+            <dependency> <!-- CVE-2026-49877: fixed in 6.2.7; also addresses version shipped by spring-boot -->
                 <groupId>org.apache.activemq</groupId>
                 <artifactId>activemq-bom</artifactId>
-                <version>6.2.6</version>
+                <version>6.2.7</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
