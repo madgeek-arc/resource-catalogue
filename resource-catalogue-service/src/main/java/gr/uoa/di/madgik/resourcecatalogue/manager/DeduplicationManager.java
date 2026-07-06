@@ -113,12 +113,9 @@ public class DeduplicationManager implements DeduplicationService {
         float effectiveThreshold = threshold != null ? threshold : 0.95f;
         FacetFilter ff = publishedFilter(resourceType, quantity);
         List<?> results;
-        // The registry indexes fields via JSONPath like $.organisation.name, so the payload
-        // must have the resource type as the top-level key to match those paths.
-        Map<String, Object> wrappedResource = new LinkedHashMap<>();
-        wrappedResource.put(resourceType, resource);
         try {
-            results = genericResourceService.recommend(ff, wrappedResource);
+            // Wrap the candidate in the actual Bundle subclass.
+            results = genericResourceService.recommend(ff, wrapResource(resourceType, resource));
         } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
             logger.debug("No embeddings available for resourceType '{}' — skipping similarity check", resourceType);
             return Collections.emptyList();
@@ -132,6 +129,23 @@ public class DeduplicationManager implements DeduplicationService {
                     return Stream.of(ScoredResult.of(sr.getScore(), scrubSensitiveFields(b.getPayload(), true)));
                 })
                 .collect(Collectors.toList());
+    }
+
+    private Object wrapResource(String resourceType, Map<String, Object> resource) {
+        Class<?> clazz = genericResourceService.getClassFromResourceType(resourceType);
+        if (clazz != null && Bundle.class.isAssignableFrom(clazz)) {
+            try {
+                Bundle bundle = (Bundle) clazz.getDeclaredConstructor().newInstance();
+                bundle.setPayload(new LinkedHashMap<>(resource));
+                return bundle;
+            } catch (ReflectiveOperationException e) {
+                throw new ServiceException("Unable to instantiate " + clazz.getName()
+                        + " for resourceType '" + resourceType + "'");
+            }
+        }
+        Map<String, Object> wrappedResource = new LinkedHashMap<>();
+        wrappedResource.put(resourceType, resource);
+        return wrappedResource;
     }
 
     @SuppressWarnings("unchecked")
