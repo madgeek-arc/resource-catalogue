@@ -7,6 +7,11 @@
   "subType": null,
   "series": null,
   "resourceType": "deployable_application",
+
+  "resourceClass": "DeployableApplication",
+  "bundleClass": "DeployableApplicationBundle",
+  "bundlePayloadField": "deployableApplication",
+
   "creationDate": "2026-01-27T16:34:45.928+00:00",
   "createdBy": null,
   "modificationDate": "2026-01-27T16:34:45.928+00:00",

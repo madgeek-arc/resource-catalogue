@@ -36,6 +36,7 @@ import gr.uoa.di.madgik.resourcecatalogue.config.AuditingProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
-@RequestMapping({"trainingResource"})
+@RequestMapping(path = "trainingResource", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "training resource")
 public class TrainingResourceController extends ResourceCatalogueGenericController<TrainingResourceBundle, TrainingResourceService> {
 

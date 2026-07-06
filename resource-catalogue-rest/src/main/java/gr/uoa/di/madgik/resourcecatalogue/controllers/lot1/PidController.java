@@ -33,7 +33,7 @@ import java.util.List;
 
 @Profile("crud")
 @RestController
-@RequestMapping("pids")
+@RequestMapping(path = "pids", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "pids", description = "PID related operations")
 public class PidController {
 
@@ -44,7 +44,7 @@ public class PidController {
     }
 
     @Operation(summary = "Returns the Resource with the given PID.")
-    @GetMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(path = "{prefix}/{suffix}")
     public ResponseEntity<?> get(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                  @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {
         Bundle bundle = pidService.get(prefix, suffix);
@@ -55,7 +55,7 @@ public class PidController {
     }
 
     @Operation(summary = "Register/Update a resource on the PID service")
-    @PostMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "{prefix}/{suffix}")
     public ResponseEntity<?> register(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                       @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix,
                                       @Parameter(description = "A list of resolve endpoints") @RequestParam(value = "resolveEndpoints", required = false) List<String> resolveEndpoints) {
@@ -70,7 +70,7 @@ public class PidController {
 
     @Hidden
     @Operation(summary = "Deletes a resource on the PID service")
-    @DeleteMapping(path = "{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> delete(@Parameter(description = "The left part of the ID before the '/'") @PathVariable("prefix") String prefix,
                                     @Parameter(description = "The right part of the ID after the '/'") @PathVariable("suffix") String suffix) {

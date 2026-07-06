@@ -7,7 +7,8 @@
       "path": "$.catalogue.id",
       "primaryKey": true,
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Catalogue ID",
@@ -15,14 +16,16 @@
       "name": "catalogue_id",
       "path": "$.catalogueId",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Urls",
       "multivalued": true,
       "name": "urls",
       "path": "$.catalogue.urls[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Catalogue Name",
@@ -30,7 +33,8 @@
       "name": "name",
       "path": "$.catalogue.name",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Description",
@@ -38,14 +42,16 @@
       "name": "description",
       "path": "$.catalogue.description",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Alternative PIDs",
       "multivalued": true,
       "name": "alternative_pids",
       "path": "$.catalogue.alternativePIDs[*].pid",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Node",
@@ -54,14 +60,16 @@
       "path": "$.catalogue.nodePID",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Type",
       "multivalued": false,
       "name": "type",
       "path": "$.catalogue.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Resource Owner",
@@ -71,7 +79,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Service Provider",
@@ -81,21 +90,24 @@
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Webpage",
       "multivalued": false,
       "name": "webpage",
       "path": "$.catalogue.webpage",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Logo",
       "multivalued": false,
       "name": "logo",
       "path": "$.catalogue.logo",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Scientific Domain",
@@ -104,7 +116,8 @@
       "path": "$.catalogue.scientificDomains[*].scientificDomain",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Scientific Subdomain",
@@ -113,7 +126,8 @@
       "path": "$.catalogue.scientificDomains[*].scientificSubdomain",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Category",
@@ -122,7 +136,8 @@
       "path": "$.catalogue.categories[*].category",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Subcategory",
@@ -131,7 +146,8 @@
       "path": "$.catalogue.categories[*].subcategory",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Tag",
@@ -139,16 +155,18 @@
       "name": "tags",
       "path": "$.catalogue.tags[*]",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Access Type",
-      "multivalued": false,
-      "name": "accessTypes",
-      "path": "$.catalogue.accessTypes",
+      "multivalued": true,
+      "name": "access_types",
+      "path": "$.catalogue.accessTypes[*]",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Jurisdiction",
@@ -157,7 +175,8 @@
       "path": "$.catalogue.jurisdiction",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "TRL",
@@ -166,28 +185,32 @@
       "path": "$.catalogue.trl",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Terms of Use",
       "multivalued": false,
       "name": "terms_of_use",
       "path": "$.catalogue.termsOfUse",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Privacy Policy",
       "multivalued": false,
       "name": "privacy_policy",
       "path": "$.catalogue.privacyPolicy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Access Policy",
       "multivalued": false,
       "name": "access_policy",
       "path": "$.catalogue.accessPolicy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Order Type",
@@ -196,30 +219,24 @@
       "path": "$.catalogue.orderType",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Order",
       "multivalued": false,
       "name": "order_link",
       "path": "$.catalogue.order",
-      "type": "java.lang.String"
-    },
-    {
-      "label": "Access Type",
-      "multivalued": false,
-      "name": "accessTypes",
-      "path": "$.catalogue.accessTypes",
       "type": "java.lang.String",
-      "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "embeddingWeight": 0.0
     },
     {
       "label": "Public Contacts",
       "multivalued": true,
       "name": "contacts",
       "path": "$.catalogue.publicContacts[*]",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": "Main Contact Role",
@@ -228,147 +245,168 @@
       "path": "$.catalogue.mainContact.role",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "registeredBy",
       "path": "$.metadata.registeredBy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedBy",
       "path": "$.metadata.modifiedBy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.time.Instant"
+      "type": "java.time.Instant",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.time.Instant"
+      "type": "java.time.Instant",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "published",
       "path": "$.metadata.published",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "originalId",
       "path": "$.identifiers.originalId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "pid",
       "path": "$.identifiers.pid",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "externalId",
       "path": "$.identifiers.externalId",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 1.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditActionType",
       "path": "$.latestAuditInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditDate",
       "path": "$.latestAuditInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditType",
       "path": "$.latestAuditInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestAuditUserEmail",
       "path": "$.latestAuditInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateActionType",
       "path": "$.latestUpdateInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateDate",
       "path": "$.latestUpdateInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateType",
       "path": "$.latestUpdateInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestUpdateUserEmail",
       "path": "$.latestUpdateInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingActionType",
       "path": "$.latestOnboardingInfo.actionType",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingDate",
       "path": "$.latestOnboardingInfo.date",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingType",
       "path": "$.latestOnboardingInfo.type",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "latestOnboardingUserEmail",
       "path": "$.latestOnboardingInfo.userEmail",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -376,7 +414,8 @@
       "multivalued": false,
       "name": "active",
       "path": "$.active",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -384,7 +423,8 @@
       "multivalued": false,
       "name": "suspended",
       "path": "$.suspended",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -392,7 +432,8 @@
       "multivalued": false,
       "name": "draft",
       "path": "$.draft",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
@@ -401,7 +442,8 @@
       "path": "$.status",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
@@ -410,7 +452,8 @@
       "path": "$.auditState",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",

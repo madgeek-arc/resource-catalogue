@@ -19,8 +19,6 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.lot1;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceAlreadyExistsException;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
@@ -48,13 +46,7 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
 
     @Override
     public Vocabulary getOrElseThrow(String id) {
-        Vocabulary vocabulary = null;
-        try {
-            vocabulary = get(id);
-        } catch (ResourceException e) {
-            throw new ResourceNotFoundException(id, "Vocabulary");
-        }
-        return vocabulary;
+        return get(id);
     }
 
     @Override

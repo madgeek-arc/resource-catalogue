@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
@@ -35,9 +36,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Profile("beyond")
@@ -49,8 +52,24 @@ public class ConfigurationTemplateInstanceController
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationTemplateInstanceController.class);
 
-    ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService service) {
+    private final ModelService modelService;
+    private final ObjectMapper objectMapper;
+
+    ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService service,
+                                            ModelService modelService,
+                                            ObjectMapper objectMapper) {
         super(service, "Configuration Template Instance");
+        this.modelService = modelService;
+        this.objectMapper = objectMapper;
+    }
+
+    @Operation(summary = "Returns the Configuration Template Instance form model.")
+    @GetMapping(path = "baseModel")
+    public ResponseEntity<Map<String, Object>> getBaseModel() {
+        gr.uoa.di.madgik.catalogue.domain.Model model = modelService.get("m-b-conftemp");
+        Map<String, Object> body = objectMapper.convertValue(model, Map.class);
+        body.remove("id");
+        return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
     @Operation(summary = "Returns the Configuration Template Instance with the given id.")

@@ -20,12 +20,13 @@ import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Profile("crud")
 @RestController
-@RequestMapping(path = "interoperability-records")
+@RequestMapping(path = "interoperability-records", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "interoperability records")
 public class InteroperabilityRecordCrudController extends ResourceCrudController<InteroperabilityRecordBundle> {
 

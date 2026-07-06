@@ -1,25 +1,26 @@
 {
-  "$schema" : "https://json-schema.org/draft/2020-12/schema",
-  "type" : "object",
-  "properties" : {
-    "catalogueId" : {
-      "type" : "string"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
     },
-    "id" : {
-      "type" : "string"
+    "resourceId": {
+      "type": "string"
     },
-    "interoperabilityRecordIds" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string"
+    "nodePID": {
+      "type": "string"
+    },
+    "interoperabilityRecordIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
       }
-    },
-    "node" : {
-      "type" : "string"
-    },
-    "resourceId" : {
-      "type" : "string"
     }
   },
-  "additionalProperties" : false
+  "additionalProperties": false,
+  "required": [
+    "resourceId",
+    "interoperabilityRecordIds"
+  ]
 }

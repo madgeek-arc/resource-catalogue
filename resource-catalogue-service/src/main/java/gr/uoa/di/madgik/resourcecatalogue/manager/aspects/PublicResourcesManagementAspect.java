@@ -86,7 +86,7 @@ public class PublicResourcesManagementAspect {
         if (bundle.getStatus().equals("approved") && bundle.isActive()) {
             try {
                 publicOrganisationService.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
-            } catch (ResourceException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 publicOrganisationService.add(ObjectUtils.clone(bundle), true);
             }
         }
@@ -155,7 +155,7 @@ public class PublicResourcesManagementAspect {
         if (service.getStatus().equals("approved") && service.isActive()) {
             try {
                 publicServiceService.get(service.getIdentifiers().getPid(), service.getCatalogueId());
-            } catch (ResourceException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 publicServiceService.add(ObjectUtils.clone(service), true);
             }
         }
@@ -200,7 +200,7 @@ public class PublicResourcesManagementAspect {
         if (catalogue.getStatus().equals("approved") && catalogue.isActive()) {
             try {
                 publicCatalogueService.get(catalogue.getIdentifiers().getPid(), catalogue.getCatalogueId());
-            } catch (ResourceException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 publicCatalogueService.add(ObjectUtils.clone(catalogue), true);
             }
         }
@@ -245,7 +245,7 @@ public class PublicResourcesManagementAspect {
         if (datasource.getStatus().equals("approved") && datasource.isActive()) {
             try {
                 publicDatasourceService.get(datasource.getIdentifiers().getPid(), datasource.getCatalogueId());
-            } catch (ResourceException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 publicDatasourceService.add(ObjectUtils.clone(datasource), true);
             }
         }
@@ -289,7 +289,7 @@ public class PublicResourcesManagementAspect {
         if (training.getStatus().equals("approved") && training.isActive()) {
             try {
                 publicTrainingResourceService.get(training.getIdentifiers().getPid(), training.getCatalogueId());
-            } catch (ResourceException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 publicTrainingResourceService.add(ObjectUtils.clone(training), true);
             }
         }
@@ -334,7 +334,7 @@ public class PublicResourcesManagementAspect {
         if (guideline.getStatus().equals("approved") && guideline.isActive()) {
             try {
                 publicGuidelineService.get(guideline.getIdentifiers().getPid(), guideline.getCatalogueId());
-            } catch (ResourceException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 publicGuidelineService.add(ObjectUtils.clone(guideline), true);
             }
         }
@@ -379,7 +379,7 @@ public class PublicResourcesManagementAspect {
         if (deployableApplication.getStatus().equals("approved") && deployableApplication.isActive()) {
             try {
                 publicDeployableApplicationService.get(deployableApplication.getIdentifiers().getPid(), deployableApplication.getCatalogueId());
-            } catch (ResourceException e) {
+            } catch (ResourceException | ResourceNotFoundException e) {
                 publicDeployableApplicationService.add(ObjectUtils.clone(deployableApplication), true);
             }
         }

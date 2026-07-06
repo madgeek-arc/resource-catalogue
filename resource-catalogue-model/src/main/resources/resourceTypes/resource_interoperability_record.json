@@ -7,7 +7,8 @@
       "path": "$.resourceInteroperabilityRecord.id",
       "primaryKey": true,
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Catalogue ID",
@@ -17,7 +18,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Resource ID",
@@ -27,7 +29,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "eoscServices",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": "Node",
@@ -36,7 +39,8 @@
       "path": "$.resourceInteroperabilityRecord.nodePID",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name"
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 1.0
     },
     {
       "label": "Interoperability Record ID",
@@ -46,42 +50,48 @@
       "type": "java.lang.String",
       "relatedResourceType": "interoperability_record",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"]
+      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "embeddingWeight": 1.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "registeredBy",
       "path": "$.metadata.registeredBy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedBy",
       "path": "$.metadata.modifiedBy",
-      "type": "java.lang.String"
+      "type": "java.lang.String",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "registeredAt",
       "path": "$.metadata.registeredAt",
-      "type": "java.time.Instant"
+      "type": "java.time.Instant",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "modifiedAt",
       "path": "$.metadata.modifiedAt",
-      "type": "java.time.Instant"
+      "type": "java.time.Instant",
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
       "multivalued": false,
       "name": "published",
       "path": "$.metadata.published",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -89,7 +99,8 @@
       "multivalued": false,
       "name": "active",
       "path": "$.active",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -97,7 +108,8 @@
       "multivalued": false,
       "name": "suspended",
       "path": "$.suspended",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     },
     {
       "defaultValue": "false",
@@ -105,7 +117,8 @@
       "multivalued": false,
       "name": "draft",
       "path": "$.draft",
-      "type": "java.lang.Boolean"
+      "type": "java.lang.Boolean",
+      "embeddingWeight": 0.0
     }
   ],
   "indexMapperClass": "gr.uoa.di.madgik.registry.index.DefaultIndexMapper",

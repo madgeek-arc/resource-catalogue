@@ -7,6 +7,11 @@
   "subType": null,
   "series": null,
   "resourceType": "interoperability_record",
+
+  "resourceClass": "InteroperabilityRecord",
+  "bundleClass": "InteroperabilityRecordBundle",
+  "bundlePayloadField": "interoperabilityRecord",
+
   "creationDate": "2026-01-27T16:34:35.140+00:00",
   "createdBy": null,
   "modificationDate": "2026-01-27T16:34:35.140+00:00",
@@ -862,7 +867,7 @@
                 "affects": null,
                 "group": null,
                 "description": {
-                  "text": "Standards related to the guideline This should point out to related standards only when it is a prerequisitite/depenendency, and likely to influence a Provider’s design towards interoperability based on the guideline.",
+                  "text": "Standards related to the guideline This should point out to related standards only when it is a prerequisitite/depenendency, and likely to influence a Provider\u2019s design towards interoperability based on the guideline.",
                   "cssClasses": null,
                   "style": null,
                   "showLess": false

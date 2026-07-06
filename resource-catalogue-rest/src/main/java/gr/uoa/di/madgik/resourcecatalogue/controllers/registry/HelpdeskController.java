@@ -38,7 +38,7 @@ import java.util.Map;
 
 @Profile("beyond")
 @RestController
-@RequestMapping({"helpdesk"})
+@RequestMapping(path = "helpdesk", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "helpdesk")
 public class HelpdeskController {
 
@@ -61,7 +61,7 @@ public class HelpdeskController {
     }
 
     @Operation(summary = "Returns a specific ticket for the authenticated user.")
-    @GetMapping(path = "tickets/{ticketId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "tickets/{ticketId}")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> getTicket(@PathVariable("ticketId") String ticketId,
                                             @Parameter(hidden = true) Authentication authentication) {
@@ -91,7 +91,7 @@ public class HelpdeskController {
 
 
     @Operation(summary = "Returns all tickets for the authenticated user.")
-    @GetMapping(path = "tickets", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "tickets")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> getAllTickets(@Parameter(hidden = true) Authentication authentication) {
         if (webClient == null) {
@@ -118,7 +118,7 @@ public class HelpdeskController {
 
 
     @Operation(summary = "Submit a ticket.")
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> submitTicket(@RequestBody Map<String, Object> ticketData,
                                                @Parameter(hidden = true) Authentication authentication) {
@@ -145,7 +145,7 @@ public class HelpdeskController {
     }
 
     @Operation(summary = "Update a ticket.")
-    @PutMapping(path = "tickets/{ticketId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "tickets/{ticketId}")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<Object> updateTicket(@PathVariable("ticketId") String ticketId,
                                                @RequestBody Map<String, Object> ticketData,

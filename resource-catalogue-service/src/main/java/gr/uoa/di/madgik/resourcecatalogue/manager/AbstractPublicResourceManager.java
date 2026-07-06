@@ -1,12 +1,12 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
-import gr.uoa.di.madgik.registry.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.HighlightedResult;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-
-import java.lang.reflect.InvocationTargetException;
 
 public abstract class AbstractPublicResourceManager<T extends Bundle>
         implements gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService<T> {
@@ -144,7 +142,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
             logger.info("Deleting public {} with id '{}'", published.getClass().getSimpleName(), published.getId());
             genericResourceService.delete(getResourceTypeName(), published.getId());
             jmsService.convertAndSendTopic(getResourceTypeName() + ".delete", published);
-        } catch (CatalogueResourceNotFoundException ignore) {
+        } catch (ResourceNotFoundException ignore) {
         }
     }
 

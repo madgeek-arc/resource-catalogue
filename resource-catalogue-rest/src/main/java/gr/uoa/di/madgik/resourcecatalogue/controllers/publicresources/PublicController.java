@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
-@RequestMapping
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "public", description = "General methods related to Public resources")
 public class PublicController {
 

@@ -83,10 +83,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/resourcesync/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/forms/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/forms/**", "/models/**", "/resourceTypes/**").permitAll()
                                 .requestMatchers(
                                         "/logs/**",
                                         "/forms/**",
+                                        "/models/**",
+                                        "/resourceTypes/**",
                                         "/dump/",
                                         "/records/**",
                                         "/restore/",

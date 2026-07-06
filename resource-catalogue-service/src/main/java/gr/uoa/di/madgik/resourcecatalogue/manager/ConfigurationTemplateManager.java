@@ -108,7 +108,7 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
         }
         bundle.markUpdate(UserInfo.of(auth), comment);
 
-        return genericResourceService.update(getResourceTypeName(), bundle);
+        return genericResourceService.update(getResourceTypeName(), bundle, false);
     }
 
     @Override

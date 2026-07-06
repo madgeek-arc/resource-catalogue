@@ -119,7 +119,15 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         }
     }
 
-    //TODO: enable for LinkedHasMap too
+    // TODO: also masking mainContact/creators emails on raw (non-Bundle) resource maps returned
+    // directly by listing/getSome/public endpoints is plausible and would match the Bundle-level
+    // behavior below, but isResourceAdmin(auth, id) resolves the resource type via an expensive
+    // sequential 8-way disambiguation (OIDCSecurityService#determineResourceType: several full
+    // fetches wrapped in exception-based control flow) and can NPE when an id doesn't resolve to
+    // any known type. Doing that per row of every listing response doesn't scale. Revisit once
+    // there's a cheap way to check resource ownership from a bare id, then extend this beyond
+    // organisation users.
+    @SuppressWarnings("unchecked")
     protected void modifyContent(T t, Authentication auth) {
         if (t instanceof OrganisationBundle) {
             modifyOrganisationBundle(t, auth);
@@ -139,6 +147,24 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             modifyInteroperabilityRecordBundle(t, auth);
         } else if (t instanceof LoggingInfo) {
             modifyLoggingInfo(t);
+        } else if (t instanceof LinkedHashMap) {
+            modifyOrganisationMap((LinkedHashMap<String, Object>) t, auth);
+        }
+    }
+
+    /**
+     * Strips the "users" list (organisation admins/editors) from a raw organisation map returned
+     * directly by a controller (e.g. public views, getSome), since the Bundle-wrapped path below
+     * only covers responses still wrapped in OrganisationBundle. Identified by the presence of a
+     * "users" key, which is unique to the organisation schema among resource types.
+     */
+    private void modifyOrganisationMap(LinkedHashMap<String, Object> resource, Authentication auth) {
+        if (resource == null || resource.get("id") == null || !resource.containsKey("users")) {
+            return;
+        }
+        String id = resource.get("id").toString();
+        if (!this.securityService.hasAdminAccess(auth, id)) {
+            resource.put("users", null);
         }
     }
 

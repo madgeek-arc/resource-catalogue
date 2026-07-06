@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
@@ -92,7 +93,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
                     new SearchService.KeyValue("resource_id", resourceId),
                     new SearchService.KeyValue("published", "false"));
             return bundle;
-        } catch (ResourceException e) {
+        } catch (ResourceException | ResourceNotFoundException e) {
             return null;
         }
     }

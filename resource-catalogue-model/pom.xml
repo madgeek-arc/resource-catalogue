@@ -126,25 +126,39 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.codehaus.mojo</groupId>-->
-<!--                <artifactId>jaxb2-maven-plugin</artifactId>-->
-<!--                <version>${jaxb2-maven-plugin.version}</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>schemagen</id>-->
-<!--                        <goals>-->
-<!--                            <goal>schemagen</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    <sources>-->
-<!--                        <source>${basedir}/src/main/java/gr/uoa/di/madgik/resourcecatalogue/domain</source>-->
-<!--                    </sources>-->
-<!--                    <outputDirectory>${basedir}/src/main/resources/schemas</outputDirectory>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>3.0.2</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy</artifactId>
+                        <version>5.0.0</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy-json</artifactId>
+                        <version>5.0.0</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>generate-dynamic-schemas</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <scripts>
+                                <script>${project.basedir}/../scripts/generate-schemas.groovy</script>
+                            </scripts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>cz.habarta.typescript-generator</groupId>
                 <artifactId>typescript-generator-maven-plugin</artifactId>

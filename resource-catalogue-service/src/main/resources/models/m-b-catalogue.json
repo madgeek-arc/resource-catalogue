@@ -7,6 +7,11 @@
   "subType": null,
   "series": null,
   "resourceType": "catalogue",
+
+  "resourceClass": "Catalogue",
+  "bundleClass": "CatalogueBundle",
+  "bundlePayloadField": "catalogue",
+
   "creationDate": "2026-01-27T16:31:20.933+00:00",
   "createdBy": null,
   "modificationDate": "2026-01-28T13:34:36.116+00:00",
