@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.registry.domain.ScoredResult;
 import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
-import gr.uoa.di.madgik.resourcecatalogue.dto.SimilarResource;
 import gr.uoa.di.madgik.resourcecatalogue.service.DeduplicationService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,36 +53,37 @@ public class DeduplicationController {
         this.deduplicationService = deduplicationService;
     }
 
-    @Operation(summary = "Scan all published resources of the given type and return similar pairs.")
+    @Operation(summary = "Scan all published resources of the given type and return similar pairs above the given similarity threshold.")
     @GetMapping(path = "{resourceType}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
     public ResponseEntity<List<DuplicatePair>> findDuplicates(
             @PathVariable String resourceType,
-            @RequestParam(defaultValue = "5") int quantity,
+            @RequestParam(required = false, defaultValue = "0.95") Float threshold,
             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(deduplicationService.findDuplicates(resourceType, quantity));
+        return ResponseEntity.ok(deduplicationService.findDuplicates(resourceType, threshold));
     }
 
     @Operation(summary = "Find published resources similar to the one identified by {prefix}/{suffix}.")
     @GetMapping(path = "{resourceType}/{prefix}/{suffix}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
-    public ResponseEntity<List<LinkedHashMap<String, Object>>> findSimilar(
+    public ResponseEntity<List<ScoredResult<LinkedHashMap<String, Object>>>> findSimilar(
             @PathVariable String resourceType,
             @PathVariable String prefix,
             @PathVariable String suffix,
+            @RequestParam(required = false, defaultValue = "0.95") Float threshold,
             @RequestParam(defaultValue = "5") int quantity,
             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(deduplicationService.findSimilar(resourceType, prefix + "/" + suffix, quantity));
+        return ResponseEntity.ok(deduplicationService.findSimilar(resourceType, prefix + "/" + suffix, threshold, quantity));
     }
 
     @Operation(summary = "Check if a resource is similar to existing published resources before submitting it.")
     @PostMapping(path = "{resourceType}/check", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<SimilarResource>> checkBeforeAdd(
+    public ResponseEntity<List<ScoredResult<LinkedHashMap<String, Object>>>> findSimilar(
             @PathVariable String resourceType,
-            @RequestParam(defaultValue = "0.95") float threshold,
+            @RequestParam(required = false, defaultValue = "0.95") Float threshold,
             @RequestParam(defaultValue = "5") int quantity,
             @RequestBody Map<String, Object> resource,
             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity.ok(deduplicationService.checkBeforeAdd(resourceType, resource, threshold, quantity));
+        return ResponseEntity.ok(deduplicationService.findSimilar(resourceType, resource, threshold, quantity));
     }
 }

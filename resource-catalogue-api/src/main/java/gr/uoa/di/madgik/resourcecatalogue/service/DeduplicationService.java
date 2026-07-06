@@ -16,8 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.ScoredResult;
 import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
-import gr.uoa.di.madgik.resourcecatalogue.dto.SimilarResource;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,9 +25,9 @@ import java.util.Map;
 
 public interface DeduplicationService {
 
-    List<DuplicatePair> findDuplicates(String resourceType, int quantity);
+    List<DuplicatePair> findDuplicates(String resourceType, Float threshold);
 
-    List<LinkedHashMap<String, Object>> findSimilar(String resourceType, String id, int quantity);
+    List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, String id, Float threshold, int quantity);
 
-    List<SimilarResource> checkBeforeAdd(String resourceType, Map<String, Object> resource, float threshold, int quantity);
+    List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, Map<String, Object> resource, Float threshold, int quantity);
 }

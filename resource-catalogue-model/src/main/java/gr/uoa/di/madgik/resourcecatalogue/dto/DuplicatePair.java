@@ -16,5 +16,5 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.dto;
 
-public record DuplicatePair(String resourceType, String resourceId1, String resourceId2) {
+public record DuplicatePair(String resourceType, String resourceId1, String resourceId2, float score) {
 }

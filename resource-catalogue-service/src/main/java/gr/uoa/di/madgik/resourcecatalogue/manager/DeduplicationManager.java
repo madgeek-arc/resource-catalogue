@@ -25,7 +25,6 @@ import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
-import gr.uoa.di.madgik.resourcecatalogue.dto.SimilarResource;
 import gr.uoa.di.madgik.resourcecatalogue.service.DeduplicationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +41,8 @@ public class DeduplicationManager implements DeduplicationService {
 
     private static final int MAX_RESOURCES_PER_SCAN = 10_000;
 
+    private static final int NEIGHBORS_PER_RESOURCE = 20;
+
     private final GenericResourceService genericResourceService;
 
     public DeduplicationManager(GenericResourceService genericResourceService) {
@@ -49,7 +50,8 @@ public class DeduplicationManager implements DeduplicationService {
     }
 
     @Override
-    public List<DuplicatePair> findDuplicates(String resourceType, int quantity) {
+    public List<DuplicatePair> findDuplicates(String resourceType, Float threshold) {
+        float effectiveThreshold = threshold != null ? threshold : 0.95f;
         Paging<?> all = genericResourceService.getResults(publishedFilter(resourceType, MAX_RESOURCES_PER_SCAN));
 
         Set<String> seen = new LinkedHashSet<>();
@@ -62,9 +64,10 @@ public class DeduplicationManager implements DeduplicationService {
             String sourceId = source.getId();
             try {
                 List<?> similar = genericResourceService.recommend(
-                        publishedFilter(resourceType, quantity), sourceId);
+                        publishedFilter(resourceType, NEIGHBORS_PER_RESOURCE), sourceId);
                 for (Object candidate : similar) {
-                    if (!(candidate instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b)) {
+                    if (!(candidate instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b
+                            && sr.getScore() >= effectiveThreshold)) {
                         continue;
                     }
                     String candidateId = b.getId();
@@ -72,7 +75,7 @@ public class DeduplicationManager implements DeduplicationService {
                             ? sourceId + "|" + candidateId
                             : candidateId + "|" + sourceId;
                     if (seen.add(key)) {
-                        pairs.add(new DuplicatePair(resourceType, sourceId, candidateId));
+                        pairs.add(new DuplicatePair(resourceType, sourceId, candidateId, sr.getScore()));
                     }
                 }
             } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
@@ -83,7 +86,9 @@ public class DeduplicationManager implements DeduplicationService {
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> findSimilar(String resourceType, String id, int quantity) {
+    public List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, String id,
+                                                                          Float threshold, int quantity) {
+        float effectiveThreshold = threshold != null ? threshold : 0.95f;
         List<?> results;
         try {
             results = genericResourceService.recommend(publishedFilter(resourceType, quantity), id);
@@ -92,14 +97,20 @@ public class DeduplicationManager implements DeduplicationService {
             return Collections.emptyList();
         }
         return results.stream()
-                .filter(obj -> obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle)
-                .map(obj -> scrubSensitiveFields(((Bundle) ((ScoredResult<?>) obj).getResult()).getPayload(), true))
+                .flatMap(obj -> {
+                    if (!(obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b
+                            && sr.getScore() >= effectiveThreshold)) {
+                        return Stream.empty();
+                    }
+                    return Stream.of(ScoredResult.of(sr.getScore(), scrubSensitiveFields(b.getPayload(), true)));
+                })
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<SimilarResource> checkBeforeAdd(String resourceType, Map<String, Object> resource,
-                                                float threshold, int quantity) {
+    public List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, Map<String, Object> resource,
+                                                                          Float threshold, int quantity) {
+        float effectiveThreshold = threshold != null ? threshold : 0.95f;
         FacetFilter ff = publishedFilter(resourceType, quantity);
         List<?> results;
         // The registry indexes fields via JSONPath like $.organisation.name, so the payload
@@ -115,11 +126,10 @@ public class DeduplicationManager implements DeduplicationService {
         return results.stream()
                 .flatMap(obj -> {
                     if (!(obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b
-                            && sr.getScore() >= threshold)) {
+                            && sr.getScore() >= effectiveThreshold)) {
                         return Stream.empty();
                     }
-                    return Stream.of(new SimilarResource(sr.getScore(),
-                            scrubSensitiveFields(b.getPayload(), true)));
+                    return Stream.of(ScoredResult.of(sr.getScore(), scrubSensitiveFields(b.getPayload(), true)));
                 })
                 .collect(Collectors.toList());
     }
