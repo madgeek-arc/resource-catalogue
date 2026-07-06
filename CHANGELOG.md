@@ -1,5 +1,39 @@
 # Changelog
 
+## [6.2.0](https://github.com/madgeek-arc/resource-catalogue/compare/v6.1.2...v6.2.0) (2026-07-06)
+
+
+### Features
+
+* add addWithModel and updateWithModel endpoints to ConfigurationTemplateController ([aed66c1](https://github.com/madgeek-arc/resource-catalogue/commit/aed66c105ccfc15e30eb089605d674c1ced0c4da))
+* add scheduled job to auto-fix missing public resources ([f788235](https://github.com/madgeek-arc/resource-catalogue/commit/f788235cb18f14880b675ad09f6e3b2e98bb8d74))
+* **auditing:** prioritize overdue resources with weighted random selection ([a09a480](https://github.com/madgeek-arc/resource-catalogue/commit/a09a480fe01e4dcd4e5d68db747cc6c2e8703d0e))
+* **dedup:** add checkBeforeAdd endpoint to detect duplicate resources before submission ([6649d86](https://github.com/madgeek-arc/resource-catalogue/commit/6649d8659d41b3323c3382d38950c59a324c9931))
+* deduplication functionality ([4cdf0da](https://github.com/madgeek-arc/resource-catalogue/commit/4cdf0da9c3aac10f873091c6cbc904e9dba0161a))
+* **dedup:** return raw payload from findSimilar and strip sensitive fields ([cfc4b96](https://github.com/madgeek-arc/resource-catalogue/commit/cfc4b96691286a9b3621fe99147cdce2d8d9b4c8))
+
+
+### Bug Fixes
+
+* change adapter package field from array to single string ([1a1c4ca](https://github.com/madgeek-arc/resource-catalogue/commit/1a1c4ca18cb19e5cdef8d415f7f7d9ecfc1c00b0))
+* **deduplication:** add threshold to similarity search methods ([cb3cbc6](https://github.com/madgeek-arc/resource-catalogue/commit/cb3cbc693983afe01b5490d7d8eed6238bdce7ac))
+* guard against null idPrefix in resource properties prefix lookup ([03c85a2](https://github.com/madgeek-arc/resource-catalogue/commit/03c85a2bfa0d0dc4dc6d7991f1d578815d1852b5))
+* handle ResourceNotFoundException from registry in catch blocks after registry exception refactor ([1511a68](https://github.com/madgeek-arc/resource-catalogue/commit/1511a6875199ac6067e2e83ec79e41c5a56f6c37))
+* public contacts are multivalued ([a66190d](https://github.com/madgeek-arc/resource-catalogue/commit/a66190d2fbee9d02c962d7a3b0f4c2acce6a5426))
+* replace exceptions ([8de2134](https://github.com/madgeek-arc/resource-catalogue/commit/8de2134c13c8bd6dfca26b181b97b4378cd76fc0))
+* **security:** mask organisation users on raw resource map responses ([0427b6c](https://github.com/madgeek-arc/resource-catalogue/commit/0427b6c6bf17898ad9b1e8a8cc44b0fa7bdb7be5))
+* **security:** restrict unauthenticated access to bare models/resourceTypes endpoints ([34b1171](https://github.com/madgeek-arc/resource-catalogue/commit/34b11718b7565b5a269f0ac8bd3092f401ae8632))
+* use correct resource_type key when resolving adapter linked resource public ID ([a27798e](https://github.com/madgeek-arc/resource-catalogue/commit/a27798e11d3ef6699c220a800a98874f6adea594))
+* wrap the provided resource with the class defined in the resource type ([9f80cff](https://github.com/madgeek-arc/resource-catalogue/commit/9f80cff41fc69167e37b353856815359b68d504f))
+
+
+### Refactoring
+
+* add quantity parameter ([e6b84b2](https://github.com/madgeek-arc/resource-catalogue/commit/e6b84b2d579e76ddaf933f299d30f35a237553ec))
+* add specific embedding weight on all indeces ([df3d563](https://github.com/madgeek-arc/resource-catalogue/commit/df3d563a26f3d3f122e71b33c24f486d100619dd))
+* configuration template base model && authorization access ([3558cf5](https://github.com/madgeek-arc/resource-catalogue/commit/3558cf5e4b79395f599ae5fe821975156513cd3a))
+* include nodePID during configuration template creation ([b62da6f](https://github.com/madgeek-arc/resource-catalogue/commit/b62da6f886e0dc8a9813de69bec10516b3439387))
+
 ## [6.1.2](https://github.com/madgeek-arc/resource-catalogue/compare/v6.1.1...v6.1.2) (2026-06-23)
 
 
