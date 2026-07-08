@@ -58,6 +58,14 @@ public interface PublicResourceService<T> extends ResourceCRUDService<T, Authent
     T add(T t, boolean registerPID);
 
     /**
+     *
+     * @param t           resource
+     * @param registerPID should the resource's PID record be updated on the PID service
+     * @return {@link T}
+     */
+    T update(T t, boolean registerPID);
+
+    /**
      * Create Public resource
      *
      * @param resource Resource

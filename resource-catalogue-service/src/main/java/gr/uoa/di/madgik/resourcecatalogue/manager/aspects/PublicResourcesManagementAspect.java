@@ -96,18 +96,19 @@ public class PublicResourcesManagementAspect {
      * Around aspect which updates the public resource associated with the provided resource.
      *
      * @param pjp      the proceeding join point
-     * @param service  the public-layer service of the resource
-     * @param resource the resource that has been updated
-     * @param <T>      the type of the resource
+     * @param service     the public-layer service of the resource
+     * @param resource    the resource that has been updated
+     * @param registerPID whether the resource's PID record should be updated on the PID service
+     * @param <T>         the type of the resource
      * @return
      * @throws Throwable
      */
-    public <T extends Bundle> T updatePublicBundle(ProceedingJoinPoint pjp, PublicResourceService<T> service, T resource) throws Throwable {
+    public <T extends Bundle> T updatePublicBundle(ProceedingJoinPoint pjp, PublicResourceService<T> service, T resource, boolean registerPID) throws Throwable {
         T init = ObjectUtils.clone(resource);
         T ret = (T) pjp.proceed();
         try {
             if (!ret.equals(init)) {
-                service.update(ObjectUtils.clone(ret), null);
+                service.update(ObjectUtils.clone(ret), registerPID);
             }
         } catch (ResourceException | ResourceNotFoundException e) {
             logger.warn(e.getMessage(), e);
@@ -117,7 +118,7 @@ public class PublicResourcesManagementAspect {
 
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.update(..)) && args(provider, ..)")
     public Object updatePublicProvider(ProceedingJoinPoint pjp, OrganisationBundle provider) throws Throwable {
-        return updatePublicBundle(pjp, publicOrganisationService, provider);
+        return updatePublicBundle(pjp, publicOrganisationService, provider, true);
     }
 
     @Async
@@ -163,7 +164,7 @@ public class PublicResourcesManagementAspect {
 
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.update(..)) && args(service, ..)")
     public Object updatePublicService(ProceedingJoinPoint pjp, ServiceBundle service) throws Throwable {
-        return updatePublicBundle(pjp, publicServiceService, service);
+        return updatePublicBundle(pjp, publicServiceService, service, true);
     }
 
     @Async
@@ -208,7 +209,7 @@ public class PublicResourcesManagementAspect {
 
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.update(..)) && args(catalogue, ..)")
     public Object updatePublicCatalogue(ProceedingJoinPoint pjp, CatalogueBundle catalogue) throws Throwable {
-        return updatePublicBundle(pjp, publicCatalogueService, catalogue);
+        return updatePublicBundle(pjp, publicCatalogueService, catalogue, true);
     }
 
     @Async
@@ -253,7 +254,7 @@ public class PublicResourcesManagementAspect {
 
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.update(..)) && args(datasource, ..)")
     public Object updatePublicDatasource(ProceedingJoinPoint pjp, DatasourceBundle datasource) throws Throwable {
-        return updatePublicBundle(pjp, publicDatasourceService, datasource);
+        return updatePublicBundle(pjp, publicDatasourceService, datasource, true);
     }
 
     @Async
@@ -298,7 +299,7 @@ public class PublicResourcesManagementAspect {
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.update(..)) " +
             "&& args(training,..)")
     public Object updatePublicTrainingResource(ProceedingJoinPoint pjp, TrainingResourceBundle training) throws Throwable {
-        return updatePublicBundle(pjp, publicTrainingResourceService, training);
+        return updatePublicBundle(pjp, publicTrainingResourceService, training, true);
     }
 
     @Async
@@ -343,7 +344,7 @@ public class PublicResourcesManagementAspect {
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.update(..)) " +
             "&& args(guideline,..)")
     public Object updatePublicGuideline(ProceedingJoinPoint pjp, InteroperabilityRecordBundle guideline) throws Throwable {
-        return updatePublicBundle(pjp, publicInteroperabilityRecordService, guideline);
+        return updatePublicBundle(pjp, publicInteroperabilityRecordService, guideline, true);
     }
 
     @Async
@@ -388,7 +389,7 @@ public class PublicResourcesManagementAspect {
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.update(..)) " +
             "&& args(deployableApplication,..)")
     public Object updatePublicDeployableApplication(ProceedingJoinPoint pjp, DeployableApplicationBundle deployableApplication) throws Throwable {
-        return updatePublicBundle(pjp, publicDeployableApplicationService, deployableApplication);
+        return updatePublicBundle(pjp, publicDeployableApplicationService, deployableApplication, true);
     }
 
     @Async
@@ -432,7 +433,7 @@ public class PublicResourcesManagementAspect {
 
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..)) && args(adapter,..)")
     public Object updatePublicAdapter(ProceedingJoinPoint pjp, AdapterBundle adapter) throws Throwable {
-        return updatePublicBundle(pjp, publicAdapterService, adapter);
+        return updatePublicBundle(pjp, publicAdapterService, adapter, true);
     }
 
     @Async
@@ -474,7 +475,7 @@ public class PublicResourcesManagementAspect {
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.update(..)) " +
             "&& args(rir,..)")
     public Object updatePublicRIR(ProceedingJoinPoint pjp, ResourceInteroperabilityRecordBundle rir) throws Throwable {
-        return updatePublicBundle(pjp, publicRIRService, rir);
+        return updatePublicBundle(pjp, publicRIRService, rir, false);
     }
 
     @Async
@@ -503,7 +504,7 @@ public class PublicResourcesManagementAspect {
     @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.update(..)) " +
             "&& args(cti,..)")
     public Object updatePublicCTI(ProceedingJoinPoint pjp, ConfigurationTemplateInstanceBundle cti) throws Throwable {
-        return updatePublicBundle(pjp, publicCTIService, cti);
+        return updatePublicBundle(pjp, publicCTIService, cti, false);
     }
 
     @Async

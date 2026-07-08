@@ -121,10 +121,24 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
     }
 
     public T update(T t, Authentication authentication) {
+        return update(t, false);
+    }
+
+    public T update(T t, boolean registerPID) {
         T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
         t.setIdentifiers(published.getIdentifiers());
         t.setId(published.getId());
         t.getMetadata().setPublished(true);
+
+        // Update PID
+        if (pidServiceEnabled && registerPID) {
+            try {
+                logger.info("Updating PID record of {} with id {} on PID service", t.getClass().getSimpleName(), t.getId());
+                pidIssuer.postPID(t.getId(), null);
+            } catch (Exception e) {
+                logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
+            }
+        }
 
         // sets public ids to fields
         updateIdsToPublic(t);
