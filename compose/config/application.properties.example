@@ -90,6 +90,25 @@ catalogue.resources.resource-interoperability-record.id-prefix=
 catalogue.resources.service.id-prefix=
 catalogue.resources.training_resource.id-prefix=
 
+### Federation Search ###
+catalogue.resources.adapter.federation-path=adapters
+catalogue.resources.catalogue.federation-path=catalogues
+catalogue.resources.configuration-template-instance.federation-path=configurationTemplateInstances
+catalogue.resources.datasource.federation-path=datasources
+catalogue.resources.deployable-application.federation-path=deployableApplications
+catalogue.resources.interoperability-record.federation-path=interoperabilityRecords
+catalogue.resources.organisation.federation-path=organisations
+catalogue.resources.resource-interoperability-record.federation-path=resourceInteroperabilityRecords
+catalogue.resources.service.federation-path=services
+catalogue.resources.training_resource.federation-path=trainingResources
+
+### Federation Duplicate-Id Check ###
+federation.duplicate-check.enabled=true
+federation.duplicate-check.search-url=https://federatedsearch.service.eosc-beyond.eu/api/federation
+federation.duplicate-check.timeout-ms=2000
+federation.duplicate-check.circuit-breaker-failure-threshold=5
+federation.duplicate-check.circuit-breaker-reset-ms=60000
+
 ### Email Notification Properties ###
 catalogue.emails.enabled=false
 catalogue.emails.admin-notifications=false

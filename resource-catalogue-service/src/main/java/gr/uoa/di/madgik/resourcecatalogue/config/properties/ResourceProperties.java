@@ -41,6 +41,13 @@ public class ResourceProperties {
     private List<String> resolveEndpoints;
 
     /**
+     * The path segment this resource type is exposed under on the federated search aggregator
+     * (e.g. "services" for {@code https://federatedsearch.service.eosc-beyond.eu/api/federation/services}).
+     * Optional: if unset, the federation duplicate-id check is skipped for this resource type.
+     */
+    private String federationPath;
+
+    /**
      * The PID Issuer properties (optional).
      */
     @NestedConfigurationProperty
@@ -63,6 +70,14 @@ public class ResourceProperties {
 
     public void setResolveEndpoints(List<String> resolveEndpoints) {
         this.resolveEndpoints = resolveEndpoints;
+    }
+
+    public String getFederationPath() {
+        return federationPath;
+    }
+
+    public void setFederationPath(String federationPath) {
+        this.federationPath = federationPath;
     }
 
     public PidIssuerConfig getPidIssuer() {

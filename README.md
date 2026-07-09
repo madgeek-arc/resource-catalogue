@@ -292,6 +292,8 @@ catalogue.resources.resource-interoperability-record.id-prefix=resource_interope
 catalogue.resources.service.id-prefix=service
 catalogue.resources.training_resource.id-prefix=training_resource
 catalogue.resources.vocabulary-curation.id-prefix=vocabulary_curation
+## Federation Duplicate-Id Check ##
+federation.duplicate-check.enabled=true
 ## Email Notification Properties ##
 catalogue.emails.enabled=false
 catalogue.emails.admin-notifications=false

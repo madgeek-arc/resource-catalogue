@@ -21,25 +21,45 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationDuplicateCheckProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceTypes;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class ResourceIdCreator implements IdCreator {
 
+    private static final Logger logger = LoggerFactory.getLogger(ResourceIdCreator.class);
+
     private final SearchService searchService;
     private final Map<ResourceTypes, ResourceProperties> resourceProperties;
+    private final FederationDuplicateCheckProperties federationProperties;
+    private final WebClient federationWebClient;
+
+    private final AtomicInteger consecutiveFederationFailures = new AtomicInteger(0);
+    private final AtomicLong federationCircuitOpenUntilMillis = new AtomicLong(0);
 
 
     public ResourceIdCreator(SearchService searchService,
-                             CatalogueProperties catalogueProperties) {
+                             CatalogueProperties catalogueProperties,
+                             FederationDuplicateCheckProperties federationProperties) {
         this.searchService = searchService;
         this.resourceProperties = catalogueProperties.getResources();
+        this.federationProperties = federationProperties;
+        this.federationWebClient = WebClient.builder()
+                .baseUrl(federationProperties.getSearchUrl())
+                .build();
     }
 
     @Override
@@ -47,7 +67,7 @@ public class ResourceIdCreator implements IdCreator {
         String prefix = createPrefix(resourceType);
         String id = prefix + "/" + randomGenerator();
         if (!prefix.equals("non")) {
-            while (searchIdExists(id)) {
+            while (searchIdExists(id) || existsInFederation(resourceType, id)) {
                 id = prefix + "/" + randomGenerator();
             }
         }
@@ -72,6 +92,77 @@ public class ResourceIdCreator implements IdCreator {
         ff.addFilter("resource_internal_id", id);
         Paging<?> resources = searchService.search(ff);
         return resources.getTotal() > 0;
+    }
+
+    /**
+     * Checks whether the given id is already registered by another node in the federation, via
+     * the federated search aggregator's per-resource "fetch by id" endpoint. Fails open: if the
+     * check is disabled, not configured for this resource type, or the aggregator is unreachable
+     * or the circuit breaker is open, this returns {@code false} (i.e. "not found") rather than
+     * blocking id generation on an external dependency.
+     */
+    boolean existsInFederation(String resourceType, String id) {
+        if (!federationProperties.isEnabled()) {
+            return false;
+        }
+        String federationPath = federationPathFor(resourceType);
+        if (federationPath == null) {
+            return false;
+        }
+        if (isFederationCircuitOpen()) {
+            logger.debug("Federation duplicate-id check circuit is open; skipping check for id {}", id);
+            return false;
+        }
+        // the aggregator's get-by-id route is /federation/{collection}/{prefix}/{suffix},
+        // not a single {id} segment - splitting here avoids the id's own "/" being percent-encoded
+        // into the wrong route.
+        String[] prefixAndSuffix = id.split("/", 2);
+        if (prefixAndSuffix.length != 2) {
+            return false;
+        }
+        try {
+            federationWebClient.get()
+                    .uri("/{path}/{prefix}/{suffix}", federationPath, prefixAndSuffix[0], prefixAndSuffix[1])
+                    .retrieve()
+                    .toBodilessEntity()
+                    .timeout(Duration.ofMillis(federationProperties.getTimeoutMs()))
+                    .block();
+            onFederationCallSuccess();
+            return true;
+        } catch (WebClientResponseException.NotFound e) {
+            onFederationCallSuccess();
+            return false;
+        } catch (Exception e) {
+            onFederationCallFailure(id, e);
+            return false;
+        }
+    }
+
+    private String federationPathFor(String resourceType) {
+        try {
+            return resourceProperties.get(ResourceTypes.valueOf(resourceType.toUpperCase())).getFederationPath();
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private boolean isFederationCircuitOpen() {
+        return System.currentTimeMillis() < federationCircuitOpenUntilMillis.get();
+    }
+
+    private void onFederationCallSuccess() {
+        consecutiveFederationFailures.set(0);
+    }
+
+    private void onFederationCallFailure(String id, Exception e) {
+        logger.warn("Federation duplicate-id check failed for id {}: {}", id, e.getMessage());
+        int failures = consecutiveFederationFailures.incrementAndGet();
+        if (failures >= federationProperties.getCircuitBreakerFailureThreshold()) {
+            long resetMs = federationProperties.getCircuitBreakerResetMs();
+            federationCircuitOpenUntilMillis.set(System.currentTimeMillis() + resetMs);
+            logger.warn("Federation duplicate-id check circuit breaker opened after {} consecutive " +
+                    "failures; skipping checks for {} ms", failures, resetMs);
+        }
     }
 
     @Override
