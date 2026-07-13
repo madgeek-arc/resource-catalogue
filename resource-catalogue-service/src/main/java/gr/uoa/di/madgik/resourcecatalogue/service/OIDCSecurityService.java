@@ -41,6 +41,7 @@ public class OIDCSecurityService implements SecurityService {
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
+    private final ConfigurationTemplateService configurationTemplateService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
@@ -51,6 +52,7 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
                                @Lazy DeployableApplicationService deployableApplicationService,
                                @Lazy AdapterService adapterService,
+                               @Lazy ConfigurationTemplateService configurationTemplateService,
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.organisationService = organisationService;
@@ -60,6 +62,7 @@ public class OIDCSecurityService implements SecurityService {
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
+        this.configurationTemplateService = configurationTemplateService;
     }
 
     @Override
@@ -460,5 +463,12 @@ public class OIDCSecurityService implements SecurityService {
                     return userIsOrganisationAdmin(user, providerId);
                 })
                 .orElse(false);
+    }
+
+    @Override
+    public boolean isConfigurationTemplateAdmin(Authentication auth, String configurationTemplateId) {
+        ConfigurationTemplateBundle bundle = configurationTemplateService.get(configurationTemplateId);
+        String interoperabilityRecordId = (String) bundle.getConfigurationTemplate().get("interoperabilityRecordId");
+        return isInteroperabilityRecordAdmin(auth, interoperabilityRecordId);
     }
 }

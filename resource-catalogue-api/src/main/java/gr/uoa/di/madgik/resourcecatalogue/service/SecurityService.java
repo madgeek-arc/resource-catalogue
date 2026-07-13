@@ -184,4 +184,12 @@ public interface SecurityService {
      */
     boolean isInteroperabilityRecordAdmin(Authentication auth, String interoperabilityRecordId);
 
+    /**
+     * @param auth Authentication
+     * @param configurationTemplateId Configuration Template ID
+     * @return True if the authenticated user is an admin of the Interoperability Record
+     * that the given Configuration Template belongs to
+     */
+    boolean isConfigurationTemplateAdmin(Authentication auth, String configurationTemplateId);
+
 }
