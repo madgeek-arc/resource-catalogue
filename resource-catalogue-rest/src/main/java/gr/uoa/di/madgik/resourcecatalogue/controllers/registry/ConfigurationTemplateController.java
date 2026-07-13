@@ -125,9 +125,10 @@ public class ConfigurationTemplateController {
         return ResponseEntity.ok(paging);
     }
 
-    @Operation(summary = "Adds a new Configuration Template.")
+    @Deprecated
+    @Operation(summary = "Adds a new Configuration Template.", deprecated = true)
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> ct,
                                  @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateBundle bundle = new ConfigurationTemplateBundle();
@@ -170,9 +171,10 @@ public class ConfigurationTemplateController {
         service.addBulk(ctList, auth);
     }
 
-    @Operation(summary = "Updates the Configuration Template with the given id.")
+    @Deprecated
+    @Operation(summary = "Updates the Configuration Template with the given id.", deprecated = true)
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #ct['interoperabilityRecordId'])")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> ct,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -212,9 +214,10 @@ public class ConfigurationTemplateController {
         return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.OK);
     }
 
-    @Operation(summary = "Deletes the Configuration Template with the given id.")
+    @Deprecated
+    @Operation(summary = "Deletes the Configuration Template with the given id.", deprecated = true)
     @DeleteMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -223,6 +226,25 @@ public class ConfigurationTemplateController {
 
         service.delete(bundle);
         logger.info("Deleted the Configuration Template with id '{}'", bundle.getId());
+        return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Deletes a Configuration Template and its corresponding Model in a single request.")
+    @DeleteMapping(path = "{prefix}/{suffix}/withModel")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isConfigurationTemplateAdmin(#auth, #prefix+'/'+#suffix)")
+    public ResponseEntity<?> deleteWithModel(@PathVariable String prefix,
+                                             @PathVariable String suffix,
+                                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        ConfigurationTemplateBundle bundle = service.get(id);
+        if (!instanceService.getByConfigurationTemplateId(bundle.getId()).isEmpty()) {
+            throw new ValidationException("Cannot delete: Configuration Template '" + bundle.getId()
+                    + "' has registered instances. Remove them before deleting.");
+        }
+        String modelId = (String) bundle.getConfigurationTemplate().get("modelId");
+        modelService.delete(modelId);
+        service.delete(bundle);
+        logger.info("Deleted Configuration Template '{}' with Model '{}'", bundle.getId(), modelId);
         return new ResponseEntity<>(bundle.getConfigurationTemplate(), HttpStatus.OK);
     }
 
