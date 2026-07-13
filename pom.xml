@@ -51,7 +51,7 @@
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
         <netty.version>4.2.15.Final</netty.version>
         <tomcat.version>11.0.23</tomcat.version>
-        <postgresql.version>42.7.11</postgresql.version>
+        <postgresql.version>42.7.13</postgresql.version>
         <!-- Preserve test JVM args so modules can append their own flags safely. -->
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
