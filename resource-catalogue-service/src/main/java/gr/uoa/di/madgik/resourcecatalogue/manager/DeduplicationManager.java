@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.DuplicatePair;
 import gr.uoa.di.madgik.resourcecatalogue.service.DeduplicationService;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationSimilarityClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,9 +45,12 @@ public class DeduplicationManager implements DeduplicationService {
     private static final int NEIGHBORS_PER_RESOURCE = 20;
 
     private final GenericResourceService genericResourceService;
+    private final FederationSimilarityClient federationSimilarityClient;
 
-    public DeduplicationManager(GenericResourceService genericResourceService) {
+    public DeduplicationManager(GenericResourceService genericResourceService,
+                                 FederationSimilarityClient federationSimilarityClient) {
         this.genericResourceService = genericResourceService;
+        this.federationSimilarityClient = federationSimilarityClient;
     }
 
     @Override
@@ -117,17 +121,28 @@ public class DeduplicationManager implements DeduplicationService {
             // Wrap the candidate in the actual Bundle subclass.
             results = genericResourceService.recommend(ff, wrapResource(resourceType, resource));
         } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
-            logger.debug("No embeddings available for resourceType '{}' — skipping similarity check", resourceType);
-            return Collections.emptyList();
+            logger.debug("No embeddings available for resourceType '{}' — skipping local similarity check", resourceType);
+            results = Collections.emptyList();
         }
-        return results.stream()
+        Stream<ScoredResult<LinkedHashMap<String, Object>>> localMatches = results.stream()
                 .flatMap(obj -> {
                     if (!(obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b
                             && sr.getScore() >= effectiveThreshold)) {
                         return Stream.empty();
                     }
                     return Stream.of(ScoredResult.of(sr.getScore(), scrubSensitiveFields(b.getPayload(), true)));
-                })
+                });
+
+        // Federation matches are already cosine-similarity scores on the same scale as the local
+        // ones (every node runs the same recommend() logic), so they can be merged into one
+        // flat, score-sorted list rather than kept as a separate section.
+        Stream<ScoredResult<LinkedHashMap<String, Object>>> federationMatches =
+                federationSimilarityClient.findSimilar(resourceType, resource, threshold, quantity).stream()
+                        .filter(sr -> sr.getScore() >= effectiveThreshold);
+
+        return Stream.concat(localMatches, federationMatches)
+                .sorted((a, b) -> Float.compare(b.getScore(), a.getScore()))
+                .limit(quantity)
                 .collect(Collectors.toList());
     }
 
