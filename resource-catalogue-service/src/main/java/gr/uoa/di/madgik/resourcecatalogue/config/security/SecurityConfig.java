@@ -20,18 +20,18 @@ import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
@@ -40,16 +40,20 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.SpringOpaqueTokenIntrospector;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Profile("!no-auth")
 @Configuration
@@ -58,6 +62,10 @@ import java.util.*;
 public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
+    private static final String ENTITLEMENT_GROUP = "service-catalogue";
+    private static final Pattern ENTITLEMENT_ROLE_PATTERN =
+            Pattern.compile(":group:" + Pattern.quote(ENTITLEMENT_GROUP) + ":role=([^:#]+)");
 
     private final AuthenticationSuccessHandler authSuccessHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
@@ -78,7 +86,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    public SecurityFilterChain filterChain(HttpSecurity http, OpaqueTokenIntrospector opaqueTokenIntrospector) {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
@@ -103,8 +111,8 @@ public class SecurityConfig {
                                 .successHandler(authSuccessHandler))
 
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                            .jwtAuthenticationConverter(authenticationConverter())
+                        .opaqueToken(opaque -> opaque
+                                .introspector(opaqueTokenIntrospector)
                         )
                 )
 
@@ -136,42 +144,11 @@ public class SecurityConfig {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
             authorities.forEach(authority -> {
-                String sub = "";
-                String email = "";
-                if (authority instanceof OidcUserAuthority) {
-                    // Map the claims found in idToken and/or userInfo
-                    // to one or more GrantedAuthority's and add it to mappedAuthorities
-
-                    OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
-                    OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
-                    if (userInfo != null) {
-                        sub = userInfo.getSubject();
-                        email = userInfo.getEmail();
-                    } else {
-                        if (((OidcUserAuthority) authority).getAttributes() != null
-                                && ((OidcUserAuthority) authority).getAttributes().containsKey("email")) {
-                            sub = ((OidcUserAuthority) authority).getAttributes().get("sub").toString();
-                            email = ((OidcUserAuthority) authority).getAttributes().get("email").toString();
-                        }
-                    }
-                    mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
+                AuthorityContext context = resolveAuthorityContext(authority);
+                if (context != null) {
+                    mappedAuthorities.addAll(authoritiesMapper.getAuthorities(context.email()));
+                    mappedAuthorities.addAll(resolveEntitlementAuthorities(context.attributes()));
                     logger.info("User mapped as '{}'", mappedAuthorities);
-
-                } else if (authority instanceof OAuth2UserAuthority) {
-                    // Map the attributes found in userAttributes
-                    // to one or more GrantedAuthority's and add it to mappedAuthorities
-
-                    OAuth2UserAuthority oauth2UserAuthority = (OAuth2UserAuthority) authority;
-                    Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
-
-                    if (userAttributes != null && (catalogueProperties.getAdmins().contains(userAttributes.get("email"))
-                            || catalogueProperties.getOnboardingTeam().contains(userAttributes.get("email")))) {
-                        sub = userAttributes.get("sub").toString();
-                        email = userAttributes.get("email").toString();
-                    }
-                    mappedAuthorities.addAll(authoritiesMapper.getAuthorities(email));
-                    logger.info("User mapped as '{}'", mappedAuthorities);
-
                 }
             });
 
@@ -200,27 +177,110 @@ public class SecurityConfig {
     }
 
     @Bean
-    Converter<Jwt, AbstractAuthenticationToken> authenticationConverter() {
-        CustomJwtAuthenticationConverter jwtAuthenticationConverter = new CustomJwtAuthenticationConverter();
-        return jwtAuthenticationConverter;
+    OpaqueTokenIntrospector opaqueTokenIntrospector(
+            @Value("${spring.security.oauth2.resourceserver.opaquetoken.introspection-uri}")
+            String introspectionUri,
+            @Value("${spring.security.oauth2.resourceserver.opaquetoken.client-id}")
+            String clientId,
+            @Value("${spring.security.oauth2.resourceserver.opaquetoken.client-secret}")
+            String clientSecret) {
+
+        OpaqueTokenIntrospector delegate =
+                SpringOpaqueTokenIntrospector
+                        .withIntrospectionUri(introspectionUri)
+                        .clientId(clientId)
+                        .clientSecret(clientSecret)
+                        .build();
+
+        return token -> {
+            OAuth2AuthenticatedPrincipal principal = delegate.introspect(token);
+            Map<String, Object> attributes = new HashMap<>(principal.getAttributes());
+
+            String email = attributes.get("email") != null ? attributes.get("email").toString() : null;
+            if (email == null) {
+                Map<String, Object> info = userInfoService.getUserInfo("eosc", token);
+                attributes.putAll(info);
+                email = info.get("email") != null ? info.get("email").toString() : null;
+            }
+
+            Set<GrantedAuthority> authorities = new HashSet<>(authoritiesMapper.getAuthorities(email));
+            authorities.addAll(resolveEntitlementAuthorities(attributes));
+
+            return new DefaultOAuth2AuthenticatedPrincipal(principal.getName(), attributes, authorities);
+        };
     }
 
-    class CustomJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+    private record AuthorityContext(String email, Map<String, Object> attributes) {
+    }
 
-        public AbstractAuthenticationToken convert(Jwt jwt) {
-            String email = jwt.getClaimAsString("email");
-            Map<String, Object> info = new HashMap<>();
-            if (email == null) {
-                info = userInfoService.getUserInfo("eosc", jwt.getTokenValue());
-                email = info.get("email").toString();
+    /**
+     * Resolves the email and raw attributes to map to authorities from an OIDC ID token/userinfo
+     * or an OAuth2 userinfo response. Returns null if the authority type is not one of these two,
+     * meaning it should not be mapped at all.
+     */
+    private AuthorityContext resolveAuthorityContext(GrantedAuthority authority) {
+        if (authority instanceof OidcUserAuthority oidcUserAuthority) {
+            OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
+            if (userInfo != null) {
+                return new AuthorityContext(userInfo.getEmail(), userInfo.getClaims());
             }
-            Map<String, Object> claims = new HashMap<>(jwt.getClaims());
-            claims.putAll(info);
-            Collection<GrantedAuthority> authorities = authoritiesMapper.getAuthorities(email);
-            Jwt token = new Jwt(jwt.getTokenValue(), jwt.getIssuedAt(), jwt.getExpiresAt(), jwt.getHeaders(),
-                    Collections.unmodifiableMap(claims));
-
-            return new JwtAuthenticationToken(token, authorities);
+            Map<String, Object> attributes = oidcUserAuthority.getAttributes();
+            String email = attributes != null && attributes.containsKey("email")
+                    ? String.valueOf(attributes.get("email"))
+                    : "";
+            return new AuthorityContext(email, attributes);
         }
+
+        if (authority instanceof OAuth2UserAuthority oauth2UserAuthority) {
+            Map<String, Object> attributes = oauth2UserAuthority.getAttributes();
+            String email = "";
+            if (attributes != null && (catalogueProperties.getAdmins().contains(attributes.get("email"))
+                    || catalogueProperties.getOnboardingTeam().contains(attributes.get("email")))) {
+                email = String.valueOf(attributes.get("email"));
+            }
+            return new AuthorityContext(email, attributes);
+        }
+
+        return null;
+    }
+
+    /**
+     * Extracts the raw entitlement URN values from the 'entitlements' attribute/claim,
+     * regardless of whether it was deserialized as a single string or a collection.
+     */
+    static List<String> extractEntitlements(Map<String, Object> attributes) {
+        if (attributes == null) {
+            return List.of();
+        }
+        Object raw = attributes.get("entitlements");
+        if (raw instanceof Collection<?> values) {
+            return values.stream().map(String::valueOf).toList();
+        }
+        if (raw instanceof String value) {
+            return List.of(value);
+        }
+        return List.of();
+    }
+
+    /**
+     * Maps AARC-style entitlement URNs for the {@value #ENTITLEMENT_GROUP} group
+     * (role=x) to ROLE_X authorities.
+     */
+    static Set<GrantedAuthority> resolveEntitlementAuthorities(Map<String, Object> attributes) {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (String entitlement : extractEntitlements(attributes)) {
+            Matcher matcher = ENTITLEMENT_ROLE_PATTERN.matcher(entitlement);
+            if (!matcher.find()) {
+                continue;
+            }
+            switch (matcher.group(1)) {
+                case "read" -> authorities.add(new SimpleGrantedAuthority("ROLE_READ"));
+                case "write" -> authorities.add(new SimpleGrantedAuthority("ROLE_WRITE"));
+                case "epot" -> authorities.add(new SimpleGrantedAuthority("ROLE_EPOT"));
+                case "admin" -> authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                default -> logger.debug("Unrecognized entitlement role '{}' in '{}'", matcher.group(1), entitlement);
+            }
+        }
+        return authorities;
     }
 }

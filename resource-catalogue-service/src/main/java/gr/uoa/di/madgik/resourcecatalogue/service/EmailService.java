@@ -115,7 +115,7 @@ public class EmailService {
         );
 
         List<User> users = deduplicateUsersByEmail(
-                securityService.getProviderUsers(organisationBundle.getId())
+                securityService.getOrganisationUsers(organisationBundle.getId())
         );
 
         for (User user : users) {
@@ -137,7 +137,7 @@ public class EmailService {
 
         updateRootAccordingToResourceType(resourceBundle, emailBasicInfo);
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getOrganisationUsers(organisationBundle.getId())));
         for (User user : users) {
             emailBasicInfo.updateRoot("user", user);
             sendMailsFromTemplate("providerOutdatedResources.ftl", emailBasicInfo.getRoot(),
@@ -149,7 +149,7 @@ public class EmailService {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminAdded.ftl", organisationBundle,
                 null);
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getOrganisationUsers(organisationBundle.getId())));
         for (User user : users) {
             String userEmail = user.getEmail().toLowerCase();
             if (admins == null || admins.contains(userEmail)) {
@@ -164,7 +164,7 @@ public class EmailService {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerAdminDeleted.ftl", organisationBundle,
                 null);
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getOrganisationUsers(organisationBundle.getId())));
         for (User user : users) {
             if (admins.contains(user.getEmail().toLowerCase())) {
                 emailBasicInfo.updateRoot("user", user);
@@ -187,7 +187,7 @@ public class EmailService {
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerDeletion.ftl", organisation,
                 null);
 
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisation.getId())));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getOrganisationUsers(organisation.getId())));
         for (User user : users) {
             emailBasicInfo.updateRoot("user", user);
             sendMailsFromTemplate("providerDeletion.ftl", emailBasicInfo.getRoot(), emailBasicInfo.getSubject(),
@@ -202,7 +202,7 @@ public class EmailService {
         } else {
             organisationId = bundle.getPayload().get("resourceOwner").toString();
         }
-        List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationId)));
+        List<User> users = new ArrayList<>(new HashSet<>(securityService.getOrganisationUsers(organisationId)));
 
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("bundleAudit.ftl", bundle, bundle.getId());
 
@@ -258,7 +258,7 @@ public class EmailService {
         );
 
         List<User> users = deduplicateUsersByEmail(
-                securityService.getProviderUsers(organisation.getId())
+                securityService.getOrganisationUsers(organisation.getId())
         );
 
         for (User user : users) {
@@ -298,7 +298,7 @@ public class EmailService {
         );
 
         List<User> users = deduplicateUsersByEmail(
-                securityService.getProviderUsers(organisation.getId())
+                securityService.getOrganisationUsers(organisation.getId())
         );
 
         for (User user : users) {
@@ -664,7 +664,7 @@ public class EmailService {
             if (organisationBundle.getTemplateStatus().equals("no template status")) {
                 emailBasicInfo.updateRoot("organisationBundle", organisationBundle);
 
-                List<User> users = new ArrayList<>(new HashSet<>(securityService.getProviderUsers(organisationBundle.getId())));
+                List<User> users = new ArrayList<>(new HashSet<>(securityService.getOrganisationUsers(organisationBundle.getId())));
                 for (User user : users) {
                     emailBasicInfo.updateRoot("user", user);
                     sendMailsFromTemplate("providerOnboarding.ftl", emailBasicInfo.getRoot(),

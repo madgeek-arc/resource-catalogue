@@ -24,14 +24,14 @@ import java.util.Objects;
 public class CreatorAffiliationInfo {
 
     /**
-     * The organizational or institutional affiliation of the creator.
+     * The organisational or institutional affiliation of the creator.
      */
     @Schema
     @FieldValidation(nullable = true)
     private String affiliation;
 
     /**
-     * Uniquely identifies the organizational affiliation of the creator.
+     * Uniquely identifies the organisational affiliation of the creator.
      */
     @Schema
     @FieldValidation(nullable = true)

@@ -46,7 +46,7 @@ public class PublicServiceController extends BasePublicController<ServiceBundle>
 
     @Deprecated
     @GetMapping(path = "infraService/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasReadAccess() or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundleDeprecated(@PathVariable String prefix,
                                                  @PathVariable String suffix,
@@ -63,7 +63,7 @@ public class PublicServiceController extends BasePublicController<ServiceBundle>
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "adminPage/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<ServiceBundle>> getAllBundlesDeprecated(
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);

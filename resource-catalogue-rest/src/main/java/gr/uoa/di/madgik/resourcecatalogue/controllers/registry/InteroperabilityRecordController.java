@@ -75,7 +75,7 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordRead")
     @Operation(summary = "Returns the Interoperability Record with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasReadAccess() or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
             "@securityService.guidelineIsActive(#prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
@@ -88,7 +88,7 @@ public class InteroperabilityRecordController
 
     @Tag(name = "InteroperabilityRecordRead")
     @GetMapping(path = "bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecordBundle> getBundle(@PathVariable String prefix,
                                                                   @PathVariable String suffix,
                                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -121,7 +121,7 @@ public class InteroperabilityRecordController
             @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
     @GetMapping(path = "bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllBundles(@Parameter(hidden = true)
                                                                               @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -147,7 +147,7 @@ public class InteroperabilityRecordController
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
     @GetMapping(path = "random")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                                           @Parameter(hidden = true) Authentication auth) {
         Paging<InteroperabilityRecordBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingInterval, auth);
@@ -157,7 +157,7 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Adds a new Interoperability Record.")
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #guideline, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> guideline,
                                  @Parameter(hidden = true) Authentication auth) {
@@ -189,7 +189,7 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Updates the Interoperability Record with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.isResourceAdmin(#auth,#guideline['id'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> guideline,
                                     @RequestParam(required = false) String comment,
@@ -216,7 +216,7 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Deletes the Interoperability Record with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -231,7 +231,7 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordAdmin")
     @Operation(summary = "Verifies the Interoperability Record.")
     @PatchMapping(path = "verify/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<InteroperabilityRecordBundle> setStatus(@PathVariable String prefix,
                                                                   @PathVariable String suffix,
                                                                   @RequestParam(required = false) Boolean active,
@@ -247,7 +247,7 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordWrite")
     @Operation(summary = "Activates/Deactivates the Interoperability Record.")
     @PatchMapping(path = "setActive/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
+    @PreAuthorize("@securityService.hasWriteAccess() " +
             "or @securityService.resourceIsApprovedAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<InteroperabilityRecordBundle> setActive(@PathVariable String prefix,
                                                                   @PathVariable String suffix,
@@ -262,7 +262,7 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordAdmin")
     @Operation(summary = "Audits the Interoperability Record.")
     @PatchMapping(path = "audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<InteroperabilityRecordBundle> audit(@PathVariable String prefix,
                                                               @PathVariable String suffix,
                                                               @RequestParam(required = false) String comment,
@@ -276,7 +276,7 @@ public class InteroperabilityRecordController
     @Tag(name = "InteroperabilityRecordAdmin")
     @Operation(summary = "Suspends a specific Interoperability Record.")
     @PutMapping(path = "suspend")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public InteroperabilityRecordBundle suspend(@RequestParam String id,
                                                 @RequestParam boolean suspend,
                                                 @Parameter(hidden = true) Authentication auth) {
@@ -323,7 +323,7 @@ public class InteroperabilityRecordController
             "byProvider/{prefix}/{suffix}",
             "byOrganisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                               @PathVariable String prefix,
                                                                               @PathVariable String suffix,
@@ -348,7 +348,7 @@ public class InteroperabilityRecordController
 
     @Tag(name = "InteroperabilityRecordAdmin")
     @GetMapping(path = {"sendEmailForOutdatedResource/{prefix}/{suffix}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public void sendEmailNotificationToProviderForOutdatedGuideline(@PathVariable String prefix,
                                                                     @PathVariable String suffix,
                                                                     @Parameter(hidden = true) Authentication auth) {
@@ -428,7 +428,7 @@ public class InteroperabilityRecordController
 
     @Tag(name = "InteroperabilityRecordWrite")
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #guideline['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #guideline['id'])")
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> guideline,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) guideline.get("id");
@@ -441,7 +441,7 @@ public class InteroperabilityRecordController
 
     @Tag(name = "InteroperabilityRecordWrite")
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public void deleteDraft(@PathVariable String prefix,
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -452,7 +452,7 @@ public class InteroperabilityRecordController
 
     @Tag(name = "InteroperabilityRecordWrite")
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #guideline['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #guideline['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> guideline,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) guideline.get("id");
