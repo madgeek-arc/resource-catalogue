@@ -163,7 +163,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             return;
         }
         String id = resource.get("id").toString();
-        if (!this.securityService.hasAdminAccess(auth, id)) {
+        if (!this.securityService.isOrganisationAdmin(auth, id)) {
             resource.put("users", null);
         }
     }
@@ -175,7 +175,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.hasAdminAccess(auth, ((OrganisationBundle) bundle).getId())) {
+        if (!this.securityService.isOrganisationAdmin(auth, ((OrganisationBundle) bundle).getId())) {
             LinkedHashMap<String, Object> org = ((OrganisationBundle) bundle).getOrganisation();
             nullifyMainContactEmails(org);
             org.put("users", null);

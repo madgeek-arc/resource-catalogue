@@ -333,7 +333,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
             "byProvider/{prefix}/{suffix}",
             "byOrganisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<ServiceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                @PathVariable String prefix,
                                                                @PathVariable String suffix,
@@ -359,7 +359,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "getSharedResources/{prefix}/{suffix}")
-    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<?>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                         @PathVariable String prefix,
                                                         @PathVariable String suffix,

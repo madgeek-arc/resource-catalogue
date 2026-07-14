@@ -59,7 +59,7 @@ public class PublicOrganisationController {
             "public/provider/{prefix}/{suffix}",
             "public/organisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -79,7 +79,7 @@ public class PublicOrganisationController {
             "public/organisation/bundle/{prefix}/{suffix}"
     })
     @PreAuthorize("@securityService.hasReadAccess() or " +
-            "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+            "@securityService.isOrganisationAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

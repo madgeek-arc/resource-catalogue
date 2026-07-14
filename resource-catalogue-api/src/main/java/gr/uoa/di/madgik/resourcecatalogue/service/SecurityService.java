@@ -65,7 +65,7 @@ public interface SecurityService {
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
      */
-    boolean hasAdminAccess(Authentication auth, @NotNull String id);
+    boolean isOrganisationAdmin(Authentication auth, @NotNull String id);
 
     /**
      * @param auth        Authentication
@@ -73,14 +73,14 @@ public interface SecurityService {
      * @param catalogueId Catalogue id
      * @return True if the authenticated user is a Provider Admin within the given Catalogue
      */
-    boolean hasAdminAccess(Authentication auth, @NotNull String externalId, @NotNull String catalogueId);
+    boolean isOrganisationAdmin(Authentication auth, @NotNull String externalId, @NotNull String catalogueId);
 
     /**
      * @param user User
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
      */
-    boolean userHasAdminAccess(@NotNull User user, @NotNull String id);
+    boolean userIsOrganisationAdmin(@NotNull User user, @NotNull String id);
 
     /**
      * @param auth       Authentication
@@ -125,7 +125,7 @@ public interface SecurityService {
      * @param id service id
      * @return True if provider is active
      */
-    boolean providerIsActive(String id);
+    boolean organisationIsActive(String id);
 
     /**
      * @param id service id
@@ -175,14 +175,14 @@ public interface SecurityService {
      * @param suffix ID suffix
      * @return True if Provider is approved
      */
-    boolean isApprovedProvider(String prefix, String suffix);
+    boolean isApprovedOrganisation(String prefix, String suffix);
 
     /**
      *
      * @param id Organisation ID
      * @return List<User>
      */
-    List<User> getProviderUsers(String id);
+    List<User> getOrganisationUsers(String id);
 
     /**
      * @param auth Authentication

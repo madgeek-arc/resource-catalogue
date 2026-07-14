@@ -331,7 +331,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "byProvider/{prefix}/{suffix}",
             "byOrganisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth,#id)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#id)")
     public ResponseEntity<Paging<CatalogueBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                  @PathVariable String prefix,
                                                                  @PathVariable String suffix,
@@ -355,7 +355,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @BrowseParameters
     @GetMapping(path = "getSharedResources/{prefix}/{suffix}")
-    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<?>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                         @PathVariable String prefix,
                                                         @PathVariable String suffix,
@@ -477,7 +477,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                              @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String providerId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.hasAdminAccess(auth, providerId, catalogueId)) {
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isOrganisationAdmin(auth, providerId, catalogueId)) {
             throw new AccessDeniedException("Forbidden");
         }
         return new ResponseEntity<>(organisationService.get(getExternalFilters(providerId, catalogueId)), HttpStatus.OK);
@@ -534,7 +534,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                             @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String providerId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.hasAdminAccess(auth, providerId, catalogueId)) {
+        if (!securityService.hasPortalAdminRole(auth) && !securityService.isOrganisationAdmin(auth, providerId, catalogueId)) {
             throw new AccessDeniedException("Forbidden");
         }
         OrganisationBundle bundle = organisationService.get(getExternalFilters(providerId, catalogueId));
@@ -581,7 +581,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "{cataloguePrefix}/{catalogueSuffix}/provider",
             "{cataloguePrefix}/{catalogueSuffix}/organisation"
     })
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth,#provider['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth,#provider['id'])")
     public ResponseEntity<?> updateCatalogueOrganisation(@RequestBody LinkedHashMap<String, Object> provider,
                                                          @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                          @RequestParam(required = false) String comment,
@@ -616,7 +616,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "{cataloguePrefix}/{catalogueSuffix}/provider/**",
             "{cataloguePrefix}/{catalogueSuffix}/organisation/**"
     })
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueOrganisation(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                          HttpServletRequest request,
                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -754,7 +754,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Service of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/**")
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueService(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                     HttpServletRequest request,
                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -889,7 +889,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Datasource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/**")
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueDatasource(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                        HttpServletRequest request,
                                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -1024,7 +1024,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Adapter of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/**")
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueAdapter(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                     HttpServletRequest request,
                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -1160,7 +1160,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Training Resource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/**")
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueTrainingResource(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                              HttpServletRequest request,
                                                              @SuppressWarnings("unused")
@@ -1297,7 +1297,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Deployable Application of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/**")
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueDeployableApplication(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                   HttpServletRequest request,
                                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -1432,7 +1432,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Interoperability Record of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/**")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueInteroperabilityRecord(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                    HttpServletRequest request,
                                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

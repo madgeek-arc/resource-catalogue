@@ -293,7 +293,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
             "byProvider/{prefix}/{suffix}",
             "byOrganisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<DeployableApplicationBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                              @PathVariable String prefix,
                                                                              @PathVariable String suffix,

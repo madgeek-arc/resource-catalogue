@@ -6,7 +6,7 @@
             new ${project} Provider in the ${project}.
             <br>
             Your application will be reviewed and you will be notified on its approval or rejection, as well as for any
-            further steps you can follow for registering successfully your organization and its services.
+            further steps you can follow for registering successfully your organisation and its services.
             <br>
             Thank you for your interest in becoming a member of the ${project}.
         </#if>
@@ -36,7 +36,7 @@
             You have applied for registering [${bundle.organisation.name}] - ([${bundle.organisation.id}]) as a
             new ${project} Provider in the ${project}.
             <br>
-            Your application has been rejected, as your organization does not comply with the Rules of Participation
+            Your application has been rejected, as your organisation does not comply with the Rules of Participation
             of the ${project}.
             <br>
             [Option 1: We would like to offer an information webinar or training session to improve your application.

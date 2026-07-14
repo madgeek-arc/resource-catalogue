@@ -68,8 +68,8 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     @Operation(summary = "Returns the Provider with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
     @PreAuthorize("@securityService.hasReadAccess() or " +
-            "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix) or " +
-            "@securityService.isApprovedProvider(#prefix, #suffix)")
+            "@securityService.isOrganisationAdmin(#auth, #prefix+'/'+#suffix) or " +
+            "@securityService.isApprovedOrganisation(#prefix, #suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused")
@@ -80,7 +80,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
-    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<OrganisationBundle> getBundle(@PathVariable String prefix,
                                                         @PathVariable String suffix,
                                                         @SuppressWarnings("unused")
@@ -174,7 +174,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
 
     @Operation(summary = "Updates the Provider with the given id.")
     @PutMapping()
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth,#provider['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth,#provider['id'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> provider,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -356,7 +356,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     }
 
     @PutMapping(path = "/draft")
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth,#provider['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth,#provider['id'])")
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> provider,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) provider.get("id");
@@ -368,7 +368,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     }
 
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #prefix+'/'+#suffix)")
     public void deleteDraft(@PathVariable String prefix,
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -378,7 +378,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     }
 
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.hasAdminAccess(#auth,#provider['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth,#provider['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> provider,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) provider.get("id");
