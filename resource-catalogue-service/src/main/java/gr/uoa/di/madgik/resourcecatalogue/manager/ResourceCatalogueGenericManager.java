@@ -220,7 +220,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         ff.setResourceType(getResourceTypeName());
         boolean authenticated = auth != null && auth.isAuthenticated();
         if (authenticated) {
-            if (securityService.hasPortalAdminRole(auth)) {
+            if (securityService.hasReadAccess()) {
                 return getAll(ff);
             }
             if (securityService.hasRole(auth, "ROLE_PROVIDER")) {
