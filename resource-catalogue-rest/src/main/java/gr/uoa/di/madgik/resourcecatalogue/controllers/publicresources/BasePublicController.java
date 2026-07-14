@@ -61,7 +61,7 @@ public abstract class BasePublicController<T extends Bundle> {
 
     @Operation(description = "Returns the resource Bundle with the given id.")
     @GetMapping(path = "bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasReadAccess() or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
@@ -98,7 +98,7 @@ public abstract class BasePublicController<T extends Bundle> {
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<T>> getAllBundles(
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);

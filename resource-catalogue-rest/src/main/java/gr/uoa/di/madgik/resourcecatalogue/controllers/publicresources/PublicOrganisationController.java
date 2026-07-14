@@ -59,7 +59,7 @@ public class PublicOrganisationController {
             "public/provider/{prefix}/{suffix}",
             "public/organisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -78,7 +78,7 @@ public class PublicOrganisationController {
             "public/provider/bundle/{prefix}/{suffix}",
             "public/organisation/bundle/{prefix}/{suffix}"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasReadAccess() or " +
             "@securityService.hasAdminAccess(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
@@ -124,7 +124,7 @@ public class PublicOrganisationController {
             "public/provider/bundle/all",
             "public/organisation/bundle/all"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<OrganisationBundle>> getAllBundles(@Parameter(hidden = true)
                                                                     @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);

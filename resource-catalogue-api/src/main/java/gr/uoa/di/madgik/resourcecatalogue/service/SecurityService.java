@@ -51,6 +51,16 @@ public interface SecurityService {
     boolean hasPortalAdminRole(Authentication auth);
 
     /**
+     * @return True if the currently authenticated user has role READ, EPOT, or ADMIN, False otherwise
+     */
+    boolean hasReadAccess();
+
+    /**
+     * @return True if the currently authenticated user has role WRITE, EPOT, or ADMIN, False otherwise
+     */
+    boolean hasWriteAccess();
+
+    /**
      * @param auth Authentication
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin

@@ -67,7 +67,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceRead")
     @Operation(summary = "Returns the Service with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasReadAccess() or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
             "@securityService.serviceIsActive(#prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
@@ -80,7 +80,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 
     @Tag(name = "ServiceRead")
     @GetMapping(path = "/bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<ServiceBundle> getBundle(@PathVariable String prefix,
                                                    @PathVariable String suffix,
                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -111,7 +111,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "adminPage/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<ServiceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
                                                                          @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -133,7 +133,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
             @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
     @GetMapping(path = "bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<ServiceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -159,7 +159,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
     @GetMapping(path = "random")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<ServiceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                            @Parameter(hidden = true) Authentication auth) {
         Paging<ServiceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingProperties.getInterval(), auth);
@@ -169,7 +169,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceWrite")
     @Operation(summary = "Adds a new Service.")
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #serviceMap, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                  @Parameter(hidden = true) Authentication auth) {
@@ -201,7 +201,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceWrite")
     @Operation(summary = "Updates the Service with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#serviceMap['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#serviceMap['id'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -227,7 +227,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceWrite")
     @Operation(summary = "Deletes the Service with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -242,7 +242,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceAdmin")
     @Operation(summary = "Verifies the Service.")
     @PatchMapping(path = "verify/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<ServiceBundle> setStatus(@PathVariable String prefix,
                                                    @PathVariable String suffix,
                                                    @RequestParam(required = false) Boolean active,
@@ -258,7 +258,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceWrite")
     @Operation(summary = "Activates/Deactivates the Service.")
     @PatchMapping(path = "setActive/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
+    @PreAuthorize("@securityService.hasWriteAccess() " +
             "or @securityService.resourceIsApprovedAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<ServiceBundle> setActive(@PathVariable String prefix,
                                                    @PathVariable String suffix,
@@ -273,7 +273,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceAdmin")
     @Operation(summary = "Audits the Service.")
     @PatchMapping(path = "audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<ServiceBundle> audit(@PathVariable String prefix,
                                                @PathVariable String suffix,
                                                @RequestParam(required = false) String comment,
@@ -287,7 +287,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceAdmin")
     @Operation(summary = "Suspends a specific Service.")
     @PutMapping(path = "suspend")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ServiceBundle suspend(@RequestParam String id,
                                  @RequestParam boolean suspend,
                                  @Parameter(hidden = true) Authentication auth) {
@@ -333,7 +333,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
             "byProvider/{prefix}/{suffix}",
             "byOrganisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<ServiceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                @PathVariable String prefix,
                                                                @PathVariable String suffix,
@@ -359,7 +359,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     @Tag(name = "ServiceRead")
     @BrowseParameters
     @GetMapping(path = "getSharedResources/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<?>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                         @PathVariable String prefix,
                                                         @PathVariable String suffix,
@@ -374,7 +374,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 
     @Tag(name = "ServiceAdmin")
     @GetMapping(path = {"sendEmailForOutdatedResource/{prefix}/{suffix}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public void sendEmailNotificationToProviderForOutdatedService(@PathVariable String prefix,
                                                                   @PathVariable String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
@@ -429,7 +429,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 
     @Tag(name = "ServiceWrite")
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceMap['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #serviceMap['id'])")
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) serviceMap.get("id");
@@ -442,7 +442,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 
     @Tag(name = "ServiceWrite")
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public void deleteDraft(@PathVariable String prefix,
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -453,7 +453,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
 
     @Tag(name = "ServiceWrite")
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #serviceMap['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #serviceMap['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> serviceMap,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) serviceMap.get("id");

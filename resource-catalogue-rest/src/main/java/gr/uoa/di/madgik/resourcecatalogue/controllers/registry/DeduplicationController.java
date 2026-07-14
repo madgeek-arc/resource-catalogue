@@ -55,7 +55,7 @@ public class DeduplicationController {
 
     @Operation(summary = "Scan all published resources of the given type and return similar pairs above the given similarity threshold.")
     @GetMapping(path = "{resourceType}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<List<DuplicatePair>> findDuplicates(
             @PathVariable String resourceType,
             @RequestParam(required = false, defaultValue = "0.95") Float threshold,
@@ -65,7 +65,7 @@ public class DeduplicationController {
 
     @Operation(summary = "Find published resources similar to the one identified by {prefix}/{suffix}.")
     @GetMapping(path = "{resourceType}/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<List<ScoredResult<LinkedHashMap<String, Object>>>> findSimilar(
             @PathVariable String resourceType,
             @PathVariable String prefix,

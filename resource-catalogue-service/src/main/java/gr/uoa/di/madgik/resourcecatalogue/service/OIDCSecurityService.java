@@ -23,9 +23,9 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -90,6 +90,18 @@ public class OIDCSecurityService implements SecurityService {
 
     public boolean hasPortalAdminRole(Authentication auth) {
         return auth != null && (hasRole(auth, "ROLE_ADMIN") || hasRole(auth, "ROLE_EPOT"));
+    }
+
+    @Override
+    public boolean hasReadAccess() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && (hasRole(auth, "ROLE_READ") || hasRole(auth, "ROLE_EPOT") || hasRole(auth, "ROLE_ADMIN"));
+    }
+
+    @Override
+    public boolean hasWriteAccess() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && (hasRole(auth, "ROLE_WRITE") || hasRole(auth, "ROLE_EPOT") || hasRole(auth, "ROLE_ADMIN"));
     }
 
     // region Catalogues & Providers

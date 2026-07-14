@@ -90,7 +90,7 @@ public class ConfigurationTemplateController {
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<ConfigurationTemplateBundle> getBundle(@PathVariable String prefix,
                                                                  @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
@@ -115,7 +115,7 @@ public class ConfigurationTemplateController {
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<ConfigurationTemplateBundle>> getAllBundles(@Parameter(hidden = true)
                                                                              @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -127,7 +127,7 @@ public class ConfigurationTemplateController {
 
     @Operation(summary = "Adds a new Configuration Template.")
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> ct,
                                  @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateBundle bundle = new ConfigurationTemplateBundle();
@@ -140,7 +140,7 @@ public class ConfigurationTemplateController {
     @Operation(summary = "Creates a Model and a Configuration Template in a single request. "
             + "The model must be of resourceType 'configuration_template_instance'.")
     @PostMapping(path = "/{irPrefix}/{irSuffix}/withModel")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #irPrefix+'/'+#irSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isInteroperabilityRecordAdmin(#auth, #irPrefix+'/'+#irSuffix)")
     public ResponseEntity<?> addWithModel(@RequestBody Model model,
                                           @PathVariable String irPrefix,
                                           @PathVariable String irSuffix,
@@ -172,7 +172,7 @@ public class ConfigurationTemplateController {
 
     @Operation(summary = "Updates the Configuration Template with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #ct['interoperabilityRecordId'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isInteroperabilityRecordAdmin(#auth, #ct['interoperabilityRecordId'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> ct,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -187,7 +187,7 @@ public class ConfigurationTemplateController {
     @Operation(summary = "Updates a Model and its corresponding Configuration Template in a single request, "
             + "propagating name and description from the model to the Configuration Template.")
     @PutMapping(path = "/{irPrefix}/{irSuffix}/withModel")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #irPrefix+'/'+#irSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isInteroperabilityRecordAdmin(#auth, #irPrefix+'/'+#irSuffix)")
     public ResponseEntity<?> updateWithModel(@RequestBody Model model,
                                              @PathVariable String irPrefix,
                                              @PathVariable String irSuffix,
@@ -214,7 +214,7 @@ public class ConfigurationTemplateController {
 
     @Operation(summary = "Deletes the Configuration Template with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -240,7 +240,7 @@ public class ConfigurationTemplateController {
     @Operation(summary = "Returns all Configuration Template Bundles of a specific Interoperability Record,"
             + " accessible to organisation admins of that Interoperability Record.")
     @GetMapping(path = "/bundle/getAllByInteroperabilityRecordId/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isInteroperabilityRecordAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isInteroperabilityRecordAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<List<ConfigurationTemplateBundle>> getAllBundlesByInteroperabilityRecordId(@PathVariable String prefix,
                                                                                                      @PathVariable String suffix,
                                                                                                      @Parameter(hidden = true) Authentication auth) {
