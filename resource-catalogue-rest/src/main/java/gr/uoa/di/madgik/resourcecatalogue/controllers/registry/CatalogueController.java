@@ -477,9 +477,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                              @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String providerId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isOrganisationAdmin(auth, providerId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, providerId, catalogueId, true);
         return new ResponseEntity<>(organisationService.get(getExternalFilters(providerId, catalogueId)), HttpStatus.OK);
     }
 
@@ -534,9 +532,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                             @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String providerId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isOrganisationAdmin(auth, providerId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, providerId, catalogueId, true);
         OrganisationBundle bundle = organisationService.get(getExternalFilters(providerId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = organisationService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -664,9 +660,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                    @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String serviceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, serviceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, serviceId, catalogueId, false);
         return new ResponseEntity<>(serviceService.get(getExternalFilters(serviceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -712,9 +706,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                        @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String serviceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, serviceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, serviceId, catalogueId, false);
         ServiceBundle bundle = serviceService.get(getExternalFilters(serviceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = serviceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -799,9 +791,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                          @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String datasourceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, datasourceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, datasourceId, catalogueId, false);
         return new ResponseEntity<>(datasourceService.get(getExternalFilters(datasourceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -847,9 +837,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                           @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String datasourceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, datasourceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, datasourceId, catalogueId, false);
         DatasourceBundle bundle = datasourceService.get(getExternalFilters(datasourceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = datasourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -934,9 +922,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                    @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String adapterId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, adapterId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, adapterId, catalogueId, false);
         return new ResponseEntity<>(adapterService.get(getExternalFilters(adapterId, catalogueId)), HttpStatus.OK);
     }
 
@@ -982,9 +968,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                        @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String adapterId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, adapterId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, adapterId, catalogueId, false);
         AdapterBundle bundle = adapterService.get(getExternalFilters(adapterId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = adapterService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1070,9 +1054,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                      @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String trainingResourceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, trainingResourceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, trainingResourceId, catalogueId, false);
         return new ResponseEntity<>(trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1118,9 +1100,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                 @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String trainingResourceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, trainingResourceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, trainingResourceId, catalogueId, false);
         TrainingResourceBundle bundle = trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = trainingResourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1207,9 +1187,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                                @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String deployableApplicationId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, deployableApplicationId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, deployableApplicationId, catalogueId, false);
         return new ResponseEntity<>(deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1255,9 +1233,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                      @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String deployableApplicationId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, deployableApplicationId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, deployableApplicationId, catalogueId, false);
         DeployableApplicationBundle bundle = deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = deployableApplicationService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1342,9 +1318,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                                  @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String interoperabilityRecordId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, interoperabilityRecordId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, interoperabilityRecordId, catalogueId, false);
         return new ResponseEntity<>(guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1390,9 +1364,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                       @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String interoperabilityRecordId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, interoperabilityRecordId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, interoperabilityRecordId, catalogueId, false);
         InteroperabilityRecordBundle bundle = guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = guidelineService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1472,6 +1444,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         return new AntPathMatcher().extractPathWithinPattern(pattern, path);
+    }
+
+    private void checkResourceAdmin(Authentication auth, String externalId, String catalogueId, boolean isOrganisation) {
+        boolean isAdmin = isOrganisation
+                ? securityService.isOrganisationAdmin(auth, externalId, catalogueId)
+                : securityService.isResourceAdmin(auth, externalId, catalogueId);
+        if (!securityService.hasReadAccess() && !isAdmin) {
+            throw new AccessDeniedException("Forbidden");
+        }
     }
     //endregion
 }
