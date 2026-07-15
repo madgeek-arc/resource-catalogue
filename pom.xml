@@ -50,7 +50,7 @@
         <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
         <netty.version>4.2.15.Final</netty.version>
-        <tomcat.version>11.0.23</tomcat.version>
+        <tomcat.version>11.0.24</tomcat.version> <!-- CVE-2026-59083, CVE-2026-59084: patched in 11.0.24 -->
         <postgresql.version>42.7.13</postgresql.version>
         <!-- Preserve test JVM args so modules can append their own flags safely. -->
         <argLine>-Dfile.encoding=UTF-8</argLine>
