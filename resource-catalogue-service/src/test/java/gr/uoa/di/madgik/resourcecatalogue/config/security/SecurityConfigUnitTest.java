@@ -16,6 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.config.security;
 
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,6 +30,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SecurityConfigUnitTest {
 
+    private SecurityConfig securityConfig;
+
+    @BeforeEach
+    void setUp() {
+        CatalogueProperties catalogueProperties = new CatalogueProperties()
+                .setEntitlementGroup("service-catalogue");
+        securityConfig = new SecurityConfig(null, null, null, catalogueProperties, null);
+    }
+
     @Test
     void resolveEntitlementAuthorities_readAndWriteUrnsMapToBothRoles() {
         Map<String, Object> attributes = Map.of("entitlements", List.of(
@@ -37,7 +48,7 @@ class SecurityConfigUnitTest {
                 "urn:geant:sandbox.eosc-beyond.eu:core:group:service-catalogue:role=admin"
         ));
 
-        Set<GrantedAuthority> authorities = SecurityConfig.resolveEntitlementAuthorities(attributes);
+        Set<GrantedAuthority> authorities = securityConfig.resolveEntitlementAuthorities(attributes);
 
         assertThat(authorities).containsExactlyInAnyOrder(
                 new SimpleGrantedAuthority("ROLE_READ"),
@@ -53,7 +64,7 @@ class SecurityConfigUnitTest {
                 "urn:geant:sandbox.eosc-beyond.eu:core:group:some-other-service:role=write"
         ));
 
-        Set<GrantedAuthority> authorities = SecurityConfig.resolveEntitlementAuthorities(attributes);
+        Set<GrantedAuthority> authorities = securityConfig.resolveEntitlementAuthorities(attributes);
 
         assertThat(authorities).isEmpty();
     }
@@ -64,15 +75,15 @@ class SecurityConfigUnitTest {
                 "urn:geant:sandbox.eosc-beyond.eu:core:group:service-catalogue:role=member"
         ));
 
-        Set<GrantedAuthority> authorities = SecurityConfig.resolveEntitlementAuthorities(attributes);
+        Set<GrantedAuthority> authorities = securityConfig.resolveEntitlementAuthorities(attributes);
 
         assertThat(authorities).isEmpty();
     }
 
     @Test
     void resolveEntitlementAuthorities_missingEntitlementsYieldsEmptySet() {
-        assertThat(SecurityConfig.resolveEntitlementAuthorities(Map.of())).isEmpty();
-        assertThat(SecurityConfig.resolveEntitlementAuthorities(null)).isEmpty();
+        assertThat(securityConfig.resolveEntitlementAuthorities(Map.of())).isEmpty();
+        assertThat(securityConfig.resolveEntitlementAuthorities(null)).isEmpty();
     }
 
     @Test
@@ -80,8 +91,23 @@ class SecurityConfigUnitTest {
         Map<String, Object> attributes = Map.of("entitlements",
                 "urn:geant:sandbox.eosc-beyond.eu:core:group:service-catalogue:role=read");
 
-        Set<GrantedAuthority> authorities = SecurityConfig.resolveEntitlementAuthorities(attributes);
+        Set<GrantedAuthority> authorities = securityConfig.resolveEntitlementAuthorities(attributes);
 
         assertThat(authorities).containsExactly(new SimpleGrantedAuthority("ROLE_READ"));
+    }
+
+    @Test
+    void resolveEntitlementAuthorities_usesConfiguredEntitlementGroup() {
+        CatalogueProperties catalogueProperties = new CatalogueProperties()
+                .setEntitlementGroup("custom-group");
+        SecurityConfig customSecurityConfig = new SecurityConfig(null, null, null, catalogueProperties, null);
+
+        Map<String, Object> attributes = Map.of("entitlements", List.of(
+                "urn:geant:sandbox.eosc-beyond.eu:core:group:custom-group:role=admin"
+        ));
+
+        assertThat(customSecurityConfig.resolveEntitlementAuthorities(attributes))
+                .containsExactly(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        assertThat(securityConfig.resolveEntitlementAuthorities(attributes)).isEmpty();
     }
 }

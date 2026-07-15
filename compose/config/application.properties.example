@@ -76,6 +76,8 @@ node.registry.key=
 ### Admins / Onboarding Team ###
 catalogue.admins=admin@example.eu
 catalogue.onboarding-team=admin@example.eu
+## AARC Entitlement Group ##
+catalogue.entitlement-group=service-catalogue
 ### Redirect URLs ###
 catalogue.login-redirect=https://catalogue.example.eu
 catalogue.logout-redirect=https://catalogue.example.eu

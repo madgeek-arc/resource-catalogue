@@ -74,6 +74,13 @@ public class CatalogueProperties {
     private String logoutRedirect;
 
     /**
+     * AARC entitlement group used to resolve role-mapping entitlement URNs.
+     */
+    @NotNull
+    @NotEmpty
+    private String entitlementGroup = "service-catalogue";
+
+    /**
      * Catalogue resources properties
      */
     @Valid
@@ -160,6 +167,15 @@ public class CatalogueProperties {
 
     public CatalogueProperties setLogoutRedirect(String logoutRedirect) {
         this.logoutRedirect = logoutRedirect;
+        return this;
+    }
+
+    public String getEntitlementGroup() {
+        return entitlementGroup;
+    }
+
+    public CatalogueProperties setEntitlementGroup(String entitlementGroup) {
+        this.entitlementGroup = entitlementGroup;
         return this;
     }
 
