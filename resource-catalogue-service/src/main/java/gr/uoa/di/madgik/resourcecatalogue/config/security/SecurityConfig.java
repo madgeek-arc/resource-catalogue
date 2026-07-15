@@ -20,7 +20,6 @@ import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,16 +40,19 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedCli
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
-import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
-import org.springframework.security.oauth2.server.resource.introspection.SpringOpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +88,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, OpaqueTokenIntrospector opaqueTokenIntrospector) {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                            OpaqueTokenAuthenticationConverter opaqueTokenAuthenticationConverter) {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
@@ -112,7 +115,7 @@ public class SecurityConfig {
 
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .opaqueToken(opaque -> opaque
-                                .introspector(opaqueTokenIntrospector)
+                                .authenticationConverter(opaqueTokenAuthenticationConverter)
                         )
                 )
 
@@ -176,29 +179,19 @@ public class SecurityConfig {
         return manager;
     }
 
+    /**
+     * Leaves token introspection to the default {@code OpaqueTokenIntrospector} that Spring Boot
+     * autoconfigures from the {@code spring.security.oauth2.resourceserver.opaquetoken.*} properties,
+     * and only enriches the resulting principal's authorities (email-based + AARC entitlement roles).
+     */
     @Bean
-    OpaqueTokenIntrospector opaqueTokenIntrospector(
-            @Value("${spring.security.oauth2.resourceserver.opaquetoken.introspection-uri}")
-            String introspectionUri,
-            @Value("${spring.security.oauth2.resourceserver.opaquetoken.client-id}")
-            String clientId,
-            @Value("${spring.security.oauth2.resourceserver.opaquetoken.client-secret}")
-            String clientSecret) {
-
-        OpaqueTokenIntrospector delegate =
-                SpringOpaqueTokenIntrospector
-                        .withIntrospectionUri(introspectionUri)
-                        .clientId(clientId)
-                        .clientSecret(clientSecret)
-                        .build();
-
-        return token -> {
-            OAuth2AuthenticatedPrincipal principal = delegate.introspect(token);
+    OpaqueTokenAuthenticationConverter opaqueTokenAuthenticationConverter() {
+        return (introspectedToken, principal) -> {
             Map<String, Object> attributes = new HashMap<>(principal.getAttributes());
 
             String email = attributes.get("email") != null ? attributes.get("email").toString() : null;
             if (email == null) {
-                Map<String, Object> info = userInfoService.getUserInfo("eosc", token);
+                Map<String, Object> info = userInfoService.getUserInfo("eosc", introspectedToken);
                 attributes.putAll(info);
                 email = info.get("email") != null ? info.get("email").toString() : null;
             }
@@ -206,7 +199,15 @@ public class SecurityConfig {
             Set<GrantedAuthority> authorities = new HashSet<>(authoritiesMapper.getAuthorities(email));
             authorities.addAll(resolveEntitlementAuthorities(attributes));
 
-            return new DefaultOAuth2AuthenticatedPrincipal(principal.getName(), attributes, authorities);
+            OAuth2AuthenticatedPrincipal enrichedPrincipal =
+                    new DefaultOAuth2AuthenticatedPrincipal(principal.getName(), attributes, authorities);
+
+            Instant iat = enrichedPrincipal.getAttribute(OAuth2TokenIntrospectionClaimNames.IAT);
+            Instant exp = enrichedPrincipal.getAttribute(OAuth2TokenIntrospectionClaimNames.EXP);
+            OAuth2AccessToken accessToken =
+                    new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, introspectedToken, iat, exp);
+
+            return new BearerTokenAuthentication(enrichedPrincipal, accessToken, authorities);
         };
     }
 
