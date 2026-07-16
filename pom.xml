@@ -34,8 +34,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson2.annotations.version>2.21</jackson2.annotations.version>
-        <jackson.version>3.1.4</jackson.version>
+        <jackson2.annotations.version>2.22</jackson2.annotations.version>
+        <jackson.version>3.2.1</jackson.version>
         <registry-core.version>5.0.0-SNAPSHOT</registry-core.version>
         <elasticsearch.version>9.4.3</elasticsearch.version>
         <springdoc.version>3.0.3</springdoc.version>
@@ -52,6 +52,8 @@
         <netty.version>4.2.15.Final</netty.version>
         <tomcat.version>11.0.24</tomcat.version>
         <postgresql.version>42.7.13</postgresql.version>
+        <!-- CVE-2026-49844: log4j-core JSON MapMessage encoding issue, fixed in 2.26.1 (Boot 4.0.7 manages 2.25.4) -->
+        <log4j2.version>2.26.1</log4j2.version>
         <!-- Preserve test JVM args so modules can append their own flags safely. -->
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
@@ -215,6 +217,26 @@
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
+            <dependency> <!-- CVE-2026-54515: jackson-databind 2.x (legacy line pulled in by jjwt-jackson), fixed in 2.21.5+ -->
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.22.1</version>
+            </dependency>
+            <dependency> <!-- CVE-2026-54515: jackson-databind 2.x (legacy line pulled in by jjwt-jackson), fixed in 2.21.5+ -->
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.22.1</version>
+            </dependency>
+            <dependency> <!-- CVE-2026-54399/CVE-2026-54428: HTTP/1.1 and HTTP/2 DoS via unbounded resource consumption, fixed in 5.4.3. Pulled in by httpclient5. -->
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5</artifactId>
+                <version>5.4.3</version>
+            </dependency>
+            <dependency> <!-- CVE-2026-54399/CVE-2026-54428: see httpcore5 note above -->
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5-h2</artifactId>
+                <version>5.4.3</version>
+            </dependency>
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
@@ -253,7 +275,7 @@
                 <artifactId>rhino</artifactId>
                 <version>1.7.15.1</version>
             </dependency>
-            <dependency> <!-- CVE-2026-29181: fixed by upgrading to 1.41.1. CVE-2026-39882/39883: Go SDK false positives suppressed in dependency-check-suppressions.xml. Pulled in by micrometer-tracing-bridge-otel. -->
+            <dependency> <!-- CVE-2026-29181: fixed by upgrading to 1.41.1. CVE-2026-39882/39883/41178: Go SDK false positives suppressed in dependency-check-suppressions.xml. Pulled in by micrometer-tracing-bridge-otel. -->
                 <groupId>io.opentelemetry.semconv</groupId>
                 <artifactId>opentelemetry-semconv</artifactId>
                 <version>1.41.1</version>
