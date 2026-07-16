@@ -44,18 +44,21 @@ public interface SecurityService {
     boolean hasRole(Authentication auth, String role);
 
     /**
-     *
-     * @param auth authentication
-     * @return True if authentication is not null and has role ADMIN or EPOT, False otherwise
+     * @return True if the currently authenticated user has role READ, EPOT, or ADMIN, False otherwise
      */
-    boolean hasPortalAdminRole(Authentication auth);
+    boolean hasReadAccess();
+
+    /**
+     * @return True if the currently authenticated user has role WRITE, EPOT, or ADMIN, False otherwise
+     */
+    boolean hasWriteAccess();
 
     /**
      * @param auth Authentication
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
      */
-    boolean hasAdminAccess(Authentication auth, @NotNull String id);
+    boolean isOrganisationAdmin(Authentication auth, @NotNull String id);
 
     /**
      * @param auth        Authentication
@@ -63,14 +66,14 @@ public interface SecurityService {
      * @param catalogueId Catalogue id
      * @return True if the authenticated user is a Provider Admin within the given Catalogue
      */
-    boolean hasAdminAccess(Authentication auth, @NotNull String externalId, @NotNull String catalogueId);
+    boolean isOrganisationAdmin(Authentication auth, @NotNull String externalId, @NotNull String catalogueId);
 
     /**
      * @param user User
      * @param id   Catalogue or Provider id
      * @return True if the authenticated user is a Catalogue or Provider Admin
      */
-    boolean userHasAdminAccess(@NotNull User user, @NotNull String id);
+    boolean userIsOrganisationAdmin(@NotNull User user, @NotNull String id);
 
     /**
      * @param auth       Authentication
@@ -115,7 +118,7 @@ public interface SecurityService {
      * @param id service id
      * @return True if provider is active
      */
-    boolean providerIsActive(String id);
+    boolean organisationIsActive(String id);
 
     /**
      * @param id service id
@@ -165,14 +168,14 @@ public interface SecurityService {
      * @param suffix ID suffix
      * @return True if Provider is approved
      */
-    boolean isApprovedProvider(String prefix, String suffix);
+    boolean isApprovedOrganisation(String prefix, String suffix);
 
     /**
      *
      * @param id Organisation ID
      * @return List<User>
      */
-    List<User> getProviderUsers(String id);
+    List<User> getOrganisationUsers(String id);
 
     /**
      * @param auth Authentication
@@ -180,5 +183,13 @@ public interface SecurityService {
      * @return True if the authenticated user is an admin of the Organisation that owns the given Interoperability Record
      */
     boolean isInteroperabilityRecordAdmin(Authentication auth, String interoperabilityRecordId);
+
+    /**
+     * @param auth Authentication
+     * @param configurationTemplateId Configuration Template ID
+     * @return True if the authenticated user is an admin of the Interoperability Record
+     * that the given Configuration Template belongs to
+     */
+    boolean isConfigurationTemplateAdmin(Authentication auth, String configurationTemplateId);
 
 }

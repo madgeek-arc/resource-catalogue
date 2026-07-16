@@ -49,7 +49,7 @@ public class OpenApiConfig {
         String projectName = nodeProperties.getName();
         OpenAPI openAPI = new OpenAPI()
                 .info(new Info().title(projectName + " API")
-                        .description("A single platform for providers to onboard their organization, register and manage their resources.")
+                        .description("A single platform for providers to onboard their organisation, register and manage their resources.")
                         .version(projectVersion)
                         .license(new License().name("Apache 2.0").url("https://www.apache.org/licenses/LICENSE-2.0")))
                 .servers(properties.getServers())

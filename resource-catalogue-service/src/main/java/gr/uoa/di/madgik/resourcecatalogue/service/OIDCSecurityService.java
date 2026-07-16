@@ -23,9 +23,9 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -41,6 +41,7 @@ public class OIDCSecurityService implements SecurityService {
     private final InteroperabilityRecordService interoperabilityRecordService;
     private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
+    private final ConfigurationTemplateService configurationTemplateService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
@@ -51,6 +52,7 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy InteroperabilityRecordService interoperabilityRecordService,
                                @Lazy DeployableApplicationService deployableApplicationService,
                                @Lazy AdapterService adapterService,
+                               @Lazy ConfigurationTemplateService configurationTemplateService,
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.organisationService = organisationService;
@@ -60,6 +62,7 @@ public class OIDCSecurityService implements SecurityService {
         this.interoperabilityRecordService = interoperabilityRecordService;
         this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
+        this.configurationTemplateService = configurationTemplateService;
     }
 
     @Override
@@ -88,21 +91,29 @@ public class OIDCSecurityService implements SecurityService {
         return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
     }
 
-    public boolean hasPortalAdminRole(Authentication auth) {
-        return auth != null && (hasRole(auth, "ROLE_ADMIN") || hasRole(auth, "ROLE_EPOT"));
+    @Override
+    public boolean hasReadAccess() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && (hasRole(auth, "ROLE_READ") || hasRole(auth, "ROLE_EPOT") || hasRole(auth, "ROLE_ADMIN"));
+    }
+
+    @Override
+    public boolean hasWriteAccess() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && (hasRole(auth, "ROLE_WRITE") || hasRole(auth, "ROLE_EPOT") || hasRole(auth, "ROLE_ADMIN"));
     }
 
     // region Catalogues & Providers
     @Override
-    public boolean hasAdminAccess(Authentication auth, @NotNull String id) {
+    public boolean isOrganisationAdmin(Authentication auth, @NotNull String id) {
         return getAuthenticatedUser(auth)
-                .map(user -> userHasAdminAccess(user, id))
+                .map(user -> userIsOrganisationAdmin(user, id))
                 .orElse(false);
     }
 
     @Override
-    public boolean userHasAdminAccess(User user, @NotNull String id) {
-        List<User> users = getProviderUsers(id);
+    public boolean userIsOrganisationAdmin(User user, @NotNull String id) {
+        List<User> users = getOrganisationUsers(id);
         if (users == null) {
             return false;
         }
@@ -118,12 +129,12 @@ public class OIDCSecurityService implements SecurityService {
         return Optional.of(Objects.requireNonNull(User.of(auth)));
     }
 
-    public List<User> getProviderUsers(String id) {
-        OrganisationBundle registeredProvider = checkProviderExistence(id);
-        return getProviderUsers(registeredProvider); // reuse logic
+    public List<User> getOrganisationUsers(String id) {
+        OrganisationBundle registeredProvider = checkOrganisationExistence(id);
+        return getOrganisationUsers(registeredProvider); // reuse logic
     }
 
-    public List<User> getProviderUsers(OrganisationBundle organisationBundle) {
+    public List<User> getOrganisationUsers(OrganisationBundle organisationBundle) {
         if (organisationBundle == null) {
             return Collections.emptyList();
         }
@@ -142,7 +153,7 @@ public class OIDCSecurityService implements SecurityService {
         return users;
     }
 
-    private OrganisationBundle checkProviderExistence(String providerId) {
+    private OrganisationBundle checkOrganisationExistence(String providerId) {
         try {
             return organisationService.get(providerId);
         } catch (ResourceException | ResourceNotFoundException e) {
@@ -155,7 +166,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean isApprovedProvider(String prefix, String suffix) {
+    public boolean isApprovedOrganisation(String prefix, String suffix) {
         String id = prefix + "/" + suffix;
         OrganisationBundle bundle = organisationService.get(id);
         return "approved".equals(bundle.getStatus());
@@ -174,7 +185,7 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean userIsResourceAdmin(@NotNull User user, String resourceId) {
         String providerId = getProviderId(resourceId);
-        return userHasAdminAccess(user, providerId);
+        return userIsOrganisationAdmin(user, providerId);
     }
 
     @Override
@@ -186,17 +197,17 @@ public class OIDCSecurityService implements SecurityService {
                         return false;
                     }
                     String providerId = getProviderId(bundle);
-                    return userHasAdminAccess(user, providerId);
+                    return userIsOrganisationAdmin(user, providerId);
                 })
                 .orElse(false);
     }
 
     @Override
-    public boolean hasAdminAccess(Authentication auth, @NotNull String externalId, @NotNull String catalogueId) {
+    public boolean isOrganisationAdmin(Authentication auth, @NotNull String externalId, @NotNull String catalogueId) {
         return getAuthenticatedUser(auth)
                 .map(user -> {
-                    OrganisationBundle provider = checkProviderExistence(externalId, catalogueId);
-                    return getProviderUsers(provider).parallelStream()
+                    OrganisationBundle provider = checkOrganisationExistence(externalId, catalogueId);
+                    return getOrganisationUsers(provider).parallelStream()
                             .filter(Objects::nonNull)
                             .anyMatch(u -> userMatches(u, user));
                 })
@@ -226,7 +237,7 @@ public class OIDCSecurityService implements SecurityService {
         }
     }
 
-    private OrganisationBundle checkProviderExistence(String externalId, String catalogueId) {
+    private OrganisationBundle checkOrganisationExistence(String externalId, String catalogueId) {
         try {
             return organisationService.get(getExternalFilters(externalId, catalogueId));
         } catch (ResourceException | ResourceNotFoundException e) {
@@ -372,7 +383,7 @@ public class OIDCSecurityService implements SecurityService {
             return true;
         }
 
-        return hasAdminAccess(auth, provider.getId());
+        return isOrganisationAdmin(auth, provider.getId());
     }
 
     @Override
@@ -381,13 +392,13 @@ public class OIDCSecurityService implements SecurityService {
         if (bundle != null) {
             if (bundle instanceof OrganisationBundle) {
                 if (bundle.getStatus().equals("approved")) {
-                    return hasAdminAccess(auth, id);
+                    return isOrganisationAdmin(auth, id);
                 }
             } else {
                 String providerId = getProviderId(id);
                 OrganisationBundle provider = organisationService.get(providerId);
                 if (provider.getStatus().equals("approved")) {
-                    return hasAdminAccess(auth, providerId);
+                    return isOrganisationAdmin(auth, providerId);
                 }
             }
         }
@@ -395,7 +406,7 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean providerIsActive(String id) {
+    public boolean organisationIsActive(String id) {
         OrganisationBundle organisationBundle = organisationService.get(id);
         return organisationBundle.isActive();
     }
@@ -449,8 +460,15 @@ public class OIDCSecurityService implements SecurityService {
                 .map(user -> {
                     InteroperabilityRecordBundle ir = interoperabilityRecordService.get(interoperabilityRecordId);
                     String providerId = (String) ir.getInteroperabilityRecord().get("resourceOwner");
-                    return userHasAdminAccess(user, providerId);
+                    return userIsOrganisationAdmin(user, providerId);
                 })
                 .orElse(false);
+    }
+
+    @Override
+    public boolean isConfigurationTemplateAdmin(Authentication auth, String configurationTemplateId) {
+        ConfigurationTemplateBundle bundle = configurationTemplateService.get(configurationTemplateId);
+        String interoperabilityRecordId = (String) bundle.getConfigurationTemplate().get("interoperabilityRecordId");
+        return isInteroperabilityRecordAdmin(auth, interoperabilityRecordId);
     }
 }

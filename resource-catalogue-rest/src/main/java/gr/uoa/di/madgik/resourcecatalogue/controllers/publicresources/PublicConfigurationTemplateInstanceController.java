@@ -64,7 +64,7 @@ public class PublicConfigurationTemplateInstanceController extends BasePublicCon
     @Operation(description = "Returns the Configuration Template Instance Bundle with the given id.")
     @Override
     @GetMapping(path = "bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<?> getBundle(@PathVariable String prefix,
                                        @PathVariable String suffix,
                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

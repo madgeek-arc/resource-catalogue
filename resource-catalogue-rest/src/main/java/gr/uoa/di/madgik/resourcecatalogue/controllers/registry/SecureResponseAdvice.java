@@ -78,7 +78,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             fixNodeFacets(t);
 
-            if (t != null && !securityService.hasRole(auth, "ROLE_ADMIN") && !securityService.hasRole(auth, "ROLE_EPOT")) {
+            if (t != null && !securityService.hasReadAccess()) {
                 logger.trace("User is not Admin nor EPOT: attempting to remove sensitive information");
                 if (Collection.class.isAssignableFrom(t.getClass())) {
                     for (T object : ((Collection<T>) t)) {
@@ -163,7 +163,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
             return;
         }
         String id = resource.get("id").toString();
-        if (!this.securityService.hasAdminAccess(auth, id)) {
+        if (!this.securityService.isOrganisationAdmin(auth, id)) {
             resource.put("users", null);
         }
     }
@@ -175,7 +175,7 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
         modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestUpdateInfo());
         modifyLoggingInfo((T) ((OrganisationBundle) bundle).getLatestOnboardingInfo());
 
-        if (!this.securityService.hasAdminAccess(auth, ((OrganisationBundle) bundle).getId())) {
+        if (!this.securityService.isOrganisationAdmin(auth, ((OrganisationBundle) bundle).getId())) {
             LinkedHashMap<String, Object> org = ((OrganisationBundle) bundle).getOrganisation();
             nullifyMainContactEmails(org);
             org.put("users", null);

@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 
 import gr.uoa.di.madgik.resourcecatalogue.exception.OidcAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 
@@ -54,8 +55,10 @@ public class AuthenticationInfo {
             return new HashMap<>();
         } else if (auth.getPrincipal() instanceof OidcUser principal) {
             return principal.getClaims();
-        } else if (auth.getPrincipal() instanceof Jwt) {
-            return ((Jwt) auth.getPrincipal()).getClaims();
+        } else if (auth.getPrincipal() instanceof Jwt jwt) {
+            return jwt.getClaims();
+        } else if (auth.getPrincipal() instanceof OAuth2AuthenticatedPrincipal principal) {
+            return principal.getAttributes();
         } else {
             throw new OidcAuthenticationException("Could not retrieve user details.");
         }

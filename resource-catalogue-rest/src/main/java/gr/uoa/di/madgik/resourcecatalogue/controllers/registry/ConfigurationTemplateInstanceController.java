@@ -82,7 +82,7 @@ public class ConfigurationTemplateInstanceController
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<ConfigurationTemplateInstanceBundle> getBundle(@PathVariable String prefix,
                                                                          @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
@@ -107,7 +107,7 @@ public class ConfigurationTemplateInstanceController
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<ConfigurationTemplateInstanceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                                      @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -150,7 +150,7 @@ public class ConfigurationTemplateInstanceController
 
     @Operation(summary = "Create a new Configuration Template Instance.")
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #cti['resourceId'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #cti['resourceId'])")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> cti,
                                  @Parameter(hidden = true) Authentication auth) {
         ConfigurationTemplateInstanceBundle bundle = new ConfigurationTemplateInstanceBundle();
@@ -169,7 +169,7 @@ public class ConfigurationTemplateInstanceController
 
     @Operation(summary = "Updates the Configuration Template Instance with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #cti['resourceId'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #cti['resourceId'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> cti,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -183,7 +183,7 @@ public class ConfigurationTemplateInstanceController
 
     @Operation(summary = "Deletes the Configuration Template Instance with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {

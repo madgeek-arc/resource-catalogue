@@ -74,7 +74,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     //region generic
     @Operation(summary = "Returns the Datasource with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasReadAccess() or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
             "@securityService.datasourceIsActive(#prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
@@ -86,7 +86,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     }
 
     @GetMapping(path = "/bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<DatasourceBundle> getBundle(@PathVariable String prefix,
                                                       @PathVariable String suffix,
                                                       @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -115,7 +115,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "adminPage/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<DatasourceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
                                                                             @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -132,7 +132,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     @BrowseCatalogue
     @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
     @GetMapping(path = "bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<DatasourceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -155,7 +155,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
     @GetMapping(path = "random")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<DatasourceBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                               @Parameter(hidden = true) Authentication auth) {
         Paging<DatasourceBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingProperties.getInterval(), auth);
@@ -164,7 +164,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @Operation(summary = "Adds a new Datasource.")
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #datasource, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> datasource,
                                  @RequestParam(required = false) String openaireId,
@@ -194,7 +194,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @Operation(summary = "Updates the Datasource with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#datasource['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#datasource['id'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> datasource,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -218,7 +218,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @Operation(summary = "Deletes the Datasource with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -232,7 +232,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @Operation(summary = "Verifies the Datasource.")
     @PatchMapping(path = "verify/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<DatasourceBundle> setStatus(@PathVariable String prefix,
                                                       @PathVariable String suffix,
                                                       @RequestParam(required = false) Boolean active,
@@ -247,7 +247,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @Operation(summary = "Activates/Deactivates the Datasource.")
     @PatchMapping(path = "setActive/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
+    @PreAuthorize("@securityService.hasWriteAccess() " +
             "or @securityService.resourceIsApprovedAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<DatasourceBundle> setActive(@PathVariable String prefix,
                                                       @PathVariable String suffix,
@@ -261,7 +261,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @Operation(summary = "Audits the Datasource.")
     @PatchMapping(path = "audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<DatasourceBundle> audit(@PathVariable String prefix,
                                                   @PathVariable String suffix,
                                                   @RequestParam(required = false) String comment,
@@ -274,7 +274,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @Operation(summary = "Suspends a specific Datasource.")
     @PutMapping(path = "suspend")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public DatasourceBundle suspend(@RequestParam String id,
                                     @RequestParam boolean suspend,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -316,7 +316,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
             "byProvider/{prefix}/{suffix}",
             "byOrganisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<DatasourceBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                   @PathVariable String prefix,
                                                                   @PathVariable String suffix,
@@ -340,7 +340,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     @BrowseParameters
     @GetMapping(path = "getSharedResources/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<?>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                         @PathVariable String prefix,
                                                         @PathVariable String suffix,
@@ -354,7 +354,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     }
 
     @GetMapping(path = {"sendEmailForOutdatedResource/{prefix}/{suffix}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public void sendEmailNotificationToProviderForOutdatedService(@PathVariable String prefix,
                                                                   @PathVariable String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
@@ -450,7 +450,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     }
 
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #datasource['id'])")
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> datasource,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) datasource.get("id");
@@ -462,7 +462,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     }
 
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public void deleteDraft(@PathVariable String prefix,
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -472,7 +472,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
     }
 
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #datasource['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #datasource['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> datasource,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) datasource.get("id");

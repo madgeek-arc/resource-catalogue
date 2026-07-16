@@ -66,7 +66,7 @@ public class ResourceInteroperabilityRecordController {
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<ResourceInteroperabilityRecordBundle> getBundle(@PathVariable String prefix,
                                                                           @PathVariable String suffix) {
         String id = prefix + "/" + suffix;
@@ -91,7 +91,7 @@ public class ResourceInteroperabilityRecordController {
     @BrowseParameters
     @BrowseCatalogue
     @GetMapping(path = "bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<ResourceInteroperabilityRecordBundle>> getAllBundles(@Parameter(hidden = true)
                                                                                       @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -115,7 +115,7 @@ public class ResourceInteroperabilityRecordController {
 
     @Operation(summary = "Adds a new Resource Interoperability Record.")
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #rir['resourceId'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #rir['resourceId'])")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> rir,
                                  @RequestParam String resourceType,
                                  @Parameter(hidden = true) Authentication auth) {
@@ -135,7 +135,7 @@ public class ResourceInteroperabilityRecordController {
 
     @Operation(summary = "Updates the Resource Interoperability Record with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#rir['resourceId'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#rir['resourceId'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> rir,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -150,7 +150,7 @@ public class ResourceInteroperabilityRecordController {
 
     @DeleteMapping(path = "{resourcePrefix}/{resourceSuffix}/{rirPrefix}/{rirSuffix}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #resourcePrefix+'/'+resourceSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #resourcePrefix+'/'+resourceSuffix)")
     public ResponseEntity<?> deleteById(@SuppressWarnings("unused") @PathVariable String resourcePrefix,
                                         @SuppressWarnings("unused") @PathVariable String resourceSuffix,
                                         @PathVariable String rirPrefix,

@@ -95,7 +95,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     //region Catalogue
     @Operation(summary = "Returns the Catalogue with the given id.")
     @GetMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasReadAccess() or " +
             "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix) or " +
             "@securityService.catalogueIsActive(#prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
@@ -107,7 +107,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @GetMapping(path = "/bundle/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<CatalogueBundle> getBundle(@PathVariable String prefix,
                                                      @PathVariable String suffix,
                                                      @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -138,7 +138,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
     })
     @GetMapping(path = "bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<CatalogueBundle>> getAllBundles(@Parameter(hidden = true)
                                                                  @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
@@ -162,7 +162,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             @Parameter(name = "quantity", description = "Quantity to be fetched", schema = @Schema(type = "string"))
     })
     @GetMapping(path = "random")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<CatalogueBundle>> getRandom(@RequestParam(defaultValue = "10") int quantity,
                                                              @Parameter(hidden = true) Authentication auth) {
         Paging<CatalogueBundle> paging = service.getRandomResourcesForAuditing(quantity, auditingProperties.getInterval(), auth);
@@ -171,7 +171,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(summary = "Returns all resources belonging to the Catalogue with the given id.")
     @GetMapping(path = "{prefix}/{suffix}/resources/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<CatalogueResources> getAllCatalogueResources(@PathVariable String prefix,
                                                                        @PathVariable String suffix,
                                                                        @SuppressWarnings("unused")
@@ -182,7 +182,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(summary = "Adds a new Catalogue.")
     @PostMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #catalogue, null)")
     public ResponseEntity<?> add(@RequestBody LinkedHashMap<String, Object> catalogue,
                                  @Parameter(hidden = true) Authentication auth) {
@@ -211,7 +211,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(summary = "Updates the Catalogue with the given id.")
     @PutMapping()
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#catalogueMap['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#catalogueMap['id'])")
     public ResponseEntity<?> update(@RequestBody LinkedHashMap<String, Object> catalogueMap,
                                     @RequestParam(required = false) String comment,
                                     @Parameter(hidden = true) Authentication auth) {
@@ -235,7 +235,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(summary = "Deletes the Catalogue with the given id.")
     @DeleteMapping(path = "{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> delete(@PathVariable String prefix,
                                     @PathVariable String suffix,
                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -248,7 +248,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(summary = "Verifies the Catalogue.")
     @PatchMapping(path = "verify/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<CatalogueBundle> setStatus(@PathVariable String prefix,
                                                      @PathVariable String suffix,
                                                      @RequestParam(required = false) Boolean active,
@@ -263,7 +263,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(summary = "Activates/Deactivates the Catalogue.")
     @PatchMapping(path = "setActive/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') " +
+    @PreAuthorize("@securityService.hasWriteAccess() " +
             "or @securityService.resourceIsApprovedAndUserIsAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<CatalogueBundle> setActive(@PathVariable String prefix,
                                                      @PathVariable String suffix,
@@ -277,7 +277,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(summary = "Audits the Catalogue.")
     @PatchMapping(path = "audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<CatalogueBundle> audit(@PathVariable String prefix,
                                                  @PathVariable String suffix,
                                                  @RequestParam(required = false) String comment,
@@ -290,7 +290,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(summary = "Suspends a specific Catalogue.")
     @PutMapping(path = "suspend")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public CatalogueBundle suspend(@RequestParam String id,
                                    @RequestParam boolean suspend,
                                    @Parameter(hidden = true) Authentication auth) {
@@ -331,7 +331,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "byProvider/{prefix}/{suffix}",
             "byOrganisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#id)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#id)")
     public ResponseEntity<Paging<CatalogueBundle>> getByProvider(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                                  @PathVariable String prefix,
                                                                  @PathVariable String suffix,
@@ -355,7 +355,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @BrowseParameters
     @GetMapping(path = "getSharedResources/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth,#prefix+'/'+#suffix)")
     public ResponseEntity<Paging<?>> getSharedResources(@Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params,
                                                         @PathVariable String prefix,
                                                         @PathVariable String suffix,
@@ -369,7 +369,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @GetMapping(path = {"sendEmailForOutdatedResource/{prefix}/{suffix}"})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public void sendEmailNotificationToProviderForOutdatedService(@PathVariable String prefix,
                                                                   @PathVariable String suffix,
                                                                   @Parameter(hidden = true) Authentication auth) {
@@ -418,7 +418,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @PutMapping(path = "/draft")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #catalogueMap['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #catalogueMap['id'])")
     public ResponseEntity<?> updateDraft(@RequestBody LinkedHashMap<String, Object> catalogueMap,
                                          @Parameter(hidden = true) Authentication auth) {
         String id = (String) catalogueMap.get("id");
@@ -430,7 +430,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @DeleteMapping(path = "/draft/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
     public void deleteDraft(@PathVariable String prefix,
                             @PathVariable String suffix,
                             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -440,7 +440,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
     }
 
     @PutMapping(path = "draft/transform")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth, #catalogueMap['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth, #catalogueMap['id'])")
     public ResponseEntity<?> finalize(@RequestBody LinkedHashMap<String, Object> catalogueMap,
                                       @Parameter(hidden = true) Authentication auth) {
         String id = (String) catalogueMap.get("id");
@@ -477,9 +477,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                              @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String providerId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.hasAdminAccess(auth, providerId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, providerId, catalogueId, true);
         return new ResponseEntity<>(organisationService.get(getExternalFilters(providerId, catalogueId)), HttpStatus.OK);
     }
 
@@ -508,7 +506,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "{cataloguePrefix}/{catalogueSuffix}/provider/bundle/all",
             "{cataloguePrefix}/{catalogueSuffix}/organisation/bundle/all"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<OrganisationBundle>> getAllCatalogueOrganisationBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                                          @Parameter(hidden = true)
                                                                                          @RequestParam MultiValueMap<String, Object> params,
@@ -534,9 +532,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                             @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String providerId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.hasAdminAccess(auth, providerId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, providerId, catalogueId, true);
         OrganisationBundle bundle = organisationService.get(getExternalFilters(providerId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = organisationService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -581,7 +577,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "{cataloguePrefix}/{catalogueSuffix}/provider",
             "{cataloguePrefix}/{catalogueSuffix}/organisation"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth,#provider['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth,#provider['id'])")
     public ResponseEntity<?> updateCatalogueOrganisation(@RequestBody LinkedHashMap<String, Object> provider,
                                                          @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                          @RequestParam(required = false) String comment,
@@ -616,7 +612,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "{cataloguePrefix}/{catalogueSuffix}/provider/**",
             "{cataloguePrefix}/{catalogueSuffix}/organisation/**"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueOrganisation(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                          HttpServletRequest request,
                                                          @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -633,7 +629,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
             "{cataloguePrefix}/{catalogueSuffix}/provider/audit/{prefix}/{suffix}",
             "{cataloguePrefix}/{catalogueSuffix}/organisation/audit/{prefix}/{suffix}"
     })
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<OrganisationBundle> auditOrganisation(@PathVariable String prefix,
                                                                 @PathVariable String suffix,
                                                                 @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -664,9 +660,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                    @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String serviceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, serviceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, serviceId, catalogueId, false);
         return new ResponseEntity<>(serviceService.get(getExternalFilters(serviceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -689,7 +683,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<ServiceBundle>> getAllCatalogueServiceBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                                @Parameter(hidden = true)
                                                                                @RequestParam MultiValueMap<String, Object> params,
@@ -712,9 +706,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                        @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String serviceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, serviceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, serviceId, catalogueId, false);
         ServiceBundle bundle = serviceService.get(getExternalFilters(serviceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = serviceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -722,7 +714,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Creates a new Service for the specific Catalogue.")
     @PostMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #service, null)")
     public ResponseEntity<?> addCatalogueService(@RequestBody LinkedHashMap<String, Object> service,
                                                  @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -738,7 +730,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Updates the Service of the specific Catalogue.")
     @PutMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#service['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#service['id'])")
     public ResponseEntity<?> updateCatalogueService(@RequestBody LinkedHashMap<String, Object> service,
                                                     @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                     @RequestParam(required = false) String comment,
@@ -754,7 +746,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Service of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/**")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueService(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                     HttpServletRequest request,
                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -768,7 +760,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @PatchMapping(path = "{cataloguePrefix}/{catalogueSuffix}/service/audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<ServiceBundle> auditService(@PathVariable String prefix,
                                                       @PathVariable String suffix,
                                                       @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -799,9 +791,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                          @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String datasourceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, datasourceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, datasourceId, catalogueId, false);
         return new ResponseEntity<>(datasourceService.get(getExternalFilters(datasourceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -824,7 +814,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<DatasourceBundle>> getAllCatalogueDatasourceBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                                      @Parameter(hidden = true)
                                                                                      @RequestParam MultiValueMap<String, Object> params,
@@ -847,9 +837,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                           @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String datasourceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, datasourceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, datasourceId, catalogueId, false);
         DatasourceBundle bundle = datasourceService.get(getExternalFilters(datasourceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = datasourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -857,7 +845,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Creates a new Datasource for the specific Catalogue.")
     @PostMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #datasource, null)")
     public ResponseEntity<?> addCatalogueDatasource(@RequestBody LinkedHashMap<String, Object> datasource,
                                                     @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -873,7 +861,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Updates the Datasource of the specific Catalogue.")
     @PutMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#datasource['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#datasource['id'])")
     public ResponseEntity<?> updateCatalogueDatasource(@RequestBody LinkedHashMap<String, Object> datasource,
                                                        @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                        @RequestParam(required = false) String comment,
@@ -889,7 +877,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Datasource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/**")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueDatasource(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                        HttpServletRequest request,
                                                        @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -903,7 +891,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @PatchMapping(path = "{cataloguePrefix}/{catalogueSuffix}/datasource/audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<DatasourceBundle> auditDatasource(@PathVariable String prefix,
                                                             @PathVariable String suffix,
                                                             @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -934,9 +922,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                    @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String adapterId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, adapterId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, adapterId, catalogueId, false);
         return new ResponseEntity<>(adapterService.get(getExternalFilters(adapterId, catalogueId)), HttpStatus.OK);
     }
 
@@ -959,7 +945,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<AdapterBundle>> getAllCatalogueAdapterBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                                @Parameter(hidden = true)
                                                                                @RequestParam MultiValueMap<String, Object> params,
@@ -982,9 +968,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                        @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String adapterId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, adapterId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, adapterId, catalogueId, false);
         AdapterBundle bundle = adapterService.get(getExternalFilters(adapterId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = adapterService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -992,7 +976,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Creates a new Adapter for the specific Catalogue.")
     @PostMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #adapter, null)")
     public ResponseEntity<?> addCatalogueAdapter(@RequestBody LinkedHashMap<String, Object> adapter,
                                                  @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -1008,7 +992,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Updates the Adapter of the specific Catalogue.")
     @PutMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#adapter['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#adapter['id'])")
     public ResponseEntity<?> updateCatalogueAdapter(@RequestBody LinkedHashMap<String, Object> adapter,
                                                     @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                     @RequestParam(required = false) String comment,
@@ -1024,7 +1008,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Adapter of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/**")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueAdapter(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                     HttpServletRequest request,
                                                     @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -1038,7 +1022,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @PatchMapping(path = "{cataloguePrefix}/{catalogueSuffix}/adapter/audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<AdapterBundle> auditAdapter(@PathVariable String prefix,
                                                       @PathVariable String suffix,
                                                       @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -1070,9 +1054,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                      @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String trainingResourceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, trainingResourceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, trainingResourceId, catalogueId, false);
         return new ResponseEntity<>(trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1095,7 +1077,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<TrainingResourceBundle>> getAllCatalogueTrainingResourceBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                                                  @Parameter(hidden = true)
                                                                                                  @RequestParam MultiValueMap<String, Object> params,
@@ -1118,9 +1100,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                 @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String trainingResourceId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, trainingResourceId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, trainingResourceId, catalogueId, false);
         TrainingResourceBundle bundle = trainingResourceService.get(getExternalFilters(trainingResourceId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = trainingResourceService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1128,7 +1108,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Creates a new Training Resource for the specific Catalogue.")
     @PostMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #trainingResource, null)")
     public ResponseEntity<?> addCatalogueTrainingResource(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                                           @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -1144,7 +1124,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Updates the Training Resource of the specific Catalogue.")
     @PutMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#trainingResource['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#trainingResource['id'])")
     public ResponseEntity<?> updateCatalogueTrainingResource(@RequestBody LinkedHashMap<String, Object> trainingResource,
                                                              @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                              @RequestParam(required = false) String comment,
@@ -1160,7 +1140,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Training Resource of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/**")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueTrainingResource(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                              HttpServletRequest request,
                                                              @SuppressWarnings("unused")
@@ -1175,7 +1155,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @PatchMapping(path = "{cataloguePrefix}/{catalogueSuffix}/trainingResource/audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<TrainingResourceBundle> auditTrainingResource(@PathVariable String prefix,
                                                                         @PathVariable String suffix,
                                                                         @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -1207,9 +1187,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                                @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String deployableApplicationId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, deployableApplicationId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, deployableApplicationId, catalogueId, false);
         return new ResponseEntity<>(deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1232,7 +1210,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<DeployableApplicationBundle>> getAllCatalogueDeployableApplicationBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                                                            @Parameter(hidden = true)
                                                                                                            @RequestParam MultiValueMap<String, Object> params,
@@ -1255,9 +1233,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                      @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String deployableApplicationId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, deployableApplicationId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, deployableApplicationId, catalogueId, false);
         DeployableApplicationBundle bundle = deployableApplicationService.get(getExternalFilters(deployableApplicationId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = deployableApplicationService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1265,7 +1241,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Creates a new Deployable Application for the specific Catalogue.")
     @PostMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #deployableApplication, null)")
     public ResponseEntity<?> addCatalogueDeployableApplication(@RequestBody LinkedHashMap<String, Object> deployableApplication,
                                                                @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -1281,7 +1257,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Updates the Deployable Application of the specific Catalogue.")
     @PutMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#deployableApplication['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#deployableApplication['id'])")
     public ResponseEntity<?> updateCatalogueDeployableApplication(@RequestBody LinkedHashMap<String, Object> deployableApplication,
                                                                   @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                   @RequestParam(required = false) String comment,
@@ -1297,7 +1273,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Deployable Application of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/**")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueDeployableApplication(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                   HttpServletRequest request,
                                                                   @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -1311,7 +1287,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @PatchMapping(path = "{cataloguePrefix}/{catalogueSuffix}/deployableApplication/audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<DeployableApplicationBundle> auditDeployableApplication(@PathVariable String prefix,
                                                                                   @PathVariable String suffix,
                                                                                   @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -1342,9 +1318,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                                  @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String interoperabilityRecordId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, interoperabilityRecordId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, interoperabilityRecordId, catalogueId, false);
         return new ResponseEntity<>(guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId)), HttpStatus.OK);
     }
 
@@ -1367,7 +1341,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @GetMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/bundle/all")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<InteroperabilityRecordBundle>> getAllCatalogueInteroperabilityRecordBundles(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                                                              @Parameter(hidden = true)
                                                                                                              @RequestParam MultiValueMap<String, Object> params,
@@ -1390,9 +1364,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                                                                                       @Parameter(hidden = true) Authentication auth) {
         String catalogueId = cataloguePrefix + "/" + catalogueSuffix;
         String interoperabilityRecordId = extractWildcardId(request);
-        if (!securityService.hasPortalAdminRole(auth) && !securityService.isResourceAdmin(auth, interoperabilityRecordId, catalogueId)) {
-            throw new AccessDeniedException("Forbidden");
-        }
+        checkResourceAdmin(auth, interoperabilityRecordId, catalogueId, false);
         InteroperabilityRecordBundle bundle = guidelineService.get(getExternalFilters(interoperabilityRecordId, catalogueId));
         List<LoggingInfo> loggingInfoHistory = guidelineService.getLoggingInfoHistory(bundle);
         return ResponseEntity.ok(loggingInfoHistory);
@@ -1400,7 +1372,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Creates a new Interoperability Record for the specific Catalogue.")
     @PostMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or " +
+    @PreAuthorize("@securityService.hasWriteAccess() or " +
             "@securityService.providerCanAddResources(#auth, #interoperabilityRecord, null)")
     public ResponseEntity<?> addCatalogueInteroperabilityRecord(@RequestBody LinkedHashMap<String, Object> interoperabilityRecord,
                                                                 @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -1416,7 +1388,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Updates the Interoperability Record of the specific Catalogue.")
     @PutMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT') or @securityService.isResourceAdmin(#auth,#interoperabilityRecord['id'])")
+    @PreAuthorize("@securityService.hasWriteAccess() or @securityService.isResourceAdmin(#auth,#interoperabilityRecord['id'])")
     public ResponseEntity<?> updateCatalogueInteroperabilityRecord(@RequestBody LinkedHashMap<String, Object> interoperabilityRecord,
                                                                    @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                    @RequestParam(required = false) String comment,
@@ -1432,7 +1404,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Operation(description = "Deletes the Interoperability Record of the specific Catalogue with the given id.")
     @DeleteMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/**")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.hasAdminAccess(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isOrganisationAdmin(#auth, #cataloguePrefix+'/'+#catalogueSuffix)")
     public ResponseEntity<?> deleteCatalogueInteroperabilityRecord(@PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
                                                                    HttpServletRequest request,
                                                                    @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
@@ -1446,7 +1418,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
 
     @Hidden
     @PatchMapping(path = "{cataloguePrefix}/{catalogueSuffix}/interoperabilityRecord/audit/{prefix}/{suffix}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasWriteAccess()")
     public ResponseEntity<InteroperabilityRecordBundle> auditInteroperabilityRecord(@PathVariable String prefix,
                                                                                     @PathVariable String suffix,
                                                                                     @PathVariable String cataloguePrefix, @PathVariable String catalogueSuffix,
@@ -1472,6 +1444,15 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         return new AntPathMatcher().extractPathWithinPattern(pattern, path);
+    }
+
+    private void checkResourceAdmin(Authentication auth, String externalId, String catalogueId, boolean isOrganisation) {
+        boolean isAdmin = isOrganisation
+                ? securityService.isOrganisationAdmin(auth, externalId, catalogueId)
+                : securityService.isResourceAdmin(auth, externalId, catalogueId);
+        if (!securityService.hasReadAccess() && !isAdmin) {
+            throw new AccessDeniedException("Forbidden");
+        }
     }
     //endregion
 }

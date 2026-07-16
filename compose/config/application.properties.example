@@ -16,10 +16,12 @@ spring.security.oauth2.client.provider.eosc.issuer-uri=https://aai.example.eu/au
 spring.security.oauth2.client.registration.eosc.client-id=
 spring.security.oauth2.client.registration.eosc.client-name=EOSC
 spring.security.oauth2.client.registration.eosc.client-secret=
-spring.security.oauth2.client.registration.eosc.scope=openid,email,profile
+spring.security.oauth2.client.registration.eosc.scope=openid,email,profile,entitlements
 spring.security.oauth2.client.registration.eosc.redirect-uri=https://catalogue.example.eu/api/login/oauth2/code/eosc
 
-spring.security.oauth2.resourceserver.jwt.issuer-uri=https://aai.example.eu/auth/realms/example
+spring.security.oauth2.resourceserver.opaquetoken.introspection-uri=${spring.security.oauth2.client.provider.eosc.issuer-uri}/protocol/openid-connect/token/introspect
+spring.security.oauth2.resourceserver.opaquetoken.client-id=${spring.security.oauth2.client.registration.eosc.client-id}
+spring.security.oauth2.resourceserver.opaquetoken.client-secret=${spring.security.oauth2.client.registration.eosc.client-secret}
 
 
 ##########################
@@ -74,6 +76,8 @@ node.registry.key=
 ### Admins / Onboarding Team ###
 catalogue.admins=admin@example.eu
 catalogue.onboarding-team=admin@example.eu
+## AARC Entitlement Group ##
+catalogue.entitlement-group=service-catalogue
 ### Redirect URLs ###
 catalogue.login-redirect=https://catalogue.example.eu
 catalogue.logout-redirect=https://catalogue.example.eu

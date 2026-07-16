@@ -72,7 +72,7 @@ public class CSVController {
     @Hidden
     @Operation(summary = "Downloads a csv file with Organisation entries.")
     @GetMapping(path = "providers", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<String> providersToCSV(@RequestParam(required = false) Boolean published,
                                                  @Parameter(hidden = true) Authentication auth,
                                                  HttpServletResponse response) {
@@ -86,7 +86,7 @@ public class CSVController {
     @Hidden
     @Operation(summary = "Downloads a csv file with Service entries.")
     @GetMapping(path = "services", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<String> servicesToCSV(@RequestParam(required = false) Boolean published,
                                                 @Parameter(hidden = true) Authentication auth,
                                                 HttpServletResponse response) {
@@ -100,7 +100,7 @@ public class CSVController {
     @Hidden
     @Operation(summary = "Downloads a csv file with Vocabulary entries.")
     @GetMapping(path = "vocabularies", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<String> vocabulariesToCSV(@Parameter(hidden = true) Authentication auth,
                                                     HttpServletResponse response) {
         Paging<Vocabulary> vocabularies = vocabularyService.getAll(createFacetFilter(null), auth);
@@ -113,7 +113,7 @@ public class CSVController {
     @Hidden
     @Operation(summary = "Downloads a csv file with the number of approved services per provider and country, before a specific date.")
     @GetMapping(path = "approvedServicesByProviderAndCountry", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EPOT')")
+    @PreAuthorize("@securityService.hasReadAccess()")
     public void numberOfServicesPerProviderCountryToCSV(@Parameter(description = "Before date (format yyyy-MM-dd)",
                                                                 example = "2023-01-01")
                                                         @RequestParam String date,

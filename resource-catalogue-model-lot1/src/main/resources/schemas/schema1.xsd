@@ -885,13 +885,13 @@ a Provider's design towards interoperability based on the guideline.]]></xs:docu
             
       <xs:element minOccurs="0" name="affiliation" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[The organizational or institutional affiliation of the creator.]]></xs:documentation>
+          <xs:documentation><![CDATA[The organisational or institutional affiliation of the creator.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
             
       <xs:element minOccurs="0" name="affiliationIdentifier" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[Uniquely identifies the organizational affiliation of the creator.]]></xs:documentation>
+          <xs:documentation><![CDATA[Uniquely identifies the organisational affiliation of the creator.]]></xs:documentation>
         </xs:annotation>
       </xs:element>
           
