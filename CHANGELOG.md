@@ -1,5 +1,26 @@
 # Changelog
 
+## [6.3.0](https://github.com/madgeek-arc/resource-catalogue/compare/v6.2.0...v6.3.0) (2026-07-16)
+
+
+### Features
+
+* create hasReadAccess() / hasWriteAccess() security methods and replace hasAnyRole(..) checks in controllers ([9875add](https://github.com/madgeek-arc/resource-catalogue/commit/9875add5f8588a17ea6b9e4a34fe52cfbed18ba8))
+* replace JWT token auth with opaque token auth ([95d5a00](https://github.com/madgeek-arc/resource-catalogue/commit/95d5a002e811a7706ab986d08e1b80e750f1f725))
+
+
+### Bug Fixes
+
+* update condition for elevated read access ([bc7bcce](https://github.com/madgeek-arc/resource-catalogue/commit/bc7bcce1d49430905b25d0a8369a26c3e11e355d))
+
+
+### Refactoring
+
+* extract checkResourceAdmin() helper in CatalogueController ([7db6c65](https://github.com/madgeek-arc/resource-catalogue/commit/7db6c65f185e3551d571e79d19e3225cd9de524b))
+* make entitlement group a configurable property ([232c594](https://github.com/madgeek-arc/resource-catalogue/commit/232c594217e868739f99dbc6b8a49e8aa03def46))
+* rename security methods ([5fcf4b9](https://github.com/madgeek-arc/resource-catalogue/commit/5fcf4b9a6919fce32370c6489d3cf69584cbd209))
+* replace custom token introspector with spring-security's default and override authentication converter ([01f90db](https://github.com/madgeek-arc/resource-catalogue/commit/01f90dbd5d8aed41e1385cc5709248342346f9bb))
+
 ## [6.2.0](https://github.com/madgeek-arc/resource-catalogue/compare/v6.1.2...v6.2.0) (2026-07-06)
 
 
