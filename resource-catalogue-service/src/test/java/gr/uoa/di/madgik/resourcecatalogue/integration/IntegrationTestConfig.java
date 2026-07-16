@@ -36,7 +36,7 @@ public class IntegrationTestConfig {
 
     @Container
     static final ElasticsearchContainer elastic =
-            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.4.2")
+            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:9.4.3")
                     .withPassword("password")
                     .withStartupTimeout(Duration.ofMinutes(5))
                     .withEnv("discovery.type", "single-node")

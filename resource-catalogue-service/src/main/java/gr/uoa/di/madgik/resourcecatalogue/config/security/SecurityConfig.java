@@ -65,15 +65,12 @@ public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
-    private static final String ENTITLEMENT_GROUP = "service-catalogue";
-    private static final Pattern ENTITLEMENT_ROLE_PATTERN =
-            Pattern.compile(":group:" + Pattern.quote(ENTITLEMENT_GROUP) + ":role=([^:#]+)");
-
     private final AuthenticationSuccessHandler authSuccessHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final UserInfoService userInfoService;
     private final CatalogueProperties catalogueProperties;
     private final AuthoritiesMapper authoritiesMapper;
+    private final Pattern entitlementRolePattern;
 
     public SecurityConfig(AuthenticationSuccessHandler authSuccessHandler,
                           ClientRegistrationRepository clientRegistrationRepository,
@@ -85,6 +82,8 @@ public class SecurityConfig {
         this.userInfoService = userInfoService;
         this.catalogueProperties = catalogueProperties;
         this.authoritiesMapper = authoritiesMapper;
+        this.entitlementRolePattern = Pattern.compile(
+                ":group:" + Pattern.quote(catalogueProperties.getEntitlementGroup()) + ":role=([^:#]+)");
     }
 
     @Bean
@@ -264,13 +263,13 @@ public class SecurityConfig {
     }
 
     /**
-     * Maps AARC-style entitlement URNs for the {@value #ENTITLEMENT_GROUP} group
+     * Maps AARC-style entitlement URNs for the configured entitlement group
      * (role=x) to ROLE_X authorities.
      */
-    static Set<GrantedAuthority> resolveEntitlementAuthorities(Map<String, Object> attributes) {
+    Set<GrantedAuthority> resolveEntitlementAuthorities(Map<String, Object> attributes) {
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (String entitlement : extractEntitlements(attributes)) {
-            Matcher matcher = ENTITLEMENT_ROLE_PATTERN.matcher(entitlement);
+            Matcher matcher = entitlementRolePattern.matcher(entitlement);
             if (!matcher.find()) {
                 continue;
             }
