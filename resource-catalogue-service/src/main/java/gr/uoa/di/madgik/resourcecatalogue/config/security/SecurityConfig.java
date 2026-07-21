@@ -88,12 +88,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
-                                            OpaqueTokenAuthenticationConverter opaqueTokenAuthenticationConverter) {
+                                            OpaqueTokenAuthenticationConverter opaqueTokenAuthenticationConverter,
+                                            WizardAccessDeniedHandler wizardAccessDeniedHandler) {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/resourcesync/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/forms/**", "/models/**", "/resourceTypes/**").permitAll()
+                                .requestMatchers("/wizard/403").permitAll()
                                 .requestMatchers(
                                         "/logs/**",
                                         "/forms/**",
@@ -104,9 +106,13 @@ public class SecurityConfig {
                                         "/restore/",
                                         "/resources/**",
                                         "/resourceType/**",
-                                        "/search/**").hasAuthority("ROLE_ADMIN")
+                                        "/search/**",
+                                        "/wizard/**").hasAuthority("ROLE_ADMIN")
                                 .anyRequest().permitAll()
                 )
+
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.accessDeniedHandler(wizardAccessDeniedHandler))
 
                 .oauth2Login(oauth2login ->
                         oauth2login

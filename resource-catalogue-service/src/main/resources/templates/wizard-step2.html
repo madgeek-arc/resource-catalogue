@@ -79,6 +79,18 @@
             align-items: center;
             margin-top: 20px;
         }
+
+        li.status-NEW {
+            background-color: #eee;
+        }
+
+        li.status-CHANGED {
+            background-color: #fff3cd;
+        }
+
+        li.status-UP_TO_DATE {
+            background-color: #d4edda;
+        }
     </style>
 </head>
 <body>
@@ -91,16 +103,16 @@
 
 <form th:action="@{step2/loadModels}" method="post" id="modelsForm">
     <ul>
-        <li th:each="entry : ${modelStatus}">
+        <li th:each="entry : ${modelStatus}" th:class="'status-' + ${entry.value}">
             <input type="checkbox" th:id="${entry.key}" th:value="${entry.key}"
-                   th:checked="${entry.value}" disabled/>
-            <label th:for="${entry.key}" th:text="${entry.key}"></label>
+                   th:checked="${entry.value.name() == 'UP_TO_DATE'}" disabled/>
+            <label th:for="${entry.key}" th:text="${entry.key} + ' — ' + ${entry.value}"></label>
         </li>
     </ul>
 
     <div>
         <div style="display: block">
-            <button type="submit" id="loadBtn" th:disabled="${allModelsLoading || allModelsLoaded}">
+            <button type="submit" id="loadBtn" th:disabled="${allModelsLoaded}">
                 Load Models
             </button>
         </div>
