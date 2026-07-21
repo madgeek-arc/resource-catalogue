@@ -925,6 +925,11 @@
                   "form": {
                     "dependsOn": null,
                     "affects": null,
+                    "autofillFrom": {
+                      "field": "licenseName",
+                      "vocabularyUrl": "/api/vocabulary/types/Spdx%20license",
+                      "sourceProperty": "extras.url"
+                    },
                     "group": null,
                     "description": {
                       "text": "A license document that applies to this content, typically indicated by URL.",
