@@ -19,7 +19,7 @@
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Urls",
@@ -36,7 +36,7 @@
       "path": "$.service.name",
       "type": "java.lang.String",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Description",
@@ -45,7 +45,7 @@
       "path": "$.service.description",
       "type": "java.lang.String",
       "searchCapabilities": ["TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Alternative PIDs",
@@ -53,7 +53,7 @@
       "name": "alternative_pids",
       "path": "$.service.alternativePIDs[*].pid",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Node",
@@ -63,7 +63,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Type",
@@ -71,7 +71,7 @@
       "name": "type",
       "path": "$.service.type",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Resource Owner",
@@ -82,7 +82,7 @@
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Service Provider",
@@ -93,7 +93,7 @@
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Webpage",
@@ -101,7 +101,7 @@
       "name": "webpage",
       "path": "$.service.webpage",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Logo",
@@ -178,7 +178,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "TRL",
@@ -222,7 +222,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Order",
@@ -312,7 +312,7 @@
       "name": "externalId",
       "path": "$.identifiers.externalId",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": null,

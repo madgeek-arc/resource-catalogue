@@ -19,7 +19,7 @@
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Organisation Name",
@@ -28,7 +28,7 @@
       "path": "$.organisation.name",
       "type": "java.lang.String",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Description",
@@ -37,7 +37,7 @@
       "path": "$.organisation.description",
       "type": "java.lang.String",
       "searchCapabilities": ["TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Alternative PIDs",
@@ -45,7 +45,7 @@
       "name": "alternative_pids",
       "path": "$.organisation.alternativePIDs[*].pid",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Node",
@@ -55,7 +55,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Abbreviation",
@@ -74,7 +74,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Legal Entity",
@@ -228,7 +228,7 @@
       "name": "externalId",
       "path": "$.identifiers.externalId",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": null,

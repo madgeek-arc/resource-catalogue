@@ -18,7 +18,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Urls",
@@ -35,7 +35,7 @@
       "path": "$.adapter.name",
       "type": "java.lang.String",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Description",
@@ -44,7 +44,7 @@
       "path": "$.adapter.description",
       "type": "java.lang.String",
       "searchCapabilities": ["TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Alternative PIDs",
@@ -52,7 +52,7 @@
       "name": "alternative_pids",
       "path": "$.adapter.alternativePIDs[*].pid",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Node",
@@ -62,7 +62,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Type",
@@ -70,7 +70,7 @@
       "name": "type",
       "path": "$.adapter.type",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Resource Owner",
@@ -81,7 +81,7 @@
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Linked Resource ID",
@@ -108,7 +108,7 @@
       "name": "documentation",
       "path": "$.adapter.documentation",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Software Repository",
@@ -116,7 +116,7 @@
       "name": "software_repository",
       "path": "$.adapter.softwareRepository",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Package",
@@ -124,7 +124,7 @@
       "name": "package",
       "path": "$.adapter.package",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Programming Language",
@@ -135,7 +135,7 @@
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "License",
@@ -255,7 +255,7 @@
       "path": "$.identifiers.externalId",
       "type": "java.lang.String",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": null,

@@ -19,7 +19,7 @@
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Interoperability Record ID",
@@ -30,7 +30,7 @@
       "relatedResourceType": "interoperability_record",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Node",
@@ -40,7 +40,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Name",
@@ -49,7 +49,7 @@
       "path": "$.configurationTemplate.name",
       "type": "java.lang.String",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Model ID",
@@ -60,7 +60,7 @@
       "relatedResourceType": "model",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": null,

@@ -19,7 +19,7 @@
       "relatedResourceType": "service",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Configuration Template ID",
@@ -30,7 +30,7 @@
       "relatedResourceType": "configuration_template",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Catalogue ID",
@@ -41,7 +41,7 @@
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Node",
@@ -51,7 +51,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Configuration Template Payload",
