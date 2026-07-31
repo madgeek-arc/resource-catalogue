@@ -24,6 +24,7 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,6 +52,7 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.Instant;
 import java.util.*;
@@ -62,6 +64,8 @@ import java.util.regex.Pattern;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true, mode = AdviceMode.PROXY)
 public class SecurityConfig {
+
+    private static final String EMAIL = "email";
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
@@ -142,7 +146,7 @@ public class SecurityConfig {
 
     @Bean
     public GrantedAuthoritiesMapper userAuthoritiesMapper() {
-        return (authorities) -> {
+        return authorities -> {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
             authorities.forEach(authority -> {
@@ -188,11 +192,24 @@ public class SecurityConfig {
         return (introspectedToken, principal) -> {
             Map<String, Object> attributes = new HashMap<>(principal.getAttributes());
 
-            String email = attributes.get("email") != null ? attributes.get("email").toString() : null;
+            String email = attributes.get(EMAIL) != null ? attributes.get(EMAIL).toString() : null;
             if (email == null) {
-                Map<String, Object> info = userInfoService.getUserInfo("eosc", introspectedToken);
-                attributes.putAll(info);
-                email = info.get("email") != null ? info.get("email").toString() : null;
+                try {
+                    Map<String, Object> info = userInfoService.getUserInfo("eosc", introspectedToken);
+                    attributes.putAll(info);
+                    email = info.get(EMAIL) != null ? info.get(EMAIL).toString() : null;
+                } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.Forbidden e) {
+                    // Handle 401 and 403 - this may happen if the token is invalid or doesn't have the required scopes
+                    if (logger.isDebugEnabled()) {
+                        HttpHeaders headers = e.getResponseHeaders();
+                        String wwwAuthenticate = headers != null ? headers.getFirst(HttpHeaders.WWW_AUTHENTICATE) : null;
+                        if (wwwAuthenticate != null) {
+                            logger.debug("Couldn't get userinfo for user {}: {}", principal.getName(), wwwAuthenticate);
+                        } else {
+                            logger.debug("Couldn't get userinfo for user {}: {}", principal.getName(), e.toString());
+                        }
+                    }
+                }
             }
 
             Set<GrantedAuthority> authorities = new HashSet<>(authoritiesMapper.getAuthorities(email));
@@ -225,8 +242,8 @@ public class SecurityConfig {
                 return new AuthorityContext(userInfo.getEmail(), userInfo.getClaims());
             }
             Map<String, Object> attributes = oidcUserAuthority.getAttributes();
-            String email = attributes != null && attributes.containsKey("email")
-                    ? String.valueOf(attributes.get("email"))
+            String email = attributes != null && attributes.containsKey(EMAIL)
+                    ? String.valueOf(attributes.get(EMAIL))
                     : "";
             return new AuthorityContext(email, attributes);
         }
@@ -234,9 +251,14 @@ public class SecurityConfig {
         if (authority instanceof OAuth2UserAuthority oauth2UserAuthority) {
             Map<String, Object> attributes = oauth2UserAuthority.getAttributes();
             String email = "";
-            if (attributes != null && (catalogueProperties.getAdmins().contains(attributes.get("email"))
-                    || catalogueProperties.getOnboardingTeam().contains(attributes.get("email")))) {
-                email = String.valueOf(attributes.get("email"));
+            if (attributes != null) {
+                Object emailAttribute = attributes.get(EMAIL);
+                if (emailAttribute instanceof String && (
+                        catalogueProperties.getAdmins().contains(emailAttribute) ||
+                                catalogueProperties.getOnboardingTeam().contains(emailAttribute))
+                ) {
+                    email = String.valueOf(emailAttribute);
+                }
             }
             return new AuthorityContext(email, attributes);
         }
@@ -273,12 +295,13 @@ public class SecurityConfig {
             if (!matcher.find()) {
                 continue;
             }
-            switch (matcher.group(1)) {
+            String matchedEntitlement = matcher.group(1);
+            switch (matchedEntitlement) {
                 case "read" -> authorities.add(new SimpleGrantedAuthority("ROLE_READ"));
                 case "write" -> authorities.add(new SimpleGrantedAuthority("ROLE_WRITE"));
                 case "epot" -> authorities.add(new SimpleGrantedAuthority("ROLE_EPOT"));
                 case "admin" -> authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                default -> logger.debug("Unrecognized entitlement role '{}' in '{}'", matcher.group(1), entitlement);
+                default -> logger.debug("Unrecognized entitlement role '{}' in '{}'", matchedEntitlement, entitlement);
             }
         }
         return authorities;
