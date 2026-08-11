@@ -49,7 +49,7 @@
         <testcontainers.version>2.0.3</testcontainers.version>
         <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
-        <netty.version>4.2.15.Final</netty.version>
+        <netty.version>4.2.16.Final</netty.version>
         <tomcat.version>11.0.24</tomcat.version>
         <postgresql.version>42.7.13</postgresql.version>
         <!-- CVE-2026-49844: log4j-core JSON MapMessage encoding issue, fixed in 2.26.1 (Boot 4.0.7 manages 2.25.4) -->
