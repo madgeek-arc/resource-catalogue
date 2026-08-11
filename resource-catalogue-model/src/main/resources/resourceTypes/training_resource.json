@@ -18,7 +18,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.0
     },
     {
@@ -81,7 +81,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.5
     },
     {
@@ -92,7 +92,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "service",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 1.0
     },
     {
@@ -141,6 +141,7 @@
       "name": "learning_outcomes",
       "path": "$.trainingResource.learningOutcomes[*]",
       "type": "java.lang.String",
+      "searchCapabilities": ["TEXT"],
       "embeddingWeight": 3.0
     },
     {
@@ -217,6 +218,7 @@
       "name": "keywords",
       "path": "$.trainingResource.keywords[*]",
       "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"],
       "embeddingWeight": 1.0
     },
     {

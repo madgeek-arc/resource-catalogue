@@ -80,7 +80,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.5
     },
     {
@@ -91,7 +91,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "linkedResources",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 1.0
     },
     {
@@ -134,7 +134,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.5
     },
     {
@@ -189,7 +189,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.0
     },
     {
@@ -254,7 +254,6 @@
       "name": "externalId",
       "path": "$.identifiers.externalId",
       "type": "java.lang.String",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
       "embeddingWeight": 0.0
     },
     {

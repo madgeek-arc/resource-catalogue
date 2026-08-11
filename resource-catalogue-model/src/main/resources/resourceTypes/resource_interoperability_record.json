@@ -18,7 +18,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.0
     },
     {
@@ -29,7 +29,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "eoscServices",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.0
     },
     {
@@ -50,7 +50,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "interoperability_record",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.0
     },
     {

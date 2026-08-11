@@ -18,7 +18,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.0
     },
     {
@@ -81,7 +81,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.5
     },
     {
@@ -136,6 +136,7 @@
       "name": "tags",
       "path": "$.deployableApplication.tags[*]",
       "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"],
       "embeddingWeight": 1.0
     },
     {

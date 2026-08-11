@@ -18,7 +18,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 0.0
     },
     {
@@ -29,8 +29,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "interoperability_record",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 3.0
+      "searchCapabilities": ["KEYWORD"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Node",
@@ -59,8 +59,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "model",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 3.0
+      "searchCapabilities": ["KEYWORD"],
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
