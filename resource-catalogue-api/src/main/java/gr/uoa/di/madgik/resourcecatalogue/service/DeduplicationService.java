@@ -30,4 +30,13 @@ public interface DeduplicationService {
     List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, String id, Float threshold, int quantity);
 
     List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, Map<String, Object> resource, Float threshold, int quantity);
+
+    /**
+     * Local-node-only equivalent of {@link #findSimilar(String, Map, Float, int)} — no federation
+     * fan-out. This is what the federation aggregator itself calls on each node when it fans a
+     * check out across the federation; it must never trigger a further federation call, or a node
+     * calling the aggregator would cause the aggregator to call back into that same node, which
+     * would call the aggregator again, recursing without bound.
+     */
+    List<ScoredResult<LinkedHashMap<String, Object>>> findSimilarLocally(String resourceType, Map<String, Object> resource, Float threshold, int quantity);
 }

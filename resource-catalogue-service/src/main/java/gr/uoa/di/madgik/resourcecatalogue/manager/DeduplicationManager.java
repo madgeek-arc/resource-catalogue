@@ -93,11 +93,86 @@ public class DeduplicationManager implements DeduplicationService {
     public List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, String id,
                                                                           Float threshold, int quantity) {
         float effectiveThreshold = threshold != null ? threshold : 0.95f;
+        Bundle source = resolveSource(resourceType, id);
+        // The public copy of `id` is indexed under its own PID as resource_internal_id, so the
+        // registry's own-id exclusion (which matches on the id we search with) can't filter it
+        // out. Drop it from the local results below instead.
+        String ownPublicId = source != null && source.getIdentifiers() != null
+                ? source.getIdentifiers().getPid() : null;
+
         List<?> results;
         try {
-            results = genericResourceService.recommend(publishedFilter(resourceType, quantity), id);
+            results = genericResourceService.recommend(publishedFilter(resourceType, quantity + 1), id);
         } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
-            logger.debug("No embeddings available for resourceType '{}' — skipping similarity check", resourceType);
+            logger.debug("No embeddings available for resourceType '{}' — skipping local similarity check", resourceType);
+            results = Collections.emptyList();
+        }
+        List<ScoredResult<LinkedHashMap<String, Object>>> localMatches = results.stream()
+                .flatMap(obj -> {
+                    if (!(obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b
+                            && sr.getScore() >= effectiveThreshold)) {
+                        return Stream.empty();
+                    }
+                    if (b.getId().equals(ownPublicId)) {
+                        return Stream.empty();
+                    }
+                    return Stream.of(ScoredResult.of(sr.getScore(), scrubSensitiveFields(b.getPayload(), true)));
+                })
+                .collect(Collectors.toList());
+
+        // Node-specific EPOT notification also gets a federation-wide view: a resource pending
+        // review on this node may already duplicate one published on another node, which is
+        // exactly the kind of thing a reviewer should know about before approving it. This calls
+        // the aggregator's /similar route, which fans out to every node's local-only
+        // /dedup/{resourceType}/check/local — never back into this method — so it cannot recurse.
+        List<ScoredResult<LinkedHashMap<String, Object>>> federationMatches = source == null
+                ? Collections.emptyList()
+                : federationSimilarityClient.findSimilar(resourceType, source.getPayload(), threshold, quantity).stream()
+                        .filter(sr -> sr.getScore() >= effectiveThreshold)
+                        .collect(Collectors.toList());
+
+        return mergeLocalAndFederation(localMatches, federationMatches, quantity);
+    }
+
+    private Bundle resolveSource(String resourceType, String id) {
+        try {
+            return genericResourceService.get(resourceType, id);
+        } catch (ResourceNotFoundException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, Map<String, Object> resource,
+                                                                          Float threshold, int quantity) {
+        float effectiveThreshold = threshold != null ? threshold : 0.95f;
+        List<ScoredResult<LinkedHashMap<String, Object>>> localMatches =
+                findSimilarLocally(resourceType, resource, threshold, quantity);
+
+        // Federation matches are already cosine-similarity scores on the same scale as the local
+        // ones (every node runs the same recommend() logic), so they can be merged into one
+        // flat, score-sorted list rather than kept as a separate section. The aggregator fans this
+        // out to every node's local-only /check/local, including this one, so our own matches can
+        // legitimately reappear here too — mergeLocalAndFederation() drops that echo.
+        List<ScoredResult<LinkedHashMap<String, Object>>> federationMatches =
+                federationSimilarityClient.findSimilar(resourceType, resource, threshold, quantity).stream()
+                        .filter(sr -> sr.getScore() >= effectiveThreshold)
+                        .collect(Collectors.toList());
+
+        return mergeLocalAndFederation(localMatches, federationMatches, quantity);
+    }
+
+    @Override
+    public List<ScoredResult<LinkedHashMap<String, Object>>> findSimilarLocally(String resourceType, Map<String, Object> resource,
+                                                                                  Float threshold, int quantity) {
+        float effectiveThreshold = threshold != null ? threshold : 0.95f;
+        FacetFilter ff = publishedFilter(resourceType, quantity);
+        List<?> results;
+        try {
+            // Wrap the candidate in the actual Bundle subclass.
+            results = genericResourceService.recommend(ff, wrapResource(resourceType, resource));
+        } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
+            logger.debug("No embeddings available for resourceType '{}' — skipping local similarity check", resourceType);
             return Collections.emptyList();
         }
         return results.stream()
@@ -111,36 +186,29 @@ public class DeduplicationManager implements DeduplicationService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType, Map<String, Object> resource,
-                                                                          Float threshold, int quantity) {
-        float effectiveThreshold = threshold != null ? threshold : 0.95f;
-        FacetFilter ff = publishedFilter(resourceType, quantity);
-        List<?> results;
-        try {
-            // Wrap the candidate in the actual Bundle subclass.
-            results = genericResourceService.recommend(ff, wrapResource(resourceType, resource));
-        } catch (MissingResourceEmbeddingsException | ResourceNotFoundException | ServiceException e) {
-            logger.debug("No embeddings available for resourceType '{}' — skipping local similarity check", resourceType);
-            results = Collections.emptyList();
+    /**
+     * Merges local and federation matches, preferring the local copy when the same resource
+     * (identified by its payload id / PID) appears in both — which happens whenever this node
+     * itself is reachable through the federation aggregator's own fan-out.
+     */
+    private List<ScoredResult<LinkedHashMap<String, Object>>> mergeLocalAndFederation(
+            List<ScoredResult<LinkedHashMap<String, Object>>> localMatches,
+            List<ScoredResult<LinkedHashMap<String, Object>>> federationMatches,
+            int quantity) {
+        Set<Object> seenIds = new HashSet<>();
+        List<ScoredResult<LinkedHashMap<String, Object>>> merged =
+                new ArrayList<>(localMatches.size() + federationMatches.size());
+        for (ScoredResult<LinkedHashMap<String, Object>> sr : localMatches) {
+            if (seenIds.add(sr.getResult().get("id"))) {
+                merged.add(sr);
+            }
         }
-        Stream<ScoredResult<LinkedHashMap<String, Object>>> localMatches = results.stream()
-                .flatMap(obj -> {
-                    if (!(obj instanceof ScoredResult<?> sr && sr.getResult() instanceof Bundle b
-                            && sr.getScore() >= effectiveThreshold)) {
-                        return Stream.empty();
-                    }
-                    return Stream.of(ScoredResult.of(sr.getScore(), scrubSensitiveFields(b.getPayload(), true)));
-                });
-
-        // Federation matches are already cosine-similarity scores on the same scale as the local
-        // ones (every node runs the same recommend() logic), so they can be merged into one
-        // flat, score-sorted list rather than kept as a separate section.
-        Stream<ScoredResult<LinkedHashMap<String, Object>>> federationMatches =
-                federationSimilarityClient.findSimilar(resourceType, resource, threshold, quantity).stream()
-                        .filter(sr -> sr.getScore() >= effectiveThreshold);
-
-        return Stream.concat(localMatches, federationMatches)
+        for (ScoredResult<LinkedHashMap<String, Object>> sr : federationMatches) {
+            if (seenIds.add(sr.getResult().get("id"))) {
+                merged.add(sr);
+            }
+        }
+        return merged.stream()
                 .sorted((a, b) -> Float.compare(b.getScore(), a.getScore()))
                 .limit(quantity)
                 .collect(Collectors.toList());
