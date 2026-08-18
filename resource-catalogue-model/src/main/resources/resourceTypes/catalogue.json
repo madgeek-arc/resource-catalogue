@@ -465,7 +465,8 @@
   "name": "catalogue",
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle",
+    "reindexVersion": "1"
   },
   "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }
