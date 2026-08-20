@@ -237,6 +237,11 @@
                 <artifactId>httpcore5-h2</artifactId>
                 <version>5.4.3</version>
             </dependency>
+            <dependency> <!-- CVE-2026-71290: async TLS hostname verification bypass, fixed in 5.6.4. Pulled in transitively at 5.5.2 by elasticsearch-rest5-client. -->
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.6.4</version>
+            </dependency>
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
