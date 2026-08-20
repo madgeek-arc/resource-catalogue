@@ -18,6 +18,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -47,7 +48,9 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,37 +59,46 @@ public class PidIssuer {
 
     private static final Logger logger = LoggerFactory.getLogger(PidIssuer.class);
 
+    private static final int HS_ADMIN_INDEX = 100;
+    private static final int FDO_TYPE_INDEX = 9991;
+    private static final int FDO_PROFILE_INDEX = 9992;
+    private static final int FDO_DATA_INDEX = 9993;
+    private static final String ORGANISATION_RESOURCE_TYPE = "organisation";
+
     private final CatalogueProperties properties;
 
     public PidIssuer(CatalogueProperties properties) {
         this.properties = properties;
     }
 
-    public void postPID(String pid, List<String> customResolveEndpoints) {
-        sendPIDRequest(pid, customResolveEndpoints, false);
-    }
-
-    public void deletePID(String pid) {
-        sendPIDRequest(pid, null, true);
-    }
-
-    private void sendPIDRequest(String pid, List<String> customResolveEndpoints, boolean delete) {
+    public void postPID(Bundle bundle, List<String> customResolveEndpoints) {
+        String pid = bundle.getId();
         String prefix = pid.split("/")[0];
         ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
         PidIssuerConfig config = resourceProperties.getPidIssuer();
         WebClient webClient = createWebClient(config);
         HttpHeaders headers = createHeaders(config);
-        if (!delete) {
-            String payload;
-            if (customResolveEndpoints != null && !customResolveEndpoints.isEmpty()) {
-                payload = createPID(pid, config, customResolveEndpoints, true);
-            } else {
-                payload = createPID(pid, config, resourceProperties.getResolveEndpoints(), false);
-            }
-            exchange(payload, headers, config, pid, webClient, HttpMethod.PUT);
-        } else {
-            exchange(null, headers, config, pid, webClient, HttpMethod.DELETE);
-        }
+
+        // Custom endpoints (e.g. LOT1 supplying its own list) replace the configured ones entirely
+        // rather than adding to them; this project's own pid.yml always configures exactly one.
+        List<String> resolveEndpoints = (customResolveEndpoints != null && !customResolveEndpoints.isEmpty())
+                ? customResolveEndpoints
+                : resourceProperties.getResolveEndpoints();
+
+        String resourceType = properties.getResourceTypeFromPrefix(prefix);
+        String payload = ORGANISATION_RESOURCE_TYPE.equals(resourceType)
+                ? createOrganisationPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdoProfile())
+                : createPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdoProfile());
+        exchange(payload, headers, config, pid, webClient, HttpMethod.PUT);
+    }
+
+    public void deletePID(String pid) {
+        String prefix = pid.split("/")[0];
+        ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
+        PidIssuerConfig config = resourceProperties.getPidIssuer();
+        WebClient webClient = createWebClient(config);
+        HttpHeaders headers = createHeaders(config);
+        exchange(null, headers, config, pid, webClient, HttpMethod.DELETE);
     }
 
     private WebClient createWebClient(PidIssuerConfig config) {
@@ -202,56 +214,150 @@ public class PidIssuer {
         engine.setSSLParameters(params);
     }
 
-    private String createPID(String pid, PidIssuerConfig config, List<String> resolveEndpoints, boolean isCustom) {
-        JSONObject data = new JSONObject();
+    /**
+     * Builds the FDO-shaped PID record for every resource type except Organisation, which has no
+     * resourceOwner/type/publishingDate/urls of its own and is handled by {@link #createOrganisationPID}.
+     */
+    private String createPID(String pid, PidIssuerConfig config, LinkedHashMap<String, Object> payload,
+                             List<String> resolveEndpoints, String fdoProfile) {
         JSONArray values = new JSONArray();
-        JSONObject hs_admin = new JSONObject();
-        JSONObject hs_admin_data = new JSONObject();
-        JSONObject hs_admin_data_value = new JSONObject();
-        JSONObject id = new JSONObject();
-        JSONObject id_data = new JSONObject();
+        int index = 1;
 
-        hs_admin_data_value.put("handle", config.getUser());
-        hs_admin_data_value.put("index", Integer.parseInt(config.getUserIndex()));
-        hs_admin_data_value.put("permissions", "011111110011");
-        hs_admin_data.put("format", "admin");
-        hs_admin_data.put("value", hs_admin_data_value);
-        hs_admin.put("index", 100);
-        hs_admin.put("type", "HS_ADMIN");
-        hs_admin.put("data", hs_admin_data);
-        values.put(hs_admin);
-        id_data.put("format", "string");
-        id_data.put("value", pid);
-        id.put("index", 1);
-        id.put("type", "ID");
-        id.put("data", id_data);
-        values.put(id);
-        if (resolveEndpoints != null && !resolveEndpoints.isEmpty()) {
-            int index = 2;
+        for (Map<String, Object> alternativePid : asMapList(payload.get("alternativePIDs"))) {
+            values.put(buildEntry(index++, "alternativePIDs", new JSONObject(alternativePid).toString()));
+        }
+
+        for (String url : asStringList(payload.get("urls"))) {
+            values.put(buildEntry(index++, "url", url));
+        }
+
+        if (resolveEndpoints != null) {
             for (String endpoint : resolveEndpoints) {
-                JSONObject resolveUrls = new JSONObject();
-                JSONObject resolveUrl_data = new JSONObject();
-                resolveUrl_data.put("format", "string");
-                if (isCustom) {
-                    resolveUrl_data.put("value", endpoint);
-                } else {
-                    //FIXME: temporary solution with the fewest changes
-                    if (endpoint.startsWith("https://search.marketplace.sandbox.eosc-beyond.eu")) {
-                        String encodedSlash = pid.replace("/", "%252F");
-                        resolveUrl_data.put("value", String.join("/", endpoint, encodedSlash));
-                    } else {
-                        resolveUrl_data.put("value", String.join("/", endpoint, pid));
-                    }
-                }
-                resolveUrls.put("index", index);
-                resolveUrls.put("type", "URL");
-                resolveUrls.put("data", resolveUrl_data);
-                values.put(resolveUrls);
-                index++;
+                values.put(buildEntry(index++, "URL", resolveUrl(endpoint, pid)));
             }
         }
+
+        values.put(buildEntry(index++, "name", payload.get("name")));
+        values.put(buildEntry(index++, "description", payload.get("description")));
+        values.put(buildEntry(index++, "publishingDate", payload.get("publishingDate")));
+        values.put(buildEntry(index++, "type", payload.get("type")));
+        values.put(buildEntry(index++, "nodePID", payload.get("nodePID")));
+        values.put(buildEntry(index++, "resourceOwner", payload.get("resourceOwner")));
+
+        for (String contact : asStringList(payload.get("publicContacts"))) {
+            values.put(buildEntry(index++, "publicContacts", contact));
+        }
+
+        values.put(buildHsAdmin(config));
+        addFdoFields(values, fdoProfile);
+
+        JSONObject data = new JSONObject();
         data.put("values", values);
         return data.toString();
+    }
+
+    /**
+     * Organisations are their own resourceOwner and have no type/publishingDate/urls, so their
+     * record is limited to the fields the Organisation model shares with the other resource types.
+     */
+    private String createOrganisationPID(String pid, PidIssuerConfig config, LinkedHashMap<String, Object> payload,
+                                         List<String> resolveEndpoints, String fdoProfile) {
+        JSONArray values = new JSONArray();
+        int index = 1;
+
+        for (Map<String, Object> alternativePid : asMapList(payload.get("alternativePIDs"))) {
+            values.put(buildEntry(index++, "alternativePIDs", new JSONObject(alternativePid).toString()));
+        }
+
+        if (resolveEndpoints != null) {
+            for (String endpoint : resolveEndpoints) {
+                values.put(buildEntry(index++, "URL", resolveUrl(endpoint, pid)));
+            }
+        }
+
+        values.put(buildEntry(index++, "name", payload.get("name")));
+        values.put(buildEntry(index++, "description", payload.get("description")));
+        values.put(buildEntry(index++, "nodePID", payload.get("nodePID")));
+
+        for (String contact : asStringList(payload.get("publicContacts"))) {
+            values.put(buildEntry(index++, "publicContacts", contact));
+        }
+
+        values.put(buildHsAdmin(config));
+        addFdoFields(values, fdoProfile);
+
+        JSONObject data = new JSONObject();
+        data.put("values", values);
+        return data.toString();
+    }
+
+    /**
+     * Substitutes {@code pid} into a resolve-endpoint template. A {@code {encodedPid}} placeholder gets
+     * the PID with its internal "/" percent-encoded (for endpoints that expect the whole PID as a single
+     * path segment, e.g. a search API); a {@code {pid}} placeholder gets the raw PID; an endpoint with
+     * neither placeholder has the raw PID appended as a new path segment, for backward compatibility.
+     */
+    private String resolveUrl(String endpoint, String pid) {
+        if (endpoint.contains("{encodedPid}")) {
+            return endpoint.replace("{encodedPid}", pid.replace("/", "%252F"));
+        } else if (endpoint.contains("{pid}")) {
+            return endpoint.replace("{pid}", pid);
+        }
+        return String.join("/", endpoint, pid);
+    }
+
+    private void addFdoFields(JSONArray values, String fdoProfile) {
+        values.put(buildEntry(FDO_TYPE_INDEX, "FdoType", "type"));
+        values.put(buildEntry(FDO_PROFILE_INDEX, "FdoProfile", fdoProfile));
+        values.put(buildEntry(FDO_DATA_INDEX, "FdoData", "self"));
+    }
+
+    private JSONObject buildHsAdmin(PidIssuerConfig config) {
+        JSONObject hsAdminValue = new JSONObject();
+        hsAdminValue.put("handle", config.getUser());
+        hsAdminValue.put("index", Integer.parseInt(config.getUserIndex()));
+        hsAdminValue.put("permissions", "011111110011");
+
+        JSONObject hsAdminData = new JSONObject();
+        hsAdminData.put("format", "admin");
+        hsAdminData.put("value", hsAdminValue);
+
+        return buildEntry(HS_ADMIN_INDEX, "HS_ADMIN", hsAdminData);
+    }
+
+    private JSONObject buildEntry(int index, String type, JSONObject data) {
+        JSONObject entry = new JSONObject();
+        entry.put("index", index);
+        entry.put("type", type);
+        entry.put("data", data);
+        return entry;
+    }
+
+    private JSONObject buildEntry(int index, String type, Object value) {
+        JSONObject data = new JSONObject();
+        data.put("format", "string");
+        data.put("value", value);
+        return buildEntry(index, type, data);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> asMapList(Object value) {
+        if (value instanceof List<?> list) {
+            return (List<Map<String, Object>>) (List<?>) list;
+        }
+        return List.of();
+    }
+
+    private List<String> asStringList(Object value) {
+        List<String> result = new ArrayList<>();
+        if (value instanceof List<?> list) {
+            for (Object item : list) {
+                if (item != null) {
+                    result.add(item.toString());
+                }
+            }
+        }
+        return result;
     }
 
     private HttpHeaders createHeaders(PidIssuerConfig config) {

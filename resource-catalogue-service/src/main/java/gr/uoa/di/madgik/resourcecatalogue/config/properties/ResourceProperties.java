@@ -36,9 +36,17 @@ public class ResourceProperties {
     private String idPrefix;
 
     /**
-     * Endpoints in which the PID will resolve to (optional).
+     * Endpoints the PID should resolve to on our node's userspace/search UI (optional). Each entry is
+     * either a plain URL (the PID is appended raw, e.g. {@code endpoint/prefix/suffix}) or a template
+     * containing {@code {pid}} (raw PID substituted) or {@code {encodedPid}} (PID with its internal
+     * "/" percent-encoded, for endpoints that expect the whole PID as a single path segment).
      */
     private List<String> resolveEndpoints;
+
+    /**
+     * The handle of the FDO type registry profile this resource type's PID records conform to.
+     */
+    private String fdoProfile;
 
     /**
      * The path segment this resource type is exposed under on the federated search aggregator
@@ -70,6 +78,14 @@ public class ResourceProperties {
 
     public void setResolveEndpoints(List<String> resolveEndpoints) {
         this.resolveEndpoints = resolveEndpoints;
+    }
+
+    public String getFdoProfile() {
+        return fdoProfile;
+    }
+
+    public void setFdoProfile(String fdoProfile) {
+        this.fdoProfile = fdoProfile;
     }
 
     public String getFederationPath() {

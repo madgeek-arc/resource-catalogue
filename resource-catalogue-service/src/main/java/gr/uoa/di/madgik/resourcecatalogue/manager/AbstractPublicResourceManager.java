@@ -104,7 +104,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         if (pidServiceEnabled && registerPID) {
             try {
                 logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
-                pidIssuer.postPID(t.getId(), null);
+                pidIssuer.postPID(t, null);
             } catch (Exception e) {
                 logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
             }
@@ -134,7 +134,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         if (pidServiceEnabled && registerPID) {
             try {
                 logger.info("Updating PID record of {} with id {} on PID service", t.getClass().getSimpleName(), t.getId());
-                pidIssuer.postPID(t.getId(), null);
+                pidIssuer.postPID(t, null);
             } catch (Exception e) {
                 logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
             }

@@ -61,7 +61,7 @@ public class PidController {
                                       @Parameter(description = "A list of resolve endpoints") @RequestParam(value = "resolveEndpoints", required = false) List<String> resolveEndpoints) {
         Bundle bundle = pidService.get(prefix, suffix);
         if (bundle != null) {
-            pidService.register(bundle.getId(), resolveEndpoints);
+            pidService.register(bundle, resolveEndpoints);
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
