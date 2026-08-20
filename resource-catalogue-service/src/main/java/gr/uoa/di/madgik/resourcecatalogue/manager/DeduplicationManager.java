@@ -124,11 +124,15 @@ public class DeduplicationManager implements DeduplicationService {
         // review on this node may already duplicate one published on another node, which is
         // exactly the kind of thing a reviewer should know about before approving it. This calls
         // the aggregator's /similar route, which fans out to every node's local-only
-        // /dedup/{resourceType}/check/local — never back into this method — so it cannot recurse.
+        // /dedup/{resourceType}/check/local — including this node itself — so our own public copy
+        // can come back through this channel too. It's excluded from localMatches above by id, but
+        // that exclusion doesn't carry over to the merge, so it must be re-applied here or it rides
+        // through as a false "federation" duplicate.
         List<ScoredResult<LinkedHashMap<String, Object>>> federationMatches = source == null
                 ? Collections.emptyList()
                 : federationSimilarityClient.findSimilar(resourceType, source.getPayload(), threshold, quantity).stream()
                         .filter(sr -> sr.getScore() >= effectiveThreshold)
+                        .filter(sr -> !Objects.equals(sr.getResult().get("id"), ownPublicId))
                         .collect(Collectors.toList());
 
         return mergeLocalAndFederation(localMatches, federationMatches, quantity);
