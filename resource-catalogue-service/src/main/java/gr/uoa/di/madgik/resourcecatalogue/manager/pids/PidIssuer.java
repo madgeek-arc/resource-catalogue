@@ -63,6 +63,7 @@ public class PidIssuer {
     private static final int FDO_TYPE_INDEX = 9991;
     private static final int FDO_PROFILE_INDEX = 9992;
     private static final int FDO_DATA_INDEX = 9993;
+    private static final int FDO_VERSION_INDEX = 9994;
     private static final String ORGANISATION_RESOURCE_TYPE = "organisation";
 
     private final CatalogueProperties properties;
@@ -87,8 +88,8 @@ public class PidIssuer {
 
         String resourceType = properties.getResourceTypeFromPrefix(prefix);
         String payload = ORGANISATION_RESOURCE_TYPE.equals(resourceType)
-                ? createOrganisationPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdoProfile())
-                : createPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdoProfile());
+                ? createOrganisationPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdo())
+                : createPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdo());
         exchange(payload, headers, config, pid, webClient, HttpMethod.PUT);
     }
 
@@ -219,7 +220,7 @@ public class PidIssuer {
      * resourceOwner/type/publishingDate/urls of its own and is handled by {@link #createOrganisationPID}.
      */
     private String createPID(String pid, PidIssuerConfig config, LinkedHashMap<String, Object> payload,
-                             List<String> resolveEndpoints, String fdoProfile) {
+                             List<String> resolveEndpoints, ResourceProperties.Fdo fdo) {
         JSONArray values = new JSONArray();
         int index = 1;
 
@@ -249,7 +250,7 @@ public class PidIssuer {
         }
 
         values.put(buildHsAdmin(config));
-        addFdoFields(values, fdoProfile);
+        addFdoFields(values, fdo);
 
         JSONObject data = new JSONObject();
         data.put("values", values);
@@ -261,7 +262,7 @@ public class PidIssuer {
      * record is limited to the fields the Organisation model shares with the other resource types.
      */
     private String createOrganisationPID(String pid, PidIssuerConfig config, LinkedHashMap<String, Object> payload,
-                                         List<String> resolveEndpoints, String fdoProfile) {
+                                         List<String> resolveEndpoints, ResourceProperties.Fdo fdo) {
         JSONArray values = new JSONArray();
         int index = 1;
 
@@ -284,7 +285,7 @@ public class PidIssuer {
         }
 
         values.put(buildHsAdmin(config));
-        addFdoFields(values, fdoProfile);
+        addFdoFields(values, fdo);
 
         JSONObject data = new JSONObject();
         data.put("values", values);
@@ -306,10 +307,11 @@ public class PidIssuer {
         return String.join("/", endpoint, pid);
     }
 
-    private void addFdoFields(JSONArray values, String fdoProfile) {
-        values.put(buildEntry(FDO_TYPE_INDEX, "FdoType", "type"));
-        values.put(buildEntry(FDO_PROFILE_INDEX, "FdoProfile", fdoProfile));
-        values.put(buildEntry(FDO_DATA_INDEX, "FdoData", "self"));
+    private void addFdoFields(JSONArray values, ResourceProperties.Fdo fdo) {
+        values.put(buildEntry(FDO_TYPE_INDEX, "FdoType", fdo.getType()));
+        values.put(buildEntry(FDO_PROFILE_INDEX, "FdoProfile", fdo.getProfile()));
+        values.put(buildEntry(FDO_DATA_INDEX, "FdoData", fdo.getData()));
+        values.put(buildEntry(FDO_VERSION_INDEX, "FdoVersion", fdo.getVersion()));
     }
 
     private JSONObject buildHsAdmin(PidIssuerConfig config) {

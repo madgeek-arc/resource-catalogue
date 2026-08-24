@@ -2,6 +2,11 @@
 catalogue:
   resources:
     organisation:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -13,6 +18,11 @@ catalogue:
           client-key:
           client-cert:
     service:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -24,6 +34,11 @@ catalogue:
           client-key:
           client-cert:
     datasource:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -35,6 +50,11 @@ catalogue:
           client-key:
           client-cert:
     catalogue:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -46,6 +66,11 @@ catalogue:
           client-key:
           client-cert:
     training-resource:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -57,6 +82,11 @@ catalogue:
           client-key:
           client-cert:
     interoperability-record:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -68,6 +98,11 @@ catalogue:
           client-key:
           client-cert:
     adapter:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url:
@@ -79,6 +114,11 @@ catalogue:
           client-key:
           client-cert:
     deployable-application:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url:

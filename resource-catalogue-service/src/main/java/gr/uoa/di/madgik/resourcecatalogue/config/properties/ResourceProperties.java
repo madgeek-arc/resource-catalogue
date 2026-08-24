@@ -44,9 +44,11 @@ public class ResourceProperties {
     private List<String> resolveEndpoints;
 
     /**
-     * The handle of the FDO type registry profile this resource type's PID records conform to.
+     * The FDO kernel information fields (FdoType/FdoProfile/FdoData/FdoVersion) this
+     * resource type's PID records are registered with.
      */
-    private String fdoProfile;
+    @NestedConfigurationProperty
+    private Fdo fdo;
 
     /**
      * The path segment this resource type is exposed under on the federated search aggregator
@@ -80,12 +82,12 @@ public class ResourceProperties {
         this.resolveEndpoints = resolveEndpoints;
     }
 
-    public String getFdoProfile() {
-        return fdoProfile;
+    public Fdo getFdo() {
+        return fdo;
     }
 
-    public void setFdoProfile(String fdoProfile) {
-        this.fdoProfile = fdoProfile;
+    public void setFdo(Fdo fdo) {
+        this.fdo = fdo;
     }
 
     public String getFederationPath() {
@@ -102,5 +104,64 @@ public class ResourceProperties {
 
     public void setPidIssuer(PidIssuerConfig pidIssuer) {
         this.pidIssuer = pidIssuer;
+    }
+
+    public static class Fdo {
+
+        /**
+         * The FdoType value (HS_ADMIN index 9991).
+         */
+        private String type;
+
+        /**
+         * The handle of the FDO type registry profile this resource type's PID records conform to
+         * (HS_ADMIN index 9992).
+         */
+        private String profile;
+
+        /**
+         * The FdoData value (HS_ADMIN index 9993).
+         */
+        private String data;
+
+        /**
+         * The FdoVersion value (HS_ADMIN index 9994).
+         */
+        private String version;
+
+        public Fdo() {
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getProfile() {
+            return profile;
+        }
+
+        public void setProfile(String profile) {
+            this.profile = profile;
+        }
+
+        public String getData() {
+            return data;
+        }
+
+        public void setData(String data) {
+            this.data = data;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
     }
 }
