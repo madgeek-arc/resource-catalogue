@@ -95,7 +95,7 @@ public class PidServiceRegistrationConsistency {
                 HttpStatusCode httpStatusCode = getResourceFromPidService(organisationBundle.getId());
                 if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                     logger.info("Posting Provider with id {} to PID service", organisationBundle.getId());
-                    pidIssuer.postPID(organisationBundle, null);
+                    pidIssuer.postPID(organisationBundle, "organisation", null);
                 }
             }
 
@@ -104,7 +104,7 @@ public class PidServiceRegistrationConsistency {
                 HttpStatusCode httpStatusCode = getResourceFromPidService(adapterBundle.getId());
                 if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                     logger.info("Posting Adapter with id {} to PID service", adapterBundle.getId());
-                    pidIssuer.postPID(adapterBundle, null);
+                    pidIssuer.postPID(adapterBundle, "adapter", null);
                 }
             }
 
@@ -113,7 +113,7 @@ public class PidServiceRegistrationConsistency {
                 HttpStatusCode httpStatusCode = getResourceFromPidService(serviceBundle.getId());
                 if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                     logger.info("Posting Service with id {} to PID service", serviceBundle.getId());
-                    pidIssuer.postPID(serviceBundle, null);
+                    pidIssuer.postPID(serviceBundle, "service", null);
                 }
             }
 
@@ -122,7 +122,7 @@ public class PidServiceRegistrationConsistency {
                 HttpStatusCode httpStatusCode = getResourceFromPidService(catalogueBundle.getId());
                 if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                     logger.info("Posting Catalogue with id {} to PID service", catalogueBundle.getId());
-                    pidIssuer.postPID(catalogueBundle, null);
+                    pidIssuer.postPID(catalogueBundle, "catalogue", null);
                 }
             }
 
@@ -131,7 +131,7 @@ public class PidServiceRegistrationConsistency {
                 HttpStatusCode httpStatusCode = getResourceFromPidService(datasourceBundle.getId());
                 if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                     logger.info("Posting Datasource with id {} to PID service", datasourceBundle.getId());
-                    pidIssuer.postPID(datasourceBundle, null);
+                    pidIssuer.postPID(datasourceBundle, "datasource", null);
                 }
             }
 
@@ -140,7 +140,7 @@ public class PidServiceRegistrationConsistency {
                 HttpStatusCode httpStatusCode = getResourceFromPidService(trainingResourceBundle.getId());
                 if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                     logger.info("Posting Training Resource with id {} to PID service", trainingResourceBundle.getId());
-                    pidIssuer.postPID(trainingResourceBundle, null);
+                    pidIssuer.postPID(trainingResourceBundle, "training_resource", null);
                 }
             }
 
@@ -149,7 +149,7 @@ public class PidServiceRegistrationConsistency {
                 HttpStatusCode httpStatusCode = getResourceFromPidService(deployableApplicationBundle.getId());
                 if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                     logger.info("Posting Deployable Application with id {} to PID service", deployableApplicationBundle.getId());
-                    pidIssuer.postPID(deployableApplicationBundle, null);
+                    pidIssuer.postPID(deployableApplicationBundle, "deployable_application", null);
                 }
             }
 
@@ -158,7 +158,7 @@ public class PidServiceRegistrationConsistency {
                 HttpStatusCode httpStatusCode = getResourceFromPidService(interoperabilityRecordBundle.getId());
                 if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
                     logger.info("Posting Interoperability Record with id {} to PID service", interoperabilityRecordBundle.getId());
-                    pidIssuer.postPID(interoperabilityRecordBundle, null);
+                    pidIssuer.postPID(interoperabilityRecordBundle, "interoperability_record", null);
                 }
             }
         }

@@ -60,7 +60,9 @@ public class PidManager implements PidService {
     }
 
     public void register(Bundle bundle, List<String> endpoints) {
-        pidIssuer.postPID(bundle, endpoints);
+        String prefix = bundle.getId().split("/")[0];
+        String resourceType = catalogueProperties.getResourceTypeFromPrefix(prefix);
+        pidIssuer.postPID(bundle, resourceType, endpoints);
     }
 
     public void delete(String pid) {

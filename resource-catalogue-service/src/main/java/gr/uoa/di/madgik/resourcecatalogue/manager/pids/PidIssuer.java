@@ -72,10 +72,9 @@ public class PidIssuer {
         this.properties = properties;
     }
 
-    public void postPID(Bundle bundle, List<String> customResolveEndpoints) {
+    public void postPID(Bundle bundle, String resourceType, List<String> customResolveEndpoints) {
         String pid = bundle.getId();
-        String prefix = pid.split("/")[0];
-        ResourceProperties resourceProperties = properties.getResourcePropertiesFromPrefix(prefix);
+        ResourceProperties resourceProperties = properties.getResourcePropertiesForResourceType(resourceType);
         PidIssuerConfig config = resourceProperties.getPidIssuer();
         WebClient webClient = createWebClient(config);
         HttpHeaders headers = createHeaders(config);
@@ -86,7 +85,6 @@ public class PidIssuer {
                 ? customResolveEndpoints
                 : resourceProperties.getResolveEndpoints();
 
-        String resourceType = properties.getResourceTypeFromPrefix(prefix);
         String payload = ORGANISATION_RESOURCE_TYPE.equals(resourceType)
                 ? createOrganisationPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdo())
                 : createPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdo());
@@ -225,17 +223,17 @@ public class PidIssuer {
         int index = 1;
 
         for (Map<String, Object> alternativePid : asMapList(payload.get("alternativePIDs"))) {
-            values.put(buildEntry(index++, "alternativePIDs", new JSONObject(alternativePid).toString()));
+            values.put(buildEntry(index++, "alternativePID", new JSONObject(alternativePid).toString()));
         }
 
-        for (String url : asStringList(payload.get("urls"))) {
-            values.put(buildEntry(index++, "url", url));
-        }
-
+        //TODO: what to do with resolve endpoints
         if (resolveEndpoints != null) {
             for (String endpoint : resolveEndpoints) {
-                values.put(buildEntry(index++, "URL", resolveUrl(endpoint, pid)));
+                values.put(buildEntry(index++, "url", resolveUrl(endpoint, pid)));
             }
+        }
+        for (String url : asStringList(payload.get("urls"))) {
+            values.put(buildEntry(index++, "url", url));
         }
 
         values.put(buildEntry(index++, "name", payload.get("name")));
@@ -246,7 +244,7 @@ public class PidIssuer {
         values.put(buildEntry(index++, "resourceOwner", payload.get("resourceOwner")));
 
         for (String contact : asStringList(payload.get("publicContacts"))) {
-            values.put(buildEntry(index++, "publicContacts", contact));
+            values.put(buildEntry(index++, "publicContact", contact));
         }
 
         values.put(buildHsAdmin(config));

@@ -213,6 +213,17 @@ public class CatalogueProperties {
         return null;
     }
 
+    /**
+     * Looks up a resource type's properties directly by its {@link ResourceTypes} key, rather than by
+     * scanning for an {@code idPrefix} match. Unlike {@link #getResourcePropertiesFromPrefix}, this is
+     * unambiguous even when multiple resource types share the same Handle prefix (the normal case, since
+     * a Handle prefix is assigned per institution, not per resource type) — use it whenever the caller
+     * already knows the resource type (e.g. from {@code getResourceTypeName()}).
+     */
+    public ResourceProperties getResourcePropertiesForResourceType(String resourceType) {
+        return resources.get(ResourceTypes.valueOf(resourceType.toUpperCase()));
+    }
+
     public String getResourceTypeFromPrefix(String prefix) {
         for (Map.Entry<ResourceTypes, ResourceProperties> rp : resources.entrySet()) {
             if (prefix.equals(rp.getValue().getIdPrefix())) {
