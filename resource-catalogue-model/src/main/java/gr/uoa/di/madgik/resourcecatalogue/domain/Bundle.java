@@ -373,4 +373,26 @@ public class Bundle {
         result.put("catalogueId", catalogueId);
         return result;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Bundle bundle = (Bundle) o;
+        return active == bundle.active && suspended == bundle.suspended && draft == bundle.draft
+                && legacy == bundle.legacy && Objects.equals(payload, bundle.payload)
+                && Objects.equals(metadata, bundle.metadata) && Objects.equals(identifiers, bundle.identifiers)
+                && Objects.equals(loggingInfo, bundle.loggingInfo)
+                && Objects.equals(latestAuditInfo, bundle.latestAuditInfo)
+                && Objects.equals(latestOnboardingInfo, bundle.latestOnboardingInfo)
+                && Objects.equals(latestUpdateInfo, bundle.latestUpdateInfo)
+                && Objects.equals(status, bundle.status) && Objects.equals(auditState, bundle.auditState)
+                && Objects.equals(catalogueId, bundle.catalogueId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(payload, metadata, active, suspended, draft, legacy, identifiers, loggingInfo,
+                latestAuditInfo, latestOnboardingInfo, latestUpdateInfo, status, auditState, catalogueId);
+    }
 }
