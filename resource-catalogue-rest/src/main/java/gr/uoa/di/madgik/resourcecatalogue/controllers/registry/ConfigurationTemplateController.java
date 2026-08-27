@@ -22,6 +22,7 @@ import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
@@ -29,6 +30,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,15 +61,18 @@ public class ConfigurationTemplateController {
     private final ConfigurationTemplateInstanceService instanceService;
     private final ModelService modelService;
     private final NodeProperties nodeProperties;
+    private final FederationLinkageService federationLinkageService;
 
     public ConfigurationTemplateController(ConfigurationTemplateService service,
                                            ConfigurationTemplateInstanceService instanceService,
                                            ModelService modelService,
-                                           NodeProperties nodeProperties) {
+                                           NodeProperties nodeProperties,
+                                           FederationLinkageService federationLinkageService) {
         this.service = service;
         this.instanceService = instanceService;
         this.modelService = modelService;
         this.nodeProperties = nodeProperties;
+        this.federationLinkageService = federationLinkageService;
     }
 
     @Operation(summary = "Returns the Configuration Template with the given id.")
@@ -81,12 +86,23 @@ public class ConfigurationTemplateController {
 
     @Operation(summary = "Returns the Model for the given Configuration Template id.")
     @GetMapping(path = "{prefix}/{suffix}/model")
-    public ResponseEntity<Model> getModelByConfigurationTemplateId(@PathVariable String prefix,
-                                                                   @PathVariable String suffix) {
+    public ResponseEntity<?> getModelByConfigurationTemplateId(@PathVariable String prefix,
+                                                               @PathVariable String suffix,
+                                                               @RequestParam(required = false, defaultValue = "false")
+                                                               boolean federation) {
         String id = prefix + "/" + suffix;
-        ConfigurationTemplateBundle bundle = service.get(id);
-        String modelId = (String) bundle.getConfigurationTemplate().get("modelId");
-        return ResponseEntity.ok(modelService.get(modelId));
+        try {
+            ConfigurationTemplateBundle bundle = service.get(id);
+            String modelId = (String) bundle.getConfigurationTemplate().get("modelId");
+            return ResponseEntity.ok(modelService.get(modelId));
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (federation) {
+                return federationLinkageService.getConfigurationTemplateModel(id)
+                        .<ResponseEntity<?>>map(ResponseEntity::ok)
+                        .orElseThrow(() -> e);
+            }
+            throw e;
+        }
     }
 
     @GetMapping(path = "bundle/{prefix}/{suffix}")
@@ -253,9 +269,20 @@ public class ConfigurationTemplateController {
     @GetMapping(path = "/getAllByInteroperabilityRecordId/{prefix}/{suffix}")
     public ResponseEntity<Paging<?>> getAllByInteroperabilityRecordId(@PathVariable String prefix,
                                                                       @PathVariable String suffix,
+                                                                      @RequestParam(required = false, defaultValue = "false")
+                                                                      boolean federation,
                                                                       @Parameter(hidden = true)
                                                                       @RequestParam MultiValueMap<String, Object> params) {
-        Paging<ConfigurationTemplateBundle> paging = service.getAllByInteroperabilityRecordId(params, prefix + "/" + suffix);
+        String interoperabilityRecordId = prefix + "/" + suffix;
+        params.remove("federation");
+        Paging<ConfigurationTemplateBundle> paging = service.getAllByInteroperabilityRecordId(params, interoperabilityRecordId);
+        if (federation && paging.getResults().isEmpty()) {
+            List<Map<String, Object>> federated =
+                    federationLinkageService.getConfigurationTemplatesByInteroperabilityRecordId(interoperabilityRecordId);
+            if (!federated.isEmpty()) {
+                return ResponseEntity.ok(new Paging<>(federated.size(), 0, federated.size(), federated, List.of()));
+            }
+        }
         return ResponseEntity.ok(paging);
     }
 

@@ -16,6 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
@@ -76,21 +78,35 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
         String type = (String) typeObj;
         String id = (String) idObj;
 
-        String publicId;
-        switch (type.toLowerCase()) {
-            case "service" -> {
-                ServiceBundle service = serviceService.get(id, adapter.getCatalogueId());
-                publicId = service.getIdentifiers().getPid();
+        linkedResource.put("id", toPublicId(type, id, adapter.getCatalogueId()));
+    }
+
+    /**
+     * Resolves a locally-held linked resource id to its public PID. When the id resolves to
+     * nothing local it is assumed to reference a resource published on another federation node -
+     * it is already the public PID and kept verbatim. A non-PID-shaped unresolvable id is rethrown.
+     */
+    private String toPublicId(String type, String id, String catalogueId) {
+        try {
+            return switch (type.toLowerCase()) {
+                case "service" -> {
+                    ServiceBundle service = serviceService.get(id, catalogueId);
+                    yield service.getIdentifiers().getPid();
+                }
+                case "datasource" -> {
+                    DatasourceBundle datasource = datasourceService.get(id, catalogueId);
+                    yield datasource.getIdentifiers().getPid();
+                }
+                default -> {
+                    InteroperabilityRecordBundle guideline = guidelineService.get(id, catalogueId);
+                    yield guideline.getIdentifiers().getPid();
+                }
+            };
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (id != null && id.contains("/")) {
+                return id;
             }
-            case "datasource" -> {
-                DatasourceBundle datasource = datasourceService.get(id, adapter.getCatalogueId());
-                publicId = datasource.getIdentifiers().getPid();
-            }
-            default -> {
-                InteroperabilityRecordBundle guideline = guidelineService.get(id, adapter.getCatalogueId());
-                publicId = guideline.getIdentifiers().getPid();
-            }
+            throw e;
         }
-        linkedResource.put("id", publicId);
     }
 }

@@ -56,6 +56,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
     private final VocabularyService vocabularyService;
     private final ConfigurationTemplateService ctService;
     private final ConfigurationTemplateInstanceService ctiService;
+    private final FederationLinkageService federationLinkageService;
 
 
     public ResourceInteroperabilityRecordManager(@Lazy ServiceService serviceService,
@@ -67,6 +68,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
                                                  VocabularyService vocabularyService,
                                                  ConfigurationTemplateService ctService,
                                                  ConfigurationTemplateInstanceService ctiService,
+                                                 FederationLinkageService federationLinkageService,
                                                  WorkflowService workflowService) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.serviceService = serviceService;
@@ -77,6 +79,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         this.vocabularyService = vocabularyService;
         this.ctService = ctService;
         this.ctiService = ctiService;
+        this.federationLinkageService = federationLinkageService;
     }
 
     public String getResourceTypeName() {
@@ -161,13 +164,29 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         List<String> interoperabilityRecordIds = (List<String>) bundle.getResourceInteroperabilityRecord()
                 .get("interoperabilityRecordIds");
         for (String id : interoperabilityRecordIds) {
-            if (!"approved".equals(interoperabilityRecordService.get(id).getStatus())) {
+            if (!isApproved(id)) {
                 throw new ValidationException(
                         "One or more of the Interoperability Records you have provided is not yet approved."
                 );
             }
         }
         return bundle;
+    }
+
+    /**
+     * Whether the given Interoperability Record is approved. A local guideline is checked by its
+     * status; one that is not held locally is looked up across the federation - the aggregator
+     * only serves published (i.e. approved + active) resources, so a hit there means approved.
+     */
+    private boolean isApproved(String id) {
+        try {
+            return "approved".equals(interoperabilityRecordService.get(id).getStatus());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (id != null && id.contains("/")) {
+                return federationLinkageService.getInteroperabilityRecord(id).isPresent();
+            }
+            throw e;
+        }
     }
 
     @Override

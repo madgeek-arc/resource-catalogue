@@ -4,7 +4,9 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceCatalogueGenericService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,14 +20,20 @@ public abstract class ResourceCatalogueGenericController<T extends Bundle, S ext
     protected final S service;
     protected final String resourceName;
 
+    // Field-injected: the abstract base is shared by ~10 controllers each with its own
+    // constructor, and threading this through every one of them adds noise for no benefit.
+    @Autowired
+    protected FederationLinkageService federationLinkageService;
+
     public ResourceCatalogueGenericController(S service, String resourceName) {
         this.service = service;
         this.resourceName = resourceName;
     }
 
     @GetMapping(path = "list")
-    public List<Value> listResources(@RequestParam(required = false) String catalogueId) {
-        return service.listResources(catalogueId);
+    public List<Value> listResources(@RequestParam(required = false) String catalogueId,
+                                     @RequestParam(required = false, defaultValue = "false") boolean federation) {
+        return federationLinkageService.listResources(resourceName, service.listResources(catalogueId), federation);
     }
 
     @GetMapping(path = "list/{id}")

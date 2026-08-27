@@ -20,6 +20,8 @@ import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
@@ -132,11 +134,30 @@ public class ConfigurationTemplateInstanceController
     public ResponseEntity<?> getByResourceAndConfigurationTemplateId(@PathVariable("resourcePrefix") String resourcePrefix,
                                                                      @PathVariable("resourceSuffix") String resourceSuffix,
                                                                      @PathVariable("ctPrefix") String ctPrefix,
-                                                                     @PathVariable("ctSuffix") String ctSuffix) {
+                                                                     @PathVariable("ctSuffix") String ctSuffix,
+                                                                     @RequestParam(required = false, defaultValue = "false")
+                                                                     boolean federation) {
         String resourceId = resourcePrefix + "/" + resourceSuffix;
         String ctId = ctPrefix + "/" + ctSuffix;
-        LinkedHashMap<String, Object> ret = service.getByResourceAndConfigurationTemplateId(resourceId, ctId);
-        return new ResponseEntity<>(ret, HttpStatus.OK);
+        try {
+            LinkedHashMap<String, Object> ret = service.getByResourceAndConfigurationTemplateId(resourceId, ctId);
+            if (ret != null && !ret.isEmpty()) {
+                return new ResponseEntity<>(ret, HttpStatus.OK);
+            }
+            if (federation) {
+                return federationLinkageService.getConfigurationTemplateInstanceTemplate(resourceId, ctId)
+                        .<ResponseEntity<?>>map(body -> new ResponseEntity<>(body, HttpStatus.OK))
+                        .orElseGet(() -> new ResponseEntity<>(ret, HttpStatus.OK));
+            }
+            return new ResponseEntity<>(ret, HttpStatus.OK);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (federation) {
+                return federationLinkageService.getConfigurationTemplateInstanceTemplate(resourceId, ctId)
+                        .<ResponseEntity<?>>map(body -> new ResponseEntity<>(body, HttpStatus.OK))
+                        .orElseThrow(() -> e);
+            }
+            throw e;
+        }
     }
 
     @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'configurationTemplateId'.")

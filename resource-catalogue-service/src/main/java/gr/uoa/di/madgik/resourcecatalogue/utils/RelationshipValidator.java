@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.utils;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
@@ -35,14 +36,26 @@ public class RelationshipValidator {
     private final OrganisationService organisationService;
     private final ServiceService serviceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final FederationLinkageService federationLinkageService;
 
     @Autowired
     public RelationshipValidator(OrganisationService organisationService,
                                  ServiceService serviceService,
-                                 InteroperabilityRecordService interoperabilityRecordService) {
+                                 InteroperabilityRecordService interoperabilityRecordService,
+                                 FederationLinkageService federationLinkageService) {
         this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.federationLinkageService = federationLinkageService;
+    }
+
+    /**
+     * A cross-node reference stores the referenced resource's bare PID ({@code prefix/suffix}),
+     * which does not resolve locally. Such an id is valid as long as the federation can see it.
+     */
+    private boolean existsInFederation(String resourceDisplayName, String id) {
+        return id != null && id.contains("/")
+                && federationLinkageService.getFederatedResource(resourceDisplayName, id).isPresent();
     }
 
     //TODO: decide if we still want public IDs inside lower level resources
@@ -107,9 +120,11 @@ public class RelationshipValidator {
                         try {
                             serviceService.get(eoscRelatedService, catalogueId);
                         } catch (ResourceNotFoundException e) {
-                            throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
-                                            "There is no Service with ID '%s' in the %s Catalogue. ",
-                                    eoscRelatedService, catalogueId));
+                            if (!existsInFederation("Service", eoscRelatedService)) {
+                                throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
+                                                "There is no Service with ID '%s' in the %s Catalogue or the federation. ",
+                                        eoscRelatedService, catalogueId));
+                            }
                         }
                     }
                 }
@@ -120,9 +135,12 @@ public class RelationshipValidator {
                         try {
                             interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
                         } catch (ResourceNotFoundException e) {
-                            throw new ValidationException(String.format("Field [interoperabilityRecordIds]: " +
-                                            "There is no Interoperability Record with ID '%s' in the %s Catalogue.",
-                                    interoperabilityRecordId, catalogueId));
+                            if (!existsInFederation("Interoperability Record", interoperabilityRecordId)) {
+                                throw new ValidationException(String.format("Field [interoperabilityRecordIds]: " +
+                                                "There is no Interoperability Record with ID '%s' in the %s Catalogue "
+                                                + "or the federation.",
+                                        interoperabilityRecordId, catalogueId));
+                            }
                         }
                     }
                 }
