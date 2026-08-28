@@ -223,17 +223,17 @@ public class PidIssuer {
         int index = 1;
 
         for (Map<String, Object> alternativePid : asMapList(payload.get("alternativePIDs"))) {
-            values.put(buildEntry(index++, "alternativePID", new JSONObject(alternativePid).toString()));
+            values.put(buildEntry(index++, "alternativePIDs", new JSONObject(alternativePid).toString()));
         }
 
         //TODO: what to do with resolve endpoints
         if (resolveEndpoints != null) {
             for (String endpoint : resolveEndpoints) {
-                values.put(buildEntry(index++, "url", resolveUrl(endpoint, pid)));
+                values.put(buildEntry(index++, "URL", resolveUrl(endpoint, pid)));
             }
         }
         for (String url : asStringList(payload.get("urls"))) {
-            values.put(buildEntry(index++, "url", url));
+            values.put(buildEntry(index++, "urls", url));
         }
 
         values.put(buildEntry(index++, "name", payload.get("name")));
@@ -244,7 +244,7 @@ public class PidIssuer {
         values.put(buildEntry(index++, "resourceOwner", payload.get("resourceOwner")));
 
         for (String contact : asStringList(payload.get("publicContacts"))) {
-            values.put(buildEntry(index++, "publicContact", contact));
+            values.put(buildEntry(index++, "publicContacts", contact));
         }
 
         values.put(buildHsAdmin(config));
