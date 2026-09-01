@@ -50,6 +50,8 @@
         <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
         <netty.version>4.2.16.Final</netty.version>
+        <!-- CVE-2026-59313: Spring MVC SSE content spoofing, fixed in 7.0.9 (Boot 4.0.7 manages 7.0.8) -->
+        <spring-framework.version>7.0.9</spring-framework.version>
         <!-- CVE-2026-65905/65637/65183/65182/66422/68525/68569: fixed in 11.0.25 -->
         <tomcat.version>11.0.25</tomcat.version>
         <postgresql.version>42.7.13</postgresql.version>
