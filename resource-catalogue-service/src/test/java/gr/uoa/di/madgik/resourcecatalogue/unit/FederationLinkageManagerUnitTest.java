@@ -117,4 +117,24 @@ class FederationLinkageManagerUnitTest {
         // ADAPTER is a valid ResourceTypes value but has no federation-path configured in this test
         assertThat(manager.listResources("Adapter", local, true)).isSameAs(local);
     }
+
+    @Test
+    void federatedResourceExists_passesThroughTriStateFromClient() {
+        when(federationResourceClient.existsById("services", "99.NB", "zzz"))
+                .thenReturn(Boolean.TRUE, Boolean.FALSE, null);
+
+        assertThat(manager.federatedResourceExists("Service", "99.NB/zzz")).isTrue();
+        assertThat(manager.federatedResourceExists("Service", "99.NB/zzz")).isFalse();
+        assertThat(manager.federatedResourceExists("Service", "99.NB/zzz")).isNull();
+    }
+
+    @Test
+    void federatedResourceExists_falseWhenTypeUnknownOrIdNotPidShaped() {
+        assertThat(manager.federatedResourceExists("Not A Type", "99.NB/zzz")).isFalse();
+        assertThat(manager.federatedResourceExists("Service", "no-slash")).isFalse();
+        verify(federationResourceClient, never())
+                .existsById(org.mockito.ArgumentMatchers.anyString(),
+                        org.mockito.ArgumentMatchers.anyString(),
+                        org.mockito.ArgumentMatchers.anyString());
+    }
 }

@@ -125,7 +125,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
             return bundle;
         }
         bundle.markUpdate(UserInfo.of(auth), comment);
-        relationshipValidator.checkRelatedResourceIDsConsistency(bundle);
+        relationshipValidator.checkRelatedResourceIDsConsistency(bundle, existing);
 
         return genericResourceService.update(getResourceTypeName(), bundle);
     }

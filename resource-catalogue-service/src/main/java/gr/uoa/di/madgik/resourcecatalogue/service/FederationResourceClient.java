@@ -113,6 +113,38 @@ public class FederationResourceClient {
     }
 
     /**
+     * Tri-state existence check for write-path validation. {@code TRUE} - the federation has a
+     * resource with this id; {@code FALSE} - the aggregator answered and the id is nowhere in the
+     * federation (404); {@code null} - the aggregator could not be reached (timeout, network
+     * error, or open circuit breaker), so existence is <em>unknown</em>. Callers must not treat
+     * {@code null} as "does not exist" - it means "could not verify", and per this client's
+     * fail-open contract the caller should not block on it.
+     */
+    public Boolean existsById(String federationPath, String prefix, String suffix) {
+        if (!isEnabled() || isCircuitOpen()) {
+            return null;
+        }
+        try {
+            federationWebClient.get()
+                    .uri(uriBuilder -> uriBuilder.path("/{path}/{prefix}/{suffix}")
+                            .build(federationPath, prefix, suffix))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    })
+                    .timeout(Duration.ofMillis(properties.getTimeoutMs()))
+                    .block();
+            onSuccess();
+            return Boolean.TRUE;
+        } catch (WebClientResponseException.NotFound e) {
+            onSuccess();
+            return Boolean.FALSE;
+        } catch (Exception e) {
+            onFailure("existsById(" + federationPath + ")", e);
+            return null;
+        }
+    }
+
+    /**
      * Fetches all Configuration Templates of the given Interoperability Record from whichever
      * node owns it. The aggregator returns a {@code Paging}; this unwraps it to the list of
      * Configuration Template payload maps.

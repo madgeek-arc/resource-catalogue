@@ -107,6 +107,16 @@ public class FederationLinkageManager implements FederationLinkageService {
     }
 
     @Override
+    public Boolean federatedResourceExists(String resourceDisplayName, String id) {
+        String federationPath = federationPathFor(resourceDisplayName);
+        String[] ps = splitPid(id);
+        if (federationPath == null || federationPath.isBlank() || ps == null) {
+            return Boolean.FALSE;
+        }
+        return federationResourceClient.existsById(federationPath, ps[0], ps[1]);
+    }
+
+    @Override
     public Optional<Map<String, Object>> getInteroperabilityRecord(String id) {
         String[] ps = splitPid(id);
         if (ps == null) {

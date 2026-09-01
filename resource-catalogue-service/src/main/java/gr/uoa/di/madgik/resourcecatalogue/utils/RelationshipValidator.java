@@ -27,8 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 @Component
 public class RelationshipValidator {
@@ -51,100 +52,142 @@ public class RelationshipValidator {
 
     /**
      * A cross-node reference stores the referenced resource's bare PID ({@code prefix/suffix}),
-     * which does not resolve locally. Such an id is valid as long as the federation can see it.
+     * which does not resolve locally. Such an id is valid as long as the federation can see it -
+     * or as long as the aggregator cannot be reached to say otherwise: a timeout / unreachable
+     * aggregator returns {@code null} here, and we fail open rather than block a write on an
+     * external dependency (matching {@code FederationResourceClient}'s posture). Only a definite
+     * {@code FALSE} - the aggregator answered and the id is nowhere in the federation - is
+     * treated as "does not exist".
      */
     private boolean existsInFederation(String resourceDisplayName, String id) {
-        return id != null && id.contains("/")
-                && federationLinkageService.getFederatedResource(resourceDisplayName, id).isPresent();
+        if (id == null || !id.contains("/")) {
+            return false;
+        }
+        Boolean exists = federationLinkageService.federatedResourceExists(resourceDisplayName, id);
+        return exists == null || exists;
     }
 
     //TODO: decide if we still want public IDs inside lower level resources
+
+    /**
+     * Validates every related-resource id carried by {@code o} (providers, {@code eoscRelatedServices},
+     * {@code interoperabilityRecordIds}). Use on create.
+     */
     public void checkRelatedResourceIDsConsistency(Object o) {
-        String catalogueId = null;
-        List<String> serviceProviders = new ArrayList<>();
-        List<String> eoscRelatedServices = new ArrayList<>();
-        List<String> interoperabilityRecordIds = new ArrayList<>();
-        if (o != null) {
-            if (o instanceof ServiceBundle) {
-                catalogueId = ((ServiceBundle) o).getCatalogueId();
-                Object serviceProvidersObj = ((ServiceBundle) o).getService().get("serviceProviders");
-                if (serviceProvidersObj instanceof List<?>) {
-                    serviceProviders = (List<String>) serviceProvidersObj;
-                }
+        checkRelatedResourceIDsConsistency(o, null);
+    }
+
+    /**
+     * Update-aware variant: validates only the related-resource ids in {@code updated} that were
+     * <em>not</em> already present on {@code existing}. An id that is unchanged since the last
+     * write was validated then; re-checking it here would make an unrelated field edit depend on
+     * (and potentially be blocked by) the federated-search aggregator. Pass {@code existing == null}
+     * to validate everything (equivalent to {@link #checkRelatedResourceIDsConsistency(Object)}).
+     */
+    public void checkRelatedResourceIDsConsistency(Object updated, Object existing) {
+        if (updated == null) {
+            return;
+        }
+        RelatedIds now = extractRelatedIds(updated);
+        RelatedIds alreadyValidated = extractRelatedIds(existing);
+
+        validateProviders(newValues(now.serviceProviders(), alreadyValidated.serviceProviders()), now.catalogueId());
+        validateServices(newValues(now.eoscRelatedServices(), alreadyValidated.eoscRelatedServices()), now.catalogueId());
+        validateInteroperabilityRecords(
+                newValues(now.interoperabilityRecordIds(), alreadyValidated.interoperabilityRecordIds()),
+                now.catalogueId());
+    }
+
+    private void validateProviders(List<String> providerIds, String catalogueId) {
+        for (String providerId : providerIds) {
+            try {
+                organisationService.get(providerId, catalogueId);
+            } catch (ResourceNotFoundException e) {
+                throw new ValidationException(String.format("Field [resourceProviders]: "
+                        + "There is no Provider with ID '%s' in the %s Catalogue.", providerId, catalogueId));
             }
-            if (o instanceof DatasourceBundle) {
-                catalogueId = ((DatasourceBundle) o).getCatalogueId();
-                Object serviceProvidersObj = ((DatasourceBundle) o).getDatasource().get("serviceProviders");
-                if (serviceProvidersObj instanceof List<?>) {
-                    serviceProviders = (List<String>) serviceProvidersObj;
-                }
-            }
-            if (o instanceof CatalogueBundle) {
-                catalogueId = ((CatalogueBundle) o).getCatalogueId();
-                Object serviceProvidersObj = ((CatalogueBundle) o).getCatalogue().get("serviceProviders");
-                if (serviceProvidersObj instanceof List<?>) {
-                    serviceProviders = (List<String>) serviceProvidersObj;
-                }
-            }
-            if (o instanceof TrainingResourceBundle) {
-                catalogueId = ((TrainingResourceBundle) o).getCatalogueId();
-                Object eoscRelatedServicesObj = ((TrainingResourceBundle) o).getTrainingResource().get("eoscRelatedServices");
-                if (eoscRelatedServicesObj instanceof List<?>) {
-                    eoscRelatedServices = (List<String>) eoscRelatedServicesObj;
-                }
-            }
-            if (o instanceof ResourceInteroperabilityRecordBundle) {
-                catalogueId = ((ResourceInteroperabilityRecordBundle) o).getCatalogueId();
-                Object interoperabilityRecordIdsObj = ((ResourceInteroperabilityRecordBundle) o)
-                        .getResourceInteroperabilityRecord().get("interoperabilityRecordIds");
-                if (interoperabilityRecordIdsObj instanceof List<?>) {
-                    interoperabilityRecordIds = (List<String>) interoperabilityRecordIdsObj;
-                }
-            }
-            if (!serviceProviders.isEmpty() && serviceProviders.stream().anyMatch(Objects::nonNull)) {
-                for (String serviceProvider : serviceProviders) {
-                    if (serviceProvider != null && !serviceProvider.isEmpty()) {
-                        try {
-                            organisationService.get(serviceProvider, catalogueId);
-                        } catch (ResourceNotFoundException e) {
-                            throw new ValidationException(String.format("Field [resourceProviders]: " +
-                                            "There is no Provider with ID '%s' in the %s Catalogue.",
-                                    serviceProvider, catalogueId));
-                        }
-                    }
-                }
-            }
-            if (!eoscRelatedServices.isEmpty() && eoscRelatedServices.stream().anyMatch(Objects::nonNull)) {
-                for (String eoscRelatedService : eoscRelatedServices) {
-                    if (eoscRelatedService != null && !eoscRelatedService.isEmpty()) {
-                        try {
-                            serviceService.get(eoscRelatedService, catalogueId);
-                        } catch (ResourceNotFoundException e) {
-                            if (!existsInFederation("Service", eoscRelatedService)) {
-                                throw new ValidationException(String.format("Field [eoscRelatedServices]: " +
-                                                "There is no Service with ID '%s' in the %s Catalogue or the federation. ",
-                                        eoscRelatedService, catalogueId));
-                            }
-                        }
-                    }
-                }
-            }
-            if (!interoperabilityRecordIds.isEmpty() && interoperabilityRecordIds.stream().anyMatch(Objects::nonNull)) {
-                for (String interoperabilityRecordId : interoperabilityRecordIds) {
-                    if (interoperabilityRecordId != null && !interoperabilityRecordId.isEmpty()) {
-                        try {
-                            interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
-                        } catch (ResourceNotFoundException e) {
-                            if (!existsInFederation("Interoperability Record", interoperabilityRecordId)) {
-                                throw new ValidationException(String.format("Field [interoperabilityRecordIds]: " +
-                                                "There is no Interoperability Record with ID '%s' in the %s Catalogue "
-                                                + "or the federation.",
-                                        interoperabilityRecordId, catalogueId));
-                            }
-                        }
-                    }
+        }
+    }
+
+    private void validateServices(List<String> serviceIds, String catalogueId) {
+        for (String serviceId : serviceIds) {
+            try {
+                serviceService.get(serviceId, catalogueId);
+            } catch (ResourceNotFoundException e) {
+                if (!existsInFederation("Service", serviceId)) {
+                    throw new ValidationException(String.format("Field [eoscRelatedServices]: "
+                            + "There is no Service with ID '%s' in the %s Catalogue or the federation. ",
+                            serviceId, catalogueId));
                 }
             }
         }
+    }
+
+    private void validateInteroperabilityRecords(List<String> interoperabilityRecordIds, String catalogueId) {
+        for (String interoperabilityRecordId : interoperabilityRecordIds) {
+            try {
+                interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
+            } catch (ResourceNotFoundException e) {
+                if (!existsInFederation("Interoperability Record", interoperabilityRecordId)) {
+                    throw new ValidationException(String.format("Field [interoperabilityRecordIds]: "
+                            + "There is no Interoperability Record with ID '%s' in the %s Catalogue "
+                            + "or the federation.", interoperabilityRecordId, catalogueId));
+                }
+            }
+        }
+    }
+
+    /**
+     * Non-blank ids in {@code current} that are not already in {@code alreadyValidated}.
+     */
+    private static List<String> newValues(List<String> current, List<String> alreadyValidated) {
+        Set<String> known = new HashSet<>(alreadyValidated);
+        List<String> out = new ArrayList<>();
+        for (String value : current) {
+            if (value != null && !value.isEmpty() && !known.contains(value)) {
+                out.add(value);
+            }
+        }
+        return out;
+    }
+
+    @SuppressWarnings("unchecked")
+    private RelatedIds extractRelatedIds(Object o) {
+        if (o == null) {
+            return RelatedIds.EMPTY;
+        }
+        String catalogueId = null;
+        List<String> serviceProviders = List.of();
+        List<String> eoscRelatedServices = List.of();
+        List<String> interoperabilityRecordIds = List.of();
+
+        if (o instanceof ServiceBundle sb) {
+            catalogueId = sb.getCatalogueId();
+            serviceProviders = asStringList(sb.getService().get("serviceProviders"));
+        } else if (o instanceof DatasourceBundle db) {
+            catalogueId = db.getCatalogueId();
+            serviceProviders = asStringList(db.getDatasource().get("serviceProviders"));
+        } else if (o instanceof CatalogueBundle cb) {
+            catalogueId = cb.getCatalogueId();
+            serviceProviders = asStringList(cb.getCatalogue().get("serviceProviders"));
+        } else if (o instanceof TrainingResourceBundle tb) {
+            catalogueId = tb.getCatalogueId();
+            eoscRelatedServices = asStringList(tb.getTrainingResource().get("eoscRelatedServices"));
+        } else if (o instanceof ResourceInteroperabilityRecordBundle rb) {
+            catalogueId = rb.getCatalogueId();
+            interoperabilityRecordIds = asStringList(
+                    rb.getResourceInteroperabilityRecord().get("interoperabilityRecordIds"));
+        }
+        return new RelatedIds(catalogueId, serviceProviders, eoscRelatedServices, interoperabilityRecordIds);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<String> asStringList(Object o) {
+        return o instanceof List<?> list ? (List<String>) list : List.of();
+    }
+
+    private record RelatedIds(String catalogueId, List<String> serviceProviders,
+                              List<String> eoscRelatedServices, List<String> interoperabilityRecordIds) {
+        static final RelatedIds EMPTY = new RelatedIds(null, List.of(), List.of(), List.of());
     }
 }

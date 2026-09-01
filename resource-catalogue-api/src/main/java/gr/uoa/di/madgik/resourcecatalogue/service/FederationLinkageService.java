@@ -54,6 +54,17 @@ public interface FederationLinkageService {
     Optional<Map<String, Object>> getFederatedResource(String resourceDisplayName, String id);
 
     /**
+     * Tri-state check of whether a resource with the given bare PID exists anywhere in the
+     * federation: {@code TRUE} = it does, {@code FALSE} = the aggregator answered and it does
+     * not, {@code null} = the aggregator could not be reached, so existence is <em>unknown</em>.
+     * Write-path validators must treat {@code null} as "cannot verify" rather than "absent".
+     *
+     * @param resourceDisplayName controller-level display name, e.g. "Service"
+     * @param id                  the resource's bare PID ({@code prefix/suffix})
+     */
+    Boolean federatedResourceExists(String resourceDisplayName, String id);
+
+    /**
      * Fetches an Interoperability Record by id from whichever federation node owns it.
      */
     Optional<Map<String, Object>> getInteroperabilityRecord(String id);
