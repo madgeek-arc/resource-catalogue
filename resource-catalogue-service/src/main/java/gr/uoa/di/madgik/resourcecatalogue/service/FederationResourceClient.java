@@ -63,6 +63,8 @@ public class FederationResourceClient {
         this.properties = properties;
         this.federationWebClient = WebClient.builder()
                 .baseUrl(properties.getSearchUrl())
+                .codecs(configurer -> configurer.defaultCodecs()
+                        .maxInMemorySize(properties.getMaxInMemorySizeBytes()))
                 .build();
     }
 
@@ -72,26 +74,28 @@ public class FederationResourceClient {
 
     /**
      * Returns every resource published under {@code federationPath} across the federation, as a
-     * list of public payload maps (each carrying a bare-PID {@code id} and a {@code name}).
-     * The local node's own copies are included - callers must de-duplicate them.
+     * list of {@code {id, name}} maps (each carrying a bare-PID {@code id} and a display
+     * {@code name}). The local node's own copies are included - callers must de-duplicate them.
+     * <p>
+     * Hits the aggregator's dedicated {@code /{federationPath}/ids} route, which projects every
+     * node's hits down to id + name, de-duplicates, sorts by name, and serves the result from a
+     * short-TTL cache - so this is a small, bounded payload regardless of how large the
+     * federation grows, and does not trigger a full cross-node search + rank-fusion on every call.
      */
     public List<Map<String, Object>> listAll(String federationPath) {
         if (!isEnabled() || federationPath == null || isCircuitOpen()) {
             return Collections.emptyList();
         }
         try {
-            Map<String, Object> body = federationWebClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/{path}")
-                            .queryParam("from", 0)
-                            .queryParam("quantity", properties.getListQuantity())
-                            .build(federationPath))
+            List<Map<String, Object>> body = federationWebClient.get()
+                    .uri(uriBuilder -> uriBuilder.path("/{path}/ids").build(federationPath))
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {
                     })
                     .timeout(Duration.ofMillis(properties.getTimeoutMs()))
                     .block();
             onSuccess();
-            return extractResults(body);
+            return body != null ? body : Collections.emptyList();
         } catch (Exception e) {
             onFailure("listAll(" + federationPath + ")", e);
             return Collections.emptyList();
@@ -179,26 +183,6 @@ public class FederationResourceClient {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> extractResults(Map<String, Object> body) {
-        if (body == null) {
-            return Collections.emptyList();
-        }
-        Object results = body.get("results");
-        if (!(results instanceof List<?> list)) {
-            return Collections.emptyList();
-        }
-        List<Map<String, Object>> payloads = new ArrayList<>(list.size());
-        for (Object element : list) {
-            if (element instanceof Map<?, ?> map) {
-                Object result = map.get("result");
-                if (result instanceof Map<?, ?> resultMap) {
-                    payloads.add((Map<String, Object>) resultMap);
-                }
-            }
-        }
-        return payloads;
-    }
 
     @SuppressWarnings("unchecked")
     private List<Map<String, Object>> unwrapPaging(Map<String, Object> body) {

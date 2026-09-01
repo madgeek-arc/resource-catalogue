@@ -57,12 +57,14 @@ public class FederationCrossLinkageProperties {
     private Long timeoutMs;
 
     /**
-     * Maximum number of federated results to pull from the aggregator when populating a
-     * dropdown. Kept explicit so a node can cap the payload of a "list everything" call.
+     * Upper bound, in bytes, on the in-memory buffer {@link org.springframework.web.reactive.function.client.WebClient}
+     * uses to hold an aggregator response before decoding it. WebClient's own default is 256 KB, which the
+     * federation-wide {@code listAll} call can still overrun with a {@code DataBufferLimitException} once the
+     * federation holds enough resources. Sized explicitly so a node can bound the largest response it will accept.
      */
     @NotNull
     @Positive
-    private Integer listQuantity;
+    private Integer maxInMemorySizeBytes;
 
     /**
      * Number of consecutive failed/timed-out calls after which the circuit breaker opens,
@@ -106,12 +108,12 @@ public class FederationCrossLinkageProperties {
         return this;
     }
 
-    public Integer getListQuantity() {
-        return listQuantity;
+    public Integer getMaxInMemorySizeBytes() {
+        return maxInMemorySizeBytes;
     }
 
-    public FederationCrossLinkageProperties setListQuantity(Integer listQuantity) {
-        this.listQuantity = listQuantity;
+    public FederationCrossLinkageProperties setMaxInMemorySizeBytes(Integer maxInMemorySizeBytes) {
+        this.maxInMemorySizeBytes = maxInMemorySizeBytes;
         return this;
     }
 
