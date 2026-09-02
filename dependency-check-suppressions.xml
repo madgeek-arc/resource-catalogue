@@ -39,6 +39,43 @@
         <cve>CVE-2026-39883</cve>
     </suppress>
 
+    <!-- ===== co.elastic.clients (Java REST API clients: elasticsearch-java, elasticsearch-rest5-client) =====
+         NVD matches the Elasticsearch *server* CPEs (cpe:2.3:a:elastic:elasticsearch and
+         cpe:2.3:a:elasticsearch:elasticsearch) against these co.elastic.clients artifacts
+         purely because Elastic ships the clients with the same version number as the server
+         they target. Both are REST API wrappers with no native code, no ML inference engine,
+         and no server-side components, so server-only CVEs cannot apply to them.
+         dependency-check requires an exact (non-wildcard) CPE match for <cpe> suppression
+         rules, so each affected version needs its own entry below as new server CVEs get
+         misattributed to these jars; add another block here (bump the version) when that
+         next happens rather than reaching for a blanket <cpe> wildcard, which the plugin
+         silently ignores (zero matches). -->
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-72642: heap corruption (CWE-823) in the Elasticsearch server's native
+            ML model inference process when evaluating an uploaded model. Requires privileges
+            to upload/deploy trained models to the server; co.elastic.clients:elasticsearch-java
+            is a REST client with no native code or inference engine, so it cannot be affected.
+            False positive from CPE/version-number overlap between client and server releases.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-java@.*$</packageUrl>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-72642</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-72642: same false positive as above (heap corruption in the server's
+            native ML inference process), misattributed to co.elastic.clients:elasticsearch-rest5-client,
+            which is the low-level HTTP transport used by elasticsearch-java and likewise has
+            no native code or inference engine.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-rest5-client@.*$</packageUrl>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-72642</cve>
+    </suppress>
+
     <!-- ===== swagger-ui (DOMPurify) =====
          CVE-2026-41238, CVE-2026-41239, CVE-2026-41240: DOMPurify 3.3.2 bundled in
          swagger-ui 5.32.2 (shipped with springdoc-openapi 3.0.3). The fix is DOMPurify
