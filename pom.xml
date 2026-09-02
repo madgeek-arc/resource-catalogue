@@ -57,6 +57,8 @@
         <postgresql.version>42.7.13</postgresql.version>
         <!-- CVE-2026-49844: log4j-core JSON MapMessage encoding issue, fixed in 2.26.1 (Boot 4.0.7 manages 2.25.4) -->
         <log4j2.version>2.26.1</log4j2.version>
+        <!-- CVE-2026-59270: LDAP UnboundIdContainer exposes admin bind DN on all interfaces, fixed in 7.0.7 (Boot 4.0.7 manages 7.0.6) -->
+        <spring-security.version>7.0.7</spring-security.version>
         <!-- Preserve test JVM args so modules can append their own flags safely. -->
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
