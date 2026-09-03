@@ -52,6 +52,7 @@ public class PublicResourcesManagementAspect {
     private final PublicResourceInteroperabilityRecordService publicRIRService;
     private final PublicConfigurationTemplateInstanceService publicCTIService;
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordService;
+    private final PublicConfigurationTemplateService publicConfigurationTemplateService;
 
     public PublicResourcesManagementAspect(PublicOrganisationService publicOrganisationService,
                                            PublicServiceService publicServiceService,
@@ -63,7 +64,8 @@ public class PublicResourcesManagementAspect {
                                            PublicAdapterService publicAdapterService,
                                            PublicResourceInteroperabilityRecordService publicRIRService,
                                            PublicConfigurationTemplateInstanceService publicCTIService,
-                                           PublicInteroperabilityRecordService publicInteroperabilityRecordService) {
+                                           PublicInteroperabilityRecordService publicInteroperabilityRecordService,
+                                           PublicConfigurationTemplateService publicConfigurationTemplateService) {
         this.publicOrganisationService = publicOrganisationService;
         this.publicServiceService = publicServiceService;
         this.publicCatalogueService = publicCatalogueService;
@@ -75,6 +77,7 @@ public class PublicResourcesManagementAspect {
         this.publicRIRService = publicRIRService;
         this.publicCTIService = publicCTIService;
         this.publicInteroperabilityRecordService = publicInteroperabilityRecordService;
+        this.publicConfigurationTemplateService = publicConfigurationTemplateService;
     }
 
     //region Public Provider
@@ -484,6 +487,35 @@ public class PublicResourcesManagementAspect {
         ResourceInteroperabilityRecordBundle rir = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
         try {
             publicRIRService.delete(rir);
+        } catch (ResourceException | ResourceNotFoundException ignore) {
+        }
+    }
+    //endregion
+
+    //region Public Configuration Template
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.add(..))",
+            returning = "ct")
+    public void addPublicConfigurationTemplate(final ConfigurationTemplateBundle ct) {
+        try {
+            publicConfigurationTemplateService.get(ct.getIdentifiers().getPid(), ct.getCatalogueId());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            publicConfigurationTemplateService.add(ObjectUtils.clone(ct), false);
+        }
+    }
+
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.update(..)) " +
+            "&& args(ct,..)")
+    public Object updatePublicConfigurationTemplate(ProceedingJoinPoint pjp, ConfigurationTemplateBundle ct) throws Throwable {
+        return updatePublicBundle(pjp, publicConfigurationTemplateService, ct, false);
+    }
+
+    @Async
+    @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.delete(..))")
+    public void deletePublicConfigurationTemplate(JoinPoint joinPoint) {
+        ConfigurationTemplateBundle ct = (ConfigurationTemplateBundle) joinPoint.getArgs()[0];
+        try {
+            publicConfigurationTemplateService.delete(ct);
         } catch (ResourceException | ResourceNotFoundException ignore) {
         }
     }
