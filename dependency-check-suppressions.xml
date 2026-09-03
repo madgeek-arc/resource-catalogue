@@ -75,6 +75,33 @@
         <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
         <cve>CVE-2026-72642</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-72649: deserialization of untrusted data (CWE-502) in the Elasticsearch
+            server's machine learning component, leading to RCE via object injection when a
+            crafted trained model artifact is deployed. Requires an authenticated user with
+            privileges to create and deploy trained models on the server (affected server
+            versions: < 8.19.20, 9.0.0-9.4.4, 9.5.0). co.elastic.clients:elasticsearch-java
+            is a REST client with no ML component or model-loading logic, so it cannot be
+            affected. False positive from CPE/version-number overlap between client and server.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-java@.*$</packageUrl>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-72649</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-72649: same false positive as above (deserialization RCE in the server's
+            ML component), misattributed to co.elastic.clients:elasticsearch-rest5-client,
+            which is the low-level HTTP transport used by elasticsearch-java and likewise has
+            no ML component or model-loading logic.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-rest5-client@.*$</packageUrl>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-72649</cve>
+    </suppress>
 
     <!-- ===== swagger-ui (DOMPurify) =====
          CVE-2026-41238, CVE-2026-41239, CVE-2026-41240: DOMPurify 3.3.2 bundled in
