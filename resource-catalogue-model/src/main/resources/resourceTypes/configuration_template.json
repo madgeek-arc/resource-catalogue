@@ -127,6 +127,16 @@
       "embeddingWeight": 0.0
     },
     {
+      "label": null,
+      "multivalued": false,
+      "name": "status",
+      "path": "$.status",
+      "type": "java.lang.String",
+      "relatedResourceType": "vocabulary",
+      "relatedResourceTypeField": "name",
+      "embeddingWeight": 0.0
+    },
+    {
       "defaultValue": "false",
       "label": null,
       "multivalued": false,
