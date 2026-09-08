@@ -180,18 +180,6 @@ public class FederationResourceClient {
                 .build(prefix, suffix), "getConfigurationTemplateModel");
     }
 
-    /**
-     * Fetches the Configuration Template Instance form/template for a resource + template pair
-     * from whichever node owns them.
-     */
-    public Optional<Map<String, Object>> getConfigurationTemplateInstanceTemplate(String resPrefix, String resSuffix,
-                                                                                 String ctPrefix, String ctSuffix) {
-        return get(uriBuilder -> uriBuilder
-                        .path("/configurationTemplateInstances/resources/{rp}/{rs}/templates/{cp}/{cs}")
-                        .build(resPrefix, resSuffix, ctPrefix, ctSuffix),
-                "getConfigurationTemplateInstanceTemplate");
-    }
-
     private Optional<Map<String, Object>> get(Function<UriBuilder, URI> uriFunction, String opLabel) {
         if (!isEnabled() || isCircuitOpen()) {
             return Optional.empty();

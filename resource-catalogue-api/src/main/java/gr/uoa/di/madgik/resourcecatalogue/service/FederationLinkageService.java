@@ -82,13 +82,6 @@ public interface FederationLinkageService {
     Optional<Map<String, Object>> getConfigurationTemplateModel(String configurationTemplateId);
 
     /**
-     * Fetches the Configuration Template Instance form/template for a resource + template pair
-     * from whichever federation node owns them.
-     */
-    Optional<Map<String, Object>> getConfigurationTemplateInstanceTemplate(String resourceId,
-                                                                          String configurationTemplateId);
-
-    /**
      * Whether federation cross-linkage is enabled on this node at all.
      */
     boolean isEnabled();

@@ -20,8 +20,6 @@ import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.registry.exception.ResourceException;
-import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateInstanceService;
@@ -134,30 +132,15 @@ public class ConfigurationTemplateInstanceController
     public ResponseEntity<?> getByResourceAndConfigurationTemplateId(@PathVariable("resourcePrefix") String resourcePrefix,
                                                                      @PathVariable("resourceSuffix") String resourceSuffix,
                                                                      @PathVariable("ctPrefix") String ctPrefix,
-                                                                     @PathVariable("ctSuffix") String ctSuffix,
-                                                                     @RequestParam(required = false, defaultValue = "false")
-                                                                     boolean federation) {
+                                                                     @PathVariable("ctSuffix") String ctSuffix) {
+        // Configuration Template Instances are always created and stored on the node that owns
+        // the resource, so this is a purely local lookup - no federation fallback. A null result
+        // ("no instance yet") is a valid answer: the UI renders an empty form from the (possibly
+        // federated) Configuration Template model.
         String resourceId = resourcePrefix + "/" + resourceSuffix;
         String ctId = ctPrefix + "/" + ctSuffix;
-        try {
-            LinkedHashMap<String, Object> ret = service.getByResourceAndConfigurationTemplateId(resourceId, ctId);
-            if (ret != null && !ret.isEmpty()) {
-                return new ResponseEntity<>(ret, HttpStatus.OK);
-            }
-            if (federation) {
-                return federationLinkageService.getConfigurationTemplateInstanceTemplate(resourceId, ctId)
-                        .<ResponseEntity<?>>map(body -> new ResponseEntity<>(body, HttpStatus.OK))
-                        .orElseGet(() -> new ResponseEntity<>(ret, HttpStatus.OK));
-            }
-            return new ResponseEntity<>(ret, HttpStatus.OK);
-        } catch (ResourceException | ResourceNotFoundException e) {
-            if (federation) {
-                return federationLinkageService.getConfigurationTemplateInstanceTemplate(resourceId, ctId)
-                        .<ResponseEntity<?>>map(body -> new ResponseEntity<>(body, HttpStatus.OK))
-                        .orElseThrow(() -> e);
-            }
-            throw e;
-        }
+        LinkedHashMap<String, Object> ret = service.getByResourceAndConfigurationTemplateId(resourceId, ctId);
+        return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'configurationTemplateId'.")

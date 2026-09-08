@@ -143,17 +143,6 @@ public class FederationLinkageManager implements FederationLinkageService {
         return federationResourceClient.getConfigurationTemplateModel(ps[0], ps[1]);
     }
 
-    @Override
-    public Optional<Map<String, Object>> getConfigurationTemplateInstanceTemplate(String resourceId,
-                                                                                 String configurationTemplateId) {
-        String[] res = splitPid(resourceId);
-        String[] ct = splitPid(configurationTemplateId);
-        if (res == null || ct == null) {
-            return Optional.empty();
-        }
-        return federationResourceClient.getConfigurationTemplateInstanceTemplate(res[0], res[1], ct[0], ct[1]);
-    }
-
     /**
      * Local ids as-is plus, for every low-level id ({@code <pid>00}), the bare PID it derives
      * from - so a federation entry keyed by that bare PID is recognised as the local copy.
