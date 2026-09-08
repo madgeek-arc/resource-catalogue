@@ -16,11 +16,13 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
+import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
+import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,8 +45,15 @@ import java.util.Map;
 @Tag(name = "public configuration template")
 public class PublicConfigurationTemplateController extends BasePublicController<ConfigurationTemplateBundle> {
 
-    PublicConfigurationTemplateController(PublicResourceService<ConfigurationTemplateBundle> service) {
+    private final ConfigurationTemplateService configurationTemplateService;
+    private final ModelService modelService;
+
+    PublicConfigurationTemplateController(PublicResourceService<ConfigurationTemplateBundle> service,
+                                         ConfigurationTemplateService configurationTemplateService,
+                                         ModelService modelService) {
         super(service);
+        this.configurationTemplateService = configurationTemplateService;
+        this.modelService = modelService;
     }
 
     @Operation(description = "Returns the Public Configuration Template with the given id.")
@@ -80,5 +89,37 @@ public class PublicConfigurationTemplateController extends BasePublicController<
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("active", true);
         return ResponseEntity.ok(service.getAll(ff).map(Bundle::getPayload));
+    }
+
+    @Operation(description = "Returns the public Configuration Templates of an Interoperability Record, matched by "
+            + "the Interoperability Record's public PID. Used by the federated-search aggregator for cross-node reads.")
+    @BrowseParameters
+    @GetMapping(path = "getAllByInteroperabilityRecordId/{prefix}/{suffix}")
+    public ResponseEntity<Paging<ConfigurationTemplateBundle>> getAllByInteroperabilityRecordId(
+            @PathVariable String prefix,
+            @PathVariable String suffix,
+            @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
+        // Same response shape as the private registry route
+        // (ConfigurationTemplateController#getAllByInteroperabilityRecordId), so the federation
+        // fallback there relays an identical body to callers.
+        return ResponseEntity.ok(
+                configurationTemplateService.getPublicByInteroperabilityRecordId(params, prefix + "/" + suffix));
+    }
+
+    @Operation(description = "Returns the dynamic-form Model bound to the public Configuration Template with the "
+            + "given id. The Model is a node-local resource; this lets the federated-search aggregator serve it "
+            + "to other nodes so they can render this template's form.")
+    @GetMapping(path = "{prefix}/{suffix}/model")
+    public ResponseEntity<?> getModelByConfigurationTemplateId(@PathVariable String prefix,
+                                                               @PathVariable String suffix,
+                                                               @SuppressWarnings("unused") @Parameter(hidden = true)
+                                                               Authentication auth) {
+        ConfigurationTemplateBundle bundle = service.get(prefix + "/" + suffix, null);
+        if (!bundle.isActive()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
+                    "The specific Configuration Template is not active"));
+        }
+        String modelId = (String) bundle.getConfigurationTemplate().get("modelId");
+        return ResponseEntity.ok(modelService.get(modelId));
     }
 }
