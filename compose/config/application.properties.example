@@ -105,7 +105,7 @@ catalogue.resources.interoperability-record.federation-path=interoperabilityReco
 catalogue.resources.organisation.federation-path=organisations
 catalogue.resources.resource-interoperability-record.federation-path=resourceInteroperabilityRecords
 catalogue.resources.service.federation-path=services
-catalogue.resources.training_resource.federation-path=trainingResources
+catalogue.resources.training-resource.federation-path=trainingResources
 
 ### Federation Duplicate-Id Check ###
 federation.duplicate-check.enabled=true
@@ -118,7 +118,6 @@ federation.duplicate-check.circuit-breaker-reset-ms=60000
 federation.cross-linkage.enabled=true
 federation.cross-linkage.search-url=https://federatedsearch.service.eosc-beyond.eu/api/federation
 federation.cross-linkage.timeout-ms=8000
-federation.cross-linkage.list-quantity=1000
 federation.cross-linkage.circuit-breaker-failure-threshold=5
 federation.cross-linkage.circuit-breaker-reset-ms=60000
 federation.cross-linkage.max-in-memory-size-bytes=4194304

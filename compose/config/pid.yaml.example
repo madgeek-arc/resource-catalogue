@@ -2,6 +2,11 @@
 catalogue:
   resources:
     organisation:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -13,6 +18,11 @@ catalogue:
           client-key: /rc/config/pid_certs/organisation/privkey.pem
           client-cert: /rc/config/pid_certs/organisation/cert.pem
     service:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -24,6 +34,11 @@ catalogue:
           client-key: /rc/config/pid_certs/service/privkey.pem
           client-cert: /rc/config/pid_certs/service/cert.pem
     datasource:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -35,6 +50,11 @@ catalogue:
           client-key: /rc/config/pid_certs/datasource/privkey.pem
           client-cert: /rc/config/pid_certs/datasource/cert.pem
     catalogue:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -46,6 +66,11 @@ catalogue:
           client-key: /rc/config/pid_certs/catalogue/privkey.pem
           client-cert: /rc/config/pid_certs/catalogue/cert.pem
     training-resource:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -57,6 +82,11 @@ catalogue:
           client-key: /rc/config/pid_certs/training-resource/privkey.pem
           client-cert: /rc/config/pid_certs/training-resource/cert.pem
     interoperability-record:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -68,6 +98,11 @@ catalogue:
           client-key: /rc/config/pid_certs/interoperability-record/privkey.pem
           client-cert: /rc/config/pid_certs/interoperability-record/cert.pem
     adapter:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -79,6 +114,11 @@ catalogue:
           client-key: /rc/config/pid_certs/adapter/privkey.pem
           client-cert: /rc/config/pid_certs/adapter/cert.pem
     deployable-application:
+      fdo:
+        type:
+        profile:
+        data:
+        version:
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
