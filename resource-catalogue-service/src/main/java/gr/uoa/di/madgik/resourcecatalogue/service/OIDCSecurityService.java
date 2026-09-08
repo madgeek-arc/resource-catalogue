@@ -42,6 +42,7 @@ public class OIDCSecurityService implements SecurityService {
     private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
     private final ConfigurationTemplateService configurationTemplateService;
+    private final FederationLinkageService federationLinkageService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
@@ -53,6 +54,7 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy DeployableApplicationService deployableApplicationService,
                                @Lazy AdapterService adapterService,
                                @Lazy ConfigurationTemplateService configurationTemplateService,
+                               @Lazy FederationLinkageService federationLinkageService,
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.organisationService = organisationService;
@@ -63,6 +65,7 @@ public class OIDCSecurityService implements SecurityService {
         this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
         this.configurationTemplateService = configurationTemplateService;
+        this.federationLinkageService = federationLinkageService;
     }
 
     @Override
@@ -185,6 +188,9 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean userIsResourceAdmin(@NotNull User user, String resourceId) {
         String providerId = getProviderId(resourceId);
+        if (providerId == null) {
+            return false;
+        }
         return userIsOrganisationAdmin(user, providerId);
     }
 
@@ -258,6 +264,7 @@ public class OIDCSecurityService implements SecurityService {
 
     private String getProviderId(Bundle bundle) {
         return switch (bundle) {
+            case null -> null;
             case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("resourceOwner");
             case CatalogueBundle catalogueBundle -> (String) catalogueBundle.getCatalogue().get("resourceOwner");
             case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("resourceOwner");
@@ -266,7 +273,7 @@ public class OIDCSecurityService implements SecurityService {
             case DeployableApplicationBundle deployableApplicationBundle ->
                     (String) deployableApplicationBundle.getDeployableApplication().get("resourceOwner");
             case AdapterBundle adapterBundle -> (String) adapterBundle.getAdapter().get("resourceOwner");
-            case null, default ->
+            default ->
                     (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("resourceOwner");
         };
     }
@@ -437,8 +444,13 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean guidelineIsActive(String id) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
-        return interoperabilityRecordBundle.isActive();
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.getOrElseReturnNull(id);
+        if (interoperabilityRecordBundle != null) {
+            return interoperabilityRecordBundle.isActive();
+        }
+        // Not found locally: a guideline hosted on another federation node is by definition
+        // already published/public there, so it satisfies the same "readable by anyone" intent.
+        return federationLinkageService.getInteroperabilityRecord(id).isPresent();
     }
 
     @Override
