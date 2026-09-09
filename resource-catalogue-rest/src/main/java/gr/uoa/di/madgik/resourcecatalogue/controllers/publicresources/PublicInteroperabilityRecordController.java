@@ -18,18 +18,26 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Profile("beyond")
 @RestController
@@ -38,11 +46,39 @@ import java.util.List;
 public class PublicInteroperabilityRecordController extends BasePublicController<InteroperabilityRecordBundle> {
 
     private final PublicResourceService<ResourceInteroperabilityRecordBundle> rirService;
+    private final FederationLinkageService federationLinkageService;
 
     public PublicInteroperabilityRecordController(PublicResourceService<InteroperabilityRecordBundle> service,
-                                                  PublicResourceService<ResourceInteroperabilityRecordBundle> rirService) {
+                                                  PublicResourceService<ResourceInteroperabilityRecordBundle> rirService,
+                                                  FederationLinkageService federationLinkageService) {
         super(service);
         this.rirService = rirService;
+        this.federationLinkageService = federationLinkageService;
+    }
+
+    @Operation(description = "Returns the Public Interoperability Record with the given id. When not found "
+            + "locally, falls back to whichever federation node owns it.")
+    @GetMapping(path = "{prefix}/{suffix}", params = "federation")
+    public ResponseEntity<?> get(@PathVariable String prefix,
+                                 @PathVariable String suffix,
+                                 @RequestParam(required = false, defaultValue = "false") boolean federation,
+                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        try {
+            InteroperabilityRecordBundle bundle = service.get(id);
+            if (bundle.isActive()) {
+                return new ResponseEntity<>(bundle.toPublicMap(), HttpStatus.OK);
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message",
+                    "The specific resource is not active"));
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (federation) {
+                return federationLinkageService.getInteroperabilityRecord(id)
+                        .<ResponseEntity<?>>map(ResponseEntity::ok)
+                        .orElseThrow(() -> e);
+            }
+            throw e;
+        }
     }
 
     @Operation(description = "Returns the Public Related Resources of a specific Interoperability Record given its id.")

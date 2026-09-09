@@ -121,6 +121,23 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     @Override
     public Paging<ConfigurationTemplateBundle> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
                                                                                 String interoperabilityRecordId) {
+        return getByInteroperabilityRecordId(params, interoperabilityRecordId, false);
+    }
+
+    @Override
+    public Paging<ConfigurationTemplateBundle> getPublicByInteroperabilityRecordId(MultiValueMap<String, Object> params,
+                                                                                   String interoperabilityRecordId) {
+        return getByInteroperabilityRecordId(params, interoperabilityRecordId, true);
+    }
+
+    /**
+     * Shared query for "Configuration Templates of an Interoperability Record". {@code publicLayer}
+     * selects which layer is read: the private layer keys the link by the IR's local id, the
+     * public layer by the IR's public PID (set during id translation on publish).
+     */
+    private Paging<ConfigurationTemplateBundle> getByInteroperabilityRecordId(MultiValueMap<String, Object> params,
+                                                                              String interoperabilityRecordId,
+                                                                              boolean publicLayer) {
         FacetFilter ff;
         if (params != null) {
             ff = FacetFilter.from(params);
@@ -129,7 +146,10 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
         }
         ff.setResourceType("configuration_template");
         ff.setQuantity(1000);
-        ff.addFilter("published", false);
+        ff.addFilter("published", publicLayer);
+        if (publicLayer) {
+            ff.addFilter("active", true);
+        }
         ff.addFilter("interoperability_record_id", interoperabilityRecordId);
         return genericResourceService.getResults(ff);
     }
