@@ -98,12 +98,21 @@ public class Bundle {
     }
 
     public void markUpdate(UserInfo user, String comment) {
+        markUpdate(user, comment, LoggingInfo.ActionType.UPDATED);
+    }
+
+    /**
+     * Records an update-type logging entry with a specific {@link LoggingInfo.ActionType} (e.g.
+     * {@link LoggingInfo.ActionType#MOVED} when a resource is reassigned to another Organisation).
+     * The entry is still of type {@link LoggingInfo.Types#UPDATE}, so it counts as an update for
+     * audit-state purposes.
+     */
+    public void markUpdate(UserInfo user, String comment, LoggingInfo.ActionType actionType) {
         this.setMetadata(Metadata.updateMetadata(this.getMetadata(), user.fullName(), user.email()));
-        LoggingInfo updateInfo;
-        updateInfo = LoggingInfo.createLoggingInfoEntry(
+        LoggingInfo updateInfo = LoggingInfo.createLoggingInfoEntry(
                 user,
                 LoggingInfo.Types.UPDATE.getKey(),
-                LoggingInfo.ActionType.UPDATED.getKey(),
+                actionType.getKey(),
                 comment
         );
         this.setLatestUpdateInfo(updateInfo);

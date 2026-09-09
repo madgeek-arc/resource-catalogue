@@ -439,6 +439,17 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicAdapterService, adapter, true);
     }
 
+    @Around("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.changeResourceOwner(..))")
+    public Object updatePublicAdapterOnOwnerChange(ProceedingJoinPoint pjp) throws Throwable {
+        AdapterBundle adapter = (AdapterBundle) pjp.proceed();
+        try {
+            publicAdapterService.update(ObjectUtils.clone(adapter), true);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            logger.warn(e.getMessage(), e);
+        }
+        return adapter;
+    }
+
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))" +

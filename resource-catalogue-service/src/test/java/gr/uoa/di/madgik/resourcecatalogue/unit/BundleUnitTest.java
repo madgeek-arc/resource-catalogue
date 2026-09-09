@@ -140,6 +140,31 @@ class BundleUnitTest {
                 .isEqualTo(LoggingInfo.ActionType.UPDATED.getKey());
     }
 
+    @Test
+    void markUpdate_withExplicitActionType_appendsUpdateEntryWithThatActionType() {
+        bundle.markUpdate(UserInfo.of(auth), "moved to another organisation", LoggingInfo.ActionType.MOVED);
+
+        assertThat(bundle.getLoggingInfo()).hasSize(1);
+        assertThat(bundle.getLoggingInfo().getFirst().getType()).isEqualTo(LoggingInfo.Types.UPDATE.getKey());
+        assertThat(bundle.getLoggingInfo().getFirst().getActionType())
+                .isEqualTo(LoggingInfo.ActionType.MOVED.getKey());
+        assertThat(bundle.getLatestUpdateInfo().getActionType())
+                .isEqualTo(LoggingInfo.ActionType.MOVED.getKey());
+    }
+
+    @Test
+    void markUpdate_withMovedActionType_stillCountsAsUpdateAfterAudit() {
+        LoggingInfo pastAudit = new LoggingInfo();
+        pastAudit.setType(LoggingInfo.Types.AUDIT.getKey());
+        pastAudit.setActionType(LoggingInfo.ActionType.INVALID.getKey());
+        pastAudit.setDate("1000");
+        bundle.getLoggingInfo().add(pastAudit);
+
+        bundle.markUpdate(UserInfo.of(auth), null, LoggingInfo.ActionType.MOVED);
+
+        assertThat(bundle.getAuditState()).isEqualTo(Auditable.INVALID_AND_UPDATED);
+    }
+
     // --- markSuspend ---
 
     @Test
