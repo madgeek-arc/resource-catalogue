@@ -22,10 +22,12 @@ import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
+import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
@@ -39,6 +41,7 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final InteroperabilityRecordService guidelineService;
+    private final OrganisationService organisationService;
 
     public PublicAdapterService(GenericResourceService genericResourceService,
                                 JmsService jmsService,
@@ -46,11 +49,13 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
                                 FacetLabelService facetLabelService,
                                 ServiceService serviceService,
                                 DatasourceService datasourceService,
-                                InteroperabilityRecordService guidelineService) {
+                                InteroperabilityRecordService guidelineService,
+                                OrganisationService organisationService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.guidelineService = guidelineService;
+        this.organisationService = organisationService;
     }
 
     @Override
@@ -64,6 +69,15 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
         if (adapterMap == null) {
             return;
         }
+
+        // Resource Owner
+        OrganisationBundle provider = organisationService.get(
+                (String) adapterMap.get("resourceOwner"),
+                adapter.getCatalogueId()
+        );
+        adapterMap.put("resourceOwner", provider.getIdentifiers().getPid());
+
+        // Linked Resource
         Object linkedResourceObj = adapterMap.get("linkedResource");
         if (!(linkedResourceObj instanceof Map)) {
             return;
