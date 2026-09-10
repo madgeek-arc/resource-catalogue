@@ -1,12 +1,12 @@
 ## PID Properties ##
 catalogue:
+  type-api:
+    url: https://typeapi.pidconsortium.net
   resources:
     organisation:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        profile: 21.T11969/a9f1d8fa88366d1f49cb
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -19,10 +19,9 @@ catalogue:
           client-cert:
     service:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -35,10 +34,9 @@ catalogue:
           client-cert:
     datasource:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -51,10 +49,9 @@ catalogue:
           client-cert:
     catalogue:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -67,10 +64,9 @@ catalogue:
           client-cert:
     training-resource:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -83,10 +79,9 @@ catalogue:
           client-cert:
     interoperability-record:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -99,10 +94,9 @@ catalogue:
           client-cert:
     adapter:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -115,10 +109,9 @@ catalogue:
           client-cert:
     deployable-application:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:

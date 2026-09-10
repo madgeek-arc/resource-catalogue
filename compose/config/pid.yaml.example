@@ -1,12 +1,12 @@
 ## PID Properties ##
 catalogue:
+  type-api:
+    url: https://typeapi.pidconsortium.net
   resources:
     organisation:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        profile: 21.T11969/a9f1d8fa88366d1f49cb
+        data: self
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -19,10 +19,9 @@ catalogue:
           client-cert: /rc/config/pid_certs/organisation/cert.pem
     service:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -35,10 +34,9 @@ catalogue:
           client-cert: /rc/config/pid_certs/service/cert.pem
     datasource:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -51,10 +49,9 @@ catalogue:
           client-cert: /rc/config/pid_certs/datasource/cert.pem
     catalogue:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -67,10 +64,9 @@ catalogue:
           client-cert: /rc/config/pid_certs/catalogue/cert.pem
     training-resource:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -83,10 +79,9 @@ catalogue:
           client-cert: /rc/config/pid_certs/training-resource/cert.pem
     interoperability-record:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -99,10 +94,9 @@ catalogue:
           client-cert: /rc/config/pid_certs/interoperability-record/cert.pem
     adapter:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles
@@ -115,10 +109,9 @@ catalogue:
           client-cert: /rc/config/pid_certs/adapter/cert.pem
     deployable-application:
       fdo:
-        type:
-        profile:
-        data:
-        version:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url: https://api.pids.example.eu:8000/api/handles

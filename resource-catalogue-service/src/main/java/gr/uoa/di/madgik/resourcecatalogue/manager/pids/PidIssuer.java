@@ -48,6 +48,9 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -63,13 +66,22 @@ public class PidIssuer {
     private static final int FDO_TYPE_INDEX = 9991;
     private static final int FDO_PROFILE_INDEX = 9992;
     private static final int FDO_DATA_INDEX = 9993;
-    private static final int FDO_VERSION_INDEX = 9994;
     private static final String ORGANISATION_RESOURCE_TYPE = "organisation";
 
-    private final CatalogueProperties properties;
+    private static final DateTimeFormatter[] PUBLISHING_DATE_FORMATS = {
+            DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+            DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+            DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+            DateTimeFormatter.ofPattern("dd.MM.yyyy"),
+    };
 
-    public PidIssuer(CatalogueProperties properties) {
+    private final CatalogueProperties properties;
+    private final PidRecordValidator pidRecordValidator;
+
+    public PidIssuer(CatalogueProperties properties, PidRecordValidator pidRecordValidator) {
         this.properties = properties;
+        this.pidRecordValidator = pidRecordValidator;
     }
 
     public void postPID(Bundle bundle, String resourceType, List<String> customResolveEndpoints) {
@@ -85,10 +97,60 @@ public class PidIssuer {
                 ? customResolveEndpoints
                 : resourceProperties.getResolveEndpoints();
 
-        String payload = ORGANISATION_RESOURCE_TYPE.equals(resourceType)
-                ? createOrganisationPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdo())
-                : createPID(pid, config, bundle.getPayload(), resolveEndpoints, resourceProperties.getFdo());
-        exchange(payload, headers, config, pid, webClient, HttpMethod.PUT);
+        LinkedHashMap<String, Object> payload = bundle.getPayload();
+        PidFields fields = extractFields(payload);
+
+        String typeApiUrl = (properties.getTypeApi() != null) ? properties.getTypeApi().getUrl() : null;
+        if (StringUtils.hasText(typeApiUrl)) {
+            pidRecordValidator.validate(typeApiUrl, pid, fields, resourceProperties.getFdo());
+        } else {
+            logger.debug("TypeAPI url not configured; skipping FDO profile validation for PID '{}'", pid);
+        }
+
+        String recordPayload = ORGANISATION_RESOURCE_TYPE.equals(resourceType)
+                ? createOrganisationPID(pid, config, payload, fields, resolveEndpoints, resourceProperties.getFdo())
+                : createPID(pid, config, payload, fields, resolveEndpoints, resourceProperties.getFdo());
+        exchange(recordPayload, headers, config, pid, webClient, HttpMethod.PUT);
+    }
+
+    /**
+     * Pulls the FDO-profile fields off {@code payload} once, normalizing {@code publishingDate} to
+     * ISO-8601 so the value is consistent between the Handle record and the FDO validation request.
+     */
+    private PidFields extractFields(LinkedHashMap<String, Object> payload) {
+        return new PidFields(
+                asString(payload.get("name")),
+                asString(payload.get("description")),
+                normalizePublishingDate(payload.get("publishingDate")),
+                asString(payload.get("type")),
+                asString(payload.get("nodePID")),
+                asString(payload.get("resourceOwner")),
+                asStringList(payload.get("publicContacts")));
+    }
+
+    private String asString(Object value) {
+        return value != null ? value.toString() : null;
+    }
+
+    /**
+     * Normalizes {@code publishingDate} to ISO-8601 ({@code yyyy-MM-dd}), tolerantly parsing the same
+     * formats {@code ModelResponseValidator} accepts on submission. The frontend always sends ISO, but
+     * a direct API caller isn't forced to, and the FDO profile expects strict ISO — so an un-normalized
+     * value would otherwise fail FDO validation, or be silently misinterpreted for ambiguous dates.
+     */
+    private String normalizePublishingDate(Object rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        String raw = rawValue.toString();
+        for (DateTimeFormatter format : PUBLISHING_DATE_FORMATS) {
+            try {
+                return LocalDate.parse(raw, format).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            } catch (DateTimeParseException ignored) {
+                // try next format
+            }
+        }
+        throw new RuntimeException("Could not parse publishingDate '" + raw + "' as any supported date format");
     }
 
     public void deletePID(String pid) {
@@ -218,9 +280,11 @@ public class PidIssuer {
      * resourceOwner/type/publishingDate/urls of its own and is handled by {@link #createOrganisationPID}.
      */
     private String createPID(String pid, PidIssuerConfig config, LinkedHashMap<String, Object> payload,
-                             List<String> resolveEndpoints, ResourceProperties.Fdo fdo) {
+                             PidFields fields, List<String> resolveEndpoints, ResourceProperties.Fdo fdo) {
         JSONArray values = new JSONArray();
         int index = 1;
+
+        values.put(buildEntry(index++, "id", pid));
 
         for (Map<String, Object> alternativePid : asMapList(payload.get("alternativePIDs"))) {
             values.put(buildEntry(index++, "alternativePIDs", new JSONObject(alternativePid).toString()));
@@ -236,14 +300,14 @@ public class PidIssuer {
             values.put(buildEntry(index++, "urls", url));
         }
 
-        values.put(buildEntry(index++, "name", payload.get("name")));
-        values.put(buildEntry(index++, "description", payload.get("description")));
-        values.put(buildEntry(index++, "publishingDate", payload.get("publishingDate")));
-        values.put(buildEntry(index++, "type", payload.get("type")));
-        values.put(buildEntry(index++, "nodePID", payload.get("nodePID")));
-        values.put(buildEntry(index++, "resourceOwner", payload.get("resourceOwner")));
+        values.put(buildEntry(index++, "name", fields.name()));
+        values.put(buildEntry(index++, "description", fields.description()));
+        values.put(buildEntry(index++, "publishingDate", fields.publishingDate()));
+        values.put(buildEntry(index++, "type", fields.type()));
+        values.put(buildEntry(index++, "nodePID", fields.nodePID()));
+        values.put(buildEntry(index++, "resourceOwner", fields.resourceOwner()));
 
-        for (String contact : asStringList(payload.get("publicContacts"))) {
+        for (String contact : fields.publicContacts()) {
             values.put(buildEntry(index++, "publicContacts", contact));
         }
 
@@ -260,9 +324,11 @@ public class PidIssuer {
      * record is limited to the fields the Organisation model shares with the other resource types.
      */
     private String createOrganisationPID(String pid, PidIssuerConfig config, LinkedHashMap<String, Object> payload,
-                                         List<String> resolveEndpoints, ResourceProperties.Fdo fdo) {
+                                         PidFields fields, List<String> resolveEndpoints, ResourceProperties.Fdo fdo) {
         JSONArray values = new JSONArray();
         int index = 1;
+
+        values.put(buildEntry(index++, "id", pid));
 
         for (Map<String, Object> alternativePid : asMapList(payload.get("alternativePIDs"))) {
             values.put(buildEntry(index++, "alternativePIDs", new JSONObject(alternativePid).toString()));
@@ -274,11 +340,11 @@ public class PidIssuer {
             }
         }
 
-        values.put(buildEntry(index++, "name", payload.get("name")));
-        values.put(buildEntry(index++, "description", payload.get("description")));
-        values.put(buildEntry(index++, "nodePID", payload.get("nodePID")));
+        values.put(buildEntry(index++, "name", fields.name()));
+        values.put(buildEntry(index++, "description", fields.description()));
+        values.put(buildEntry(index++, "nodePID", fields.nodePID()));
 
-        for (String contact : asStringList(payload.get("publicContacts"))) {
+        for (String contact : fields.publicContacts()) {
             values.put(buildEntry(index++, "publicContacts", contact));
         }
 
@@ -305,11 +371,21 @@ public class PidIssuer {
         return String.join("/", endpoint, pid);
     }
 
+    /**
+     * Adds the FDO kernel fields configured for this resource type, skipping any that aren't
+     * configured (e.g. Organisation has no {@code type} field in its record, so {@code FdoType}
+     * doesn't apply and its {@code fdo.type} is left unconfigured) rather than sending an empty one.
+     */
     private void addFdoFields(JSONArray values, ResourceProperties.Fdo fdo) {
-        values.put(buildEntry(FDO_TYPE_INDEX, "FdoType", fdo.getType()));
-        values.put(buildEntry(FDO_PROFILE_INDEX, "FdoProfile", fdo.getProfile()));
-        values.put(buildEntry(FDO_DATA_INDEX, "FdoData", fdo.getData()));
-        values.put(buildEntry(FDO_VERSION_INDEX, "FdoVersion", fdo.getVersion()));
+        if (StringUtils.hasText(fdo.getType())) {
+            values.put(buildEntry(FDO_TYPE_INDEX, "FdoType", fdo.getType()));
+        }
+        if (StringUtils.hasText(fdo.getProfile())) {
+            values.put(buildEntry(FDO_PROFILE_INDEX, "FdoProfile", fdo.getProfile()));
+        }
+        if (StringUtils.hasText(fdo.getData())) {
+            values.put(buildEntry(FDO_DATA_INDEX, "FdoData", fdo.getData()));
+        }
     }
 
     private JSONObject buildHsAdmin(PidIssuerConfig config) {

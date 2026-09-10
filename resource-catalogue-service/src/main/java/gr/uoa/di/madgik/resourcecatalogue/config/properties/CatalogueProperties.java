@@ -98,6 +98,13 @@ public class CatalogueProperties {
     @NestedConfigurationProperty
     private MailerProperties mailer = new MailerProperties();
 
+    /**
+     * TypeAPI properties, used to validate PID records against their FDO profile before posting them
+     * to the PID service.
+     */
+    @NestedConfigurationProperty
+    private TypeApiProperties typeApi = new TypeApiProperties();
+
 
     public CatalogueProperties() {
     }
@@ -193,6 +200,15 @@ public class CatalogueProperties {
 
     public CatalogueProperties setMailer(MailerProperties mailer) {
         this.mailer = mailer;
+        return this;
+    }
+
+    public TypeApiProperties getTypeApi() {
+        return typeApi;
+    }
+
+    public CatalogueProperties setTypeApi(TypeApiProperties typeApi) {
+        this.typeApi = typeApi;
         return this;
     }
 
