@@ -163,14 +163,15 @@ public class PidIssuer {
     }
 
     private WebClient createWebClient(PidIssuerConfig config) {
-        if (config.getAuth() != null) {
-            if (config.getAuth().isSelfSignedCert()) {
-                return createSelfSignedWebClient(config.getAuth());
-            } else {
-                return createCertBasedWebClient(
-                        config.getAuth().getClientCert(),
-                        config.getAuth().getClientKey());
-            }
+        PidIssuerConfig.IssuerCertificateAuthenticationConfig auth = config.getAuth();
+        if (auth == null) {
+            return WebClient.builder().build();
+        }
+        if (Boolean.TRUE.equals(auth.getSelfSignedCert())) {
+            return createSelfSignedWebClient(auth);
+        }
+        if (StringUtils.hasText(auth.getClientKey()) && StringUtils.hasText(auth.getClientCert())) {
+            return createCertBasedWebClient(auth.getClientCert(), auth.getClientKey());
         }
         return WebClient.builder().build();
     }
@@ -205,7 +206,7 @@ public class PidIssuer {
             }
 
             // Configure client certificate if provided (mTLS)
-            if (!auth.getClientKey().isBlank() && !auth.getClientCert().isBlank()) {
+            if (StringUtils.hasText(auth.getClientKey()) && StringUtils.hasText(auth.getClientCert())) {
                 PrivateKey privateKey = loadPrivateKey(auth.getClientKey());
                 X509Certificate certificate = loadCertificate(auth.getClientCert());
                 builder.keyManager(privateKey, certificate);
