@@ -191,6 +191,7 @@ spring.freemarker.template-loader-path=classpath:/mail/
 ## Profiles && Configuration ##
 spring.profiles.active=beyond
 spring.autoconfigure.exclude=org.flowable.spring.boot.FlowableJpaAutoConfiguration,org.flowable.spring.boot.eventregistry.EventRegistryAutoConfiguration
+spring.config.import=optional:classpath:pid.yml
 ## Servlet ##
 spring.servlet.multipart.max-file-size=50MB
 spring.servlet.multipart.max-request-size=50MB
@@ -246,12 +247,16 @@ registry.datasource.username=
 registry.datasource.password=
 registry.datasource.url=
 ### DB - JPA Properties ###
-registry.jpa.properties.hibernate.allow_update_outside_transaction=true
-registry.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-registry.jpa.properties.hibernate.enable_lazy_load_no_trans=true
 registry.jpa.properties.hibernate.format_sql=false
 registry.jpa.properties.hibernate.hbm2ddl.auto=
 registry.jpa.properties.hibernate.show_sql=false
+### Flowable DB config ###
+flowable.datasource.url=${registry.datasource.url}
+flowable.datasource.username=${registry.datasource.username}
+flowable.datasource.password=${registry.datasource.password}
+flowable.datasource.driver-class-name=${registry.datasource.driver-class-name}
+flowable.database-schema=flowable
+flowable.database-schema-update=true
 ### Elastic Properties ###
 registry.elasticsearch.uris=
 registry.elasticsearch.username=
@@ -275,12 +280,19 @@ catalogue.jms.ams.project=
 ## Basic Info ##
 catalogue.homepage=
 catalogue.version=@project.version@
+## Node Registry ##
+node.pid.value=
+node.name=
+node.registry.url=
+node.registry.key=
 ## Admins / Onboarding Team ##
 catalogue.admins=
 catalogue.onboarding-team=
 ## Redirect URLs ##
 catalogue.login-redirect=
 catalogue.logout-redirect=
+## AARC Entitlement Group ##
+catalogue.entitlement-group=
 ## Resource ID Prefixes ##
 catalogue.resources.adapter.id-prefix=adapter
 catalogue.resources.catalogue.id-prefix=catalogue
@@ -293,9 +305,31 @@ catalogue.resources.organisation.id-prefix=organisation
 catalogue.resources.resource-interoperability-record.id-prefix=resource_interoperability_record
 catalogue.resources.service.id-prefix=service
 catalogue.resources.training_resource.id-prefix=training_resource
-catalogue.resources.vocabulary-curation.id-prefix=vocabulary_curation
+## Federated search ##
+catalogue.resources.adapter.federation-path=adapters
+catalogue.resources.catalogue.federation-path=catalogues
+catalogue.resources.configuration-template.federation-path=configurationTemplates
+catalogue.resources.configuration-template-instance.federation-path=configurationTemplateInstances
+catalogue.resources.datasource.federation-path=datasources
+catalogue.resources.deployable-application.federation-path=deployableApplications
+catalogue.resources.interoperability-record.federation-path=interoperabilityRecords
+catalogue.resources.organisation.federation-path=organisations
+catalogue.resources.resource-interoperability-record.federation-path=resourceInteroperabilityRecords
+catalogue.resources.service.federation-path=services
+catalogue.resources.training-resource.federation-path=trainingResources
 ## Federation Duplicate-Id Check ##
 federation.duplicate-check.enabled=true
+federation.duplicate-check.search-url=https://federatedsearch.service.eosc-beyond.eu/api/federation
+federation.duplicate-check.timeout-ms=8000
+federation.duplicate-check.circuit-breaker-failure-threshold=5
+federation.duplicate-check.circuit-breaker-reset-ms=60000
+## Federation Cross-Linkage (dropdowns + CT/CTI flow across nodes) ##
+federation.cross-linkage.enabled=true
+federation.cross-linkage.search-url=https://federatedsearch.service.eosc-beyond.eu/api/federation
+federation.cross-linkage.timeout-ms=8000
+federation.cross-linkage.circuit-breaker-failure-threshold=5
+federation.cross-linkage.circuit-breaker-reset-ms=60000
+federation.cross-linkage.max-in-memory-size-bytes=4194304
 ## Email Notification Properties ##
 catalogue.emails.enabled=false
 catalogue.emails.admin-notifications=false
@@ -338,16 +372,8 @@ accounting.endpoint=
 accounting.client-id=
 accounting.client-secret=
 accounting.token-endpoint=
-########################
-##  Other Properties  ##
-########################
 ## SQAaaS ##
 sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
-## Node Registry ##
-node.pid.value=
-node.name=
-node.registry.url=
-node.registry.key=
 ```
 
 ### PID Properties Example
@@ -362,8 +388,13 @@ configurations under the auth block.
 ```yaml
 ## PID Properties ##
 catalogue:
+  type-api:
+    url: https://typeapi.pidconsortium.net
   resources:
     organisation:
+      fdo:
+        profile: 21.T11969/a9f1d8fa88366d1f49cb
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -375,6 +406,10 @@ catalogue:
           client-key:
           client-cert:
     service:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -386,6 +421,10 @@ catalogue:
           client-key:
           client-cert:
     datasource:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -397,6 +436,10 @@ catalogue:
           client-key:
           client-cert:
     catalogue:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -408,6 +451,10 @@ catalogue:
           client-key:
           client-cert:
     training-resource:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -419,6 +466,10 @@ catalogue:
           client-key:
           client-cert:
     interoperability-record:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -430,6 +481,10 @@ catalogue:
           client-key:
           client-cert:
     adapter:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -441,6 +496,10 @@ catalogue:
           client-key:
           client-cert:
     deployable-application:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
