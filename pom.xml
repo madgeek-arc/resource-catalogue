@@ -290,6 +290,11 @@
                 <artifactId>opentelemetry-semconv</artifactId>
                 <version>1.41.1</version>
             </dependency>
+            <dependency> <!-- CVE-2026-84939: path traversal via locale identifier in template loading, fixed in 2.3.35. Pulled in by spring-boot-starter-freemarker. -->
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>2.3.35</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
