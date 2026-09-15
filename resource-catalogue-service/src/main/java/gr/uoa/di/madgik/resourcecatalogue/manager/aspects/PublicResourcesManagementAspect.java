@@ -30,9 +30,13 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Profile("beyond")
 @Aspect
@@ -41,6 +45,7 @@ public class PublicResourcesManagementAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(PublicResourcesManagementAspect.class);
 
+    private final TaskExecutor taskExecutor;
     private final PublicOrganisationService publicOrganisationService;
     private final PublicServiceService publicServiceService;
     private final PublicCatalogueService publicCatalogueService;
@@ -54,7 +59,8 @@ public class PublicResourcesManagementAspect {
     private final PublicInteroperabilityRecordService publicInteroperabilityRecordService;
     private final PublicConfigurationTemplateService publicConfigurationTemplateService;
 
-    public PublicResourcesManagementAspect(PublicOrganisationService publicOrganisationService,
+    public PublicResourcesManagementAspect(@Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor,
+                                           PublicOrganisationService publicOrganisationService,
                                            PublicServiceService publicServiceService,
                                            PublicCatalogueService publicCatalogueService,
                                            PublicDatasourceService publicDatasourceService,
@@ -66,6 +72,7 @@ public class PublicResourcesManagementAspect {
                                            PublicConfigurationTemplateInstanceService publicCTIService,
                                            PublicInteroperabilityRecordService publicInteroperabilityRecordService,
                                            PublicConfigurationTemplateService publicConfigurationTemplateService) {
+        this.taskExecutor = taskExecutor;
         this.publicOrganisationService = publicOrganisationService;
         this.publicServiceService = publicServiceService;
         this.publicCatalogueService = publicCatalogueService;
@@ -78,6 +85,38 @@ public class PublicResourcesManagementAspect {
         this.publicCTIService = publicCTIService;
         this.publicInteroperabilityRecordService = publicInteroperabilityRecordService;
         this.publicConfigurationTemplateService = publicConfigurationTemplateService;
+    }
+
+    /**
+     * Runs the given task on the async executor only after the enclosing transaction (if any) has
+     * committed, so a public-resource sync can never fire on data whose private-side change was
+     * rolled back. Falls back to running it immediately if no transaction is active.
+     */
+    private void runAfterCommit(Runnable task) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    submit(task);
+                }
+            });
+        } else {
+            submit(task);
+        }
+    }
+
+    /**
+     * Submits to the executor without letting a rejection (e.g. pool exhaustion) escape:
+     * when called from afterCommit(), an uncaught exception here would propagate out of
+     * Spring's commit path and surface to the caller as a failure even though the private-side
+     * write already committed successfully.
+     */
+    private void submit(Runnable task) {
+        try {
+            taskExecutor.execute(task);
+        } catch (RuntimeException e) {
+            logger.error("Failed to schedule public-resource sync task", e);
+        }
     }
 
     //region Public Provider
@@ -124,7 +163,6 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicOrganisationService, provider, true);
     }
 
-    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.setSuspend(..))" +
@@ -132,20 +170,25 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "bundle")
     public void updatePublicProvider(final OrganisationBundle bundle) {
-        try {
-            publicOrganisationService.update(ObjectUtils.clone(bundle), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicOrganisationService.update(ObjectUtils.clone(bundle), null);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to sync Public Organisation '{}' after update", bundle.getId(), e);
+            }
+        });
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.delete(..))")
     public void deletePublicProvider(JoinPoint joinPoint) {
         OrganisationBundle bundle = (OrganisationBundle) joinPoint.getArgs()[0];
-        try {
-            publicOrganisationService.delete(bundle);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicOrganisationService.delete(bundle);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Organisation '{}'", bundle.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -170,27 +213,31 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicServiceService, service, true);
     }
 
-    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "service")
     public void updatePublicService(final ServiceBundle service) {
-        try {
-            publicServiceService.update(ObjectUtils.clone(service), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicServiceService.update(ObjectUtils.clone(service), null);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to sync Public Service '{}' after update", service.getId(), e);
+            }
+        });
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.delete(..))")
     public void deletePublicService(JoinPoint joinPoint) {
         ServiceBundle service = (ServiceBundle) joinPoint.getArgs()[0];
-        try {
-            publicServiceService.delete(service);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicServiceService.delete(service);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Service '{}'", service.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -215,27 +262,31 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicCatalogueService, catalogue, true);
     }
 
-    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "catalogue")
     public void updatePublicCatalogue(final CatalogueBundle catalogue) {
-        try {
-            publicCatalogueService.update(ObjectUtils.clone(catalogue), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicCatalogueService.update(ObjectUtils.clone(catalogue), null);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to sync Public Catalogue '{}' after update", catalogue.getId(), e);
+            }
+        });
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.delete(..))")
     public void deletePublicCatalogue(JoinPoint joinPoint) {
         CatalogueBundle catalogue = (CatalogueBundle) joinPoint.getArgs()[0];
-        try {
-            publicCatalogueService.delete(catalogue);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicCatalogueService.delete(catalogue);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Catalogue '{}'", catalogue.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -260,27 +311,31 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicDatasourceService, datasource, true);
     }
 
-    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "datasource")
     public void updatePublicDatasource(final DatasourceBundle datasource) {
-        try {
-            publicDatasourceService.update(ObjectUtils.clone(datasource), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicDatasourceService.update(ObjectUtils.clone(datasource), null);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to sync Public Datasource '{}' after update", datasource.getId(), e);
+            }
+        });
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.delete(..))")
     public void deletePublicDatasource(JoinPoint joinPoint) {
         DatasourceBundle datasource = (DatasourceBundle) joinPoint.getArgs()[0];
-        try {
-            publicDatasourceService.delete(datasource);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicDatasourceService.delete(datasource);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Datasource '{}'", datasource.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -305,27 +360,31 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicTrainingResourceService, training, true);
     }
 
-    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "training")
     public void updatePublicTrainingResource(final TrainingResourceBundle training) {
-        try {
-            publicTrainingResourceService.update(ObjectUtils.clone(training), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicTrainingResourceService.update(ObjectUtils.clone(training), null);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to sync Public Training Resource '{}' after update", training.getId(), e);
+            }
+        });
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.delete(..))")
     public void deletePublicTrainingResource(JoinPoint joinPoint) {
         TrainingResourceBundle training = (TrainingResourceBundle) joinPoint.getArgs()[0];
-        try {
-            publicTrainingResourceService.delete(training);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicTrainingResourceService.delete(training);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Training Resource '{}'", training.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -350,27 +409,31 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicInteroperabilityRecordService, guideline, true);
     }
 
-    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "guideline")
     public void updatePublicGuideline(final InteroperabilityRecordBundle guideline) {
-        try {
-            publicGuidelineService.update(ObjectUtils.clone(guideline), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicGuidelineService.update(ObjectUtils.clone(guideline), null);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to sync Public Interoperability Record '{}' after update", guideline.getId(), e);
+            }
+        });
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.delete(..))")
     public void deletePublicGuideline(JoinPoint joinPoint) {
         InteroperabilityRecordBundle guideline = (InteroperabilityRecordBundle) joinPoint.getArgs()[0];
-        try {
-            publicGuidelineService.delete(guideline);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicGuidelineService.delete(guideline);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Interoperability Record '{}'", guideline.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -395,27 +458,31 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicDeployableApplicationService, deployableApplication, true);
     }
 
-    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "deployableApplication")
     public void updatePublicDeployableApplication(final DeployableApplicationBundle deployableApplication) {
-        try {
-            publicDeployableApplicationService.update(ObjectUtils.clone(deployableApplication), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicDeployableApplicationService.update(ObjectUtils.clone(deployableApplication), null);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to sync Public Deployable Application '{}' after update", deployableApplication.getId(), e);
+            }
+        });
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.delete(..))")
     public void deletePublicDeployableApplication(JoinPoint joinPoint) {
         DeployableApplicationBundle deployableApplication = (DeployableApplicationBundle) joinPoint.getArgs()[0];
-        try {
-            publicDeployableApplicationService.delete(deployableApplication);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicDeployableApplicationService.delete(deployableApplication);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Deployable Application '{}'", deployableApplication.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -450,27 +517,31 @@ public class PublicResourcesManagementAspect {
         return adapter;
     }
 
-    @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "adapter")
     public void updatePublicAdapter(final AdapterBundle adapter) {
-        try {
-            publicAdapterService.update(ObjectUtils.clone(adapter), null);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicAdapterService.update(ObjectUtils.clone(adapter), null);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to sync Public Adapter '{}' after update", adapter.getId(), e);
+            }
+        });
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.delete(..))")
     public void deletePublicAdapter(JoinPoint joinPoint) {
         AdapterBundle adapter = (AdapterBundle) joinPoint.getArgs()[0];
-        try {
-            publicAdapterService.delete(adapter);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicAdapterService.delete(adapter);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Adapter '{}'", adapter.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -492,14 +563,16 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicRIRService, rir, false);
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceInteroperabilityRecordManager.delete(..))")
     public void deletePublicRIR(JoinPoint joinPoint) {
         ResourceInteroperabilityRecordBundle rir = (ResourceInteroperabilityRecordBundle) joinPoint.getArgs()[0];
-        try {
-            publicRIRService.delete(rir);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicRIRService.delete(rir);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Resource Interoperability Record '{}'", rir.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -521,14 +594,16 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicConfigurationTemplateService, ct, false);
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateManager.delete(..))")
     public void deletePublicConfigurationTemplate(JoinPoint joinPoint) {
         ConfigurationTemplateBundle ct = (ConfigurationTemplateBundle) joinPoint.getArgs()[0];
-        try {
-            publicConfigurationTemplateService.delete(ct);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicConfigurationTemplateService.delete(ct);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Configuration Template '{}'", ct.getId(), e);
+            }
+        });
     }
     //endregion
 
@@ -550,14 +625,16 @@ public class PublicResourcesManagementAspect {
         return updatePublicBundle(pjp, publicCTIService, cti, false);
     }
 
-    @Async
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ConfigurationTemplateInstanceManager.delete(..))")
     public void deletePublicConfigurationTemplateInstance(JoinPoint joinPoint) {
         ConfigurationTemplateInstanceBundle cti = (ConfigurationTemplateInstanceBundle) joinPoint.getArgs()[0];
-        try {
-            publicCTIService.delete(cti);
-        } catch (ResourceException | ResourceNotFoundException ignore) {
-        }
+        runAfterCommit(() -> {
+            try {
+                publicCTIService.delete(cti);
+            } catch (ResourceException | ResourceNotFoundException e) {
+                logger.error("Failed to delete Public Configuration Template Instance '{}'", cti.getId(), e);
+            }
+        });
     }
     //endregion
 }

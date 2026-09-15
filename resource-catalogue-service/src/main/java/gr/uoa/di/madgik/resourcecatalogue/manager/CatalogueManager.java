@@ -117,6 +117,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     }
 
     @Override
+    @Transactional
     public CatalogueBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         CatalogueBundle bundle = get(id, catalogueId);
         if (bundle.getMetadata().isPublished()) {
