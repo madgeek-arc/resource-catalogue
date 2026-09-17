@@ -285,8 +285,6 @@ public class PidIssuer {
         JSONArray values = new JSONArray();
         int index = 1;
 
-        values.put(buildEntry(index++, "id", pid));
-
         for (Map<String, Object> alternativePid : asMapList(payload.get("alternativePIDs"))) {
             values.put(buildEntry(index++, "alternativePIDs", new JSONObject(alternativePid).toString()));
         }
@@ -328,8 +326,6 @@ public class PidIssuer {
                                          PidFields fields, List<String> resolveEndpoints, ResourceProperties.Fdo fdo) {
         JSONArray values = new JSONArray();
         int index = 1;
-
-        values.put(buildEntry(index++, "id", pid));
 
         for (Map<String, Object> alternativePid : asMapList(payload.get("alternativePIDs"))) {
             values.put(buildEntry(index++, "alternativePIDs", new JSONObject(alternativePid).toString()));
