@@ -22,7 +22,6 @@ import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateBundle;
-import gr.uoa.di.madgik.resourcecatalogue.service.ConfigurationTemplateService;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,14 +44,11 @@ import java.util.Map;
 @Tag(name = "public configuration template")
 public class PublicConfigurationTemplateController extends BasePublicController<ConfigurationTemplateBundle> {
 
-    private final ConfigurationTemplateService configurationTemplateService;
     private final ModelService modelService;
 
     PublicConfigurationTemplateController(PublicResourceService<ConfigurationTemplateBundle> service,
-                                         ConfigurationTemplateService configurationTemplateService,
                                          ModelService modelService) {
         super(service);
-        this.configurationTemplateService = configurationTemplateService;
         this.modelService = modelService;
     }
 
@@ -99,11 +95,11 @@ public class PublicConfigurationTemplateController extends BasePublicController<
             @PathVariable String prefix,
             @PathVariable String suffix,
             @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
-        // Same response shape as the private registry route
-        // (ConfigurationTemplateController#getAllByInteroperabilityRecordId), so the federation
-        // fallback there relays an identical body to callers.
-        return ResponseEntity.ok(
-                configurationTemplateService.getPublicByInteroperabilityRecordId(params, prefix + "/" + suffix));
+        FacetFilter ff = FacetFilter.from(params);
+        ff.setQuantity(1000);
+        ff.addFilter("active", true);
+        ff.addFilter("interoperability_record_id", prefix + "/" + suffix);
+        return ResponseEntity.ok(service.getAll(ff));
     }
 
     @Operation(description = "Returns the dynamic-form Model bound to the public Configuration Template with the "
