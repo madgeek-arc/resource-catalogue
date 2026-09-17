@@ -16,6 +16,8 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
@@ -72,10 +74,26 @@ public class PublicTrainingResourceService extends AbstractPublicResourceManager
         if (existingObj instanceof Collection<?>) {
             for (Object eoscRelatedServiceIdObj : (Collection<?>) existingObj) {
                 String eoscRelatedServiceId = (String) eoscRelatedServiceIdObj;
-                Bundle eoscRelatedService = serviceService.get(eoscRelatedServiceId, bundle.getCatalogueId());;
-                eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
+                eoscRelatedServices.add(toPublicId(eoscRelatedServiceId, bundle.getCatalogueId()));
             }
             bundle.getTrainingResource().put("eoscRelatedServices", eoscRelatedServices);
+        }
+    }
+
+    /**
+     * Resolves a locally-held Service id to its public PID. When the id is not a local Service it
+     * is assumed to reference a Service published on another federation node - it is already the
+     * public PID, so it is kept verbatim. A non-PID-shaped unresolvable id is genuinely invalid
+     * and rethrown.
+     */
+    private String toPublicId(String serviceId, String catalogueId) {
+        try {
+            return serviceService.get(serviceId, catalogueId).getIdentifiers().getPid();
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (serviceId != null && serviceId.contains("/")) {
+                return serviceId;
+            }
+            throw e;
         }
     }
 }

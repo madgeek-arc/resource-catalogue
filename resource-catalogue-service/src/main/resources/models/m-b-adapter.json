@@ -813,7 +813,7 @@
                     "defaultValue": null,
                     "values": null,
                     "properties": {
-                      "url": "/api/rt_value/list",
+                      "url": "/api/rt_value/list?federation=true",
                       "idField": "id",
                       "labelField": "name",
                       "urlParams": [
@@ -1352,6 +1352,11 @@
                   "form": {
                     "dependsOn": null,
                     "affects": null,
+                    "autofillFrom": {
+                      "field": "licenseName",
+                      "vocabularyUrl": "/api/vocabulary/types/Spdx%20license",
+                      "sourceProperty": "extras.url"
+                    },
                     "group": null,
                     "description": {
                       "text": "A license document that applies to this content, typically indicated by URL.",

@@ -79,11 +79,26 @@ public class PublicResourceInteroperabilityRecordService
         if (interoperabilityRecordIdsObj instanceof Collection<?>) {
             for (Object idObj : (Collection<?>) interoperabilityRecordIdsObj) {
                 String interoperabilityRecordId = (String) idObj;
-                InteroperabilityRecordBundle interoperabilityRecord = interoperabilityRecordService
-                        .get(interoperabilityRecordId, bundle.getCatalogueId());
-                interoperabilityRecordIds.add(interoperabilityRecord.getIdentifiers().getPid());
+                interoperabilityRecordIds.add(toPublicId(interoperabilityRecordId, bundle.getCatalogueId()));
             }
         }
         bundle.getResourceInteroperabilityRecord().put("interoperabilityRecordIds", interoperabilityRecordIds);
+    }
+
+    /**
+     * Resolves a locally-held Interoperability Record id to its public PID. When the id is not a
+     * local guideline it is assumed to reference one published on another federation node - it is
+     * already the public PID and kept verbatim. A non-PID-shaped unresolvable id is rethrown.
+     */
+    private String toPublicId(String interoperabilityRecordId, String catalogueId) {
+        try {
+            return interoperabilityRecordService.get(interoperabilityRecordId, catalogueId)
+                    .getIdentifiers().getPid();
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (interoperabilityRecordId != null && interoperabilityRecordId.contains("/")) {
+                return interoperabilityRecordId;
+            }
+            throw e;
+        }
     }
 }

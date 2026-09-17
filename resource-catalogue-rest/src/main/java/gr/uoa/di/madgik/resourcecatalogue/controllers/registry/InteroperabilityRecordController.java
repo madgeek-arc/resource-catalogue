@@ -20,6 +20,8 @@ import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
@@ -80,10 +82,20 @@ public class InteroperabilityRecordController
             "@securityService.guidelineIsActive(#prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
+                                 @RequestParam(required = false, defaultValue = "false") boolean federation,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         String id = prefix + "/" + suffix;
-        InteroperabilityRecordBundle bundle = service.get(id);
-        return new ResponseEntity<>(bundle.getInteroperabilityRecord(), HttpStatus.OK);
+        try {
+            InteroperabilityRecordBundle bundle = service.get(id);
+            return new ResponseEntity<>(bundle.getInteroperabilityRecord(), HttpStatus.OK);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (federation) {
+                return federationLinkageService.getInteroperabilityRecord(id)
+                        .<ResponseEntity<?>>map(ResponseEntity::ok)
+                        .orElseThrow(() -> e);
+            }
+            throw e;
+        }
     }
 
     @Tag(name = "InteroperabilityRecordRead")

@@ -79,6 +79,18 @@
             align-items: center;
             margin-top: 20px;
         }
+
+        li.status-NEW {
+            background-color: #eee;
+        }
+
+        li.status-CHANGED {
+            background-color: #fff3cd;
+        }
+
+        li.status-UP_TO_DATE {
+            background-color: #d4edda;
+        }
     </style>
 </head>
 <body>
@@ -91,10 +103,10 @@
 
 <form th:action="@{step1/loadVocabularies}" method="post" id="vocabForm">
     <ul>
-        <li th:each="entry : ${vocabStatus}">
+        <li th:each="entry : ${vocabStatus}" th:class="'status-' + ${entry.value}">
             <input type="checkbox" th:id="${entry.key}" th:value="${entry.key}"
-                   th:checked="${entry.value}" disabled/>
-            <label th:for="${entry.key}" th:text="${entry.key}"></label>
+                   th:checked="${entry.value.name() == 'UP_TO_DATE'}" disabled/>
+            <label th:for="${entry.key}" th:text="${entry.key} + ' — ' + ${entry.value}"></label>
         </li>
     </ul>
 

@@ -259,6 +259,22 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
         return service.setSuspend(id, null, suspend, auth);
     }
 
+    @Operation(summary = "Moves the Adapter to a different owner Organisation. The target Organisation must exist in "
+            + "the Adapter's catalogue and be approved, active and not suspended. Administrative access moves to the "
+            + "new Organisation's admins.")
+    @PatchMapping(path = "changeResourceOwner/{prefix}/{suffix}")
+    @PreAuthorize("@securityService.hasWriteAccess()")
+    public ResponseEntity<AdapterBundle> changeResourceOwner(@PathVariable String prefix,
+                                                             @PathVariable String suffix,
+                                                             @RequestParam String newOwnerId,
+                                                             @RequestParam(required = false) String comment,
+                                                             @Parameter(hidden = true) Authentication auth) {
+        String id = prefix + "/" + suffix;
+        AdapterBundle adapter = service.changeResourceOwner(id, newOwnerId, comment, auth);
+        logger.info("Changed owner of Adapter with id '{}' to Organisation '{}'", id, newOwnerId);
+        return new ResponseEntity<>(adapter, HttpStatus.OK);
+    }
+
     @Operation(summary = "Get the LoggingInfo History of a specific Adapter.")
     @GetMapping(path = {"loggingInfoHistory/{prefix}/{suffix}"})
     public ResponseEntity<List<LoggingInfo>> loggingInfoHistory(@PathVariable String prefix,

@@ -49,11 +49,16 @@
         <testcontainers.version>2.0.3</testcontainers.version>
         <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
-        <netty.version>4.2.15.Final</netty.version>
-        <tomcat.version>11.0.24</tomcat.version>
+        <netty.version>4.2.16.Final</netty.version>
+        <!-- CVE-2026-59313: Spring MVC SSE content spoofing, fixed in 7.0.9 (Boot 4.0.7 manages 7.0.8) -->
+        <spring-framework.version>7.0.9</spring-framework.version>
+        <!-- CVE-2026-65905/65637/65183/65182/66422/68525/68569: fixed in 11.0.25 -->
+        <tomcat.version>11.0.25</tomcat.version>
         <postgresql.version>42.7.13</postgresql.version>
         <!-- CVE-2026-49844: log4j-core JSON MapMessage encoding issue, fixed in 2.26.1 (Boot 4.0.7 manages 2.25.4) -->
         <log4j2.version>2.26.1</log4j2.version>
+        <!-- CVE-2026-59270: LDAP UnboundIdContainer exposes admin bind DN on all interfaces, fixed in 7.0.7 (Boot 4.0.7 manages 7.0.6) -->
+        <spring-security.version>7.0.7</spring-security.version>
         <!-- Preserve test JVM args so modules can append their own flags safely. -->
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
@@ -237,6 +242,11 @@
                 <artifactId>httpcore5-h2</artifactId>
                 <version>5.4.3</version>
             </dependency>
+            <dependency> <!-- CVE-2026-71290: async TLS hostname verification bypass, fixed in 5.6.4. Pulled in transitively at 5.5.2 by elasticsearch-rest5-client. -->
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.6.4</version>
+            </dependency>
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
@@ -279,6 +289,11 @@
                 <groupId>io.opentelemetry.semconv</groupId>
                 <artifactId>opentelemetry-semconv</artifactId>
                 <version>1.41.1</version>
+            </dependency>
+            <dependency> <!-- CVE-2026-84939: path traversal via locale identifier in template loading, fixed in 2.3.35. Pulled in by spring-boot-starter-freemarker. -->
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>2.3.35</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

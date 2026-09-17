@@ -133,6 +133,10 @@ public class ConfigurationTemplateInstanceController
                                                                      @PathVariable("resourceSuffix") String resourceSuffix,
                                                                      @PathVariable("ctPrefix") String ctPrefix,
                                                                      @PathVariable("ctSuffix") String ctSuffix) {
+        // Configuration Template Instances are always created and stored on the node that owns
+        // the resource, so this is a purely local lookup - no federation fallback. A null result
+        // ("no instance yet") is a valid answer: the UI renders an empty form from the (possibly
+        // federated) Configuration Template model.
         String resourceId = resourcePrefix + "/" + resourceSuffix;
         String ctId = ctPrefix + "/" + ctSuffix;
         LinkedHashMap<String, Object> ret = service.getByResourceAndConfigurationTemplateId(resourceId, ctId);

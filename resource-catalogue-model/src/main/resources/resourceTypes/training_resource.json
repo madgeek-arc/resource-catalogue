@@ -18,8 +18,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "searchCapabilities": ["KEYWORD"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Urls",
@@ -36,7 +36,7 @@
       "path": "$.trainingResource.name",
       "type": "java.lang.String",
       "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Description",
@@ -45,7 +45,7 @@
       "path": "$.trainingResource.description",
       "type": "java.lang.String",
       "searchCapabilities": ["TEXT"],
-      "embeddingWeight": 1.0
+      "embeddingWeight": 3.0
     },
     {
       "label": "Alternative PIDs",
@@ -53,7 +53,7 @@
       "name": "alternative_pids",
       "path": "$.trainingResource.alternativePIDs[*].pid",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Node",
@@ -63,7 +63,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Type",
@@ -71,7 +71,7 @@
       "name": "type",
       "path": "$.trainingResource.type",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.5
     },
     {
       "label": "Resource Owner",
@@ -81,8 +81,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "organisation",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "searchCapabilities": ["KEYWORD"],
+      "embeddingWeight": 0.5
     },
     {
       "label": "EOSC Related Service",
@@ -92,7 +92,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "service",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
+      "searchCapabilities": ["KEYWORD"],
       "embeddingWeight": 1.0
     },
     {
@@ -141,7 +141,8 @@
       "name": "learning_outcomes",
       "path": "$.trainingResource.learningOutcomes[*]",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "searchCapabilities": ["TEXT"],
+      "embeddingWeight": 3.0
     },
     {
       "label": "Expertise Level",
@@ -217,6 +218,7 @@
       "name": "keywords",
       "path": "$.trainingResource.keywords[*]",
       "type": "java.lang.String",
+      "searchCapabilities": ["KEYWORD", "TEXT"],
       "embeddingWeight": 1.0
     },
     {
@@ -291,7 +293,7 @@
       "name": "externalId",
       "path": "$.identifiers.externalId",
       "type": "java.lang.String",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": null,
@@ -445,7 +447,8 @@
   "name": "training_resource",
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle",
+    "reindexVersion": "1"
   },
   "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

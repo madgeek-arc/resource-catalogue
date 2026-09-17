@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
@@ -61,11 +62,21 @@ public class NodeResolver {
 
     @Cacheable(cacheNames = "nodes", unless = "#result == null || #result.isEmpty()")
     public List<Node> fetchNodes() {
-        List<Node> nodes = webClient.get()
-                .header("x-api-key", nodeRegistryKey)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<Node>>() {})
-                .block();
+        List<Node> nodes;
+        try {
+            nodes = webClient.get()
+                    .header("x-api-key", nodeRegistryKey)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<Node>>() {})
+                    .block();
+        } catch (WebClientResponseException e) {
+            logger.warn("Failed to fetch nodes from node registry: HTTP {}, body={}",
+                    e.getStatusCode(), truncate(e.getResponseBodyAsString()));
+            return List.of();
+        } catch (Exception e) {
+            logger.warn("Failed to fetch nodes from node registry", e);
+            return List.of();
+        }
         if (nodes == null) {
             return List.of();
         }
