@@ -62,6 +62,7 @@ public class PidIssuer {
 
     private static final Logger logger = LoggerFactory.getLogger(PidIssuer.class);
 
+    private static final String PERMISSIONS = "011111110011";
     private static final int HS_ADMIN_INDEX = 100;
     private static final int FDO_TYPE_INDEX = 9991;
     private static final int FDO_PROFILE_INDEX = 9992;
@@ -389,7 +390,7 @@ public class PidIssuer {
         JSONObject hsAdminValue = new JSONObject();
         hsAdminValue.put("handle", config.getUser());
         hsAdminValue.put("index", Integer.parseInt(config.getUserIndex()));
-        hsAdminValue.put("permissions", "011111110011");
+        hsAdminValue.put("permissions", PERMISSIONS);
 
         JSONObject hsAdminData = new JSONObject();
         hsAdminData.put("format", "admin");
