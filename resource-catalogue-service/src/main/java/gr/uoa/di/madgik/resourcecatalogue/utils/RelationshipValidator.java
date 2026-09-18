@@ -59,11 +59,11 @@ public class RelationshipValidator {
      * {@code FALSE} - the aggregator answered and the id is nowhere in the federation - is
      * treated as "does not exist".
      */
-    private boolean existsInFederation(String resourceDisplayName, String id) {
+    private boolean existsInFederation(String resourceTypeName, String id) {
         if (id == null || !id.contains("/")) {
             return false;
         }
-        Boolean exists = federationLinkageService.federatedResourceExists(resourceDisplayName, id);
+        Boolean exists = federationLinkageService.federatedResourceExists(resourceTypeName, id);
         return exists == null || exists;
     }
 
@@ -103,8 +103,10 @@ public class RelationshipValidator {
             try {
                 organisationService.get(providerId, catalogueId);
             } catch (ResourceNotFoundException e) {
-                throw new ValidationException(String.format("Field [resourceProviders]: "
-                        + "There is no Provider with ID '%s' in the %s Catalogue.", providerId, catalogueId));
+                if (!existsInFederation("organisation", providerId)) {
+                    throw new ValidationException(String.format("Field [resourceProviders]: "
+                            + "There is no Provider with ID '%s' in the %s Catalogue.", providerId, catalogueId));
+                }
             }
         }
     }
@@ -114,7 +116,7 @@ public class RelationshipValidator {
             try {
                 serviceService.get(serviceId, catalogueId);
             } catch (ResourceNotFoundException e) {
-                if (!existsInFederation("Service", serviceId)) {
+                if (!existsInFederation("service", serviceId)) {
                     throw new ValidationException(String.format("Field [eoscRelatedServices]: "
                             + "There is no Service with ID '%s' in the %s Catalogue or the federation. ",
                             serviceId, catalogueId));
@@ -128,7 +130,7 @@ public class RelationshipValidator {
             try {
                 interoperabilityRecordService.get(interoperabilityRecordId, catalogueId);
             } catch (ResourceNotFoundException e) {
-                if (!existsInFederation("Interoperability Record", interoperabilityRecordId)) {
+                if (!existsInFederation("interoperability_record", interoperabilityRecordId)) {
                     throw new ValidationException(String.format("Field [interoperabilityRecordIds]: "
                             + "There is no Interoperability Record with ID '%s' in the %s Catalogue "
                             + "or the federation.", interoperabilityRecordId, catalogueId));

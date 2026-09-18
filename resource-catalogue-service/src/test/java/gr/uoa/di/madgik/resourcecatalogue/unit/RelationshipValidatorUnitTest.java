@@ -83,20 +83,20 @@ class RelationshipValidatorUnitTest {
     @Test
     void update_newlyAddedFederatedId_isValidatedAgainstAggregator() {
         when(serviceService.get(anyString(), any())).thenThrow(new ResourceNotFoundException());
-        when(federationLinkageService.federatedResourceExists("Service", "99.FED/new")).thenReturn(Boolean.TRUE);
+        when(federationLinkageService.federatedResourceExists("service", "99.FED/new")).thenReturn(Boolean.TRUE);
         TrainingResourceBundle existing = trainingResourceWith(List.of());
         TrainingResourceBundle updated = trainingResourceWith(List.of("99.FED/new"));
 
         assertThatCode(() -> validator.checkRelatedResourceIDsConsistency(updated, existing))
                 .doesNotThrowAnyException();
 
-        verify(federationLinkageService).federatedResourceExists("Service", "99.FED/new");
+        verify(federationLinkageService).federatedResourceExists("service", "99.FED/new");
     }
 
     @Test
     void update_newFederatedId_confirmedAbsent_throws() {
         when(serviceService.get(anyString(), any())).thenThrow(new ResourceNotFoundException());
-        when(federationLinkageService.federatedResourceExists("Service", "99.FED/nope")).thenReturn(Boolean.FALSE);
+        when(federationLinkageService.federatedResourceExists("service", "99.FED/nope")).thenReturn(Boolean.FALSE);
         TrainingResourceBundle updated = trainingResourceWith(List.of("99.FED/nope"));
 
         assertThatThrownBy(() -> validator.checkRelatedResourceIDsConsistency(updated, trainingResourceWith(List.of())))
@@ -107,7 +107,7 @@ class RelationshipValidatorUnitTest {
     @Test
     void update_newFederatedId_aggregatorUnreachable_failsOpen() {
         when(serviceService.get(anyString(), any())).thenThrow(new ResourceNotFoundException());
-        when(federationLinkageService.federatedResourceExists("Service", "99.FED/maybe")).thenReturn(null);
+        when(federationLinkageService.federatedResourceExists("service", "99.FED/maybe")).thenReturn(null);
         TrainingResourceBundle updated = trainingResourceWith(List.of("99.FED/maybe"));
 
         assertThatCode(() -> validator.checkRelatedResourceIDsConsistency(updated, trainingResourceWith(List.of())))
@@ -117,7 +117,7 @@ class RelationshipValidatorUnitTest {
     @Test
     void create_singleArg_validatesEveryId() {
         when(serviceService.get(anyString(), any())).thenThrow(new ResourceNotFoundException());
-        when(federationLinkageService.federatedResourceExists("Service", "99.FED/x")).thenReturn(Boolean.FALSE);
+        when(federationLinkageService.federatedResourceExists("service", "99.FED/x")).thenReturn(Boolean.FALSE);
 
         assertThatThrownBy(() -> validator.checkRelatedResourceIDsConsistency(trainingResourceWith(List.of("99.FED/x"))))
                 .isInstanceOf(ValidationException.class);
