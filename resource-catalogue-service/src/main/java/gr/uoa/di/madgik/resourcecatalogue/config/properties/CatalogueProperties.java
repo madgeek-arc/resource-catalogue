@@ -29,8 +29,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -247,5 +249,21 @@ public class CatalogueProperties {
             }
         }
         return null;
+    }
+
+    /**
+     * Every resource type whose configured {@code idPrefix} matches {@code prefix}, unlike
+     * {@link #getResourceTypeFromPrefix}, which returns only the first match by unstable map
+     * iteration order - use this when the caller must disambiguate by actually checking each
+     * candidate (e.g. searching each one for a matching record) rather than guessing.
+     */
+    public List<String> getResourceTypesFromPrefix(String prefix) {
+        List<String> types = new ArrayList<>();
+        for (Map.Entry<ResourceTypes, ResourceProperties> rp : resources.entrySet()) {
+            if (prefix.equals(rp.getValue().getIdPrefix())) {
+                types.add(rp.getKey().toString());
+            }
+        }
+        return types;
     }
 }
