@@ -28,9 +28,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.AbstractMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Component
@@ -55,17 +53,6 @@ public class PidServiceRegistrationConsistency {
     private final PublicInteroperabilityRecordService interoperabilityRecordService;
 
     private final SecurityService securityService;
-
-    private static final Map<Class<?>, String> resourceTypes = Map.ofEntries(
-            new AbstractMap.SimpleEntry<Class<?>, String>(OrganisationBundle.class, "organisation"),
-            new AbstractMap.SimpleEntry<Class<?>, String>(AdapterBundle.class, "adapter"),
-            new AbstractMap.SimpleEntry<Class<?>, String>(ServiceBundle.class, "service"),
-            new AbstractMap.SimpleEntry<Class<?>, String>(DatasourceBundle.class, "datasource"),
-            new AbstractMap.SimpleEntry<Class<?>, String>(InteroperabilityRecordBundle.class, "interoperability_record"),
-            new AbstractMap.SimpleEntry<Class<?>, String>(DeployableApplicationBundle.class, "deployable_application"),
-            new AbstractMap.SimpleEntry<Class<?>, String>(TrainingResourceBundle.class, "training_resource"),
-            new AbstractMap.SimpleEntry<Class<?>, String>(CatalogueBundle.class, "catalogue")
-    );
 
     public PidServiceRegistrationConsistency(PidIssuer pidIssuer,
                                              PublicOrganisationService organisationService,
@@ -121,12 +108,17 @@ public class PidServiceRegistrationConsistency {
         if (bundles.isEmpty()) {
             return;
         }
-        String resourceType = resourceTypes.get(bundles.getFirst().getClass());
+        String resourceType = BundleResourceTypes.resolve(bundles.getFirst());
         for (Bundle bundle : bundles) {
             HttpStatusCode httpStatusCode = getResourceFromPidService(bundle.getId());
             if (httpStatusCode.value() == HttpStatus.NOT_FOUND.value()) {
-                logger.info("Posting resource type {} with id {} to PID service", resourceType, bundle.getId());
-                pidIssuer.postPID(bundle, resourceType, null);
+                try {
+                    logger.info("Posting resource type {} with id {} to PID service", resourceType, bundle.getId());
+                    pidIssuer.postPID(bundle, resourceType, null);
+                } catch (Exception e) {
+                    logger.warn("Failed to post resource type {} with id {} to PID service: {}",
+                            resourceType, bundle.getId(), e.getMessage());
+                }
             }
         }
     }
