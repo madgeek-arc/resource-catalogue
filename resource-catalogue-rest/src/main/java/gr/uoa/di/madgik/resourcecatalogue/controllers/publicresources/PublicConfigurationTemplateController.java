@@ -87,21 +87,6 @@ public class PublicConfigurationTemplateController extends BasePublicController<
         return ResponseEntity.ok(service.getAll(ff).map(Bundle::getPayload));
     }
 
-    @Operation(description = "Returns the public Configuration Templates of an Interoperability Record, matched by "
-            + "the Interoperability Record's public PID. Used by the federated-search aggregator for cross-node reads.")
-    @BrowseParameters
-    @GetMapping(path = "getAllByInteroperabilityRecordId/{prefix}/{suffix}")
-    public ResponseEntity<Paging<ConfigurationTemplateBundle>> getAllByInteroperabilityRecordId(
-            @PathVariable String prefix,
-            @PathVariable String suffix,
-            @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.setQuantity(1000);
-        ff.addFilter("active", true);
-        ff.addFilter("interoperability_record_id", prefix + "/" + suffix);
-        return ResponseEntity.ok(service.getAll(ff));
-    }
-
     @Operation(description = "Returns the dynamic-form Model bound to the public Configuration Template with the "
             + "given id. The Model is a node-local resource; this lets the federated-search aggregator serve it "
             + "to other nodes so they can render this template's form.")
