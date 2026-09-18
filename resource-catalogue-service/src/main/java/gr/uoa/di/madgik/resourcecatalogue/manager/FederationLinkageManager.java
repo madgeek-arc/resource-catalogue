@@ -66,11 +66,11 @@ public class FederationLinkageManager implements FederationLinkageService {
     }
 
     @Override
-    public List<Value> listResources(String resourceDisplayName, List<Value> localResources, boolean federation) {
+    public List<Value> listResources(String resourceTypeName, List<Value> localResources, boolean federation) {
         if (!federation || !federationResourceClient.isEnabled()) {
             return localResources;
         }
-        String federationPath = federationPathFor(resourceDisplayName);
+        String federationPath = federationPathFor(resourceTypeName);
         if (federationPath == null || federationPath.isBlank()) {
             return localResources;
         }
@@ -91,14 +91,14 @@ public class FederationLinkageManager implements FederationLinkageService {
             }
             merged.add(new Value(id, nameObj != null ? nameObj.toString() : id));
         }
-        logger.debug("Federation list for '{}': {} local + {} federated (after de-dup)",
-                resourceDisplayName, localResources.size(), merged.size() - localResources.size());
+        logger.debug("Federation list for resource type '{}': {} local + {} federated (after de-dup)",
+                resourceTypeName, localResources.size(), merged.size() - localResources.size());
         return merged;
     }
 
     @Override
-    public Optional<Map<String, Object>> getFederatedResource(String resourceDisplayName, String id) {
-        String federationPath = federationPathFor(resourceDisplayName);
+    public Optional<Map<String, Object>> getFederatedResource(String resourceTypeName, String id) {
+        String federationPath = federationPathFor(resourceTypeName);
         String[] ps = splitPid(id);
         if (federationPath == null || federationPath.isBlank() || ps == null) {
             return Optional.empty();
@@ -107,11 +107,14 @@ public class FederationLinkageManager implements FederationLinkageService {
     }
 
     @Override
-    public Boolean federatedResourceExists(String resourceDisplayName, String id) {
-        String federationPath = federationPathFor(resourceDisplayName);
+    public Boolean federatedResourceExists(String resourceTypeName, String id) {
         String[] ps = splitPid(id);
-        if (federationPath == null || federationPath.isBlank() || ps == null) {
+        if (ps == null) {
             return Boolean.FALSE;
+        }
+        String federationPath = federationPathFor(resourceTypeName);
+        if (federationPath == null || federationPath.isBlank()) {
+            return null;
         }
         return federationResourceClient.existsById(federationPath, ps[0], ps[1]);
     }
@@ -162,10 +165,10 @@ public class FederationLinkageManager implements FederationLinkageService {
         return keys;
     }
 
-    private String federationPathFor(String resourceDisplayName) {
-        String key = resourceDisplayName.trim().toLowerCase().replace(' ', '_');
+    // TODO: review
+    private String federationPathFor(String resourceTypeName) {
         try {
-            ResourceProperties rp = catalogueProperties.getResourcePropertiesForResourceType(key);
+            ResourceProperties rp = catalogueProperties.getResourcePropertiesForResourceType(resourceTypeName);
             return rp != null ? rp.getFederationPath() : null;
         } catch (IllegalArgumentException e) {
             return null;

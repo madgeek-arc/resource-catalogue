@@ -68,7 +68,7 @@ class FederationLinkageManagerUnitTest {
     void federationFlagFalse_returnsLocalUntouchedAndNeverCallsAggregator() {
         List<Value> local = List.of(new Value("21.T15/aaa00", "Local A"));
 
-        List<Value> result = manager.listResources("Service", local, false);
+        List<Value> result = manager.listResources("service", local, false);
 
         assertThat(result).isSameAs(local);
         verify(federationResourceClient, never()).listAll(org.mockito.ArgumentMatchers.anyString());
@@ -79,7 +79,7 @@ class FederationLinkageManagerUnitTest {
         when(federationResourceClient.isEnabled()).thenReturn(false);
         List<Value> local = List.of(new Value("21.T15/aaa00", "Local A"));
 
-        assertThat(manager.listResources("Service", local, true)).isSameAs(local);
+        assertThat(manager.listResources("service", local, true)).isSameAs(local);
     }
 
     @Test
@@ -115,7 +115,7 @@ class FederationLinkageManagerUnitTest {
         List<Value> local = List.of(new Value("x/y00", "X"));
 
         // ADAPTER is a valid ResourceTypes value but has no federation-path configured in this test
-        assertThat(manager.listResources("Adapter", local, true)).isSameAs(local);
+        assertThat(manager.listResources("adapter", local, true)).isSameAs(local);
     }
 
     @Test
@@ -123,15 +123,17 @@ class FederationLinkageManagerUnitTest {
         when(federationResourceClient.existsById("services", "99.NB", "zzz"))
                 .thenReturn(Boolean.TRUE, Boolean.FALSE, null);
 
-        assertThat(manager.federatedResourceExists("Service", "99.NB/zzz")).isTrue();
-        assertThat(manager.federatedResourceExists("Service", "99.NB/zzz")).isFalse();
-        assertThat(manager.federatedResourceExists("Service", "99.NB/zzz")).isNull();
+        assertThat(manager.federatedResourceExists("service", "99.NB/zzz")).isTrue();
+        assertThat(manager.federatedResourceExists("service", "99.NB/zzz")).isFalse();
+        assertThat(manager.federatedResourceExists("service", "99.NB/zzz")).isNull();
     }
 
     @Test
-    void federatedResourceExists_falseWhenTypeUnknownOrIdNotPidShaped() {
-        assertThat(manager.federatedResourceExists("Not A Type", "99.NB/zzz")).isFalse();
-        assertThat(manager.federatedResourceExists("Service", "no-slash")).isFalse();
+    void federatedResourceExists_nullWhenTypeUnknown_falseWhenIdNotPidShaped() {
+        // unconfigured/unknown type is "unknown, fail open" (null), not "confirmed absent" (false) -
+        // only a non-PID-shaped id, which can never be a federation reference, is false.
+        assertThat(manager.federatedResourceExists("wrong_resource_type", "99.NB/zzz")).isNull();
+        assertThat(manager.federatedResourceExists("service", "no-slash")).isFalse();
         verify(federationResourceClient, never())
                 .existsById(org.mockito.ArgumentMatchers.anyString(),
                         org.mockito.ArgumentMatchers.anyString(),
