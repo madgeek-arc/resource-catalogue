@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicResourceInteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
@@ -54,13 +55,15 @@ class PublicResourceInteroperabilityRecordServiceFederationUnitTest {
     @Mock private ServiceService serviceService;
     @Mock private DatasourceService datasourceService;
     @Mock private InteroperabilityRecordService interoperabilityRecordService;
+    @Mock private FederationLinkageService federationLinkageService;
 
     private PublicResourceInteroperabilityRecordService service;
 
     @BeforeEach
     void setUp() {
         service = new PublicResourceInteroperabilityRecordService(genericResourceService, jmsService, pidIssuer,
-                facetLabelService, serviceService, datasourceService, interoperabilityRecordService);
+                facetLabelService, serviceService, datasourceService, interoperabilityRecordService,
+                federationLinkageService);
     }
 
     private static ServiceBundle serviceWithPid(String pid) {
@@ -95,6 +98,8 @@ class PublicResourceInteroperabilityRecordServiceFederationUnitTest {
         when(interoperabilityRecordService.get(eq("21.T15/local00"), any())).thenReturn(guidelineWithPid("21.T15/local"));
         when(interoperabilityRecordService.get(eq("99.NB/remote"), any()))
                 .thenThrow(new ResourceNotFoundException("not here"));
+        when(federationLinkageService.federatedResourceExists(eq("Interoperability Record"), eq("99.NB/remote")))
+                .thenReturn(true);
 
         ResourceInteroperabilityRecordBundle bundle =
                 rir("21.T15/svc00", List.of("21.T15/local00", "99.NB/remote"));
@@ -104,6 +109,25 @@ class PublicResourceInteroperabilityRecordServiceFederationUnitTest {
         List<String> ids = (List<String>) bundle.getResourceInteroperabilityRecord().get("interoperabilityRecordIds");
         assertThat(ids).containsExactly("21.T15/local", "99.NB/remote");
         assertThat(bundle.getResourceInteroperabilityRecord().get("resourceId")).isEqualTo("21.T15/svc");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void keepsConfirmedAbsentGuidelinePidVerbatimAndStillResolvesRestOfList() {
+        when(serviceService.get(eq("21.T15/svc00"), any())).thenReturn(serviceWithPid("21.T15/svc"));
+        when(interoperabilityRecordService.get(eq("99.NB/stale"), any()))
+                .thenThrow(new ResourceNotFoundException("not here"));
+        when(federationLinkageService.federatedResourceExists(eq("Interoperability Record"), eq("99.NB/stale")))
+                .thenReturn(false);
+        when(interoperabilityRecordService.get(eq("21.T15/local00"), any())).thenReturn(guidelineWithPid("21.T15/local"));
+
+        ResourceInteroperabilityRecordBundle bundle =
+                rir("21.T15/svc00", List.of("99.NB/stale", "21.T15/local00"));
+
+        service.updateIdsToPublic(bundle);
+
+        List<String> ids = (List<String>) bundle.getResourceInteroperabilityRecord().get("interoperabilityRecordIds");
+        assertThat(ids).containsExactly("99.NB/stale", "21.T15/local");
     }
 
     @Test

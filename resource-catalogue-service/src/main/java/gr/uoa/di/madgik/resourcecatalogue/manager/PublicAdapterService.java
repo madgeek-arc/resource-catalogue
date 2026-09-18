@@ -20,17 +20,17 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
-import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -38,24 +38,26 @@ import java.util.Map;
 @Service("publicAdapterManager")
 public class PublicAdapterService extends AbstractPublicResourceManager<AdapterBundle> {
 
+    private static final Logger logger = LoggerFactory.getLogger(PublicAdapterService.class);
+
     private final ServiceService serviceService;
-    private final DatasourceService datasourceService;
     private final InteroperabilityRecordService guidelineService;
     private final OrganisationService organisationService;
+    private final FederationLinkageService federationLinkageService;
 
     public PublicAdapterService(GenericResourceService genericResourceService,
                                 JmsService jmsService,
                                 PidIssuer pidIssuer,
                                 FacetLabelService facetLabelService,
                                 ServiceService serviceService,
-                                DatasourceService datasourceService,
                                 InteroperabilityRecordService guidelineService,
-                                OrganisationService organisationService) {
+                                OrganisationService organisationService,
+                                FederationLinkageService federationLinkageService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
         this.serviceService = serviceService;
-        this.datasourceService = datasourceService;
         this.guidelineService = guidelineService;
         this.organisationService = organisationService;
+        this.federationLinkageService = federationLinkageService;
     }
 
     @Override
@@ -71,11 +73,8 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
         }
 
         // Resource Owner
-        OrganisationBundle provider = organisationService.get(
-                (String) adapterMap.get("resourceOwner"),
-                adapter.getCatalogueId()
-        );
-        adapterMap.put("resourceOwner", provider.getIdentifiers().getPid());
+        adapterMap.put("resourceOwner", resolveOwnerPublicId(
+                (String) adapterMap.get("resourceOwner"), adapter.getCatalogueId()));
 
         // Linked Resource
         Object linkedResourceObj = adapterMap.get("linkedResource");
@@ -89,36 +88,65 @@ public class PublicAdapterService extends AbstractPublicResourceManager<AdapterB
         if (!(typeObj instanceof String) || !(idObj instanceof String)) {
             return;
         }
-        String type = (String) typeObj;
+        String resourceType = (String) typeObj;
         String id = (String) idObj;
 
-        linkedResource.put("id", toPublicId(type, id, adapter.getCatalogueId()));
+        linkedResource.put("id", toPublicId(resourceType, id, adapter.getCatalogueId()));
     }
 
     /**
-     * Resolves a locally-held linked resource id to its public PID. When the id resolves to
-     * nothing local it is assumed to reference a resource published on another federation node -
-     * it is already the public PID and kept verbatim. A non-PID-shaped unresolvable id is rethrown.
+     * Resolves a locally-held linked resource id to its public PID. When the id doesn't resolve
+     * locally, a PID-shaped id ({@code prefix/suffix}) is kept verbatim - it may already be a
+     * public PID from another federation node. If the federation aggregator positively confirms
+     * the id doesn't exist there either, it's still kept (rather than rejected), since that
+     * confirmation may just mean the owning node is temporarily unreachable; the case is logged
+     * instead for manual review. A non-PID-shaped unresolvable id is rethrown.
      */
-    private String toPublicId(String type, String id, String catalogueId) {
+    private String toPublicId(String resourceTypeName, String id, String catalogueId) {
         try {
-            return switch (type.toLowerCase()) {
+            return switch (resourceTypeName.toLowerCase()) {
                 case "service" -> {
                     ServiceBundle service = serviceService.get(id, catalogueId);
                     yield service.getIdentifiers().getPid();
                 }
-                case "datasource" -> {
-                    DatasourceBundle datasource = datasourceService.get(id, catalogueId);
-                    yield datasource.getIdentifiers().getPid();
-                }
-                default -> {
+                case "interoperability_record" -> {
                     InteroperabilityRecordBundle guideline = guidelineService.get(id, catalogueId);
                     yield guideline.getIdentifiers().getPid();
                 }
+                default -> throw new IllegalArgumentException("Unsupported Resource Type: " + resourceTypeName);
             };
         } catch (ResourceException | ResourceNotFoundException e) {
             if (id != null && id.contains("/")) {
+                Boolean exists = federationLinkageService.federatedResourceExists(resourceTypeName, id);
+                if (exists != null && !exists) {
+                    logger.warn("Kept reference to id '{}' (type '{}') which was not found locally and the "
+                            + "federation aggregator confirmed it does not exist there either - may be a "
+                            + "stale reference, or the owning federation node may be temporarily "
+                            + "unreachable. Needs manual review.", id, resourceTypeName);
+                }
                 return id;
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Resolves a locally-held Organisation id to its public PID, with the same federation
+     * fallback as {@link #toPublicId}.
+     */
+    private String resolveOwnerPublicId(String resourceOwnerId, String catalogueId) {
+        try {
+            return organisationService.get(resourceOwnerId, catalogueId).getIdentifiers().getPid();
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (resourceOwnerId != null && resourceOwnerId.contains("/")) {
+                Boolean exists = federationLinkageService.federatedResourceExists("organisation", resourceOwnerId);
+                if (exists != null && !exists) {
+                    logger.warn("Kept reference to id '{}' (type 'organisation') which was not found locally "
+                            + "and the federation aggregator confirmed it does not exist there either - may "
+                            + "be a stale reference, or the owning federation node may be temporarily "
+                            + "unreachable. Needs manual review.", resourceOwnerId);
+                }
+                return resourceOwnerId;
             }
             throw e;
         }

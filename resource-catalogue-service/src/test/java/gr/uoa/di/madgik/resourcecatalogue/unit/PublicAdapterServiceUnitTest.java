@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.unit;
 
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
@@ -23,7 +24,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicAdapterService;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
-import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
@@ -50,16 +51,17 @@ class PublicAdapterServiceUnitTest {
     @Mock private PidIssuer pidIssuer;
     @Mock private FacetLabelService facetLabelService;
     @Mock private ServiceService serviceService;
-    @Mock private DatasourceService datasourceService;
     @Mock private InteroperabilityRecordService guidelineService;
     @Mock private OrganisationService organisationService;
+    @Mock private FederationLinkageService federationLinkageService;
 
     private PublicAdapterService publicAdapterService;
 
     @BeforeEach
     void setUp() {
         publicAdapterService = new PublicAdapterService(genericResourceService, jmsService, pidIssuer,
-                facetLabelService, serviceService, datasourceService, guidelineService, organisationService);
+                facetLabelService, serviceService, guidelineService, organisationService,
+                federationLinkageService);
     }
 
     private static OrganisationBundle organisationWithPid(String pid) {
@@ -125,5 +127,36 @@ class PublicAdapterServiceUnitTest {
         publicAdapterService.updateIdsToPublic(adapter);
 
         assertThat(adapter.getAdapter()).isNull();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void updateIdsToPublic_keepsLinkedResourceIdVerbatimWhenFederationConfirmsAbsent() {
+        AdapterBundle adapter = createAdapterBundle();
+        Map<String, Object> linkedResource = (Map<String, Object>) adapter.getAdapter().get("linkedResource");
+        linkedResource.put("id", "99.NB/remote");
+        when(organisationService.get("11.1111/abc123", "eosc"))
+                .thenReturn(organisationWithPid("11.11111/owner-pid"));
+        when(serviceService.get("99.NB/remote", "eosc")).thenThrow(new ResourceNotFoundException("not here"));
+        when(federationLinkageService.federatedResourceExists("service", "99.NB/remote")).thenReturn(false);
+
+        publicAdapterService.updateIdsToPublic(adapter);
+
+        assertThat(linkedResource.get("id")).isEqualTo("99.NB/remote");
+    }
+
+    @Test
+    void updateIdsToPublic_keepsResourceOwnerVerbatimWhenFederationConfirmsAbsent() {
+        AdapterBundle adapter = createAdapterBundle();
+        adapter.getAdapter().put("resourceOwner", "99.NB/remote-owner");
+        when(organisationService.get("99.NB/remote-owner", "eosc"))
+                .thenThrow(new ResourceNotFoundException("not here"));
+        when(federationLinkageService.federatedResourceExists("organisation", "99.NB/remote-owner"))
+                .thenReturn(false);
+        lenient().when(serviceService.get("test-service", "eosc")).thenReturn(serviceWithPid("22.22222/svc-pid"));
+
+        publicAdapterService.updateIdsToPublic(adapter);
+
+        assertThat(adapter.getAdapter().get("resourceOwner")).isEqualTo("99.NB/remote-owner");
     }
 }
