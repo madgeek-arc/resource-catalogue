@@ -41,7 +41,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Profile("beyond")
 @RestController
@@ -117,16 +116,6 @@ public class ConfigurationTemplateInstanceController
         return ResponseEntity.ok(paging);
     }
 
-    @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'resourceId'.")
-    @GetMapping(path = "getAllByResourceId/{prefix}/{suffix}")
-    public ResponseEntity<List<?>> getCTIByResourceId(@PathVariable String prefix,
-                                                      @PathVariable String suffix) {
-        String id = prefix + "/" + suffix;
-        List<LinkedHashMap<String, Object>> ret = service.getByResourceId(id).stream()
-                .map(ConfigurationTemplateInstanceBundle::getConfigurationTemplateInstance).collect(Collectors.toList());
-        return new ResponseEntity<>(ret, HttpStatus.OK);
-    }
-
     @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'resourceId', 'ctiId'.")
     @GetMapping(path = "/resources/{resourcePrefix}/{resourceSuffix}/templates/{ctPrefix}/{ctSuffix}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getByResourceAndConfigurationTemplateId(@PathVariable("resourcePrefix") String resourcePrefix,
@@ -140,15 +129,6 @@ public class ConfigurationTemplateInstanceController
         String resourceId = resourcePrefix + "/" + resourceSuffix;
         String ctId = ctPrefix + "/" + ctSuffix;
         LinkedHashMap<String, Object> ret = service.getByResourceAndConfigurationTemplateId(resourceId, ctId);
-        return new ResponseEntity<>(ret, HttpStatus.OK);
-    }
-
-    @Operation(summary = "Returns a list of all Configuration Template Instances associated with the given 'configurationTemplateId'.")
-    @GetMapping(path = "getAllByConfigurationTemplateId/{prefix}/{suffix}")
-    public ResponseEntity<List<?>> getCTIByConfigurationTemplateId(@PathVariable String prefix,
-                                                                   @PathVariable String suffix) {
-        String id = prefix + "/" + suffix;
-        List<LinkedHashMap<String, Object>> ret = service.getByConfigurationTemplateId(id);
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
