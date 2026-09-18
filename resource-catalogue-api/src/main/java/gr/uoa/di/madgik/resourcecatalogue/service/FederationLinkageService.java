@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 
 import java.util.List;
@@ -73,7 +74,7 @@ public interface FederationLinkageService {
      * Fetches all Configuration Templates of the given Interoperability Record from whichever
      * federation node owns it.
      */
-    List<Map<String, Object>> getConfigurationTemplatesByInteroperabilityRecordId(String interoperabilityRecordId);
+    Paging<Map<String, Object>> getConfigurationTemplatesByInteroperabilityRecordId(String interoperabilityRecordId);
 
     /**
      * Fetches the dynamic-form Model bound to the given Configuration Template, from whichever

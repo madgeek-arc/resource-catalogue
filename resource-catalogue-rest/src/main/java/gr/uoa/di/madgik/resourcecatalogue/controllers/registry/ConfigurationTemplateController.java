@@ -275,12 +275,18 @@ public class ConfigurationTemplateController {
                                                                       @RequestParam MultiValueMap<String, Object> params) {
         String interoperabilityRecordId = prefix + "/" + suffix;
         params.remove("federation");
+        // TODO: two refactoring paths are under consideration for this endpoint, not yet decided:
+        //  1. Fold it into /all: interoperability_record_id is already an indexed, filterable
+        //     field there, so this could become all?interoperability_record_id=X&federation=...
+        //     instead of a dedicated path.
+        //  2. Revert to accepting interoperability_record_id as a request param instead of a
+        //     path variable (the shape this endpoint had before this change).
         Paging<ConfigurationTemplateBundle> paging = service.getAllByInteroperabilityRecordId(params, interoperabilityRecordId);
         if (federation && paging.getResults().isEmpty()) {
-            List<Map<String, Object>> federated =
+            Paging<Map<String, Object>> federated =
                     federationLinkageService.getConfigurationTemplatesByInteroperabilityRecordId(interoperabilityRecordId);
-            if (!federated.isEmpty()) {
-                return ResponseEntity.ok(new Paging<>(federated.size(), 0, federated.size(), federated, List.of()));
+            if (!federated.getResults().isEmpty()) {
+                return ResponseEntity.ok(federated);
             }
         }
         return ResponseEntity.ok(paging);

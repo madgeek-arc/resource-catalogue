@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.federation.search.aggregator.client.SearchAggregatorClient;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationCrossLinkageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,11 +126,11 @@ public class FederationResourceClient {
      * Fetches all Configuration Templates of the given Interoperability Record from whichever
      * node owns it.
      */
-    public List<Map<String, Object>> getConfigurationTemplatesByInteroperabilityRecordId(String prefix, String suffix) {
+    public Paging<Map<String, Object>> getConfigurationTemplatesByInteroperabilityRecordId(String prefix, String suffix) {
         if (!isEnabled() || isCircuitOpen()) {
-            return Collections.emptyList();
+            return new Paging<>();
         }
-        return call("getConfigurationTemplatesByInteroperabilityRecordId", Collections.emptyList(),
+        return call("getConfigurationTemplatesByInteroperabilityRecordId", new Paging<>(),
                 () -> searchAggregatorClient.getConfigurationTemplatesByInteroperabilityRecordId(prefix, suffix));
     }
 

@@ -16,6 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
@@ -26,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -129,10 +129,10 @@ public class FederationLinkageManager implements FederationLinkageService {
     }
 
     @Override
-    public List<Map<String, Object>> getConfigurationTemplatesByInteroperabilityRecordId(String interoperabilityRecordId) {
+    public Paging<Map<String, Object>> getConfigurationTemplatesByInteroperabilityRecordId(String interoperabilityRecordId) {
         String[] ps = splitPid(interoperabilityRecordId);
         if (ps == null) {
-            return Collections.emptyList();
+            return new Paging<>();
         }
         return federationResourceClient.getConfigurationTemplatesByInteroperabilityRecordId(ps[0], ps[1]);
     }
