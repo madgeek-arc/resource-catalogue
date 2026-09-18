@@ -44,8 +44,7 @@ public class ResourceProperties {
     private List<String> resolveEndpoints;
 
     /**
-     * The FDO kernel information fields (FdoType/FdoProfile/FdoData/FdoVersion) this
-     * resource type's PID records are registered with.
+     * The FDO kernel information fields this resource type's PID records are registered with.
      */
     @NestedConfigurationProperty
     private Fdo fdo;
@@ -124,11 +123,6 @@ public class ResourceProperties {
          */
         private String data;
 
-        /**
-         * The FdoVersion value (HS_ADMIN index 9994).
-         */
-        private String version;
-
         public Fdo() {
         }
 
@@ -154,14 +148,6 @@ public class ResourceProperties {
 
         public void setData(String data) {
             this.data = data;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
         }
     }
 }
