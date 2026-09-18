@@ -59,7 +59,7 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
     private AuditingProperties auditingProperties;
 
     TrainingResourceController(TrainingResourceService trainingResourceService) {
-        super(trainingResourceService, "Training Resource");
+        super(trainingResourceService, "training_resource");
     }
 
     //region generic

@@ -58,7 +58,7 @@ public class ConfigurationTemplateInstanceController
     ConfigurationTemplateInstanceController(ConfigurationTemplateInstanceService service,
                                             ModelService modelService,
                                             ObjectMapper objectMapper) {
-        super(service, "Configuration Template Instance");
+        super(service, "configuration_template_instance");
         this.modelService = modelService;
         this.objectMapper = objectMapper;
     }

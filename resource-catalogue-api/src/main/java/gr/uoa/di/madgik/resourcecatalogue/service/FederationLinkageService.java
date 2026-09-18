@@ -39,19 +39,19 @@ public interface FederationLinkageService {
      * copies are filtered out, so a locally-held resource stays keyed by its low-level id and
      * only genuinely remote resources are added (keyed by their bare PID).
      *
-     * @param resourceDisplayName controller-level display name, e.g. "Interoperability Record"
-     * @param localResources      the local {@code /list} result
-     * @param federation          when false, {@code localResources} is returned unchanged
+     * @param resourceTypeName controller-level display name, e.g. "Interoperability Record"
+     * @param localResources   the local {@code /list} result
+     * @param federation       when false, {@code localResources} is returned unchanged
      */
-    List<Value> listResources(String resourceDisplayName, List<Value> localResources, boolean federation);
+    List<Value> listResources(String resourceTypeName, List<Value> localResources, boolean federation);
 
     /**
      * Fetches a resource by id from whichever federation node owns it.
      *
-     * @param resourceDisplayName controller-level display name, e.g. "Service"
-     * @param id                  the resource's bare PID ({@code prefix/suffix})
+     * @param resourceTypeName controller-level display name, e.g. "Service"
+     * @param id               the resource's bare PID ({@code prefix/suffix})
      */
-    Optional<Map<String, Object>> getFederatedResource(String resourceDisplayName, String id);
+    Optional<Map<String, Object>> getFederatedResource(String resourceTypeName, String id);
 
     /**
      * Tri-state check of whether a resource with the given bare PID exists anywhere in the
@@ -59,10 +59,10 @@ public interface FederationLinkageService {
      * not, {@code null} = the aggregator could not be reached, so existence is <em>unknown</em>.
      * Write-path validators must treat {@code null} as "cannot verify" rather than "absent".
      *
-     * @param resourceDisplayName controller-level display name, e.g. "Service"
-     * @param id                  the resource's bare PID ({@code prefix/suffix})
+     * @param resourceTypeName controller-level display name, e.g. "Service"
+     * @param id               the resource's bare PID ({@code prefix/suffix})
      */
-    Boolean federatedResourceExists(String resourceDisplayName, String id);
+    Boolean federatedResourceExists(String resourceTypeName, String id);
 
     /**
      * Fetches an Interoperability Record by id from whichever federation node owns it.

@@ -69,7 +69,7 @@ public class InteroperabilityRecordController
 
     InteroperabilityRecordController(InteroperabilityRecordService interoperabilityRecordService,
                                      @Lazy ResourceInteroperabilityRecordService rirService) {
-        super(interoperabilityRecordService, "Interoperability Record");
+        super(interoperabilityRecordService, "interoperability_record");
         this.rirService = rirService;
     }
 

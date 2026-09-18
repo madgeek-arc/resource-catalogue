@@ -18,22 +18,22 @@ import java.util.List;
 public abstract class ResourceCatalogueGenericController<T extends Bundle, S extends ResourceCatalogueGenericService<T>> {
 
     protected final S service;
-    protected final String resourceName;
+    protected final String resourceTypeName;
 
     // Field-injected: the abstract base is shared by ~10 controllers each with its own
     // constructor, and threading this through every one of them adds noise for no benefit.
     @Autowired
     protected FederationLinkageService federationLinkageService;
 
-    public ResourceCatalogueGenericController(S service, String resourceName) {
+    public ResourceCatalogueGenericController(S service, String resourceTypeName) {
         this.service = service;
-        this.resourceName = resourceName;
+        this.resourceTypeName = resourceTypeName;
     }
 
     @GetMapping(path = "list")
     public List<Value> listResources(@RequestParam(required = false) String catalogueId,
                                      @RequestParam(required = false, defaultValue = "false") boolean federation) {
-        return federationLinkageService.listResources(resourceName, service.listResources(catalogueId), federation);
+        return federationLinkageService.listResources(resourceTypeName, service.listResources(catalogueId), federation);
     }
 
     @GetMapping(path = "list/{id}")

@@ -61,7 +61,7 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     private AuditingProperties auditingProperties;
 
     OrganisationController(OrganisationService organisationService) {
-        super(organisationService, "Organisation");
+        super(organisationService, "organisation");
     }
 
     //region generic

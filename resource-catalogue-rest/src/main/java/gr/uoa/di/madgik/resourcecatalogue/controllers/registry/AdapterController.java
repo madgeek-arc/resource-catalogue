@@ -61,7 +61,7 @@ public class AdapterController extends ResourceCatalogueGenericController<Adapte
     private AuditingProperties auditingProperties;
 
     public AdapterController(AdapterService adapterService) {
-        super(adapterService, "Adapter");
+        super(adapterService, "adapter");
     }
 
     //region generic
