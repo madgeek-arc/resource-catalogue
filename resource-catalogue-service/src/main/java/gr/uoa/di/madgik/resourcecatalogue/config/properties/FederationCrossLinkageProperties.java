@@ -57,16 +57,6 @@ public class FederationCrossLinkageProperties {
     private Long timeoutMs;
 
     /**
-     * Upper bound, in bytes, on the in-memory buffer {@link org.springframework.web.reactive.function.client.WebClient}
-     * uses to hold an aggregator response before decoding it. WebClient's own default is 256 KB, which the
-     * federation-wide {@code listAll} call can still overrun with a {@code DataBufferLimitException} once the
-     * federation holds enough resources. Sized explicitly so a node can bound the largest response it will accept.
-     */
-    @NotNull
-    @Positive
-    private Integer maxInMemorySizeBytes;
-
-    /**
      * Number of consecutive failed/timed-out calls after which the circuit breaker opens,
      * i.e. further calls are skipped (failing open) until {@link #circuitBreakerResetMs} elapses.
      */
@@ -105,15 +95,6 @@ public class FederationCrossLinkageProperties {
 
     public FederationCrossLinkageProperties setTimeoutMs(Long timeoutMs) {
         this.timeoutMs = timeoutMs;
-        return this;
-    }
-
-    public Integer getMaxInMemorySizeBytes() {
-        return maxInMemorySizeBytes;
-    }
-
-    public FederationCrossLinkageProperties setMaxInMemorySizeBytes(Integer maxInMemorySizeBytes) {
-        this.maxInMemorySizeBytes = maxInMemorySizeBytes;
         return this;
     }
 

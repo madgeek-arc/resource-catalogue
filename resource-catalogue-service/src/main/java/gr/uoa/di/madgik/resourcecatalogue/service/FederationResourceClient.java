@@ -16,23 +16,19 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.federation.search.aggregator.client.SearchAggregatorClient;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationCrossLinkageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.util.UriBuilder;
 
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Reads resources published on <em>other</em> federation nodes through the EOSC-Beyond
@@ -40,11 +36,10 @@ import java.util.function.Function;
  * Template / Configuration Template Instance onboarding flow on this node can reference
  * resources that live elsewhere in the federation.
  * <p>
- * Mirrors {@link FederationSimilarityClient}'s fail-open / circuit-breaker posture towards the
- * same aggregator, but is kept as its own bean (with its own {@link WebClient} and
- * circuit-breaker state) since it is an independent concern hitting different aggregator
- * routes. Every method degrades to an empty result on a disabled feature, an unreachable
- * aggregator, or an open circuit breaker - callers are expected to fall back to local data.
+ * Every method degrades to an empty result on a disabled feature, an unreachable aggregator,
+ * or an open circuit breaker - callers are expected to fall back to local data. The HTTP/JSON
+ * handling itself lives in {@link SearchAggregatorClient}; this class only owns the resilience
+ * policy (enabled flag, timeout, circuit breaker) around it.
  */
 @Service
 public class FederationResourceClient {
@@ -52,17 +47,18 @@ public class FederationResourceClient {
     private static final Logger logger = LoggerFactory.getLogger(FederationResourceClient.class);
 
     private final FederationCrossLinkageProperties properties;
-    private final WebClient federationWebClient;
+    private final SearchAggregatorClient searchAggregatorClient;
 
     private final CircuitBreaker circuitBreaker;
 
     public FederationResourceClient(FederationCrossLinkageProperties properties) {
+        this(properties, new SearchAggregatorClient(
+                properties.getSearchUrl(), Duration.ofMillis(properties.getTimeoutMs())));
+    }
+
+    public FederationResourceClient(FederationCrossLinkageProperties properties, SearchAggregatorClient searchAggregatorClient) {
         this.properties = properties;
-        this.federationWebClient = WebClient.builder()
-                .baseUrl(properties.getSearchUrl())
-                .codecs(configurer -> configurer.defaultCodecs()
-                        .maxInMemorySize(properties.getMaxInMemorySizeBytes()))
-                .build();
+        this.searchAggregatorClient = searchAggregatorClient;
         this.circuitBreaker = new CircuitBreaker(
                 properties.getCircuitBreakerFailureThreshold(),
                 properties.getCircuitBreakerResetMs());
@@ -76,30 +72,18 @@ public class FederationResourceClient {
      * Returns every resource published under {@code federationPath} across the federation, as a
      * list of {@code {id, name}} maps (each carrying a bare-PID {@code id} and a display
      * {@code name}). The local node's own copies are included - callers must de-duplicate them.
-     * <p>
-     * Hits the aggregator's dedicated {@code /{federationPath}/ids} route, which projects every
-     * node's hits down to id + name, de-duplicates, sorts by name, and serves the result from a
-     * short-TTL cache - so this is a small, bounded payload regardless of how large the
-     * federation grows, and does not trigger a full cross-node search + rank-fusion on every call.
      */
     public List<Map<String, Object>> listAll(String federationPath) {
         if (!isEnabled() || federationPath == null || isCircuitOpen()) {
             return Collections.emptyList();
         }
-        try {
-            List<Map<String, Object>> body = federationWebClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/{path}/ids").build(federationPath))
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {
-                    })
-                    .timeout(Duration.ofMillis(properties.getTimeoutMs()))
-                    .block();
-            onSuccess();
-            return body != null ? body : Collections.emptyList();
-        } catch (Exception e) {
-            onFailure("listAll(" + federationPath + ")", e);
-            return Collections.emptyList();
-        }
+        return call("listAll(" + federationPath + ")", Collections.emptyList(), () -> {
+            List<Map<String, Object>> out = new ArrayList<>();
+            for (var idName : searchAggregatorClient.listResourceIds(federationPath, null)) {
+                out.add(Map.of("id", idName.id(), "name", idName.name()));
+            }
+            return out;
+        });
     }
 
     /**
@@ -108,8 +92,11 @@ public class FederationResourceClient {
      * the two halves of the PID. Empty when not found anywhere in the federation.
      */
     public Optional<Map<String, Object>> getById(String federationPath, String prefix, String suffix) {
-        return get(uriBuilder -> uriBuilder.path("/{path}/{prefix}/{suffix}")
-                .build(federationPath, prefix, suffix), "getById(" + federationPath + ")");
+        if (!isEnabled() || isCircuitOpen()) {
+            return Optional.empty();
+        }
+        return call("getById(" + federationPath + ")", Optional.empty(),
+                () -> searchAggregatorClient.getById(federationPath, prefix, suffix));
     }
 
     /**
@@ -125,19 +112,9 @@ public class FederationResourceClient {
             return null;
         }
         try {
-            federationWebClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/{path}/{prefix}/{suffix}")
-                            .build(federationPath, prefix, suffix))
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                    })
-                    .timeout(Duration.ofMillis(properties.getTimeoutMs()))
-                    .block();
+            boolean exists = searchAggregatorClient.getById(federationPath, prefix, suffix).isPresent();
             onSuccess();
-            return Boolean.TRUE;
-        } catch (WebClientResponseException.NotFound e) {
-            onSuccess();
-            return Boolean.FALSE;
+            return exists;
         } catch (Exception e) {
             onFailure("existsById(" + federationPath + ")", e);
             return null;
@@ -146,29 +123,14 @@ public class FederationResourceClient {
 
     /**
      * Fetches all Configuration Templates of the given Interoperability Record from whichever
-     * node owns it. The aggregator returns a {@code Paging}; this unwraps it to the list of
-     * Configuration Template payload maps.
+     * node owns it.
      */
     public List<Map<String, Object>> getConfigurationTemplatesByInteroperabilityRecordId(String prefix, String suffix) {
         if (!isEnabled() || isCircuitOpen()) {
             return Collections.emptyList();
         }
-        try {
-            Map<String, Object> body = federationWebClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/configurationTemplates/getAllByInteroperabilityRecordId/{prefix}/{suffix}")
-                            .build(prefix, suffix))
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                    })
-                    .timeout(Duration.ofMillis(properties.getTimeoutMs()))
-                    .block();
-            onSuccess();
-            return unwrapPaging(body);
-        } catch (Exception e) {
-            onFailure("getConfigurationTemplatesByInteroperabilityRecordId", e);
-            return Collections.emptyList();
-        }
+        return call("getConfigurationTemplatesByInteroperabilityRecordId", Collections.emptyList(),
+                () -> searchAggregatorClient.getConfigurationTemplatesByInteroperabilityRecordId(prefix, suffix));
     }
 
     /**
@@ -176,50 +138,22 @@ public class FederationResourceClient {
      * node owns the template.
      */
     public Optional<Map<String, Object>> getConfigurationTemplateModel(String prefix, String suffix) {
-        return get(uriBuilder -> uriBuilder.path("/configurationTemplates/{prefix}/{suffix}/model")
-                .build(prefix, suffix), "getConfigurationTemplateModel");
-    }
-
-    private Optional<Map<String, Object>> get(Function<UriBuilder, URI> uriFunction, String opLabel) {
         if (!isEnabled() || isCircuitOpen()) {
             return Optional.empty();
         }
-        try {
-            Map<String, Object> body = federationWebClient.get()
-                    .uri(uriFunction)
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                    })
-                    .timeout(Duration.ofMillis(properties.getTimeoutMs()))
-                    .block();
-            onSuccess();
-            return Optional.ofNullable(body);
-        } catch (WebClientResponseException.NotFound e) {
-            onSuccess();
-            return Optional.empty();
-        } catch (Exception e) {
-            onFailure(opLabel, e);
-            return Optional.empty();
-        }
+        return call("getConfigurationTemplateModel", Optional.empty(),
+                () -> searchAggregatorClient.getConfigurationTemplateModel(prefix, suffix));
     }
 
-
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> unwrapPaging(Map<String, Object> body) {
-        if (body == null) {
-            return Collections.emptyList();
+    private <T> T call(String opLabel, T onFailureValue, Supplier<T> call) {
+        try {
+            T result = call.get();
+            onSuccess();
+            return result;
+        } catch (Exception e) {
+            onFailure(opLabel, e);
+            return onFailureValue;
         }
-        Object results = body.get("results");
-        if (results instanceof List<?> list) {
-            List<Map<String, Object>> out = new ArrayList<>(list.size());
-            for (Object element : list) {
-                if (element instanceof Map<?, ?> map) {
-                    out.add((Map<String, Object>) map);
-                }
-            }
-            return out;
-        }
-        return Collections.emptyList();
     }
 
     private boolean isCircuitOpen() {

@@ -16,17 +16,17 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
+import gr.uoa.di.madgik.federation.search.aggregator.client.SearchAggregatorClient;
 import gr.uoa.di.madgik.registry.domain.ScoredResult;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationDuplicateCheckProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,12 +34,12 @@ import java.util.Map;
 
 /**
  * Fans a candidate resource out to the EOSC-Beyond federated search aggregator's cross-node
- * similarity check ({@code POST /{federationPath}/similar}), so that a resource about to be
- * submitted on this node can also be checked against resources already published on other
- * federation nodes. Mirrors {@link ResourceIdCreator}'s fail-open / circuit-breaker posture
- * towards the same aggregator, but is kept as its own bean (with its own {@link WebClient} and
- * circuit-breaker state) rather than sharing one, since the two checks are independent concerns
- * hitting different aggregator routes.
+ * similarity check, so that a resource about to be submitted on this node can also be checked
+ * against resources already published on other federation nodes. Mirrors
+ * {@link ResourceIdCreator}'s fail-open / circuit-breaker posture towards the same aggregator,
+ * but is kept as its own bean (with its own {@link SearchAggregatorClient} and circuit-breaker
+ * state) rather than sharing one, since the two checks are independent concerns hitting
+ * different aggregator routes.
  */
 @Service
 public class FederationSimilarityClient {
@@ -48,17 +48,22 @@ public class FederationSimilarityClient {
 
     private final CatalogueProperties catalogueProperties;
     private final FederationDuplicateCheckProperties federationProperties;
-    private final WebClient federationWebClient;
+    private final SearchAggregatorClient searchAggregatorClient;
 
     private final CircuitBreaker circuitBreaker;
 
     public FederationSimilarityClient(CatalogueProperties catalogueProperties,
                                       FederationDuplicateCheckProperties federationProperties) {
+        this(catalogueProperties, federationProperties, new SearchAggregatorClient(
+                federationProperties.getSearchUrl(), Duration.ofMillis(federationProperties.getTimeoutMs())));
+    }
+
+    public FederationSimilarityClient(CatalogueProperties catalogueProperties,
+                               FederationDuplicateCheckProperties federationProperties,
+                               SearchAggregatorClient searchAggregatorClient) {
         this.catalogueProperties = catalogueProperties;
         this.federationProperties = federationProperties;
-        this.federationWebClient = WebClient.builder()
-                .baseUrl(federationProperties.getSearchUrl())
-                .build();
+        this.searchAggregatorClient = searchAggregatorClient;
         this.circuitBreaker = new CircuitBreaker(
                 federationProperties.getCircuitBreakerFailureThreshold(),
                 federationProperties.getCircuitBreakerResetMs());
@@ -86,23 +91,23 @@ public class FederationSimilarityClient {
             return Collections.emptyList();
         }
         try {
-            List<ScoredResult<LinkedHashMap<String, Object>>> results = federationWebClient.post()
-                    .uri(uriBuilder -> uriBuilder.path("/{path}/similar")
-                            .queryParam("threshold", threshold)
-                            .queryParam("quantity", quantity)
-                            .build(federationPath))
-                    .bodyValue(resource)
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<ScoredResult<LinkedHashMap<String, Object>>>>() {
-                    })
-                    .timeout(Duration.ofMillis(federationProperties.getTimeoutMs()))
-                    .block();
+            List<ScoredResult<Map<String, Object>>> results =
+                    searchAggregatorClient.findSimilar(federationPath, resource, threshold, quantity);
             circuitBreaker.onSuccess();
-            return results != null ? results : Collections.emptyList();
+            return toLinkedHashMapResults(results);
         } catch (Exception e) {
             circuitBreaker.onFailure("similarity check for resourceType " + resourceType, e);
             return Collections.emptyList();
         }
+    }
+
+    private static List<ScoredResult<LinkedHashMap<String, Object>>> toLinkedHashMapResults(
+            List<ScoredResult<Map<String, Object>>> results) {
+        List<ScoredResult<LinkedHashMap<String, Object>>> out = new ArrayList<>(results.size());
+        for (ScoredResult<Map<String, Object>> result : results) {
+            out.add(ScoredResult.of(result.getScore(), new LinkedHashMap<>(result.getResult())));
+        }
+        return out;
     }
 
     private String federationPathFor(String resourceType) {

@@ -120,7 +120,6 @@ federation.cross-linkage.search-url=https://federatedsearch.service.eosc-beyond.
 federation.cross-linkage.timeout-ms=8000
 federation.cross-linkage.circuit-breaker-failure-threshold=5
 federation.cross-linkage.circuit-breaker-reset-ms=60000
-federation.cross-linkage.max-in-memory-size-bytes=4194304
 
 ### Email Notification Properties ###
 catalogue.emails.enabled=false

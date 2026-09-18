@@ -165,6 +165,11 @@
                 <version>10.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
+                <groupId>gr.uoa.di.madgik.federation</groupId>
+                <artifactId>search-aggregator-client</artifactId>
+                <version>1.2.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>gr.uoa.di.madgik</groupId>
                 <artifactId>request-logging-starter</artifactId>
                 <version>1.0.0</version>

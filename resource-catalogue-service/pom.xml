@@ -294,6 +294,10 @@
             <artifactId>catalogue</artifactId>
         </dependency>
         <dependency>
+            <groupId>gr.uoa.di.madgik.federation</groupId>
+            <artifactId>search-aggregator-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>gr.uoa.di.madgik</groupId>
             <artifactId>request-logging-starter</artifactId>
         </dependency>

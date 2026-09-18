@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
+import gr.uoa.di.madgik.federation.search.aggregator.client.SearchAggregatorClient;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.service.SearchService;
@@ -28,8 +29,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.Duration;
 
@@ -41,7 +40,7 @@ public class ResourceIdCreator implements IdCreator {
     private final SearchService searchService;
     private final CatalogueProperties catalogueProperties;
     private final FederationDuplicateCheckProperties federationProperties;
-    private final WebClient federationWebClient;
+    private final SearchAggregatorClient searchAggregatorClient;
 
     private final CircuitBreaker circuitBreaker;
 
@@ -52,9 +51,8 @@ public class ResourceIdCreator implements IdCreator {
         this.searchService = searchService;
         this.catalogueProperties = catalogueProperties;
         this.federationProperties = federationProperties;
-        this.federationWebClient = WebClient.builder()
-                .baseUrl(federationProperties.getSearchUrl())
-                .build();
+        this.searchAggregatorClient = new SearchAggregatorClient(
+                federationProperties.getSearchUrl(), Duration.ofMillis(federationProperties.getTimeoutMs()));
         this.circuitBreaker = new CircuitBreaker(
                 federationProperties.getCircuitBreakerFailureThreshold(),
                 federationProperties.getCircuitBreakerResetMs());
@@ -120,17 +118,10 @@ public class ResourceIdCreator implements IdCreator {
             return false;
         }
         try {
-            federationWebClient.get()
-                    .uri("/{path}/{prefix}/{suffix}", federationPath, prefixAndSuffix[0], prefixAndSuffix[1])
-                    .retrieve()
-                    .toBodilessEntity()
-                    .timeout(Duration.ofMillis(federationProperties.getTimeoutMs()))
-                    .block();
+            boolean exists = searchAggregatorClient.getById(federationPath, prefixAndSuffix[0], prefixAndSuffix[1])
+                    .isPresent();
             circuitBreaker.onSuccess();
-            return true;
-        } catch (WebClientResponseException.NotFound e) {
-            circuitBreaker.onSuccess();
-            return false;
+            return exists;
         } catch (Exception e) {
             circuitBreaker.onFailure("duplicate-id check for id " + id, e);
             return false;
