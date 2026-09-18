@@ -20,7 +20,6 @@ import gr.uoa.di.madgik.registry.domain.ScoredResult;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationDuplicateCheckProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
-import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -32,8 +31,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Fans a candidate resource out to the EOSC-Beyond federated search aggregator's cross-node
@@ -49,20 +46,22 @@ public class FederationSimilarityClient {
 
     private static final Logger logger = LoggerFactory.getLogger(FederationSimilarityClient.class);
 
-    private final Map<ResourceTypes, ResourceProperties> resourceProperties;
+    private final CatalogueProperties catalogueProperties;
     private final FederationDuplicateCheckProperties federationProperties;
     private final WebClient federationWebClient;
 
-    private final AtomicInteger consecutiveFederationFailures = new AtomicInteger(0);
-    private final AtomicLong federationCircuitOpenUntilMillis = new AtomicLong(0);
+    private final CircuitBreaker circuitBreaker;
 
     public FederationSimilarityClient(CatalogueProperties catalogueProperties,
                                       FederationDuplicateCheckProperties federationProperties) {
-        this.resourceProperties = catalogueProperties.getResources();
+        this.catalogueProperties = catalogueProperties;
         this.federationProperties = federationProperties;
         this.federationWebClient = WebClient.builder()
                 .baseUrl(federationProperties.getSearchUrl())
                 .build();
+        this.circuitBreaker = new CircuitBreaker(
+                federationProperties.getCircuitBreakerFailureThreshold(),
+                federationProperties.getCircuitBreakerResetMs());
     }
 
     /**
@@ -82,7 +81,7 @@ public class FederationSimilarityClient {
         if (federationPath == null) {
             return Collections.emptyList();
         }
-        if (isFederationCircuitOpen()) {
+        if (circuitBreaker.isOpen()) {
             logger.debug("Federation similarity check circuit is open; skipping check for resourceType {}", resourceType);
             return Collections.emptyList();
         }
@@ -98,38 +97,21 @@ public class FederationSimilarityClient {
                     })
                     .timeout(Duration.ofMillis(federationProperties.getTimeoutMs()))
                     .block();
-            onFederationCallSuccess();
+            circuitBreaker.onSuccess();
             return results != null ? results : Collections.emptyList();
         } catch (Exception e) {
-            onFederationCallFailure(resourceType, e);
+            circuitBreaker.onFailure("similarity check for resourceType " + resourceType, e);
             return Collections.emptyList();
         }
     }
 
     private String federationPathFor(String resourceType) {
         try {
-            return resourceProperties.get(ResourceTypes.valueOf(resourceType.toUpperCase())).getFederationPath();
+            ResourceProperties rp = catalogueProperties.getResourcePropertiesForResourceType(resourceType);
+            return rp != null ? rp.getFederationPath() : null;
         } catch (IllegalArgumentException e) {
             return null;
         }
     }
 
-    private boolean isFederationCircuitOpen() {
-        return System.currentTimeMillis() < federationCircuitOpenUntilMillis.get();
-    }
-
-    private void onFederationCallSuccess() {
-        consecutiveFederationFailures.set(0);
-    }
-
-    private void onFederationCallFailure(String resourceType, Exception e) {
-        logger.warn("Federation similarity check failed for resourceType {}: {}", resourceType, e.getMessage());
-        int failures = consecutiveFederationFailures.incrementAndGet();
-        if (failures >= federationProperties.getCircuitBreakerFailureThreshold()) {
-            long resetMs = federationProperties.getCircuitBreakerResetMs();
-            federationCircuitOpenUntilMillis.set(System.currentTimeMillis() + resetMs);
-            logger.warn("Federation similarity check circuit breaker opened after {} consecutive " +
-                    "failures; skipping checks for {} ms", failures, resetMs);
-        }
-    }
 }

@@ -32,8 +32,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 /**
@@ -56,8 +54,7 @@ public class FederationResourceClient {
     private final FederationCrossLinkageProperties properties;
     private final WebClient federationWebClient;
 
-    private final AtomicInteger consecutiveFailures = new AtomicInteger(0);
-    private final AtomicLong circuitOpenUntilMillis = new AtomicLong(0);
+    private final CircuitBreaker circuitBreaker;
 
     public FederationResourceClient(FederationCrossLinkageProperties properties) {
         this.properties = properties;
@@ -66,6 +63,9 @@ public class FederationResourceClient {
                 .codecs(configurer -> configurer.defaultCodecs()
                         .maxInMemorySize(properties.getMaxInMemorySizeBytes()))
                 .build();
+        this.circuitBreaker = new CircuitBreaker(
+                properties.getCircuitBreakerFailureThreshold(),
+                properties.getCircuitBreakerResetMs());
     }
 
     public boolean isEnabled() {
@@ -223,7 +223,7 @@ public class FederationResourceClient {
     }
 
     private boolean isCircuitOpen() {
-        if (System.currentTimeMillis() < circuitOpenUntilMillis.get()) {
+        if (circuitBreaker.isOpen()) {
             logger.debug("Federation cross-linkage circuit is open; skipping call");
             return true;
         }
@@ -231,17 +231,10 @@ public class FederationResourceClient {
     }
 
     private void onSuccess() {
-        consecutiveFailures.set(0);
+        circuitBreaker.onSuccess();
     }
 
     private void onFailure(String op, Exception e) {
-        logger.warn("Federation cross-linkage call {} failed: {}", op, e.getMessage());
-        int failures = consecutiveFailures.incrementAndGet();
-        if (failures >= properties.getCircuitBreakerFailureThreshold()) {
-            long resetMs = properties.getCircuitBreakerResetMs();
-            circuitOpenUntilMillis.set(System.currentTimeMillis() + resetMs);
-            logger.warn("Federation cross-linkage circuit breaker opened after {} consecutive "
-                    + "failures; skipping calls for {} ms", failures, resetMs);
-        }
+        circuitBreaker.onFailure(op, e);
     }
 }
