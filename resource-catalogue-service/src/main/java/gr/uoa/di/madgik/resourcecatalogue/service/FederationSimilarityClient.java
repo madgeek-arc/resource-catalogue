@@ -23,6 +23,7 @@ import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationDuplicateC
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -52,6 +53,7 @@ public class FederationSimilarityClient {
 
     private final CircuitBreaker circuitBreaker;
 
+    @Autowired
     public FederationSimilarityClient(CatalogueProperties catalogueProperties,
                                       FederationDuplicateCheckProperties federationProperties) {
         this(catalogueProperties, federationProperties, new SearchAggregatorClient(

@@ -21,6 +21,7 @@ import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationCrossLinkageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -52,6 +53,7 @@ public class FederationResourceClient {
 
     private final CircuitBreaker circuitBreaker;
 
+    @Autowired
     public FederationResourceClient(FederationCrossLinkageProperties properties) {
         this(properties, new SearchAggregatorClient(
                 properties.getSearchUrl(), Duration.ofMillis(properties.getTimeoutMs())));
