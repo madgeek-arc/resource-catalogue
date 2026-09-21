@@ -116,29 +116,15 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         genericResourceService.delete(getResourceTypeName(), bundle.getId());
     }
 
-    public List<ConfigurationTemplateInstanceBundle> getByResourceId(String id) {
-        List<ConfigurationTemplateInstanceBundle> ret = new ArrayList<>();
-        FacetFilter ff = new FacetFilter();
-        ff.setQuantity(10000);
-        List<ConfigurationTemplateInstanceBundle> list = getAll(ff, null).getResults();
-        for (ConfigurationTemplateInstanceBundle bundle : list) {
-            if (bundle.getConfigurationTemplateInstance().get("resourceId").equals(id)) {
-                ret.add(bundle);
-            }
-        }
-        return ret;
-    }
-
     public List<LinkedHashMap<String, Object>> getByConfigurationTemplateId(String id) {
-        List<LinkedHashMap<String, Object>> ret = new ArrayList<>();
         FacetFilter ff = new FacetFilter();
         ff.setQuantity(10000);
         ff.addFilter("published", false);
+        ff.addFilter("configuration_template_id", id);
         List<ConfigurationTemplateInstanceBundle> list = getAll(ff, null).getResults();
+        List<LinkedHashMap<String, Object>> ret = new ArrayList<>();
         for (ConfigurationTemplateInstanceBundle bundle : list) {
-            if (bundle.getConfigurationTemplateInstance().get("configurationTemplateId").equals(id)) {
-                ret.add(bundle.getConfigurationTemplateInstance());
-            }
+            ret.add(bundle.getConfigurationTemplateInstance());
         }
         return ret;
     }

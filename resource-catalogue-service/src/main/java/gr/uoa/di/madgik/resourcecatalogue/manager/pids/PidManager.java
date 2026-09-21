@@ -45,8 +45,7 @@ public class PidManager implements PidService {
     @Override
     public Bundle get(String prefix, String suffix) {
         String pid = prefix + "/" + suffix;
-        String resourceType = catalogueProperties.getResourceTypeFromPrefix(prefix);
-        if (resourceType != null) {
+        for (String resourceType : catalogueProperties.getResourceTypesFromPrefix(prefix)) {
             FacetFilter ff = new FacetFilter();
             ff.setQuantity(10000);
             ff.setResourceType(resourceType);
@@ -59,8 +58,9 @@ public class PidManager implements PidService {
         return null;
     }
 
-    public void register(String pid, List<String> endpoints) {
-        pidIssuer.postPID(pid, endpoints);
+    public void register(Bundle bundle, List<String> endpoints) {
+        String resourceType = BundleResourceTypes.resolve(bundle);
+        pidIssuer.postPID(bundle, resourceType, endpoints);
     }
 
     public void delete(String pid) {

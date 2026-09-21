@@ -88,6 +88,7 @@ public class LoggingInfo {
         REJECTED("rejected"),
         // Update
         UPDATED("updated"),
+        MOVED("moved"),
         ACTIVATED("activated"),
         DEACTIVATED("deactivated"),
         SUSPENDED("suspended"),

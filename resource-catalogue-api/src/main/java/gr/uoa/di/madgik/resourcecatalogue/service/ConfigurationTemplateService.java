@@ -27,10 +27,12 @@ import java.util.Map;
 public interface ConfigurationTemplateService extends ResourceCatalogueGenericService<ConfigurationTemplateBundle> {
 
     /**
-     * Return all Configuration Templates under a specific Interoperability Record ID
+     * Return all Configuration Templates under a specific Interoperability Record ID, from the
+     * private layer. The link is keyed by the Interoperability Record's local id - the only id
+     * form a node deals in for its own CUD operations.
      *
      * @param params                   search parameters
-     * @param interoperabilityRecordId Interoperability Record ID
+     * @param interoperabilityRecordId Interoperability Record local id
      * @return {@link Paging<ConfigurationTemplateBundle>}
      */
     Paging<ConfigurationTemplateBundle> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,

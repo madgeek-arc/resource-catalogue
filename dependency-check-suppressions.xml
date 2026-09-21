@@ -39,6 +39,105 @@
         <cve>CVE-2026-39883</cve>
     </suppress>
 
+    <!-- ===== co.elastic.clients (Java REST API clients: elasticsearch-java, elasticsearch-rest5-client) =====
+         NVD matches the Elasticsearch *server* CPEs (cpe:2.3:a:elastic:elasticsearch and
+         cpe:2.3:a:elasticsearch:elasticsearch) against these co.elastic.clients artifacts
+         purely because Elastic ships the clients with the same version number as the server
+         they target. Both are REST API wrappers with no native code, no ML inference engine,
+         and no server-side components, so server-only CVEs cannot apply to them.
+         dependency-check requires an exact (non-wildcard) CPE match for <cpe> suppression
+         rules, so each affected version needs its own entry below as new server CVEs get
+         misattributed to these jars; add another block here (bump the version) when that
+         next happens rather than reaching for a blanket <cpe> wildcard, which the plugin
+         silently ignores (zero matches). -->
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-72642: heap corruption (CWE-823) in the Elasticsearch server's native
+            ML model inference process when evaluating an uploaded model. Requires privileges
+            to upload/deploy trained models to the server; co.elastic.clients:elasticsearch-java
+            is a REST client with no native code or inference engine, so it cannot be affected.
+            False positive from CPE/version-number overlap between client and server releases.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-java@.*$</packageUrl>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-72642</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-72642: same false positive as above (heap corruption in the server's
+            native ML inference process), misattributed to co.elastic.clients:elasticsearch-rest5-client,
+            which is the low-level HTTP transport used by elasticsearch-java and likewise has
+            no native code or inference engine.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-rest5-client@.*$</packageUrl>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-72642</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-72649: deserialization of untrusted data (CWE-502) in the Elasticsearch
+            server's machine learning component, leading to RCE via object injection when a
+            crafted trained model artifact is deployed. Requires an authenticated user with
+            privileges to create and deploy trained models on the server (affected server
+            versions: < 8.19.20, 9.0.0-9.4.4, 9.5.0). co.elastic.clients:elasticsearch-java
+            is a REST client with no ML component or model-loading logic, so it cannot be
+            affected. False positive from CPE/version-number overlap between client and server.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-java@.*$</packageUrl>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-72649</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-72649: same false positive as above (deserialization RCE in the server's
+            ML component), misattributed to co.elastic.clients:elasticsearch-rest5-client,
+            which is the low-level HTTP transport used by elasticsearch-java and likewise has
+            no ML component or model-loading logic.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-rest5-client@.*$</packageUrl>
+        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
+        <cve>CVE-2026-72649</cve>
+    </suppress>
+
+    <!-- ===== org.springframework.ai (all spring-ai-* 1.1.8 artifacts) =====
+         CVE-2026-59318: prompt-injection authorization bypass in DefaultToolCallingManager
+         (a tool call not advertised to the current request can still be dispatched). Only
+         reachable if the app wires up Spring AI's chat-client/tool-calling support. This
+         project only pulls spring-ai-starter-model-transformers (local ONNX embedding
+         transformers, transitively via registry-starter-service) for embeddings/search
+         similarity — no ChatClient or tool-calling starter is on the classpath, so the
+         vulnerable code path is not reachable. Spring's own advisory
+         (spring.io/security/cve-2026-59318) rates this 6.5 MEDIUM (AC:H, PR:L, UI:R,
+         requires an authenticated tool-calling flow); NVD's CVSS of 9.8 CRITICAL used by
+         this scanner has a mismatched vector (AC:L, PR:N, UI:N) that does not match the
+         vendor's own analysis. NVD's CPE (cpe:2.3:a:vmware:spring_ai:1.1.8) matches the
+         whole 1.1.8 release rather than just the spring-ai-model artifact that actually
+         contains DefaultToolCallingManager, so every spring-ai-* 1.1.8 jar on the classpath
+         (model, commons, template-st, transformers, autoconfigure-*, ...) gets flagged —
+         hence the groupId-wide regex below instead of one entry per artifact. Public OSS
+         fix is 2.0.1 (major version bump); the 1.1.x-line backport (1.1.9) exists only
+         under HeroDevs paid Enterprise support, not on Maven Central. Revisit when a public
+         1.1.x fix ships or if this app starts using Spring AI tool calling. -->
+    <suppress>
+        <notes><![CDATA[
+            CVE-2026-59318: prompt-injection tool-dispatch bypass in DefaultToolCallingManager.
+            Not reachable — this app only uses spring-ai-starter-model-transformers (local
+            embedding transformers) via registry-starter-service; no ChatClient/tool-calling
+            starter is present. Vendor CVSS is 6.5 MEDIUM; NVD's 9.8 CRITICAL score used by
+            dependency-check has a mismatched attack vector versus Spring's own advisory. No
+            public (non-Enterprise) fix exists for the 1.1.x line as of 2026-09-17; fixed
+            upstream in 2.0.1, a major version bump not otherwise compatible with the other
+            spring-ai-* 1.1.8 artifacts pinned by registry-starter-service. Applies to every
+            spring-ai-* 1.1.8 artifact since NVD's CPE match is release-wide, not per-module.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.ai/.*@.*$</packageUrl>
+        <cve>CVE-2026-59318</cve>
+    </suppress>
+
     <!-- ===== swagger-ui (DOMPurify) =====
          CVE-2026-41238, CVE-2026-41239, CVE-2026-41240: DOMPurify 3.3.2 bundled in
          swagger-ui 5.32.2 (shipped with springdoc-openapi 3.0.3). The fix is DOMPurify

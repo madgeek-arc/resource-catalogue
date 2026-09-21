@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.service.ResourceTypeService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
@@ -82,7 +83,7 @@ public class CatalogueController extends ResourceCatalogueGenericController<Cata
                         TrainingResourceService trainingResourceService,
                         InteroperabilityRecordService guidelineService,
                         DeployableApplicationService deployableApplicationService) {
-        super(catalogueService, "Catalogue");
+        super(catalogueService, "catalogue");
         this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;

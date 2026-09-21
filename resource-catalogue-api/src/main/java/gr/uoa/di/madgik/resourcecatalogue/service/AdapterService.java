@@ -17,7 +17,21 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
+import org.springframework.security.core.Authentication;
 
 public interface AdapterService extends ResourceCatalogueGenericService<AdapterBundle>,
         EOSCResourceService<AdapterBundle>, DraftService<AdapterBundle> {
+
+    /**
+     * Moves an Adapter to a different owner Organisation. The target Organisation must exist in the
+     * Adapter's catalogue and be both approved and active. The change is propagated to the public
+     * Adapter and its PID record, and shifts administrative access to the new Organisation's admins.
+     *
+     * @param id         the Adapter id
+     * @param newOwnerId the id of the Organisation to move the Adapter to
+     * @param comment    optional free-text comment stored on the update logging-info entry
+     * @param auth       the authentication of the caller
+     * @return the updated Adapter bundle
+     */
+    AdapterBundle changeResourceOwner(String id, String newOwnerId, String comment, Authentication auth);
 }

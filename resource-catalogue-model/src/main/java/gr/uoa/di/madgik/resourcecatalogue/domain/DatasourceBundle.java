@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 public class DatasourceBundle extends Bundle {
 
@@ -49,5 +50,19 @@ public class DatasourceBundle extends Bundle {
 
     public void setOriginalOpenAIREId(String originalOpenAIREId) {
         this.originalOpenAIREId = originalOpenAIREId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        DatasourceBundle that = (DatasourceBundle) o;
+        return Objects.equals(originalOpenAIREId, that.originalOpenAIREId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), originalOpenAIREId);
     }
 }

@@ -17,6 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.domain;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 public class OrganisationBundle extends Bundle {
 
@@ -46,5 +47,19 @@ public class OrganisationBundle extends Bundle {
 
     public void setTemplateStatus(String templateStatus) {
         this.templateStatus = templateStatus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        OrganisationBundle that = (OrganisationBundle) o;
+        return Objects.equals(templateStatus, that.templateStatus);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), templateStatus);
     }
 }
