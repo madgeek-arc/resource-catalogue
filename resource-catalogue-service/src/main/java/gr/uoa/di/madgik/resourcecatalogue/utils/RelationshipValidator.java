@@ -91,10 +91,10 @@ public class RelationshipValidator {
         RelatedIds now = extractRelatedIds(updated);
         RelatedIds alreadyValidated = extractRelatedIds(existing);
 
-        validateProviders(newValues(now.serviceProviders(), alreadyValidated.serviceProviders()), now.catalogueId());
-        validateServices(newValues(now.eoscRelatedServices(), alreadyValidated.eoscRelatedServices()), now.catalogueId());
+        validateProviders(idsToValidate(now.serviceProviders(), alreadyValidated.serviceProviders()), now.catalogueId());
+        validateServices(idsToValidate(now.eoscRelatedServices(), alreadyValidated.eoscRelatedServices()), now.catalogueId());
         validateInteroperabilityRecords(
-                newValues(now.interoperabilityRecordIds(), alreadyValidated.interoperabilityRecordIds()),
+                idsToValidate(now.interoperabilityRecordIds(), alreadyValidated.interoperabilityRecordIds()),
                 now.catalogueId());
     }
 
@@ -142,7 +142,7 @@ public class RelationshipValidator {
     /**
      * Non-blank ids in {@code current} that are not already in {@code alreadyValidated}.
      */
-    private static List<String> newValues(List<String> current, List<String> alreadyValidated) {
+    private static List<String> idsToValidate(List<String> current, List<String> alreadyValidated) {
         Set<String> known = new HashSet<>(alreadyValidated);
         List<String> out = new ArrayList<>();
         for (String value : current) {
