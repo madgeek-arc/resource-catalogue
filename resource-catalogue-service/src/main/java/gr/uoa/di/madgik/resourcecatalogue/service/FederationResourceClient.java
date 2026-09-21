@@ -17,12 +17,15 @@
 package gr.uoa.di.madgik.resourcecatalogue.service;
 
 import gr.uoa.di.madgik.federation.search.aggregator.client.SearchAggregatorClient;
+import gr.uoa.di.madgik.federation.search.aggregator.core.AggregatedResult;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationCrossLinkageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -125,15 +128,19 @@ public class FederationResourceClient {
     }
 
     /**
-     * Fetches all Configuration Templates of the given Interoperability Record from whichever
-     * node owns it.
+     * Fetches all Configuration Templates across the federation that reference the given
+     * Interoperability Record, by browsing the {@code configurationTemplates} collection filtered
+     * on the indexed {@code interoperability_record_id} field.
      */
     public Paging<Map<String, Object>> getConfigurationTemplatesByInteroperabilityRecordId(String prefix, String suffix) {
         if (!isEnabled() || isCircuitOpen()) {
             return new Paging<>();
         }
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("interoperability_record_id", prefix + "/" + suffix);
         return call("getConfigurationTemplatesByInteroperabilityRecordId", new Paging<>(),
-                () -> searchAggregatorClient.getConfigurationTemplatesByInteroperabilityRecordId(prefix, suffix));
+                () -> searchAggregatorClient.browse("configurationTemplates", params)
+                        .map(AggregatedResult::result));
     }
 
     /**
