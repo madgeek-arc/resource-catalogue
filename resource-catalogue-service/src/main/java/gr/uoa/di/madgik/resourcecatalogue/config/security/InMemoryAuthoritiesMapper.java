@@ -77,42 +77,31 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     @PostConstruct
     void createAdminsOnStartup() {
-        mergeRoles(adminsAndEpot, catalogueProperties.getOnboardingTeam()
-                .stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        a -> new SimpleGrantedAuthority("ROLE_EPOT"))
-                ));
-
-        mergeRoles(adminsAndEpot, catalogueProperties.getAdmins()
-                .stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
-                ));
+        updateAdminsAndEpot();
         updateAuthorities();
     }
 
     @Override
     public boolean isAdmin(String email) {
-        if (!adminsAndEpot.containsKey(email)) {
-            return false;
-        } else {
-            return adminsAndEpot.get(email)
-                    .stream()
-                    .anyMatch(simpleGrantedAuthority -> simpleGrantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+        lock.lock();
+        try {
+            Set<SimpleGrantedAuthority> roles = adminsAndEpot.get(email);
+            return roles != null
+                    && roles.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
     public boolean isEPOT(String email) {
-        if (!adminsAndEpot.containsKey(email)) {
-            return false;
-        } else {
-            return adminsAndEpot.get(email).stream()
-                    .anyMatch(simpleGrantedAuthority -> simpleGrantedAuthority.getAuthority().equals("ROLE_EPOT"));
+        lock.lock();
+        try {
+            Set<SimpleGrantedAuthority> roles = adminsAndEpot.get(email);
+            return roles != null
+                    && roles.stream().anyMatch(a -> a.getAuthority().equals("ROLE_EPOT"));
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -171,8 +160,14 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         } finally {
             lock.unlock();
         }
-        if (adminsAndEpot.containsKey(email.toLowerCase())) {
-            authorities.addAll(adminsAndEpot.get(email.toLowerCase()));
+        lock.lock();
+        try {
+            Set<SimpleGrantedAuthority> roles = adminsAndEpot.get(email.toLowerCase());
+            if (roles != null) {
+                authorities.addAll(roles);
+            }
+        } finally {
+            lock.unlock();
         }
         logger.debug("Get Authorities took {} ms", (System.nanoTime() - time) / 1000000);
         return authorities;
@@ -234,20 +229,28 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     }
 
     private void updateAdminsAndEpot() {
-        adminsAndEpot.clear();
-        mergeRoles(adminsAndEpot, catalogueProperties.getOnboardingTeam()
+        Map<String, Set<SimpleGrantedAuthority>> updated = new HashMap<>();
+        mergeRoles(updated, catalogueProperties.getOnboardingTeam()
                 .stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         e -> new SimpleGrantedAuthority("ROLE_EPOT"))
                 ));
-        mergeRoles(adminsAndEpot, catalogueProperties.getAdmins()
+        mergeRoles(updated, catalogueProperties.getAdmins()
                 .stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
                 ));
+        lock.lock();
+        try {
+            adminsAndEpot.clear();
+            adminsAndEpot.putAll(updated);
+        } finally {
+            lock.unlock();
+        }
+        logger.info("Admins and EPOT roles updated: {}", updated);
     }
 }
