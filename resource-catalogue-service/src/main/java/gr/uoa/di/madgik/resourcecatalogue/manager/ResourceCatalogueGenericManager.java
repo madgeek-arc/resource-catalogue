@@ -98,7 +98,7 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
                 new SearchService.KeyValue("resource_internal_id", catalogueId));
     }
 
-    private void setNodePid(T bundle) {
+    protected void setNodePid(T bundle) {
         Object resourceNodePid = bundle.getPayload().get("nodePID");
         if (nodeProperties.getPid().isFixed() || resourceNodePid == null || resourceNodePid.toString().isBlank()) {
             bundle.getPayload().put("nodePID", nodeProperties.getPid().getValue());

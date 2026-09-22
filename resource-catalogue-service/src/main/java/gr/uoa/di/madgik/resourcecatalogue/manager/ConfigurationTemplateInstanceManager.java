@@ -77,6 +77,7 @@ public class ConfigurationTemplateInstanceManager extends ResourceCatalogueGener
         cti.setCatalogueId(null);
         this.createIdentifiers(cti, getResourceTypeName(), false);
         cti.setId(cti.getIdentifiers().getOriginalId());
+        setNodePid(cti);
         //FIXME: should pass validation
         ConfigurationTemplateInstanceBundle ret = genericResourceService.add(getResourceTypeName(), cti, false);
         return ret;
