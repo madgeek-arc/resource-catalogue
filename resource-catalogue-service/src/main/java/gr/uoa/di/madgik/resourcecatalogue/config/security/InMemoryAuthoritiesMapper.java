@@ -24,7 +24,6 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.User;
 import gr.uoa.di.madgik.resourcecatalogue.service.AuthoritiesMapper;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
-import gr.uoa.di.madgik.resourcecatalogue.service.SecurityService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,26 +49,19 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(InMemoryAuthoritiesMapper.class);
     private Set<String> providerUsers = new HashSet<>();
-    private Set<String> catalogueUsers = new HashSet<>();
     private final Map<String, Set<SimpleGrantedAuthority>> adminsAndEpot = new HashMap<>();
 
     private final OrganisationService organisationService;
 
-//    private final CatalogueService catalogueService;
-    private final SecurityService securityService;
     private final CatalogueProperties catalogueProperties;
 
 
     private final ReentrantLock lock = new ReentrantLock();
 
     public InMemoryAuthoritiesMapper(CatalogueProperties catalogueProperties,
-                                     OrganisationService manager,
-//                                     CatalogueService catalogueService,
-                                     SecurityService securityService) {
+                                     OrganisationService manager) {
         this.catalogueProperties = catalogueProperties;
         this.organisationService = manager;
-//        this.catalogueService = catalogueService;
-        this.securityService = securityService;
         if (catalogueProperties.getAdmins().isEmpty()) {
             throw new ServiceException("No Admins Provided");
         }
@@ -77,42 +69,31 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
 
     @PostConstruct
     void createAdminsOnStartup() {
-        mergeRoles(adminsAndEpot, catalogueProperties.getOnboardingTeam()
-                .stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        a -> new SimpleGrantedAuthority("ROLE_EPOT"))
-                ));
-
-        mergeRoles(adminsAndEpot, catalogueProperties.getAdmins()
-                .stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
-                ));
+        updateAdminsAndEpot();
         updateAuthorities();
     }
 
     @Override
     public boolean isAdmin(String email) {
-        if (!adminsAndEpot.containsKey(email)) {
-            return false;
-        } else {
-            return adminsAndEpot.get(email)
-                    .stream()
-                    .anyMatch(simpleGrantedAuthority -> simpleGrantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+        lock.lock();
+        try {
+            Set<SimpleGrantedAuthority> roles = adminsAndEpot.get(email);
+            return roles != null
+                    && roles.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
     public boolean isEPOT(String email) {
-        if (!adminsAndEpot.containsKey(email)) {
-            return false;
-        } else {
-            return adminsAndEpot.get(email).stream()
-                    .anyMatch(simpleGrantedAuthority -> simpleGrantedAuthority.getAuthority().equals("ROLE_EPOT"));
+        lock.lock();
+        try {
+            Set<SimpleGrantedAuthority> roles = adminsAndEpot.get(email);
+            return roles != null
+                    && roles.stream().anyMatch(a -> a.getAuthority().equals("ROLE_EPOT"));
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -130,18 +111,8 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
             logger.warn("There are no Provider entries in DB");
         }
 
-        //FIXME
-//        List<CatalogueBundle> catalogues = new ArrayList<>();
-//        ff.getFilter().remove("published");
-//        try {
-//            catalogues.addAll(catalogueService.getAll(ff, securityService.getAdminAccess()).getResults());
-//        } catch (Exception e) {
-//            logger.warn("There are no Catalogue entries in DB");
-//        }
-
         lock.lock();
         providerUsers = getProviderUserEmails(providers);
-//        catalogueUsers = getCatalogueUserEmails(catalogues); //FIXME
         lock.unlock();
         logger.debug("Update Authorities took {} ms", (System.nanoTime() - time) / 1000000);
     }
@@ -162,17 +133,20 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
             if (providerUsers.contains(email.toLowerCase())) {
                 authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));
             }
-            if (catalogueUsers.contains(email.toLowerCase())) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_CATALOGUE_ADMIN"));
-            }
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
             throw new RuntimeException(e);
         } finally {
             lock.unlock();
         }
-        if (adminsAndEpot.containsKey(email.toLowerCase())) {
-            authorities.addAll(adminsAndEpot.get(email.toLowerCase()));
+        lock.lock();
+        try {
+            Set<SimpleGrantedAuthority> roles = adminsAndEpot.get(email.toLowerCase());
+            if (roles != null) {
+                authorities.addAll(roles);
+            }
+        } finally {
+            lock.unlock();
         }
         logger.debug("Get Authorities took {} ms", (System.nanoTime() - time) / 1000000);
         return authorities;
@@ -205,18 +179,6 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         return user;
     }
 
-      //FIXME
-//    private Set<String> getCatalogueUserEmails(List<CatalogueBundle> catalogueBundles) {
-//        return catalogueBundles
-//                .stream()
-//                .flatMap(p -> (p.getCatalogue().getUsers() != null ? p.getCatalogue().getUsers() : new ArrayList<User>())
-//                        .stream()
-//                        .filter(Objects::nonNull)
-//                        .map(User::getEmail)
-//                        .map(String::toLowerCase))
-//                .collect(Collectors.toSet());
-//    }
-
     private void mergeRoles(Map<String, Set<SimpleGrantedAuthority>> roles, Map<String, SimpleGrantedAuthority> newRoles) {
         for (Map.Entry<String, SimpleGrantedAuthority> role : newRoles.entrySet()) {
             roles.putIfAbsent(role.getKey(), new HashSet<>());
@@ -234,20 +196,28 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
     }
 
     private void updateAdminsAndEpot() {
-        adminsAndEpot.clear();
-        mergeRoles(adminsAndEpot, catalogueProperties.getOnboardingTeam()
+        Map<String, Set<SimpleGrantedAuthority>> updated = new HashMap<>();
+        mergeRoles(updated, catalogueProperties.getOnboardingTeam()
                 .stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         e -> new SimpleGrantedAuthority("ROLE_EPOT"))
                 ));
-        mergeRoles(adminsAndEpot, catalogueProperties.getAdmins()
+        mergeRoles(updated, catalogueProperties.getAdmins()
                 .stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         a -> new SimpleGrantedAuthority("ROLE_ADMIN"))
                 ));
+        lock.lock();
+        try {
+            adminsAndEpot.clear();
+            adminsAndEpot.putAll(updated);
+        } finally {
+            lock.unlock();
+        }
+        logger.info("Admins and EPOT roles updated: {}", updated);
     }
 }
