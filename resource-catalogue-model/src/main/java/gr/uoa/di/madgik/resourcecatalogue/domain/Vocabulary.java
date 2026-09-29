@@ -49,7 +49,6 @@ public class Vocabulary implements Identifiable {
 
     public enum Type {
         // Generic
-        NODE("Node"),
         CREDIT("Credit"),
         SPDX_LICENSE("Spdx license"),
         // States

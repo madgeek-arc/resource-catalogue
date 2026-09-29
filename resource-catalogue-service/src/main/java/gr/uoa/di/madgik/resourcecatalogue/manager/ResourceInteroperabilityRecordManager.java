@@ -113,6 +113,7 @@ public class ResourceInteroperabilityRecordManager extends ResourceCatalogueGene
         bundle.setCatalogueId(null);
         this.createIdentifiers(bundle, getResourceTypeName(), false);
         bundle.setId(bundle.getIdentifiers().getOriginalId());
+        setNodePid(bundle);
 
         ResourceInteroperabilityRecordBundle ret = genericResourceService.add(getResourceTypeName(), bundle);
         return ret;
