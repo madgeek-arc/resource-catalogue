@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.controllers;
 import gr.uoa.di.madgik.catalogue.domain.ModelConfiguration;
 import gr.uoa.di.madgik.catalogue.domain.Section;
 import gr.uoa.di.madgik.catalogue.domain.Series;
+import gr.uoa.di.madgik.catalogue.domain.UiField;
 import gr.uoa.di.madgik.catalogue.service.ModelService;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -115,6 +117,38 @@ public class WizardController {
 
     private String contentHash(gr.uoa.di.madgik.catalogue.domain.Model m) {
         return sha256Hex(objectMapper.writeValueAsString(ModelContent.of(m)));
+    }
+
+    /**
+     * {@code UiField.parentId}/{@code parent} are derived, server-assigned values: {@code
+     * DefaultModelService} overwrites them from the containing field's id/name on every add/update.
+     * A model file that leaves them unset (or wrong) on a deeply nested field would otherwise hash
+     * differently from the persisted copy forever, permanently showing as CHANGED. Mirror that
+     * derivation here before hashing so the comparison reflects what actually gets persisted.
+     */
+    private void normalizeDerivedFields(gr.uoa.di.madgik.catalogue.domain.Model model) {
+        if (model.getSections() != null) {
+            model.getSections().forEach(this::normalizeSectionFields);
+        }
+    }
+
+    private void normalizeSectionFields(Section section) {
+        if (section.getSubSections() != null) {
+            section.getSubSections().forEach(this::normalizeSectionFields);
+        }
+        if (section.getFields() != null) {
+            section.getFields().forEach(this::normalizeFieldParents);
+        }
+    }
+
+    private void normalizeFieldParents(UiField parent) {
+        if (parent != null && parent.getSubFields() != null) {
+            for (UiField field : parent.getSubFields()) {
+                field.setParentId(parent.getId());
+                field.setParent(parent.getName());
+                normalizeFieldParents(field);
+            }
+        }
     }
 
     private static String sha256Hex(String input) {
@@ -224,6 +258,7 @@ public class WizardController {
         for (Resource resource : modelFiles) {
             try {
                 gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(resource.getInputStream(), gr.uoa.di.madgik.catalogue.domain.Model.class);
+                normalizeDerivedFields(m);
 
                 gr.uoa.di.madgik.catalogue.domain.Model existing = tryGetModel(m.getId());
                 LoadStatus status;
@@ -250,13 +285,16 @@ public class WizardController {
 
     @Operation(summary = "Load Models")
     @PostMapping("/step2/loadModels")
-    public String loadModels(Authentication authentication) throws IOException {
+    public String loadModels(Authentication authentication, RedirectAttributes redirectAttributes) throws IOException {
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource[] modelFiles = resolver.getResources("classpath:models/*.json");
+
+        Map<String, String> modelErrors = new TreeMap<>();
 
         for (Resource resource : modelFiles) {
             try {
                 gr.uoa.di.madgik.catalogue.domain.Model m = objectMapper.readValue(resource.getInputStream(), gr.uoa.di.madgik.catalogue.domain.Model.class);
+                normalizeDerivedFields(m);
                 gr.uoa.di.madgik.catalogue.domain.Model existing = tryGetModel(m.getId());
 
                 if (existing == null) {
@@ -271,7 +309,12 @@ public class WizardController {
 
             } catch (Exception e) {
                 logger.error("Failed to process model file [{}]: {}", resource.getFilename(), e.getMessage());
+                modelErrors.put(resource.getFilename(), e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
             }
+        }
+
+        if (!modelErrors.isEmpty()) {
+            redirectAttributes.addFlashAttribute("modelErrors", modelErrors);
         }
 
         return "redirect:/wizard/step2";
