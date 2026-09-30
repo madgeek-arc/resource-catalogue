@@ -161,10 +161,10 @@
       "embeddingWeight": 1.0
     },
     {
-      "label": "Access Type",
-      "multivalued": true,
+      "label": "Access Types",
+      "multivalued": false,
       "name": "access_types",
-      "path": "$.datasource.accessTypes[*]",
+      "path": "$.datasource.accessTypes",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
@@ -244,7 +244,7 @@
       "label": "Submission Policy URL",
       "multivalued": false,
       "name": "submission_policy_url",
-      "path": "$.datasource.submissionPolicyUrl",
+      "path": "$.datasource.submissionPolicyURL",
       "type": "java.lang.String",
       "embeddingWeight": 0.0
     },
@@ -252,7 +252,7 @@
       "label": "Preservation Policy URL",
       "multivalued": false,
       "name": "preservation_policy_url",
-      "path": "$.datasource.preservationPolicyUrl",
+      "path": "$.datasource.preservationPolicyURL",
       "type": "java.lang.String",
       "embeddingWeight": 0.0
     },

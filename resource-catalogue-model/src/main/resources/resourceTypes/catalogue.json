@@ -159,10 +159,10 @@
       "embeddingWeight": 1.0
     },
     {
-      "label": "Access Type",
-      "multivalued": true,
+      "label": "Access Types",
+      "multivalued": false,
       "name": "access_types",
-      "path": "$.catalogue.accessTypes[*]",
+      "path": "$.catalogue.accessTypes",
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",

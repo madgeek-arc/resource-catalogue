@@ -98,7 +98,7 @@
       "label": "Linked Resource Type",
       "multivalued": false,
       "name": "linked_resource_type",
-      "path": "$.adapter.linkedResource.type",
+      "path": "$.adapter.linkedResource.resource_type",
       "type": "java.lang.String",
       "embeddingWeight": 0.0
     },
@@ -111,10 +111,10 @@
       "embeddingWeight": 0.0
     },
     {
-      "label": "Software Repository",
+      "label": "Repository",
       "multivalued": false,
-      "name": "software_repository",
-      "path": "$.adapter.softwareRepository",
+      "name": "repository",
+      "path": "$.adapter.repository",
       "type": "java.lang.String",
       "embeddingWeight": 0.0
     },
@@ -159,7 +159,7 @@
       "label": "Changelog",
       "multivalued": false,
       "name": "changelog",
-      "path": "$.adapter.changelog",
+      "path": "$.adapter.changeLog",
       "type": "java.lang.String",
       "embeddingWeight": 0.0
     },
@@ -190,14 +190,6 @@
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
       "searchCapabilities": ["KEYWORD"],
-      "embeddingWeight": 0.0
-    },
-    {
-      "label": null,
-      "multivalued": true,
-      "name": "users",
-      "path": "$.adapter.users[*].email",
-      "type": "java.lang.String",
       "embeddingWeight": 0.0
     },
     {
