@@ -121,26 +121,6 @@
       "embeddingWeight": 0.0
     },
     {
-      "label": "Scientific Domain",
-      "multivalued": true,
-      "name": "scientific_domains",
-      "path": "$.organisation.scientificDomains[*].scientificDomain",
-      "type": "java.lang.String",
-      "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
-    },
-    {
-      "label": "Scientific Subdomain",
-      "multivalued": true,
-      "name": "scientific_subdomains",
-      "path": "$.organisation.scientificDomains[*].scientificSubdomain",
-      "type": "java.lang.String",
-      "relatedResourceType": "vocabulary",
-      "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
-    },
-    {
       "label": "Public Contacts",
       "multivalued": true,
       "name": "contacts",

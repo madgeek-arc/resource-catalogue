@@ -44,7 +44,7 @@
     },
     {
       "label": "Interoperability Record ID",
-      "multivalued": false,
+      "multivalued": true,
       "name": "interoperability_record_ids",
       "path": "$.resourceInteroperabilityRecord.interoperabilityRecordIds[*]",
       "type": "java.lang.String",
