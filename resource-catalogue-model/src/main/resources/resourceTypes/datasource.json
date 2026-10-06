@@ -161,7 +161,7 @@
       "embeddingWeight": 1.0
     },
     {
-      "label": "Access Types",
+      "label": "Access Type",
       "multivalued": false,
       "name": "access_types",
       "path": "$.datasource.accessTypes",
