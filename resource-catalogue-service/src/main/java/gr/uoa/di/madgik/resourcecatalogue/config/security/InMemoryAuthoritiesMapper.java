@@ -218,6 +218,6 @@ public class InMemoryAuthoritiesMapper implements AuthoritiesMapper {
         } finally {
             lock.unlock();
         }
-        logger.info("Admins and EPOT roles updated: {}", updated);
+        logger.info("Admin and EPOT roles updated");
     }
 }
