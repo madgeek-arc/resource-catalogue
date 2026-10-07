@@ -70,7 +70,22 @@ class FederationResourceClientUnitTest {
 
         List<Map<String, Object>> result = client.listAll("services");
 
-        assertThat(result).containsExactly(Map.of("id", "21.T15/svc", "name", "A Service"));
+        Map<String, Object> expected = new java.util.HashMap<>();
+        expected.put("id", "21.T15/svc");
+        expected.put("name", "A Service");
+        expected.put("nodePID", null);
+        assertThat(result).containsExactly(expected);
+    }
+
+    @Test
+    void listAll_carriesNodePid() {
+        when(searchAggregatorClient.listResourceIds("services", null))
+                .thenReturn(List.of(new ResourceIdName("21.T15/svc", "A Service", "21.T15999/node-a")));
+
+        List<Map<String, Object>> result = client.listAll("services");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).containsEntry("nodePID", "21.T15999/node-a");
     }
 
     @Test

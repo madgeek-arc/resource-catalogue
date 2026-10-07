@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.unit;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceTypes;
+import gr.uoa.di.madgik.resourcecatalogue.dto.NodeValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.manager.FederationLinkageManager;
 import gr.uoa.di.madgik.resourcecatalogue.service.FederationResourceClient;
@@ -58,9 +59,14 @@ class FederationLinkageManagerUnitTest {
     }
 
     private static Map<String, Object> payload(String id, String name) {
+        return payload(id, name, null);
+    }
+
+    private static Map<String, Object> payload(String id, String name, String nodePID) {
         Map<String, Object> m = new HashMap<>();
         m.put("id", id);
         m.put("name", name);
+        m.put("nodePID", nodePID);
         return m;
     }
 
@@ -99,6 +105,21 @@ class FederationLinkageManagerUnitTest {
                 .containsExactly("21.T15/aaa00", "99.NB/zzz");
         assertThat(result).extracting(Value::getName)
                 .containsExactly("Local A", "Remote Z");
+    }
+
+    @Test
+    void federatedValuesCarryNodePidAndMissingNodePidIsNull() {
+        when(federationResourceClient.isEnabled()).thenReturn(true);
+        when(federationResourceClient.listAll("services")).thenReturn(List.of(
+                payload("99.NB/zzz", "Remote Z", "99.NODE/b"),
+                payload("98.NB/yyy", "Remote Y")
+        ));
+
+        List<Value> result = manager.listResources("Service", List.of(), true);
+
+        assertThat(result).hasSize(2).allMatch(v -> v instanceof NodeValue);
+        assertThat(result).extracting(v -> ((NodeValue) v).getNodePID())
+                .containsExactly("99.NODE/b", null);
     }
 
     @Test
