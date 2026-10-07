@@ -23,7 +23,10 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,8 @@ import java.util.*;
 
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OIDCSecurityService.class);
 
     private final CatalogueService catalogueService;
     private final OrganisationService organisationService;
@@ -129,7 +134,12 @@ public class OIDCSecurityService implements SecurityService {
         if (auth == null || hasRole(auth, "ROLE_ANONYMOUS")) {
             return Optional.empty();
         }
-        return Optional.of(Objects.requireNonNull(User.of(auth)));
+        try {
+            return Optional.of(User.of(auth));
+        } catch (InsufficientAuthenticationException e) {
+            logger.warn("Denying access: {}", e.getMessage());
+            return Optional.empty();
+        }
     }
 
     public List<User> getOrganisationUsers(String id) {
@@ -165,7 +175,12 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean userMatches(User u1, User u2) {
-        return u1.getEmail().equalsIgnoreCase(u2.getEmail());
+        String email1 = u1.getEmail();
+        String email2 = u2.getEmail();
+        if (email1 == null || email1.isBlank() || email2 == null || email2.isBlank()) {
+            return false;
+        }
+        return email1.equalsIgnoreCase(email2);
     }
 
     @Override
