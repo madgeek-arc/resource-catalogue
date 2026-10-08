@@ -17,9 +17,8 @@ service providers.
 
 The project operates under the EOSC Beyond initiative, which aims to promote
 Open Science and foster innovation within the framework of the European Open
-Science Cloud (EOSC). EOSC Beyond overall objective is to advance Open Science
-and innovation in research in the context of the European Open Science Cloud
-(EOSC) by providing new EOSC Core capabilities allowing scientific applications
+Science Cloud (EOSC). EOSC Beyond's overall objective is to advance Open Science
+and innovation in research by providing new EOSC Core capabilities allowing scientific applications
 to find, compose and access multiple Open Science resources and offer them as
 integrated capabilities to researchers.
 
@@ -36,9 +35,10 @@ Follow these steps to set up a development environment for Resource Catalogue:
 * Java 25
 * Maven 3.9+
 * ActiveMQ 6.2.x
-* Elasticsearch 9.3.x
+* Elasticsearch 9.4.x
 * PostgreSQL 16+ with [pgvector](https://github.com/pgvector/pgvector) extension
 * Redis
+* Docker (only to run the integration tests, which use TestContainers)
 
 ### Installation
 
@@ -60,10 +60,10 @@ Follow these steps to set up a development environment for Resource Catalogue:
 
 3. Create the necessary configuration files
     1. `application.properties` – Add the required settings.
-       See the [Application Properties Example](#Application-Properties-Example)
+       See the [Application Properties Example](#application-properties-example)
        for reference.
     2. `pid.yml` – Create this file only if you plan to use the PID Service.
-       See the [PID Properties Example](#PID-Properties-Example) for details.
+       See the [PID Properties Example](#pid-properties-example) for details.
 4. Build and Package
 
    To build the project and package the code into an executable .jar file with
@@ -81,7 +81,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
    <!-- x-release-please-start-version -->
    ```bash
    java -jar \
-   resource-catalogue-service/target/resource-catalogue-service-6.3.1-SNAPSHOT \
+   resource-catalogue-service/target/resource-catalogue-service-6.3.1-SNAPSHOT.jar \
    --spring.config.additional-location=file:/path/to/application.properties
    ```
    <!-- x-release-please-end -->
@@ -91,82 +91,10 @@ Follow these steps to set up a development environment for Resource Catalogue:
    <!-- x-release-please-start-version -->
    ```bash
    java -jar \
-   resource-catalogue-service/target/resource-catalogue-service-6.3.1-SNAPSHOT \
-   --spring.config.additional-location= \
-   file:/path/to/application.properties,file:/path/to/pid.yml
+   resource-catalogue-service/target/resource-catalogue-service-6.3.1-SNAPSHOT.jar \
+   --spring.config.additional-location=file:/path/to/application.properties,file:/path/to/pid.yml
    ```
    <!-- x-release-please-end -->
-
----
-
-### Initial Setup Wizard
-
-Before using the application, you **must run the Setup Wizard** once.  
-This step populates the database with essential resources required for the
-smooth operation of the service.
-
-#### Purpose
-
-* Loads necessary controlled vocabularies.
-* Loads required resource models.
-* Checks and informs for node registration.
-
-The Setup Wizard should be executed **only once**, immediately after the first
-successful startup.
-
-#### How to Run
-
-Once the application is up and running, open the following URL in your browser
-or via an API client:
-
-```
-http://localhost:8080/api/wizard/step1
-```
-
-The Setup Wizard will guide you through each step of the initialization process.
-
----
-
-## Test execution
-
-```bash
-  mvn clean verify
-```
-
-Test results will be displayed in the terminal.
-
----
-
-## Documentation Links
-
-For extensive and detailed documentation, please refer to
-[Documentation](https://madgeek-arc.github.io/resource-catalogue-docs/).
-
----
-
-## Versioning
-
-This project adheres to [Semantic Versioning](https://semver.org/).
-For the available versions, see the
-[tags](https://github.com/madgeek-arc/resource-catalogue/tags).
-
----
-
-## Authors
-
-* Konstantinos Spyrou - Development - [GitHub](https://github.com/spyroukostas)
-* Michael Zouros - Development - [GitHub](https://github.com/mzouros)
-
-See the [contributors list][contrib] for a full list of contributors.
-
----
-
-## Acknowledgements
-
-Special thanks to all contributors, testers and the open-source community for
-their invaluable support and resources.
-
----
 
 ### Application Properties Example
 
@@ -304,7 +232,7 @@ catalogue.resources.interoperability-record.id-prefix=interoperability_record
 catalogue.resources.organisation.id-prefix=organisation
 catalogue.resources.resource-interoperability-record.id-prefix=resource_interoperability_record
 catalogue.resources.service.id-prefix=service
-catalogue.resources.training_resource.id-prefix=training_resource
+catalogue.resources.training-resource.id-prefix=training_resource
 ## Federated search ##
 catalogue.resources.adapter.federation-path=adapters
 catalogue.resources.catalogue.federation-path=catalogues
@@ -362,10 +290,10 @@ argo.grnet.monitoring.availability=
 argo.grnet.monitoring.status=
 argo.grnet.monitoring.token=
 ## Helpdesk ##
-helpdesk.enabled=true
+helpdesk.enabled=false
 helpdesk.endpoint=
 ## Accounting ##
-accounting.enabled=true
+accounting.enabled=false
 accounting.project-id=
 accounting.endpoint=
 accounting.client-id=
@@ -511,6 +439,77 @@ catalogue:
           client-cert:
 ```
 
+---
+
+### Initial Setup Wizard
+
+Before using the application, you **must run the Setup Wizard** once.  
+This step populates the database with essential resources required for the
+smooth operation of the service.
+
+#### Purpose
+
+* Loads necessary controlled vocabularies.
+* Loads required resource models.
+* Checks and informs for node registration.
+
+The Setup Wizard should be executed **only once**, immediately after the first
+successful startup.
+
+#### How to Run
+
+Once the application is up and running, open the following URL in your browser
+or via an API client:
+
+```
+http://localhost:8080/api/wizard/step1
+```
+
+The Setup Wizard will guide you through each step of the initialization process.
+
+---
+
+## Test execution
+
+```bash
+  mvn clean verify
+```
+
+Test results will be displayed in the terminal.
+
+---
+
+## Documentation Links
+
+For extensive and detailed documentation, please refer to
+[Documentation](https://madgeek-arc.github.io/resource-catalogue-docs/).
+
+---
+
+## Versioning
+
+This project adheres to [Semantic Versioning](https://semver.org/).
+For the available versions, see the
+[tags](https://github.com/madgeek-arc/resource-catalogue/tags).
+
+---
+
+## Authors
+
+* Konstantinos Spyrou - Development - [GitHub](https://github.com/spyroukostas)
+* Michael Zouros - Development - [GitHub](https://github.com/mzouros)
+
+See the [contributors list][contrib] for a full list of contributors.
+
+---
+
+## Acknowledgements
+
+Special thanks to all contributors, testers and the open-source community for
+their invaluable support and resources.
+
+---
+
 ## External Service Coordination
 
 Several integrations require coordination with their respective teams before
@@ -542,4 +541,4 @@ they can be fully operational.
 
 [contrib]: https://github.com/madgeek-arc/resource-catalogue/graphs/contributors
 
-[prop]:resource-catalogue-service/src/main/resources/application.properties
+[prop]: resource-catalogue-service/src/main/resources/application.properties
