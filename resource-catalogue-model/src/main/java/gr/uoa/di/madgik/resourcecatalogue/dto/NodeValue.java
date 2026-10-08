@@ -39,4 +39,13 @@ public class NodeValue extends Value {
     public void setNodePID(String nodePID) {
         this.nodePID = nodePID;
     }
+
+    /**
+     * Display label: the name followed by the node PID in parentheses, or just the name when the
+     * node PID is unknown.
+     */
+    public String getLabel() {
+        String name = getName();
+        return nodePID == null || nodePID.isBlank() ? name : name + " (" + nodePID + ")";
+    }
 }

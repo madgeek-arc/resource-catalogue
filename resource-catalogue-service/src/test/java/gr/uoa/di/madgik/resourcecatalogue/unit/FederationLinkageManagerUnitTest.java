@@ -120,6 +120,8 @@ class FederationLinkageManagerUnitTest {
         assertThat(result).hasSize(2).allMatch(v -> v instanceof NodeValue);
         assertThat(result).extracting(v -> ((NodeValue) v).getNodePID())
                 .containsExactly("99.NODE/b", null);
+        assertThat(result).extracting(v -> ((NodeValue) v).getLabel())
+                .containsExactly("Remote Z (99.NODE/b)", "Remote Y");
     }
 
     @Test
