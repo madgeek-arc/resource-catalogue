@@ -225,7 +225,7 @@
                 "properties": {
                   "url": "/api/interoperabilityRecord/list?federation=true",
                   "idField": "id",
-                  "labelField": "name"
+                  "labelField": "label"
                 },
                 "multiplicity": true,
                 "prefill": null

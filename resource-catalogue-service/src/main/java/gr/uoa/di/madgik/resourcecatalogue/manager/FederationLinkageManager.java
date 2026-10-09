@@ -19,6 +19,7 @@ package gr.uoa.di.madgik.resourcecatalogue.manager;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
+import gr.uoa.di.madgik.resourcecatalogue.dto.NodeValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.Value;
 import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.FederationResourceClient;
@@ -89,7 +90,9 @@ public class FederationLinkageManager implements FederationLinkageService {
             if (localKeys.contains(id) || !addedFederatedIds.add(id)) {
                 continue;
             }
-            merged.add(new Value(id, nameObj != null ? nameObj.toString() : id));
+            Object nodePidObj = payload.get("nodePID");
+            merged.add(new NodeValue(id, nameObj != null ? nameObj.toString() : id,
+                    nodePidObj != null ? nodePidObj.toString() : null));
         }
         logger.debug("Federation list for resource type '{}': {} local + {} federated (after de-dup)",
                 resourceTypeName, localResources.size(), merged.size() - localResources.size());

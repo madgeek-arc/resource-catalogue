@@ -12,6 +12,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.CatalogueBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Identifiers;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
+import gr.uoa.di.madgik.resourcecatalogue.dto.NodeValue;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -31,6 +32,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -187,9 +189,10 @@ public abstract class ResourceCatalogueGenericManager<T extends Bundle> implemen
         ).toList();
 
         List<gr.uoa.di.madgik.resourcecatalogue.dto.Value> allResources = bundles.stream()
-                .map(b -> new gr.uoa.di.madgik.resourcecatalogue.dto.Value(
+                .<gr.uoa.di.madgik.resourcecatalogue.dto.Value>map(b -> new NodeValue(
                         b.getId(),
-                        b.getPayload().get("name").toString()
+                        b.getPayload().get("name").toString(),
+                        Optional.ofNullable(b.getPayload().get("nodePID")).map(Object::toString).orElse(null)
                 ))
                 .toList();
 
