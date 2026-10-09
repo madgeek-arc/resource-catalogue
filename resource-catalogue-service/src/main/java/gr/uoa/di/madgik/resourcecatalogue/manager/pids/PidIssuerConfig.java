@@ -143,11 +143,11 @@ public class PidIssuerConfig {
             this.clientCert = clientCert;
         }
 
-        public boolean isSelfSignedCert() {
+        public Boolean getSelfSignedCert() {
             return selfSignedCert;
         }
 
-        public void setSelfSignedCert(boolean selfSignedCert) {
+        public void setSelfSignedCert(Boolean selfSignedCert) {
             this.selfSignedCert = selfSignedCert;
         }
 

@@ -94,7 +94,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
             return datasource;
         }
         datasource.markUpdate(UserInfo.of(auth), comment);
-        relationshipValidator.checkRelatedResourceIDsConsistency(datasource);
+        relationshipValidator.checkRelatedResourceIDsConsistency(datasource, existing);
         checkAndResetDatasourceOnboarding(datasource, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships

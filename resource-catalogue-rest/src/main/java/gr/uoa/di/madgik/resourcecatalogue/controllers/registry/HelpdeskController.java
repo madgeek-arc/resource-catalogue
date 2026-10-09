@@ -36,7 +36,7 @@ import org.springframework.web.util.UriBuilder;
 
 import java.util.Map;
 
-@Profile("beyond")
+@Profile("beyond & !no-auth")
 @RestController
 @RequestMapping(path = "helpdesk", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "helpdesk")

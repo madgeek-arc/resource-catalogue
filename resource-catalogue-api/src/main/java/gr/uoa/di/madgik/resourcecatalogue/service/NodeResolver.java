@@ -10,8 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
@@ -26,6 +28,8 @@ public class NodeResolver {
     private static final Logger logger = LoggerFactory.getLogger(NodeResolver.class);
     private static final Duration CAPABILITIES_CONNECT_TIMEOUT = Duration.ofSeconds(3);
     private static final Duration CAPABILITIES_REQUEST_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration REGISTRY_CONNECT_TIMEOUT = Duration.ofSeconds(3);
+    private static final Duration REGISTRY_REQUEST_TIMEOUT = Duration.ofSeconds(5);
     private static final int MAX_LOGGED_RESPONSE_BODY_LENGTH = 500;
 
     private final String nodeRegistryKey;
@@ -35,8 +39,14 @@ public class NodeResolver {
     private final ObjectMapper objectMapper;
 
     public NodeResolver(NodeProperties nodeProperties, ObjectMapper objectMapper) {
+        HttpClient registryHttpClient = HttpClient.newBuilder()
+                .connectTimeout(REGISTRY_CONNECT_TIMEOUT)
+                .build();
+        JdkClientHttpConnector registryConnector = new JdkClientHttpConnector(registryHttpClient);
+        registryConnector.setReadTimeout(REGISTRY_REQUEST_TIMEOUT);
         this.webClient = WebClient.builder()
                 .baseUrl(nodeProperties.getRegistry().getUrl())
+                .clientConnector(registryConnector)
                 .build();
         this.capabilitiesHttpClient = HttpClient.newBuilder()
                 .connectTimeout(CAPABILITIES_CONNECT_TIMEOUT)
@@ -59,13 +69,23 @@ public class NodeResolver {
             List<Capability> capabilities) {
     }
 
-    @Cacheable(cacheNames = "nodes", unless = "#result == null || #result.isEmpty()")
+    @Cacheable(cacheNames = "nodes")
     public List<Node> fetchNodes() {
-        List<Node> nodes = webClient.get()
-                .header("x-api-key", nodeRegistryKey)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<Node>>() {})
-                .block();
+        List<Node> nodes;
+        try {
+            nodes = webClient.get()
+                    .header("x-api-key", nodeRegistryKey)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<Node>>() {})
+                    .block();
+        } catch (WebClientResponseException e) {
+            logger.warn("Failed to fetch nodes from node registry: HTTP {}, body={}",
+                    e.getStatusCode(), truncate(e.getResponseBodyAsString()));
+            return List.of();
+        } catch (Exception e) {
+            logger.warn("Failed to fetch nodes from node registry", e);
+            return List.of();
+        }
         if (nodes == null) {
             return List.of();
         }

@@ -23,7 +23,10 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,8 @@ import java.util.*;
 
 @Service("securityService")
 public class OIDCSecurityService implements SecurityService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OIDCSecurityService.class);
 
     private final CatalogueService catalogueService;
     private final OrganisationService organisationService;
@@ -42,6 +47,7 @@ public class OIDCSecurityService implements SecurityService {
     private final DeployableApplicationService deployableApplicationService;
     private final AdapterService adapterService;
     private final ConfigurationTemplateService configurationTemplateService;
+    private final FederationLinkageService federationLinkageService;
     private final Authentication adminAccess = new AdminAuthentication();
 
     public OIDCSecurityService(@Lazy CatalogueService catalogueService,
@@ -53,6 +59,7 @@ public class OIDCSecurityService implements SecurityService {
                                @Lazy DeployableApplicationService deployableApplicationService,
                                @Lazy AdapterService adapterService,
                                @Lazy ConfigurationTemplateService configurationTemplateService,
+                               @Lazy FederationLinkageService federationLinkageService,
                                CatalogueProperties properties) {
         this.catalogueService = catalogueService;
         this.organisationService = organisationService;
@@ -63,6 +70,7 @@ public class OIDCSecurityService implements SecurityService {
         this.deployableApplicationService = deployableApplicationService;
         this.adapterService = adapterService;
         this.configurationTemplateService = configurationTemplateService;
+        this.federationLinkageService = federationLinkageService;
     }
 
     @Override
@@ -126,7 +134,12 @@ public class OIDCSecurityService implements SecurityService {
         if (auth == null || hasRole(auth, "ROLE_ANONYMOUS")) {
             return Optional.empty();
         }
-        return Optional.of(Objects.requireNonNull(User.of(auth)));
+        try {
+            return Optional.of(User.of(auth));
+        } catch (InsufficientAuthenticationException e) {
+            logger.warn("Denying access: {}", e.getMessage());
+            return Optional.empty();
+        }
     }
 
     public List<User> getOrganisationUsers(String id) {
@@ -162,7 +175,12 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean userMatches(User u1, User u2) {
-        return u1.getEmail().equalsIgnoreCase(u2.getEmail());
+        String email1 = u1.getEmail();
+        String email2 = u2.getEmail();
+        if (email1 == null || email1.isBlank() || email2 == null || email2.isBlank()) {
+            return false;
+        }
+        return email1.equalsIgnoreCase(email2);
     }
 
     @Override
@@ -185,6 +203,9 @@ public class OIDCSecurityService implements SecurityService {
     @Override
     public boolean userIsResourceAdmin(@NotNull User user, String resourceId) {
         String providerId = getProviderId(resourceId);
+        if (providerId == null) {
+            return false;
+        }
         return userIsOrganisationAdmin(user, providerId);
     }
 
@@ -258,6 +279,7 @@ public class OIDCSecurityService implements SecurityService {
 
     private String getProviderId(Bundle bundle) {
         return switch (bundle) {
+            case null -> null;
             case ServiceBundle serviceBundle -> (String) serviceBundle.getService().get("resourceOwner");
             case CatalogueBundle catalogueBundle -> (String) catalogueBundle.getCatalogue().get("resourceOwner");
             case DatasourceBundle datasourceBundle -> (String) datasourceBundle.getDatasource().get("resourceOwner");
@@ -266,7 +288,7 @@ public class OIDCSecurityService implements SecurityService {
             case DeployableApplicationBundle deployableApplicationBundle ->
                     (String) deployableApplicationBundle.getDeployableApplication().get("resourceOwner");
             case AdapterBundle adapterBundle -> (String) adapterBundle.getAdapter().get("resourceOwner");
-            case null, default ->
+            default ->
                     (String) ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("resourceOwner");
         };
     }
@@ -437,8 +459,13 @@ public class OIDCSecurityService implements SecurityService {
 
     @Override
     public boolean guidelineIsActive(String id) {
-        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.get(id);
-        return interoperabilityRecordBundle.isActive();
+        InteroperabilityRecordBundle interoperabilityRecordBundle = interoperabilityRecordService.getOrElseReturnNull(id);
+        if (interoperabilityRecordBundle != null) {
+            return interoperabilityRecordBundle.isActive();
+        }
+        // Not found locally: a guideline hosted on another federation node is by definition
+        // already published/public there, so it satisfies the same "readable by anyone" intent.
+        return federationLinkageService.getInteroperabilityRecord(id).isPresent();
     }
 
     @Override

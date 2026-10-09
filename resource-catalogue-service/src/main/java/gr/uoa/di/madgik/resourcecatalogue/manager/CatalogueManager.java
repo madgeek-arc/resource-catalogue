@@ -94,7 +94,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
             return catalogue;
         }
         catalogue.markUpdate(UserInfo.of(auth), comment);
-        relationshipValidator.checkRelatedResourceIDsConsistency(catalogue);
+        relationshipValidator.checkRelatedResourceIDsConsistency(catalogue, existing);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
@@ -117,6 +117,7 @@ public class CatalogueManager extends ResourceCatalogueGenericManager<CatalogueB
     }
 
     @Override
+    @Transactional
     public CatalogueBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         CatalogueBundle bundle = get(id, catalogueId);
         if (bundle.getMetadata().isPublished()) {

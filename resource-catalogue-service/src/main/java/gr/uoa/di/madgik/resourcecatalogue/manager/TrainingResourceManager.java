@@ -84,7 +84,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
             return trainingResource;
         }
         trainingResource.markUpdate(UserInfo.of(auth), comment);
-        relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource);
+        relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource, existing);
         checkAndResetServiceOnboarding(trainingResource, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships

@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.Map;
@@ -72,6 +73,12 @@ public class User implements Identifiable {
             }
             user.name = principal.getGivenName();
             user.surname = principal.getFamilyName();
+        } else if (auth instanceof BearerTokenAuthentication bearerAuth) {
+            Map<String, Object> attributes = bearerAuth.getTokenAttributes();
+            user.id = (String) attributes.get("sub");
+            user.email = (String) attributes.get("email");
+            user.name = (String) attributes.get("given_name");
+            user.surname = (String) attributes.get("family_name");
         } else if (auth instanceof JwtAuthenticationToken) {
             Jwt principal = (Jwt) auth.getPrincipal();
             user.id = principal.getClaimAsString("sub");
@@ -91,8 +98,8 @@ public class User implements Identifiable {
             user.name = "system";
             user.surname = "system";
         } else if (auth.isAuthenticated()) {
-            logger.warn("Authenticated User has missing information: {}", auth);
-            return null;
+            throw new InsufficientAuthenticationException(
+                    "Could not create user from unsupported authentication type " + auth.getClass().getSimpleName());
         } else {
             throw new InsufficientAuthenticationException("Could not create user. Insufficient user authentication");
         }

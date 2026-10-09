@@ -19,17 +19,31 @@ package gr.uoa.di.madgik.resourcecatalogue.unit;
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationDuplicateCheckProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.ResourceIdCreator;
+import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.domain.Resource;
+import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
+import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceIdCreatorUnitTest {
@@ -41,7 +55,85 @@ class ResourceIdCreatorUnitTest {
 
     @BeforeEach
     void setUp() {
-        idCreator = new ResourceIdCreator(searchService, new CatalogueProperties());
+        idCreator = new ResourceIdCreator(searchService, new CatalogueProperties(),
+                disabledFederationProperties());
+    }
+
+    private CatalogueProperties catalogueWithResource(String idPrefix, String federationPath) {
+        ResourceProperties serviceProps = new ResourceProperties();
+        serviceProps.setIdPrefix(idPrefix);
+        serviceProps.setFederationPath(federationPath);
+        Map<ResourceTypes, ResourceProperties> resources = new HashMap<>();
+        resources.put(ResourceTypes.SERVICE, serviceProps);
+        CatalogueProperties catalogueProperties = new CatalogueProperties();
+        catalogueProperties.setResources(resources);
+        return catalogueProperties;
+    }
+
+    /**
+     * All fields are mandatory in {@link FederationDuplicateCheckProperties} (no in-code
+     * defaults), so every instance built in these tests - like every instance Spring binds from
+     * configuration - must set every field explicitly.
+     */
+    private FederationDuplicateCheckProperties disabledFederationProperties() {
+        return new FederationDuplicateCheckProperties()
+                .setEnabled(false)
+                .setSearchUrl("http://192.0.2.1") // reserved, non-routable test address (RFC 5737)
+                .setTimeoutMs(2000L)
+                .setCircuitBreakerFailureThreshold(5)
+                .setCircuitBreakerResetMs(60_000L);
+    }
+
+    // --- federation duplicate-id check ---
+
+    @Test
+    void generate_federationCheckDisabled_doesNotBlockOnNetwork() {
+        Paging<Resource> emptyPaging = mock(Paging.class);
+        lenient().when(emptyPaging.getTotal()).thenReturn(0);
+        lenient().when(searchService.search(any(FacetFilter.class))).thenReturn(emptyPaging);
+
+        FederationDuplicateCheckProperties federationProperties = disabledFederationProperties();
+        idCreator = new ResourceIdCreator(searchService, catalogueWithResource("service", "services"),
+                federationProperties);
+
+        String id = idCreator.generate("service");
+
+        assertThat(id).startsWith("service/");
+    }
+
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    void generate_federationCheckEnabledButUnreachable_failsOpenInsteadOfBlocking() {
+        Paging<Resource> emptyPaging = mock(Paging.class);
+        lenient().when(emptyPaging.getTotal()).thenReturn(0);
+        lenient().when(searchService.search(any(FacetFilter.class))).thenReturn(emptyPaging);
+
+        FederationDuplicateCheckProperties federationProperties = disabledFederationProperties()
+                .setEnabled(true)
+                .setTimeoutMs(300L);
+        idCreator = new ResourceIdCreator(searchService, catalogueWithResource("service", "services"),
+                federationProperties);
+
+        String id = idCreator.generate("service");
+
+        assertThat(id).startsWith("service/");
+    }
+
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    void generate_federationCheckEnabledButNoPathConfiguredForType_skipsCheckWithoutBlocking() {
+        Paging<Resource> emptyPaging = mock(Paging.class);
+        lenient().when(emptyPaging.getTotal()).thenReturn(0);
+        lenient().when(searchService.search(any(FacetFilter.class))).thenReturn(emptyPaging);
+
+        FederationDuplicateCheckProperties federationProperties = disabledFederationProperties()
+                .setEnabled(true); // would hang/timeout if a network call were attempted
+        idCreator = new ResourceIdCreator(searchService, catalogueWithResource("service", null),
+                federationProperties);
+
+        String id = idCreator.generate("service");
+
+        assertThat(id).startsWith("service/");
     }
 
     // --- sanitizeString ---

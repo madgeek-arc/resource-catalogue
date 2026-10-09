@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Profile("beyond")
+@Profile("beyond & !no-auth")
 @ControllerAdvice
 public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
 

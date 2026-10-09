@@ -63,7 +63,8 @@ public class DeduplicationController {
         return ResponseEntity.ok(deduplicationService.findDuplicates(resourceType, threshold));
     }
 
-    @Operation(summary = "Find published resources similar to the one identified by {prefix}/{suffix}.")
+    // EPOT notification: check a specific resource for duplicates, both locally and federation-wide
+    @Operation(summary = "Find published resources, on this node and across the federation, similar to the one identified by {prefix}/{suffix}.")
     @GetMapping(path = "{resourceType}/{prefix}/{suffix}")
     @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<List<ScoredResult<LinkedHashMap<String, Object>>>> findSimilar(
@@ -76,6 +77,7 @@ public class DeduplicationController {
         return ResponseEntity.ok(deduplicationService.findSimilar(resourceType, prefix + "/" + suffix, threshold, quantity));
     }
 
+    // Cross-federation check of similar/duplicate resources during onboarding
     @Operation(summary = "Check if a resource is similar to existing published resources before submitting it.")
     @PostMapping(path = "{resourceType}/check", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ScoredResult<LinkedHashMap<String, Object>>>> findSimilar(
@@ -85,5 +87,19 @@ public class DeduplicationController {
             @RequestBody Map<String, Object> resource,
             @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
         return ResponseEntity.ok(deduplicationService.findSimilar(resourceType, resource, threshold, quantity));
+    }
+
+    // Local-only counterpart of {resourceType}/check: this is the route the federation aggregator
+    // itself calls when fanning a check out across nodes. It must never trigger a further
+    // federation call — doing so would let the aggregator call back into this same node, which
+    // would call the aggregator again, and so on without bound.
+    @Operation(summary = "Check if a resource is similar to published resources on this node only, with no federation fan-out.")
+    @PostMapping(path = "{resourceType}/check/local", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ScoredResult<LinkedHashMap<String, Object>>>> findSimilarLocally(
+            @PathVariable String resourceType,
+            @RequestParam(required = false, defaultValue = "0.95") Float threshold,
+            @RequestParam(defaultValue = "5") int quantity,
+            @RequestBody Map<String, Object> resource) {
+        return ResponseEntity.ok(deduplicationService.findSimilarLocally(resourceType, resource, threshold, quantity));
     }
 }

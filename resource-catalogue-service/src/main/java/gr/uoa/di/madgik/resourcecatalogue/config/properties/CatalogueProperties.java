@@ -29,8 +29,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -97,6 +99,13 @@ public class CatalogueProperties {
      */
     @NestedConfigurationProperty
     private MailerProperties mailer = new MailerProperties();
+
+    /**
+     * TypeAPI properties, used to validate PID records against their FDO profile before posting them
+     * to the PID service.
+     */
+    @NestedConfigurationProperty
+    private TypeApiProperties typeApi = new TypeApiProperties();
 
 
     public CatalogueProperties() {
@@ -196,6 +205,15 @@ public class CatalogueProperties {
         return this;
     }
 
+    public TypeApiProperties getTypeApi() {
+        return typeApi;
+    }
+
+    public CatalogueProperties setTypeApi(TypeApiProperties typeApi) {
+        this.typeApi = typeApi;
+        return this;
+    }
+
     public Map<ResourceTypes, ResourceProperties> getResources() {
         return resources;
     }
@@ -213,6 +231,17 @@ public class CatalogueProperties {
         return null;
     }
 
+    /**
+     * Looks up a resource type's properties directly by its {@link ResourceTypes} key, rather than by
+     * scanning for an {@code idPrefix} match. Unlike {@link #getResourcePropertiesFromPrefix}, this is
+     * unambiguous even when multiple resource types share the same Handle prefix (the normal case, since
+     * a Handle prefix is assigned per institution, not per resource type) — use it whenever the caller
+     * already knows the resource type (e.g. from {@code getResourceTypeName()}).
+     */
+    public ResourceProperties getResourcePropertiesForResourceType(String resourceType) {
+        return resources.get(ResourceTypes.valueOf(resourceType.toUpperCase()));
+    }
+
     public String getResourceTypeFromPrefix(String prefix) {
         for (Map.Entry<ResourceTypes, ResourceProperties> rp : resources.entrySet()) {
             if (prefix.equals(rp.getValue().getIdPrefix())) {
@@ -220,5 +249,21 @@ public class CatalogueProperties {
             }
         }
         return null;
+    }
+
+    /**
+     * Every resource type whose configured {@code idPrefix} matches {@code prefix}, unlike
+     * {@link #getResourceTypeFromPrefix}, which returns only the first match by unstable map
+     * iteration order - use this when the caller must disambiguate by actually checking each
+     * candidate (e.g. searching each one for a matching record) rather than guessing.
+     */
+    public List<String> getResourceTypesFromPrefix(String prefix) {
+        List<String> types = new ArrayList<>();
+        for (Map.Entry<ResourceTypes, ResourceProperties> rp : resources.entrySet()) {
+            if (prefix.equals(rp.getValue().getIdPrefix())) {
+                types.add(rp.getKey().toString());
+            }
+        }
+        return types;
     }
 }

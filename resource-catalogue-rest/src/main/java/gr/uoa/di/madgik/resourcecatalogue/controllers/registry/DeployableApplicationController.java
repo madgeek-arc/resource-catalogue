@@ -60,7 +60,7 @@ public class DeployableApplicationController extends ResourceCatalogueGenericCon
     @Autowired
     private AuditingProperties auditingProperties;
     DeployableApplicationController(DeployableApplicationService deployableApplicationService) {
-        super(deployableApplicationService, "Deployable Application");
+        super(deployableApplicationService, "deployable_application");
     }
 
     //region generic

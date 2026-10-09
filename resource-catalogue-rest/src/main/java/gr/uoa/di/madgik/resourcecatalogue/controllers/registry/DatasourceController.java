@@ -67,7 +67,7 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
 
     public DatasourceController(DatasourceService datasourceService,
                                 OpenAIREDatasourceService openAIREDatasourceService) {
-        super(datasourceService, "Datasource");
+        super(datasourceService, "datasource");
         this.openAIREDatasourceService = openAIREDatasourceService;
     }
 

@@ -60,7 +60,7 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
     private AuditingProperties auditingProperties;
 
     ServiceController(ServiceService serviceService) {
-        super(serviceService, "Service");
+        super(serviceService, "service");
     }
 
     //region generic

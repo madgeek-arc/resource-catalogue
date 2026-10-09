@@ -25,14 +25,6 @@ public interface ConfigurationTemplateInstanceService
         extends ResourceCatalogueGenericService<ConfigurationTemplateInstanceBundle> {
 
     /**
-     * Return a List of ConfigurationTemplateInstances providing a resource ID
-     *
-     * @param id resource ID
-     * @return {@link List}&lt;{@link ConfigurationTemplateInstanceBundle}&gt;
-     */
-    List<ConfigurationTemplateInstanceBundle> getByResourceId(String id);
-
-    /**
      * Return a List of ConfigurationTemplateInstances providing a ConfigurationTemplate ID
      *
      * @param id resource ID
