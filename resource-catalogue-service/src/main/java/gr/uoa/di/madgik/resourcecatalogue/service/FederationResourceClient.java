@@ -86,12 +86,13 @@ public class FederationResourceClient {
         }
         return call("listAll(" + federationPath + ")", Collections.emptyList(), () -> {
             List<Map<String, Object>> out = new ArrayList<>();
-            for (var idName : searchAggregatorClient.listResourceIds(federationPath, null)) {
+            for (var resourceSummary : searchAggregatorClient.listResources(federationPath, null)) {
                 // HashMap, not Map.of: nodePID is null when the owning node does not expose it
                 Map<String, Object> entry = new HashMap<>();
-                entry.put("id", idName.id());
-                entry.put("name", idName.name());
-                entry.put("nodePID", idName.nodePID());
+                entry.put("id", resourceSummary.id());
+                entry.put("name", resourceSummary.name());
+                entry.put("nodePID", resourceSummary.nodePID());
+                entry.put("description", resourceSummary.description());
                 out.add(entry);
             }
             return out;
