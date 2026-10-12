@@ -30,6 +30,7 @@ import org.springframework.util.MultiValueMap;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,8 +77,8 @@ public class FederationResourceClient {
 
     /**
      * Returns every resource published under {@code federationPath} across the federation, as a
-     * list of {@code {id, name}} maps (each carrying a bare-PID {@code id} and a display
-     * {@code name}). The local node's own copies are included - callers must de-duplicate them.
+     * list of {@code {id, name, nodePID}} maps (each carrying a bare-PID {@code id}, a display
+     * {@code name} and the owning node's {@code nodePID}, possibly null). The local node's own copies are included - callers must de-duplicate them.
      */
     public List<Map<String, Object>> listAll(String federationPath) {
         if (!isEnabled() || federationPath == null || isCircuitOpen()) {
@@ -85,8 +86,14 @@ public class FederationResourceClient {
         }
         return call("listAll(" + federationPath + ")", Collections.emptyList(), () -> {
             List<Map<String, Object>> out = new ArrayList<>();
-            for (var idName : searchAggregatorClient.listResourceIds(federationPath, null)) {
-                out.add(Map.of("id", idName.id(), "name", idName.name()));
+            for (var resourceSummary : searchAggregatorClient.listResources(federationPath, null)) {
+                // HashMap, not Map.of: nodePID is null when the owning node does not expose it
+                Map<String, Object> entry = new HashMap<>();
+                entry.put("id", resourceSummary.id());
+                entry.put("name", resourceSummary.name());
+                entry.put("nodePID", resourceSummary.nodePID());
+                entry.put("description", resourceSummary.description());
+                out.add(entry);
             }
             return out;
         });

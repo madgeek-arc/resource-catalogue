@@ -687,7 +687,7 @@
                 "properties": {
                   "url": "/api/service/list?federation=true",
                   "idField": "id",
-                  "labelField": "name"
+                  "labelField": "label"
                 },
                 "multiplicity": true,
                 "prefill": null

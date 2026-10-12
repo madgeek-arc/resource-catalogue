@@ -815,7 +815,7 @@
                     "properties": {
                       "url": "/api/rt_value/list?federation=true",
                       "idField": "id",
-                      "labelField": "name",
+                      "labelField": "label",
                       "urlParams": [
                         {
                           "placeholder": "rt_value",

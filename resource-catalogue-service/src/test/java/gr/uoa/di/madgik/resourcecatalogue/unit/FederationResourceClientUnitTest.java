@@ -17,7 +17,7 @@
 package gr.uoa.di.madgik.resourcecatalogue.unit;
 
 import gr.uoa.di.madgik.federation.search.aggregator.client.SearchAggregatorClient;
-import gr.uoa.di.madgik.federation.search.aggregator.core.ResourceIdName;
+import gr.uoa.di.madgik.federation.search.aggregator.core.ResourceSummary;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.FederationCrossLinkageProperties;
 import gr.uoa.di.madgik.resourcecatalogue.service.FederationResourceClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,13 +64,30 @@ class FederationResourceClientUnitTest {
     }
 
     @Test
-    void listAll_mapsResourceIdNamesToMaps() {
-        when(searchAggregatorClient.listResourceIds("services", null))
-                .thenReturn(List.of(new ResourceIdName("21.T15/svc", "A Service")));
+    void listAll_mapsResourceSummariesToMaps() {
+        when(searchAggregatorClient.listResources("services", null))
+                .thenReturn(List.of(new ResourceSummary("21.T15/svc", "A Service", null, null)));
 
         List<Map<String, Object>> result = client.listAll("services");
 
-        assertThat(result).containsExactly(Map.of("id", "21.T15/svc", "name", "A Service"));
+        Map<String, Object> expected = new java.util.HashMap<>();
+        expected.put("id", "21.T15/svc");
+        expected.put("name", "A Service");
+        expected.put("nodePID", null);
+        expected.put("description", null);
+        assertThat(result).containsExactly(expected);
+    }
+
+    @Test
+    void listAll_carriesNodePid() {
+        when(searchAggregatorClient.listResources("services", null))
+                .thenReturn(List.of(new ResourceSummary("21.T15/svc", "A Service", "21.T15999/node-a", "A description")));
+
+        List<Map<String, Object>> result = client.listAll("services");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).containsEntry("nodePID", "21.T15999/node-a")
+                .containsEntry("description", "A description");
     }
 
     @Test
@@ -81,7 +98,7 @@ class FederationResourceClientUnitTest {
         List<Map<String, Object>> result = disabled.listAll("services");
 
         assertThat(result).isEmpty();
-        verify(searchAggregatorClient, never()).listResourceIds(anyString(), any());
+        verify(searchAggregatorClient, never()).listResources(anyString(), any());
     }
 
     @Test
