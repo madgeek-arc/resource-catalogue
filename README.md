@@ -323,6 +323,7 @@ catalogue:
         profile: 21.T11969/a9f1d8fa88366d1f49cb
         data: self
       resolve-endpoints:
+        - https://userspace.endpoint/providers/{pid}
       pid-issuer:
         url:
         user:
@@ -338,6 +339,7 @@ catalogue:
         profile: 21.T11969/3bffc374f55052af4e91
         data: self
       resolve-endpoints:
+        - https://userspace.endpoint/services/{pid}
       pid-issuer:
         url:
         user:
@@ -353,6 +355,7 @@ catalogue:
         profile: 21.T11969/3bffc374f55052af4e91
         data: self
       resolve-endpoints:
+        - https://userspace.endpoint/services/{pid}
       pid-issuer:
         url:
         user:
@@ -368,6 +371,7 @@ catalogue:
         profile: 21.T11969/3bffc374f55052af4e91
         data: self
       resolve-endpoints:
+        - https://userspace.endpoint/catalogues/{pid}
       pid-issuer:
         url:
         user:
@@ -383,6 +387,7 @@ catalogue:
         profile: 21.T11969/3bffc374f55052af4e91
         data: self
       resolve-endpoints:
+        - https://userspace.endpoint/trainings/{encodedPid}
       pid-issuer:
         url:
         user:
@@ -398,6 +403,7 @@ catalogue:
         profile: 21.T11969/3bffc374f55052af4e91
         data: self
       resolve-endpoints:
+        - https://userspace.endpoint/guidelines/{encodedPid}
       pid-issuer:
         url:
         user:
@@ -413,6 +419,7 @@ catalogue:
         profile: 21.T11969/3bffc374f55052af4e91
         data: self
       resolve-endpoints:
+        - https://userspace.endpoint/adapters/{encodedPid}
       pid-issuer:
         url:
         user:
@@ -428,6 +435,7 @@ catalogue:
         profile: 21.T11969/3bffc374f55052af4e91
         data: self
       resolve-endpoints:
+        - https://userspace.endpoint/deployable_services/{pid}
       pid-issuer:
         url:
         user:
