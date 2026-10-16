@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
+import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
@@ -116,6 +117,46 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         }
 
         existing.markActive(active, UserInfo.of(auth));
+        return genericResourceService.update(getResourceTypeName(), existing);
+    }
+
+    @Override
+    public AdapterBundle changeResourceOwner(String id, String newOwnerId, String comment, Authentication auth) {
+        AdapterBundle existing = get(id);
+        if (existing.isDraft()) {
+            throw new ValidationException(String.format("Adapter [%s] is a draft; drafts cannot be moved between "
+                    + "Organisations.", id));
+        }
+        if (existing.isSuspended()) {
+            throw new ResourceException("You cannot change the owner of a suspended Adapter.", HttpStatus.CONFLICT);
+        }
+
+        String currentOwnerId = (String) existing.getAdapter().get("resourceOwner");
+        if (Objects.equals(currentOwnerId, newOwnerId)) {
+            throw new ValidationException(String.format("Adapter [%s] is already owned by Organisation [%s].",
+                    id, newOwnerId));
+        }
+
+        OrganisationBundle newOwner = organisationService.get(newOwnerId, existing.getCatalogueId());
+        if (!newOwner.getStatus().equals(vocabularyService.get("approved").getId())) {
+            throw new ValidationException(String.format(
+                    "You cannot move Adapter [%s] to Organisation [%s], because it is not approved.", id, newOwnerId));
+        }
+        if (!newOwner.isActive()) {
+            throw new ResourceException(String.format(
+                    "You cannot move Adapter [%s] to Organisation [%s], because it is inactive.", id, newOwnerId),
+                    HttpStatus.CONFLICT);
+        }
+        if (newOwner.isSuspended()) {
+            throw new ResourceException(String.format(
+                    "You cannot move Adapter [%s] to Organisation [%s], because it is suspended.", id, newOwnerId),
+                    HttpStatus.CONFLICT);
+        }
+
+        logger.info("Changing owner of Adapter [{}] from Organisation [{}] to [{}]", id, currentOwnerId, newOwnerId);
+        existing.getAdapter().put("resourceOwner", newOwnerId);
+        existing.markUpdate(UserInfo.of(auth), comment, LoggingInfo.ActionType.MOVED);
+
         return genericResourceService.update(getResourceTypeName(), existing);
     }
     //endregion

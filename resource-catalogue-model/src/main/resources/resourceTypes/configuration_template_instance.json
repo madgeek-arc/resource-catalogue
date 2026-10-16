@@ -18,8 +18,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "service",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "searchCapabilities": ["KEYWORD"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Configuration Template ID",
@@ -29,8 +29,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "configuration_template",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "searchCapabilities": ["KEYWORD"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Catalogue ID",
@@ -40,8 +40,8 @@
       "type": "java.lang.String",
       "relatedResourceType": "catalogue",
       "relatedResourceTypeField": "name",
-      "searchCapabilities": ["KEYWORD", "TEXT"],
-      "embeddingWeight": 1.0
+      "searchCapabilities": ["KEYWORD"],
+      "embeddingWeight": 0.0
     },
     {
       "label": "Node",
@@ -51,7 +51,7 @@
       "type": "java.lang.String",
       "relatedResourceType": "vocabulary",
       "relatedResourceTypeField": "name",
-      "embeddingWeight": 1.0
+      "embeddingWeight": 0.0
     },
     {
       "label": "Configuration Template Payload",
@@ -170,7 +170,8 @@
   ],
   "payloadType": "json",
   "properties": {
-    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle"
+    "class": "gr.uoa.di.madgik.resourcecatalogue.domain.ConfigurationTemplateInstanceBundle",
+    "reindexVersion": "1"
   },
   "schema": "{\n\t\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n\t\"type\": \"object\"\n}"
 }

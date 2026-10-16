@@ -2088,6 +2088,8 @@ that is the used scheme (e.g., Web Address URL, DOI, ARK, etc.).]]></xs:document
             
       <xs:enumeration value="UPDATED"/>
             
+      <xs:enumeration value="MOVED"/>
+            
       <xs:enumeration value="ACTIVATED"/>
             
       <xs:enumeration value="DEACTIVATED"/>

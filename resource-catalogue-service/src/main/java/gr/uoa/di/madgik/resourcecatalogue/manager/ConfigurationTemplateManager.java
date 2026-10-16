@@ -121,13 +121,8 @@ public class ConfigurationTemplateManager extends ResourceCatalogueGenericManage
     @Override
     public Paging<ConfigurationTemplateBundle> getAllByInteroperabilityRecordId(MultiValueMap<String, Object> params,
                                                                                 String interoperabilityRecordId) {
-        FacetFilter ff;
-        if (params != null) {
-            ff = FacetFilter.from(params);
-        } else {
-            ff = new FacetFilter();
-        }
-        ff.setResourceType("configuration_template");
+        FacetFilter ff = params != null ? FacetFilter.from(params) : new FacetFilter();
+        ff.setResourceType(getResourceTypeName());
         ff.setQuantity(1000);
         ff.addFilter("published", false);
         ff.addFilter("interoperability_record_id", interoperabilityRecordId);

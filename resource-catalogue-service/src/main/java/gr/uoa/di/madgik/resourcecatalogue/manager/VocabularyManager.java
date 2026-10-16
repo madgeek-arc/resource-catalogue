@@ -177,7 +177,8 @@ public class VocabularyManager extends ResourceManager<Vocabulary> implements Vo
         List<OrganisationBundle> allActiveAndApprovedProviders = providerManager.getAll(ff, new AdminAuthentication()).getResults();
         Map<String, String> providerNames = new LinkedHashMap<>();
         for (OrganisationBundle organisationBundle : allActiveAndApprovedProviders) {
-            if ((boolean) organisationBundle.getOrganisation().get("legalEntity")) {
+            Object legalEntity = organisationBundle.getOrganisation().get("legalEntity");
+            if (legalEntity != null && Boolean.parseBoolean(legalEntity.toString())) {
                 providerNames.put(
                         (String) organisationBundle.getOrganisation().get("name"),
                         organisationBundle.getCatalogueId()

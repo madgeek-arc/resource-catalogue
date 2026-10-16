@@ -16,16 +16,18 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
+import gr.uoa.di.madgik.registry.exception.ResourceException;
+import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
-import gr.uoa.di.madgik.resourcecatalogue.service.TrainingResourceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,9 +37,11 @@ import java.util.List;
 @Service("publicTrainingResourceManager")
 public class PublicTrainingResourceService extends AbstractPublicResourceManager<TrainingResourceBundle> {
 
+    private static final Logger logger = LoggerFactory.getLogger(PublicTrainingResourceService.class);
+
     private final OrganisationService organisationService;
     private final ServiceService serviceService;
-    private final TrainingResourceService trainingResourceService;
+    private final FederationLinkageService federationLinkageService;
 
     public PublicTrainingResourceService(GenericResourceService genericResourceService,
                                          JmsService jmsService,
@@ -45,11 +49,11 @@ public class PublicTrainingResourceService extends AbstractPublicResourceManager
                                          FacetLabelService facetLabelService,
                                          OrganisationService organisationService,
                                          ServiceService serviceService,
-                                         TrainingResourceService trainingResourceService) {
+                                         FederationLinkageService federationLinkageService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
         this.organisationService = organisationService;
         this.serviceService = serviceService;
-        this.trainingResourceService = trainingResourceService;
+        this.federationLinkageService = federationLinkageService;
     }
 
     @Override
@@ -60,11 +64,8 @@ public class PublicTrainingResourceService extends AbstractPublicResourceManager
     @Override
     public void updateIdsToPublic(TrainingResourceBundle bundle) {
         // Resource Owner
-        OrganisationBundle provider = organisationService.get(
-                (String) bundle.getTrainingResource().get("resourceOwner"),
-                bundle.getCatalogueId()
-        );
-        bundle.getTrainingResource().put("resourceOwner", provider.getIdentifiers().getPid());
+        bundle.getTrainingResource().put("resourceOwner", resolveOwnerPublicId(
+                (String) bundle.getTrainingResource().get("resourceOwner"), bundle.getCatalogueId()));
 
         // EOSC Related Services
         List<String> eoscRelatedServices = new ArrayList<>();
@@ -72,10 +73,57 @@ public class PublicTrainingResourceService extends AbstractPublicResourceManager
         if (existingObj instanceof Collection<?>) {
             for (Object eoscRelatedServiceIdObj : (Collection<?>) existingObj) {
                 String eoscRelatedServiceId = (String) eoscRelatedServiceIdObj;
-                Bundle eoscRelatedService = serviceService.get(eoscRelatedServiceId, bundle.getCatalogueId());;
-                eoscRelatedServices.add(eoscRelatedService.getIdentifiers().getPid());
+                eoscRelatedServices.add(toPublicId(eoscRelatedServiceId, bundle.getCatalogueId()));
             }
             bundle.getTrainingResource().put("eoscRelatedServices", eoscRelatedServices);
+        }
+    }
+
+    /**
+     * Resolves a locally-held Service id to its public PID. When the id doesn't resolve locally,
+     * a PID-shaped id ({@code prefix/suffix}) is kept verbatim - it may already be a public PID
+     * from another federation node. If the federation aggregator positively confirms the id
+     * doesn't exist there either, it's still kept (rather than rejected), since that confirmation
+     * may just mean the owning node is temporarily unreachable; the case is logged instead for
+     * manual review. A non-PID-shaped unresolvable id is rethrown.
+     */
+    private String toPublicId(String serviceId, String catalogueId) {
+        try {
+            return serviceService.get(serviceId, catalogueId).getIdentifiers().getPid();
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (serviceId != null && serviceId.contains("/")) {
+                Boolean exists = federationLinkageService.federatedResourceExists("service", serviceId);
+                if (exists != null && !exists) {
+                    logger.warn("Kept reference to id '{}' (type 'Service') which was not found locally and "
+                            + "the federation aggregator confirmed it does not exist there either - may be a "
+                            + "stale reference, or the owning federation node may be temporarily "
+                            + "unreachable. Needs manual review.", serviceId);
+                }
+                return serviceId;
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Resolves a locally-held Organisation id to its public PID, with the same federation
+     * fallback as {@link #toPublicId}.
+     */
+    private String resolveOwnerPublicId(String resourceOwnerId, String catalogueId) {
+        try {
+            return organisationService.get(resourceOwnerId, catalogueId).getIdentifiers().getPid();
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (resourceOwnerId != null && resourceOwnerId.contains("/")) {
+                Boolean exists = federationLinkageService.federatedResourceExists("organisation", resourceOwnerId);
+                if (exists != null && !exists) {
+                    logger.warn("Kept reference to id '{}' (type 'organisation') which was not found locally "
+                            + "and the federation aggregator confirmed it does not exist there either - may "
+                            + "be a stale reference, or the owning federation node may be temporarily "
+                            + "unreachable. Needs manual review.", resourceOwnerId);
+                }
+                return resourceOwnerId;
+            }
+            throw e;
         }
     }
 }

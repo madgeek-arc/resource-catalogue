@@ -106,6 +106,14 @@ public class VocabularyController extends ResourceController<Vocabulary> {
         return new ResponseEntity<>(vocabularyService.get(id), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get vocabularies by id (for IDs containing a '/', e.g. Hosting Legal Entity PIDs)")
+    @GetMapping(path = "types/{type}/{prefix}/{suffix}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Vocabulary> getByTypeAndId(@PathVariable(value = "type") String type,
+                                                     @PathVariable(value = "prefix") String prefix,
+                                                     @PathVariable(value = "suffix") String suffix) {
+        return new ResponseEntity<>(vocabularyService.get(prefix + "/" + suffix), HttpStatus.OK);
+    }
+
     @Operation(summary = "Get vocabulary children given the vocabulary parent")
     @GetMapping(path = "/getChildren/{parentId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<Vocabulary>> getChildren(@PathVariable String parentId) {

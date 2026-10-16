@@ -25,10 +25,13 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ResourceInteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.service.DatasourceService;
+import gr.uoa.di.madgik.resourcecatalogue.service.FederationLinkageService;
 import gr.uoa.di.madgik.resourcecatalogue.service.InteroperabilityRecordService;
 import gr.uoa.di.madgik.resourcecatalogue.service.ServiceService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,9 +42,12 @@ import java.util.List;
 public class PublicResourceInteroperabilityRecordService
         extends AbstractPublicResourceManager<ResourceInteroperabilityRecordBundle> {
 
+    private static final Logger logger = LoggerFactory.getLogger(PublicResourceInteroperabilityRecordService.class);
+
     private final ServiceService serviceService;
     private final DatasourceService datasourceService;
     private final InteroperabilityRecordService interoperabilityRecordService;
+    private final FederationLinkageService federationLinkageService;
 
     public PublicResourceInteroperabilityRecordService(GenericResourceService genericResourceService,
                                                        JmsService jmsService,
@@ -49,11 +55,13 @@ public class PublicResourceInteroperabilityRecordService
                                                        FacetLabelService facetLabelService,
                                                        ServiceService serviceService,
                                                        DatasourceService datasourceService,
-                                                       InteroperabilityRecordService interoperabilityRecordService) {
+                                                       InteroperabilityRecordService interoperabilityRecordService,
+                                                       FederationLinkageService federationLinkageService) {
         super(genericResourceService, jmsService, pidIssuer, facetLabelService);
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
         this.interoperabilityRecordService = interoperabilityRecordService;
+        this.federationLinkageService = federationLinkageService;
     }
 
     @Override
@@ -79,11 +87,37 @@ public class PublicResourceInteroperabilityRecordService
         if (interoperabilityRecordIdsObj instanceof Collection<?>) {
             for (Object idObj : (Collection<?>) interoperabilityRecordIdsObj) {
                 String interoperabilityRecordId = (String) idObj;
-                InteroperabilityRecordBundle interoperabilityRecord = interoperabilityRecordService
-                        .get(interoperabilityRecordId, bundle.getCatalogueId());
-                interoperabilityRecordIds.add(interoperabilityRecord.getIdentifiers().getPid());
+                interoperabilityRecordIds.add(toPublicId(interoperabilityRecordId, bundle.getCatalogueId()));
             }
         }
         bundle.getResourceInteroperabilityRecord().put("interoperabilityRecordIds", interoperabilityRecordIds);
+    }
+
+    /**
+     * Resolves a locally-held Interoperability Record id to its public PID. When the id doesn't
+     * resolve locally, a PID-shaped id ({@code prefix/suffix}) is kept verbatim - it may already
+     * be a public PID from another federation node. If the federation aggregator positively
+     * confirms the id doesn't exist there either, it's still kept (rather than rejected), since
+     * that confirmation may just mean the owning node is temporarily unreachable; the case is
+     * logged instead for manual review. A non-PID-shaped unresolvable id is rethrown.
+     */
+    private String toPublicId(String interoperabilityRecordId, String catalogueId) {
+        try {
+            return interoperabilityRecordService.get(interoperabilityRecordId, catalogueId)
+                    .getIdentifiers().getPid();
+        } catch (ResourceException | ResourceNotFoundException e) {
+            if (interoperabilityRecordId != null && interoperabilityRecordId.contains("/")) {
+                Boolean exists = federationLinkageService.federatedResourceExists(
+                        "Interoperability Record", interoperabilityRecordId);
+                if (exists != null && !exists) {
+                    logger.warn("Kept reference to id '{}' (type 'Interoperability Record') which was not "
+                            + "found locally and the federation aggregator confirmed it does not exist there "
+                            + "either - may be a stale reference, or the owning federation node may be "
+                            + "temporarily unreachable. Needs manual review.", interoperabilityRecordId);
+                }
+                return interoperabilityRecordId;
+            }
+            throw e;
+        }
     }
 }

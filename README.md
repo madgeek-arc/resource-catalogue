@@ -17,9 +17,8 @@ service providers.
 
 The project operates under the EOSC Beyond initiative, which aims to promote
 Open Science and foster innovation within the framework of the European Open
-Science Cloud (EOSC). EOSC Beyond overall objective is to advance Open Science
-and innovation in research in the context of the European Open Science Cloud
-(EOSC) by providing new EOSC Core capabilities allowing scientific applications
+Science Cloud (EOSC). EOSC Beyond's overall objective is to advance Open Science
+and innovation in research by providing new EOSC Core capabilities allowing scientific applications
 to find, compose and access multiple Open Science resources and offer them as
 integrated capabilities to researchers.
 
@@ -36,9 +35,10 @@ Follow these steps to set up a development environment for Resource Catalogue:
 * Java 25
 * Maven 3.9+
 * ActiveMQ 6.2.x
-* Elasticsearch 9.3.x
+* Elasticsearch 9.4.x
 * PostgreSQL 16+ with [pgvector](https://github.com/pgvector/pgvector) extension
 * Redis
+* Docker (only to run the integration tests, which use TestContainers)
 
 ### Installation
 
@@ -60,10 +60,10 @@ Follow these steps to set up a development environment for Resource Catalogue:
 
 3. Create the necessary configuration files
     1. `application.properties` – Add the required settings.
-       See the [Application Properties Example](#Application-Properties-Example)
+       See the [Application Properties Example](#application-properties-example)
        for reference.
     2. `pid.yml` – Create this file only if you plan to use the PID Service.
-       See the [PID Properties Example](#PID-Properties-Example) for details.
+       See the [PID Properties Example](#pid-properties-example) for details.
 4. Build and Package
 
    To build the project and package the code into an executable .jar file with
@@ -81,7 +81,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
    <!-- x-release-please-start-version -->
    ```bash
    java -jar \
-   resource-catalogue-service/target/resource-catalogue-service-6.3.1-SNAPSHOT \
+   resource-catalogue-service/target/resource-catalogue-service-6.3.1-SNAPSHOT.jar \
    --spring.config.additional-location=file:/path/to/application.properties
    ```
    <!-- x-release-please-end -->
@@ -91,11 +91,361 @@ Follow these steps to set up a development environment for Resource Catalogue:
    <!-- x-release-please-start-version -->
    ```bash
    java -jar \
-   resource-catalogue-service/target/resource-catalogue-service-6.3.1-SNAPSHOT \
-   --spring.config.additional-location= \
-   file:/path/to/application.properties,file:/path/to/pid.yml
+   resource-catalogue-service/target/resource-catalogue-service-6.3.1-SNAPSHOT.jar \
+   --spring.config.additional-location=file:/path/to/application.properties,file:/path/to/pid.yml
    ```
    <!-- x-release-please-end -->
+
+### Application Properties Example
+
+Refer to [application.properties][prop] for the complete set of
+configuration options.
+
+```properties
+#########################
+##  Server Properties  ##
+#########################
+dynamic.properties.path=
+## Server Configuration ##
+server.port=8080
+server.servlet.context-path=/api
+## Logging Configuration ##
+logging.level.root=INFO
+#########################
+##  Spring Properties  ##
+#########################
+## Mail Templates ##
+spring.freemarker.template-loader-path=classpath:/mail/
+## Profiles && Configuration ##
+spring.profiles.active=beyond
+spring.autoconfigure.exclude=org.flowable.spring.boot.FlowableJpaAutoConfiguration,org.flowable.spring.boot.eventregistry.EventRegistryAutoConfiguration
+spring.config.import=optional:classpath:pid.yml
+## Servlet ##
+spring.servlet.multipart.max-file-size=50MB
+spring.servlet.multipart.max-request-size=50MB
+## Bean Configuration ##
+spring.jpa.open-in-view=false
+spring.main.allow-bean-definition-overriding=true
+## Redis Properties ##
+spring.session.data.redis.namespace=eosc:beyond
+spring.data.redis.host=
+spring.data.redis.port=
+spring.data.redis.password=
+## Security Properties ##
+### EOSC AAI Authentication ###
+spring.security.oauth2.client.provider.eosc.issuer-uri=
+spring.security.oauth2.client.registration.eosc.client-id=
+spring.security.oauth2.client.registration.eosc.client-name=
+spring.security.oauth2.client.registration.eosc.client-secret=
+spring.security.oauth2.client.registration.eosc.scope=openid,email,profile,entitlements
+spring.security.oauth2.client.registration.eosc.redirect-uri=
+spring.security.oauth2.resourceserver.opaquetoken.introspection-uri=${spring.security.oauth2.client.provider.eosc.issuer-uri}/protocol/openid-connect/token/introspect
+spring.security.oauth2.resourceserver.opaquetoken.client-id=${spring.security.oauth2.client.registration.eosc.client-id}
+spring.security.oauth2.resourceserver.opaquetoken.client-secret=${spring.security.oauth2.client.registration.eosc.client-secret}
+## Springdoc Configuration ##
+springdoc.api-docs.path=/api-docs
+### Controllers ###
+springdoc.group-configs[0].group=resource-catalogue
+springdoc.group-configs[0].display-name=1.Resource Catalogue
+springdoc.group-configs[0].packages-to-scan=gr.uoa.di.madgik.resourcecatalogue
+springdoc.group-configs[1].group=dynamic-catalogue
+springdoc.group-configs[1].display-name=2.Dynamic Catalogue
+springdoc.group-configs[1].packages-to-scan=gr.uoa.di.madgik.catalogue
+springdoc.group-configs[2].group=registry
+springdoc.group-configs[2].display-name=3.Registry
+springdoc.group-configs[2].packages-to-scan=gr.uoa.di.madgik.registry
+### Swagger UI ###
+springdoc.swagger-ui.docExpansion=none
+springdoc.swagger-ui.operationsSorter=method
+springdoc.swagger-ui.syntaxHighlight.activated=false
+springdoc.swagger-ui.tagsSorter=alpha
+springdoc.swagger-ui.tryItOutEnabled=true
+###########################
+##  Registry Properties  ##
+###########################
+## Platform Settings ##
+fqdn=
+## Registry Configuration ##
+### Host ###
+registry.host=http://localhost:${server.port}${server.servlet.context-path}
+### DB - Datasource Properties ###
+registry.datasource.configuration.maximum-pool-size=
+registry.datasource.driver-class-name=org.postgresql.Driver
+registry.datasource.username=
+registry.datasource.password=
+registry.datasource.url=
+### DB - JPA Properties ###
+registry.jpa.properties.hibernate.format_sql=false
+registry.jpa.properties.hibernate.hbm2ddl.auto=
+registry.jpa.properties.hibernate.show_sql=false
+### Flowable DB config ###
+flowable.datasource.url=${registry.datasource.url}
+flowable.datasource.username=${registry.datasource.username}
+flowable.datasource.password=${registry.datasource.password}
+flowable.datasource.driver-class-name=${registry.datasource.driver-class-name}
+flowable.database-schema=flowable
+flowable.database-schema-update=true
+### Elastic Properties ###
+registry.elasticsearch.uris=
+registry.elasticsearch.username=
+registry.elasticsearch.password=
+### JMS Properties ###
+#### ActiveMQ ####
+registry.jms.host=
+registry.jms.prefix=
+registry.jms.username=
+registry.jms.password=
+#### Catalogue JMS Prefix ###
+catalogue.jms.prefix=
+#### AMS ####
+catalogue.jms.ams.enabled=true
+catalogue.jms.ams.host=
+catalogue.jms.ams.key=
+catalogue.jms.ams.project=
+############################
+##  Catalogue Properties  ##
+############################
+## Basic Info ##
+catalogue.homepage=
+catalogue.version=@project.version@
+## Node Registry ##
+node.pid.value=
+node.name=
+node.registry.url=
+node.registry.key=
+## Admins / Onboarding Team ##
+catalogue.admins=
+catalogue.onboarding-team=
+## Redirect URLs ##
+catalogue.login-redirect=
+catalogue.logout-redirect=
+## AARC Entitlement Group ##
+catalogue.entitlement-group=
+## Resource ID Prefixes ##
+catalogue.resources.adapter.id-prefix=adapter
+catalogue.resources.catalogue.id-prefix=catalogue
+catalogue.resources.configuration-template.id-prefix=configuration_template
+catalogue.resources.configuration-template-instance.id-prefix=configuration_template_instance
+catalogue.resources.datasource.id-prefix=datasource
+catalogue.resources.deployable-application.id-prefix=deployable_application
+catalogue.resources.interoperability-record.id-prefix=interoperability_record
+catalogue.resources.organisation.id-prefix=organisation
+catalogue.resources.resource-interoperability-record.id-prefix=resource_interoperability_record
+catalogue.resources.service.id-prefix=service
+catalogue.resources.training-resource.id-prefix=training_resource
+## Federated search ##
+catalogue.resources.adapter.federation-path=adapters
+catalogue.resources.catalogue.federation-path=catalogues
+catalogue.resources.configuration-template.federation-path=configurationTemplates
+catalogue.resources.configuration-template-instance.federation-path=configurationTemplateInstances
+catalogue.resources.datasource.federation-path=datasources
+catalogue.resources.deployable-application.federation-path=deployableApplications
+catalogue.resources.interoperability-record.federation-path=interoperabilityRecords
+catalogue.resources.organisation.federation-path=organisations
+catalogue.resources.resource-interoperability-record.federation-path=resourceInteroperabilityRecords
+catalogue.resources.service.federation-path=services
+catalogue.resources.training-resource.federation-path=trainingResources
+## Federation Duplicate-Id Check ##
+federation.duplicate-check.enabled=true
+federation.duplicate-check.search-url=https://federatedsearch.service.eosc-beyond.eu/api/federation
+federation.duplicate-check.timeout-ms=8000
+federation.duplicate-check.circuit-breaker-failure-threshold=5
+federation.duplicate-check.circuit-breaker-reset-ms=60000
+## Federation Cross-Linkage (dropdowns + CT/CTI flow across nodes) ##
+federation.cross-linkage.enabled=true
+federation.cross-linkage.search-url=https://federatedsearch.service.eosc-beyond.eu/api/federation
+federation.cross-linkage.timeout-ms=8000
+federation.cross-linkage.circuit-breaker-failure-threshold=5
+federation.cross-linkage.circuit-breaker-reset-ms=60000
+## Email Notification Properties ##
+catalogue.emails.enabled=false
+catalogue.emails.admin-notifications=false
+catalogue.emails.provider-notifications=false
+catalogue.emails.registration-emails.to=
+catalogue.emails.resource-consistency-notifications=false
+catalogue.emails.resource-consistency-emails.to=
+catalogue.emails.resource-consistency-emails.cc=
+catalogue.resource-consistency.fix-enabled=true
+catalogue.emails.support=
+## Mailer Properties ##
+catalogue.mailer.host=
+catalogue.mailer.from=
+catalogue.mailer.username=
+catalogue.mailer.password=
+catalogue.mailer.port=
+catalogue.mailer.protocol=
+catalogue.mailer.auth=
+catalogue.mailer.ssl=
+#########################
+##  External Services  ##
+#########################
+## PID Service ##
+pid.service.enabled=false
+pid.service.consistency.enabled=false
+## OpenAIRE Datasource Properties ##
+openaire.ds.api=https://beta.services.openaire.eu/
+## Monitoring Properties ##
+argo.grnet.monitoring.service.types=
+argo.grnet.monitoring.availability=
+argo.grnet.monitoring.status=
+argo.grnet.monitoring.token=
+## Helpdesk ##
+helpdesk.enabled=false
+helpdesk.endpoint=
+## Accounting ##
+accounting.enabled=false
+accounting.project-id=
+accounting.endpoint=
+accounting.client-id=
+accounting.client-secret=
+accounting.token-endpoint=
+## SQAaaS ##
+sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
+```
+
+### PID Properties Example
+
+Refer to [pid.yml](resource-catalogue-service/src/main/resources/pid.yml)
+for the complete set of configuration options.
+
+Resource Catalogue supports both Mutual TLS (mTLS) and Basic Authentication.
+For Basic Authentication, provide a password; otherwise, provide all necessary
+configurations under the auth block.
+
+```yaml
+## PID Properties ##
+catalogue:
+  type-api:
+    url: https://typeapi.pidconsortium.net
+  resources:
+    organisation:
+      fdo:
+        profile: 21.T11969/a9f1d8fa88366d1f49cb
+        data: self
+      resolve-endpoints:
+        - https://userspace.endpoint/providers/{pid}
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    service:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
+      resolve-endpoints:
+        - https://userspace.endpoint/services/{pid}
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    datasource:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
+      resolve-endpoints:
+        - https://userspace.endpoint/services/{pid}
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    catalogue:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
+      resolve-endpoints:
+        - https://userspace.endpoint/catalogues/{pid}
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    training-resource:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
+      resolve-endpoints:
+        - https://userspace.endpoint/trainings/{encodedPid}
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    interoperability-record:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
+      resolve-endpoints:
+        - https://userspace.endpoint/guidelines/{encodedPid}
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    adapter:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
+      resolve-endpoints:
+        - https://userspace.endpoint/adapters/{encodedPid}
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+    deployable-application:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
+      resolve-endpoints:
+        - https://userspace.endpoint/deployable_services/{pid}
+      pid-issuer:
+        url:
+        user:
+        user-index:
+        password:
+        auth:
+          self-signed-cert:
+          client-key:
+          client-cert:
+```
 
 ---
 
@@ -168,289 +518,6 @@ their invaluable support and resources.
 
 ---
 
-### Application Properties Example
-
-Refer to [application.properties][prop] for the complete set of
-configuration options.
-
-```properties
-#########################
-##  Server Properties  ##
-#########################
-dynamic.properties.path=
-## Server Configuration ##
-server.port=8080
-server.servlet.context-path=/api
-## Logging Configuration ##
-logging.level.root=INFO
-#########################
-##  Spring Properties  ##
-#########################
-## Mail Templates ##
-spring.freemarker.template-loader-path=classpath:/mail/
-## Profiles && Configuration ##
-spring.profiles.active=beyond
-spring.autoconfigure.exclude=org.flowable.spring.boot.FlowableJpaAutoConfiguration,org.flowable.spring.boot.eventregistry.EventRegistryAutoConfiguration
-## Servlet ##
-spring.servlet.multipart.max-file-size=50MB
-spring.servlet.multipart.max-request-size=50MB
-## Bean Configuration ##
-spring.jpa.open-in-view=false
-spring.main.allow-bean-definition-overriding=true
-## Redis Properties ##
-spring.session.data.redis.namespace=eosc:beyond
-spring.data.redis.host=
-spring.data.redis.port=
-spring.data.redis.password=
-## Security Properties ##
-### EOSC AAI Authentication ###
-spring.security.oauth2.client.provider.eosc.issuer-uri=
-spring.security.oauth2.client.registration.eosc.client-id=
-spring.security.oauth2.client.registration.eosc.client-name=
-spring.security.oauth2.client.registration.eosc.client-secret=
-spring.security.oauth2.client.registration.eosc.scope=openid,email,profile,entitlements
-spring.security.oauth2.client.registration.eosc.redirect-uri=
-spring.security.oauth2.resourceserver.opaquetoken.introspection-uri=${spring.security.oauth2.client.provider.eosc.issuer-uri}/protocol/openid-connect/token/introspect
-spring.security.oauth2.resourceserver.opaquetoken.client-id=${spring.security.oauth2.client.registration.eosc.client-id}
-spring.security.oauth2.resourceserver.opaquetoken.client-secret=${spring.security.oauth2.client.registration.eosc.client-secret}
-## Springdoc Configuration ##
-springdoc.api-docs.path=/api-docs
-### Controllers ###
-springdoc.group-configs[0].group=resource-catalogue
-springdoc.group-configs[0].display-name=1.Resource Catalogue
-springdoc.group-configs[0].packages-to-scan=gr.uoa.di.madgik.resourcecatalogue
-springdoc.group-configs[1].group=dynamic-catalogue
-springdoc.group-configs[1].display-name=2.Dynamic Catalogue
-springdoc.group-configs[1].packages-to-scan=gr.uoa.di.madgik.catalogue
-springdoc.group-configs[2].group=registry
-springdoc.group-configs[2].display-name=3.Registry
-springdoc.group-configs[2].packages-to-scan=gr.uoa.di.madgik.registry
-### Swagger UI ###
-springdoc.swagger-ui.docExpansion=none
-springdoc.swagger-ui.operationsSorter=method
-springdoc.swagger-ui.syntaxHighlight.activated=false
-springdoc.swagger-ui.tagsSorter=alpha
-springdoc.swagger-ui.tryItOutEnabled=true
-###########################
-##  Registry Properties  ##
-###########################
-## Platform Settings ##
-fqdn=
-## Registry Configuration ##
-### Host ###
-registry.host=http://localhost:${server.port}${server.servlet.context-path}
-### DB - Datasource Properties ###
-registry.datasource.configuration.maximum-pool-size=
-registry.datasource.driver-class-name=org.postgresql.Driver
-registry.datasource.username=
-registry.datasource.password=
-registry.datasource.url=
-### DB - JPA Properties ###
-registry.jpa.properties.hibernate.allow_update_outside_transaction=true
-registry.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-registry.jpa.properties.hibernate.enable_lazy_load_no_trans=true
-registry.jpa.properties.hibernate.format_sql=false
-registry.jpa.properties.hibernate.hbm2ddl.auto=
-registry.jpa.properties.hibernate.show_sql=false
-### Elastic Properties ###
-registry.elasticsearch.uris=
-registry.elasticsearch.username=
-registry.elasticsearch.password=
-### JMS Properties ###
-#### ActiveMQ ####
-registry.jms.host=
-registry.jms.prefix=
-registry.jms.username=
-registry.jms.password=
-#### Catalogue JMS Prefix ###
-catalogue.jms.prefix=
-#### AMS ####
-catalogue.jms.ams.enabled=true
-catalogue.jms.ams.host=
-catalogue.jms.ams.key=
-catalogue.jms.ams.project=
-############################
-##  Catalogue Properties  ##
-############################
-## Basic Info ##
-catalogue.homepage=
-catalogue.version=@project.version@
-## Admins / Onboarding Team ##
-catalogue.admins=
-catalogue.onboarding-team=
-## Redirect URLs ##
-catalogue.login-redirect=
-catalogue.logout-redirect=
-## Resource ID Prefixes ##
-catalogue.resources.adapter.id-prefix=adapter
-catalogue.resources.catalogue.id-prefix=catalogue
-catalogue.resources.configuration-template.id-prefix=configuration_template
-catalogue.resources.configuration-template-instance.id-prefix=configuration_template_instance
-catalogue.resources.datasource.id-prefix=datasource
-catalogue.resources.deployable-application.id-prefix=deployable_application
-catalogue.resources.interoperability-record.id-prefix=interoperability_record
-catalogue.resources.organisation.id-prefix=organisation
-catalogue.resources.resource-interoperability-record.id-prefix=resource_interoperability_record
-catalogue.resources.service.id-prefix=service
-catalogue.resources.training_resource.id-prefix=training_resource
-catalogue.resources.vocabulary-curation.id-prefix=vocabulary_curation
-## Email Notification Properties ##
-catalogue.emails.enabled=false
-catalogue.emails.admin-notifications=false
-catalogue.emails.provider-notifications=false
-catalogue.emails.registration-emails.to=
-catalogue.emails.resource-consistency-notifications=false
-catalogue.emails.resource-consistency-emails.to=
-catalogue.emails.resource-consistency-emails.cc=
-catalogue.resource-consistency.fix-enabled=true
-catalogue.emails.support=
-## Mailer Properties ##
-catalogue.mailer.host=
-catalogue.mailer.from=
-catalogue.mailer.username=
-catalogue.mailer.password=
-catalogue.mailer.port=
-catalogue.mailer.protocol=
-catalogue.mailer.auth=
-catalogue.mailer.ssl=
-#########################
-##  External Services  ##
-#########################
-## PID Service ##
-pid.service.enabled=false
-pid.service.consistency.enabled=false
-## OpenAIRE Datasource Properties ##
-openaire.ds.api=https://beta.services.openaire.eu/
-## Monitoring Properties ##
-argo.grnet.monitoring.service.types=
-argo.grnet.monitoring.availability=
-argo.grnet.monitoring.status=
-argo.grnet.monitoring.token=
-## Helpdesk ##
-helpdesk.enabled=true
-helpdesk.endpoint=
-## Accounting ##
-accounting.enabled=true
-accounting.project-id=
-accounting.endpoint=
-accounting.client-id=
-accounting.client-secret=
-accounting.token-endpoint=
-########################
-##  Other Properties  ##
-########################
-## SQAaaS ##
-sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
-## Node Registry ##
-node.pid.value=
-node.name=
-node.registry.url=
-node.registry.key=
-```
-
-### PID Properties Example
-
-Refer to [pid.yml](resource-catalogue-service/src/main/resources/pid.yml)
-for the complete set of configuration options.
-
-Resource Catalogue supports both Mutual TLS (mTLS) and Basic Authentication.
-For Basic Authentication, provide a password; otherwise, provide all necessary
-configurations under the auth block.
-
-```yaml
-## PID Properties ##
-catalogue:
-  resources:
-    organisation:
-      resolve-endpoints:
-      pid-issuer:
-        url:
-        user:
-        user-index:
-        password:
-        auth:
-          self-signed-cert:
-          client-key:
-          client-cert:
-    service:
-      resolve-endpoints:
-      pid-issuer:
-        url:
-        user:
-        user-index:
-        password:
-        auth:
-          self-signed-cert:
-          client-key:
-          client-cert:
-    datasource:
-      resolve-endpoints:
-      pid-issuer:
-        url:
-        user:
-        user-index:
-        password:
-        auth:
-          self-signed-cert:
-          client-key:
-          client-cert:
-    catalogue:
-      resolve-endpoints:
-      pid-issuer:
-        url:
-        user:
-        user-index:
-        password:
-        auth:
-          self-signed-cert:
-          client-key:
-          client-cert:
-    training-resource:
-      resolve-endpoints:
-      pid-issuer:
-        url:
-        user:
-        user-index:
-        password:
-        auth:
-          self-signed-cert:
-          client-key:
-          client-cert:
-    interoperability-record:
-      resolve-endpoints:
-      pid-issuer:
-        url:
-        user:
-        user-index:
-        password:
-        auth:
-          self-signed-cert:
-          client-key:
-          client-cert:
-    adapter:
-      resolve-endpoints:
-      pid-issuer:
-        url:
-        user:
-        user-index:
-        password:
-        auth:
-          self-signed-cert:
-          client-key:
-          client-cert:
-    deployable-application:
-      resolve-endpoints:
-      pid-issuer:
-        url:
-        user:
-        user-index:
-        password:
-        auth:
-          self-signed-cert:
-          client-key:
-          client-cert:
-```
-
 ## External Service Coordination
 
 Several integrations require coordination with their respective teams before
@@ -482,4 +549,4 @@ they can be fully operational.
 
 [contrib]: https://github.com/madgeek-arc/resource-catalogue/graphs/contributors
 
-[prop]:resource-catalogue-service/src/main/resources/application.properties
+[prop]: resource-catalogue-service/src/main/resources/application.properties

@@ -1,7 +1,12 @@
 ## PID Properties ##
 catalogue:
+  type-api:
+    url: https://typeapi.pidconsortium.net
   resources:
     organisation:
+      fdo:
+        profile: 21.T11969/a9f1d8fa88366d1f49cb
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -13,6 +18,10 @@ catalogue:
           client-key:
           client-cert:
     service:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -24,6 +33,10 @@ catalogue:
           client-key:
           client-cert:
     datasource:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -35,6 +48,10 @@ catalogue:
           client-key:
           client-cert:
     catalogue:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -46,6 +63,10 @@ catalogue:
           client-key:
           client-cert:
     training-resource:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -57,6 +78,10 @@ catalogue:
           client-key:
           client-cert:
     interoperability-record:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -68,6 +93,10 @@ catalogue:
           client-key:
           client-cert:
     adapter:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:
@@ -79,6 +108,10 @@ catalogue:
           client-key:
           client-cert:
     deployable-application:
+      fdo:
+        type: type
+        profile: 21.T11969/3bffc374f55052af4e91
+        data: self
       resolve-endpoints:
       pid-issuer:
         url:

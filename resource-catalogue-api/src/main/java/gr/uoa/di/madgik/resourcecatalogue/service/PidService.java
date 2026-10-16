@@ -34,10 +34,10 @@ public interface PidService {
     /**
      * Registers/Updates a PID on a specific resource
      *
-     * @param pid       PID
-     * @param endpoints List of endpoints in which the specific resource resolves (optional)
+     * @param bundle    the resource whose PID record is being registered/updated
+     * @param endpoints Extra resolve endpoints to append on top of the resource's own URLs (optional)
      */
-    void register(String pid, List<String> endpoints);
+    void register(Bundle bundle, List<String> endpoints);
 
     /**
      * Deletes the resource from the PID service

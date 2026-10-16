@@ -100,18 +100,18 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         t.setId(t.getIdentifiers().getPid());
         t.getMetadata().setPublished(true);
 
+        // sets public ids to fields
+        updateIdsToPublic(t);
+
         // Post PID
         if (pidServiceEnabled && registerPID) {
             try {
                 logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
-                pidIssuer.postPID(t.getId(), null);
+                pidIssuer.postPID(t, getResourceTypeName(), null);
             } catch (Exception e) {
                 logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
             }
         }
-
-        // sets public ids to fields
-        updateIdsToPublic(t);
 
         T ret;
         logger.info("{} '{}' is being published with id '{}'", t.getClass().getSimpleName(), lowerLevelId, t.getId());
@@ -121,6 +121,10 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
     }
 
     public T update(T t, Authentication authentication) {
+        return update(t, false);
+    }
+
+    public T update(T t, boolean registerPID) {
         T published = get(t.getIdentifiers().getPid(), t.getCatalogueId());
         t.setIdentifiers(published.getIdentifiers());
         t.setId(published.getId());
@@ -128,6 +132,16 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
         // sets public ids to fields
         updateIdsToPublic(t);
+
+        // Update PID
+        if (pidServiceEnabled && registerPID) {
+            try {
+                logger.info("Updating PID record of {} with id {} on PID service", t.getClass().getSimpleName(), t.getId());
+                pidIssuer.postPID(t, getResourceTypeName(), null);
+            } catch (Exception e) {
+                logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
+            }
+        }
 
         logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         T ret;

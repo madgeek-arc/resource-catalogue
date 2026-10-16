@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,6 +32,9 @@ public class AuthTokenService {
                 OAuth2AccessToken accessToken = client.getAccessToken();
                 return accessToken.getTokenValue();
             }
+        }
+        if (authentication instanceof BearerTokenAuthentication bearer) {
+            return bearer.getToken().getTokenValue();
         }
         throw new InsufficientAuthenticationException("Insufficient authentication");
 

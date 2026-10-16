@@ -149,6 +149,7 @@ public class OrganisationManager extends ResourceCatalogueGenericManager<Organis
     }
 
     @Override
+    @Transactional
     public OrganisationBundle setSuspend(String id, String catalogueId, boolean suspend, Authentication auth) {
         OrganisationBundle bundle = get(id, catalogueId);
         if (bundle.getMetadata().isPublished()) {

@@ -69,6 +69,26 @@ public class TestUtils {
         return bundle;
     }
 
+    public static AdapterBundle createAdapterBundle() {
+        AdapterBundle bundle = new AdapterBundle();
+        bundle.setAdapter(createAdapter());
+        bundle.setCatalogueId("eosc");
+        return bundle;
+    }
+
+    public static LinkedHashMap<String, Object> createAdapter() {
+        LinkedHashMap<String, Object> adapter = new LinkedHashMap<>();
+        adapter.put("id", "test-adapter");
+        adapter.put("name", "Test Adapter");
+        adapter.put("resourceOwner", "11.1111/abc123");
+        adapter.put("catalogueId", "eosc");
+        LinkedHashMap<String, Object> linkedResource = new LinkedHashMap<>();
+        linkedResource.put("resource_type", "service");
+        linkedResource.put("id", "test-service");
+        adapter.put("linkedResource", linkedResource);
+        return adapter;
+    }
+
     public static LinkedHashMap<String, Object> createInteroperabilityRecord() {
         LinkedHashMap<String, Object> record = new LinkedHashMap<>();
         record.put("id", "test-interoperability-record");

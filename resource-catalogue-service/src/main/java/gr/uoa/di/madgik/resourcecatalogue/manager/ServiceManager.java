@@ -85,7 +85,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
             return service;
         }
         service.markUpdate(UserInfo.of(auth), comment);
-        relationshipValidator.checkRelatedResourceIDsConsistency(service);
+        relationshipValidator.checkRelatedResourceIDsConsistency(service, existing);
         checkAndResetServiceOnboarding(service, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships

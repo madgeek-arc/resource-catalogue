@@ -223,9 +223,9 @@
                 "defaultValue": null,
                 "values": null,
                 "properties": {
-                  "url": "/api/interoperabilityRecord/list",
+                  "url": "/api/interoperabilityRecord/list?federation=true",
                   "idField": "id",
-                  "labelField": "name"
+                  "labelField": "label"
                 },
                 "multiplicity": true,
                 "prefill": null
