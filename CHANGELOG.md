@@ -1,5 +1,93 @@
 # Changelog
 
+## [6.4.0](https://github.com/madgeek-arc/resource-catalogue/compare/v6.3.0...v6.4.0) (2026-10-19)
+
+
+### Features
+
+* **adapter:** reassign an Adapter to a different owner Organisation ([38ae1d6](https://github.com/madgeek-arc/resource-catalogue/commit/38ae1d6bbe6cfe7bc3771697ef70bbe878a92a7d))
+* autofill functionality on vocabulary field ([2958e91](https://github.com/madgeek-arc/resource-catalogue/commit/2958e91477513b21da9e8b908c4b0973c8ceec2c))
+* content-diff sync for wizard models and vocabularies ([52c5b93](https://github.com/madgeek-arc/resource-catalogue/commit/52c5b93f3e1c9b78706b0bc50b48950337c18035))
+* **federation:** add federation-aware public Interoperability Record lookup ([c04db3d](https://github.com/madgeek-arc/resource-catalogue/commit/c04db3dd7f98e7099160113a860d652536e9c1e7))
+* **federation:** serve Configuration Templates from the public layer for cross-node reads ([f233047](https://github.com/madgeek-arc/resource-catalogue/commit/f2330470444f12c0d38d1f91ff47c36b7704d1ef))
+* **pids:** validate PID records against FDO profile before posting ([b3f9607](https://github.com/madgeek-arc/resource-catalogue/commit/b3f960709c8fa763acbe4d7f37a5e1b3c0cb3aee))
+* publish Configuration Templates && dedicated public controller ([496dcd4](https://github.com/madgeek-arc/resource-catalogue/commit/496dcd40042fa22cb89cdd36766840ede0812c14))
+* resource federation cross linkage initial commit ([f9eb55f](https://github.com/madgeek-arc/resource-catalogue/commit/f9eb55f8eb9d3b6bcd3c5c67d160e537a612eabd))
+* **resourceTypes:** add reindexVersion property to force reindex on deploy ([f226355](https://github.com/madgeek-arc/resource-catalogue/commit/f2263550570d4252b98f7b1bf3f55825e5010a9a))
+
+
+### Bug Fixes
+
+* **adapter:** map public Adapter resourceOwner to the Organisation public PID ([4be058b](https://github.com/madgeek-arc/resource-catalogue/commit/4be058bbba3fe511a30495b9fbcb3879f7a6b805))
+* autofill nodePID field on RIR, CTI. Remove deprecated NODE.json ([8cd2486](https://github.com/madgeek-arc/resource-catalogue/commit/8cd2486bae2e40e5f3708e49cd7fe65ce8041ccf))
+* autofill nodePID field on RIR, CTI. Remove deprecated NODE.json ([2c9a82b](https://github.com/madgeek-arc/resource-catalogue/commit/2c9a82b694044a511ac92ac57dc3967014feb257))
+* **config:** drop unused FdoVersion field from ResourceProperties ([f2ba4a0](https://github.com/madgeek-arc/resource-catalogue/commit/f2ba4a0bd0e260a747628676bfcb9d8416165993))
+* **dedup:** exclude own public copy and fix federation self-recursion in similarity checks ([3fe45f6](https://github.com/madgeek-arc/resource-catalogue/commit/3fe45f6636801eaa6b5d00ba53c604093de52b45))
+* **dedup:** exclude own public copy from federation match results ([02c9456](https://github.com/madgeek-arc/resource-catalogue/commit/02c94569269d468cbdb659e157c13fd140338b96))
+* **deps:** bump netty to 4.2.17.Final to fix CVE-2026-75595/75596 ([adcd090](https://github.com/madgeek-arc/resource-catalogue/commit/adcd0902db2f425f3da32b891128aeaeb29311df))
+* **deps:** bump spring-framework to 7.0.9 to fix content spoofing CVE ([8bdc2a7](https://github.com/madgeek-arc/resource-catalogue/commit/8bdc2a7bbec49f8e3031725784c203e2a3a29521))
+* **deps:** bump spring-security to 7.0.7 to fix LDAP admin bind-DN exposure CVE ([6d04584](https://github.com/madgeek-arc/resource-catalogue/commit/6d04584d2b7aa9834bfd268fc7e2ef685f3685b4))
+* **deps:** bump tomcat to 11.0.25 to fix high-severity CVEs ([78b711c](https://github.com/madgeek-arc/resource-catalogue/commit/78b711c18d83a62835dfe2da69342a92acb2c792))
+* **deps:** pin freemarker to 2.3.35 to fix CVE-2026-84939 ([a2c14dc](https://github.com/madgeek-arc/resource-catalogue/commit/a2c14dcc26eaa4b036fcce205007036fec65f9cf))
+* **deps:** suppress false-positive CVE-2026-59318 for spring-ai 1.1.8 artifacts ([d88d2d0](https://github.com/madgeek-arc/resource-catalogue/commit/d88d2d038c4b8f2ef24982b5b029791df9829073))
+* **deps:** suppress false-positive CVE-2026-72649 on elasticsearch-java client ([2cb86e5](https://github.com/madgeek-arc/resource-catalogue/commit/2cb86e5f716c58f6151b9e87d6950d8573df6bd2))
+* **deps:** suppress false-positive Elasticsearch server CVE on elasticsearch-java client ([50e3af4](https://github.com/madgeek-arc/resource-catalogue/commit/50e3af42d7752cd670362d71d05a330e0af50c6a))
+* **federation:** browse configurationTemplates by interoperability_record_id ([d39be93](https://github.com/madgeek-arc/resource-catalogue/commit/d39be93f9e2a4588cdb3253086acdd3f72842316))
+* **federation:** don't block resource writes when the aggregator is slow or unreachable ([15ef3de](https://github.com/madgeek-arc/resource-catalogue/commit/15ef3de466df943b41e8d8d5686c461f0fac3f7e))
+* **federation:** treat unconfigured resource type as unknown, not absent ([4bbd68c](https://github.com/madgeek-arc/resource-catalogue/commit/4bbd68c18dd01d466d4212de94087b66fc55ef6e))
+* **federation:** validate provider ids against federation before rejecting ([c1cad4c](https://github.com/madgeek-arc/resource-catalogue/commit/c1cad4c3a3b17715f702096bfb414664b8428cda))
+* get vocabularies by id for ids containing slashes (eg. HLE) ([11ff93a](https://github.com/madgeek-arc/resource-catalogue/commit/11ff93a8e079f2fb5061e7ba1b6b0b59f75830ca))
+* handle missing or string legalEntity in HLE vocabulary update ([06f4fc5](https://github.com/madgeek-arc/resource-catalogue/commit/06f4fc5711ff8a3e70e70ebad1b830d51f9af74f))
+* make provider/catalogue suspend atomic and defer public-resource sync to after commit ([bce01b3](https://github.com/madgeek-arc/resource-catalogue/commit/bce01b395a07a910b2d9aaa32f364d6e8f0d0153))
+* mismatch between index and model fields ([30567b7](https://github.com/madgeek-arc/resource-catalogue/commit/30567b7bdf5913a2fc957be7a379ecc4af8ab950))
+* **model:** implement equals/hashCode on Bundle to fix no-op update checks ([722d140](https://github.com/madgeek-arc/resource-catalogue/commit/722d140c65e5fa194490ae9edc5c3147b6d97bc2))
+* **node:** add request timeout and cache failures for node registry lookup ([971338e](https://github.com/madgeek-arc/resource-catalogue/commit/971338eb64836e97cae2c32dbccfc869820f917f))
+* PID record registration after updating the public IDs ([56bb4c6](https://github.com/madgeek-arc/resource-catalogue/commit/56bb4c69a2801d78f2221fdddcb4a3149838d6ed))
+* **pids:** don't abort nightly PID registration job on a single bad bundle ([8db61ac](https://github.com/madgeek-arc/resource-catalogue/commit/8db61ac4bdffc6a8a3e2e2dd468972b32fe4fe3e))
+* **pids:** fix startup failure when self-signed-cert is left unset. Fall back to plain WebClient when pid-issuer auth is unset ([87120b2](https://github.com/madgeek-arc/resource-catalogue/commit/87120b26a1e3e5fad1042175ec91ecf719f281d4))
+* **pids:** load bundled pid.yml as a real Spring config source ([4c71090](https://github.com/madgeek-arc/resource-catalogue/commit/4c7109020ec2834c9d1aa3b56de62b17f68c77f9))
+* **pids:** resolve resource type from bundle class, not id-prefix guessing ([8693f11](https://github.com/madgeek-arc/resource-catalogue/commit/8693f1116503604344cd293c6e82f9dac9c5e5c1))
+* postPID() method now uses resource types instead of prefixes to determine the resource, as prefixes may be the same for all resources ([a6108e9](https://github.com/madgeek-arc/resource-catalogue/commit/a6108e959f5eac601ef4c7b8ef574956f0d22c6c))
+* **public:** verify unresolved linked-resource ids against the federation ([acfdeb2](https://github.com/madgeek-arc/resource-catalogue/commit/acfdeb2d1c24cf474157e5bbcc991f10285c3629))
+* **security:** avoid NPE in resource-admin checks for ids missing locally ([f3e3c8a](https://github.com/madgeek-arc/resource-catalogue/commit/f3e3c8ab9715d057b952b03bf9eecef3588c6624))
+* **security:** guard adminsAndEpot with lock and log role reloads in InMemoryAuthoritiesMapper ([6dd3544](https://github.com/madgeek-arc/resource-catalogue/commit/6dd3544b097104461cf736d5bed2e933e408027e))
+* **security:** handle bearer token authentication in User.of ([736dd09](https://github.com/madgeek-arc/resource-catalogue/commit/736dd09d1cdc0cae9ec6122342f2c21fa2bde977))
+* **security:** handle bearer token authentication in User.of ([1f1f110](https://github.com/madgeek-arc/resource-catalogue/commit/1f1f110794134648af82e73405e065a2339a4b29))
+* **security:** scope beyond-only controllers to require auth ([a8df28b](https://github.com/madgeek-arc/resource-catalogue/commit/a8df28b260c5ab1e1ea9fa0b9dbf0ad2dc4025a6))
+* **security:** stop logging user emails in InMemoryAuthoritiesMapper ([61e7212](https://github.com/madgeek-arc/resource-catalogue/commit/61e721299e7c0ba70a8535bcf8490277fc408509))
+* update ct, rir resource types to include status index field ([fb40193](https://github.com/madgeek-arc/resource-catalogue/commit/fb401930f75174494f7cad9cae0a63f429e9834b))
+* use correct version of the federation search client ([e06bd10](https://github.com/madgeek-arc/resource-catalogue/commit/e06bd1099762c24296c23bbebebd486450099f2f))
+* **vocabulary:** restore Type.NODE enum constant ([0f735fa](https://github.com/madgeek-arc/resource-catalogue/commit/0f735fa2ceb7f253c3683a95f0fcda8099b084da))
+* **wizard:** stop hashing derived parentId/parent as if they were fil… ([e050be1](https://github.com/madgeek-arc/resource-catalogue/commit/e050be1f938d338b3d9dc71a6d94158986909230))
+* **wizard:** stop hashing derived parentId/parent as if they were file content ([a60bd30](https://github.com/madgeek-arc/resource-catalogue/commit/a60bd3007fd8140c21333b3317c13c638440c583))
+
+
+### Refactoring
+
+* add label field in NodeValue to showcase name+node in the dropdown ([3ba5d68](https://github.com/madgeek-arc/resource-catalogue/commit/3ba5d68a345daccc61ebe5aa35d26287aa732615))
+* **configurationTemplate:** move public-layer method out of private service ([10344f4](https://github.com/madgeek-arc/resource-catalogue/commit/10344f4251a5af4b0f467f652fb4cc9964151f75))
+* extract common circuit breaker ([1200527](https://github.com/madgeek-arc/resource-catalogue/commit/12005275ae5da01589f8a3e09ac1c486e3d49e51))
+* fdo related properties ([925bd9f](https://github.com/madgeek-arc/resource-catalogue/commit/925bd9f510dc545587bf9cb853384d80c4dc2bc0))
+* **federation:** drop Configuration Template Instance federation fallback ([23c32d1](https://github.com/madgeek-arc/resource-catalogue/commit/23c32d109a219fd3e1ca664a538a2a63ca31a554))
+* **federation:** rename resourceDisplayName param to resourceTypeName ([a217a9c](https://github.com/madgeek-arc/resource-catalogue/commit/a217a9c530d91bf9b9ed46e2bdd9264940ec5a4a))
+* **federation:** return Paging from config-template aggregator lookup ([8a181b6](https://github.com/madgeek-arc/resource-catalogue/commit/8a181b6021cbeaaf46bcf30716e068ff89282384))
+* **federation:** use renamed listResources and carry ResourceSummary description ([4eb1aac](https://github.com/madgeek-arc/resource-catalogue/commit/4eb1aace152e08053e41a6b01f2d96c8fb8d94bf))
+* **federation:** use shared SearchAggregatorClient for aggregator calls ([5d4ed9a](https://github.com/madgeek-arc/resource-catalogue/commit/5d4ed9abbe28cb450174c1c979a6482496357c0e))
+* listResources() now returns NodeValue objects ([04b4b72](https://github.com/madgeek-arc/resource-catalogue/commit/04b4b72e6036b090b11ef518ecc1dfc3fe2cbd51))
+* pid record refactoring ([528b0c3](https://github.com/madgeek-arc/resource-catalogue/commit/528b0c38c75217fe142d4b97b125786f00c14365))
+* **pids:** consolidate PID registration consistency checks into a shared method ([616d1d0](https://github.com/madgeek-arc/resource-catalogue/commit/616d1d09ec909d2682d33bd62890263a63788c48))
+* **pids:** extract HS_ADMIN permissions literal to a constant ([d707477](https://github.com/madgeek-arc/resource-catalogue/commit/d7074773a318f6fe1e537a9e3aa01c41693e3258))
+* remove ID field from PID record ([b90e918](https://github.com/madgeek-arc/resource-catalogue/commit/b90e918c0bc42f6e80cff319947b45f2b33e2fd3))
+* **rest:** drop redundant configuration template instance routes ([fb06df7](https://github.com/madgeek-arc/resource-catalogue/commit/fb06df7cac85f56cc6024a5ab2eefab1f8f279cb))
+* **rest:** drop redundant public configuration template route ([b2029fa](https://github.com/madgeek-arc/resource-catalogue/commit/b2029faa4756418e8f261450ba48527726083c08))
+* **search:** drop TEXT capability from ID-shaped index fields (excluding resource internal id) ([6632eb8](https://github.com/madgeek-arc/resource-catalogue/commit/6632eb8ef91a04e737854b5d4dea4765ae65150b))
+* **security:** remove dead ROLE_CATALOGUE_ADMIN/catalogueUsers code from InMemoryAuthoritiesMapper ([b2301fa](https://github.com/madgeek-arc/resource-catalogue/commit/b2301fa553f7ef0071f725a159dea7fe0d342a8a))
+
+
+### Performance Improvements
+
+* **federation:** fetch cross-linkage dropdown lists from aggregator /ids endpoint ([7b9d5fd](https://github.com/madgeek-arc/resource-catalogue/commit/7b9d5fda562c3feab106859ca07a15147e322619))
+
 ## [6.3.0](https://github.com/madgeek-arc/resource-catalogue/compare/v6.2.0...v6.3.0) (2026-07-16)
 
 
