@@ -246,12 +246,14 @@ catalogue.resources.resource-interoperability-record.federation-path=resourceInt
 catalogue.resources.service.federation-path=services
 catalogue.resources.training-resource.federation-path=trainingResources
 ## Federation Duplicate-Id Check ##
+# with enabled=false the remaining keys of this group can be omitted
 federation.duplicate-check.enabled=true
 federation.duplicate-check.search-url=https://federatedsearch.service.eosc-beyond.eu/api/federation
 federation.duplicate-check.timeout-ms=8000
 federation.duplicate-check.circuit-breaker-failure-threshold=5
 federation.duplicate-check.circuit-breaker-reset-ms=60000
 ## Federation Cross-Linkage (dropdowns + CT/CTI flow across nodes) ##
+# with enabled=false the remaining keys of this group can be omitted
 federation.cross-linkage.enabled=true
 federation.cross-linkage.search-url=https://federatedsearch.service.eosc-beyond.eu/api/federation
 federation.cross-linkage.timeout-ms=8000

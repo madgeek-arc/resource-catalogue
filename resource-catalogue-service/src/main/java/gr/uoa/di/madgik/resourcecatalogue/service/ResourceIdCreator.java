@@ -51,11 +51,17 @@ public class ResourceIdCreator implements IdCreator {
         this.searchService = searchService;
         this.catalogueProperties = catalogueProperties;
         this.federationProperties = federationProperties;
-        this.searchAggregatorClient = new SearchAggregatorClient(
-                federationProperties.getSearchUrl(), Duration.ofMillis(federationProperties.getTimeoutMs()));
-        this.circuitBreaker = new CircuitBreaker(
-                federationProperties.getCircuitBreakerFailureThreshold(),
-                federationProperties.getCircuitBreakerResetMs());
+        // the connection settings are only required, and so only read, when the check is enabled
+        if (Boolean.TRUE.equals(federationProperties.isEnabled())) {
+            this.searchAggregatorClient = new SearchAggregatorClient(
+                    federationProperties.getSearchUrl(), Duration.ofMillis(federationProperties.getTimeoutMs()));
+            this.circuitBreaker = new CircuitBreaker(
+                    federationProperties.getCircuitBreakerFailureThreshold(),
+                    federationProperties.getCircuitBreakerResetMs());
+        } else {
+            this.searchAggregatorClient = null;
+            this.circuitBreaker = null;
+        }
     }
 
     @Override
@@ -99,7 +105,7 @@ public class ResourceIdCreator implements IdCreator {
      * blocking id generation on an external dependency.
      */
     boolean existsInFederation(String resourceType, String id) {
-        if (!federationProperties.isEnabled()) {
+        if (!Boolean.TRUE.equals(federationProperties.isEnabled())) {
             return false;
         }
         String federationPath = federationPathFor(resourceType);

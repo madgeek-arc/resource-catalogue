@@ -50,10 +50,6 @@ class FederationResourceClientUnitTest {
         client = new FederationResourceClient(enabledProperties(), searchAggregatorClient);
     }
 
-    /**
-     * All fields are mandatory in {@link FederationCrossLinkageProperties} (no in-code
-     * defaults), so every instance built here must set every field explicitly.
-     */
     private FederationCrossLinkageProperties enabledProperties() {
         return new FederationCrossLinkageProperties()
                 .setEnabled(true)
@@ -149,5 +145,16 @@ class FederationResourceClientUnitTest {
         assertThat(result).isNull();
         verify(searchAggregatorClient, org.mockito.Mockito.times(3))
                 .getById(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void disabledWithOnlyEnabledFlagSet_returnsEmptyResults() {
+        FederationResourceClient disabled = new FederationResourceClient(
+                new FederationCrossLinkageProperties().setEnabled(false));
+
+        assertThat(disabled.isEnabled()).isFalse();
+        assertThat(disabled.listAll("services")).isEmpty();
+        assertThat(disabled.getById("services", "21.T15", "svc")).isEmpty();
+        assertThat(disabled.existsById("services", "21.T15", "svc")).isNull();
     }
 }

@@ -16,7 +16,7 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.config.properties;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -37,8 +37,9 @@ import org.springframework.validation.annotation.Validated;
  * features - a pre-submit consistency check versus user-facing dropdown population - can be
  * tuned and toggled independently.
  * <p>
- * Every field here must be set explicitly in configuration; there are no in-code defaults, so a
- * missing value fails application startup instead of silently falling back to a stale default.
+ * {@link #enabled} must always be set. The remaining fields are required only when the feature is
+ * enabled; there are no in-code defaults, so a missing value then fails application startup
+ * instead of silently falling back to a stale default.
  */
 @Configuration
 @ConfigurationProperties(prefix = "federation.cross-linkage")
@@ -48,11 +49,8 @@ public class FederationCrossLinkageProperties {
     @NotNull
     private Boolean enabled;
 
-    @NotNull
-    @NotEmpty
     private String searchUrl;
 
-    @NotNull
     @Positive
     private Long timeoutMs;
 
@@ -60,16 +58,24 @@ public class FederationCrossLinkageProperties {
      * Number of consecutive failed/timed-out calls after which the circuit breaker opens,
      * i.e. further calls are skipped (failing open) until {@link #circuitBreakerResetMs} elapses.
      */
-    @NotNull
     @Positive
     private Integer circuitBreakerFailureThreshold;
 
     /**
      * How long the circuit breaker stays open before the next call is allowed through again.
      */
-    @NotNull
     @Positive
     private Long circuitBreakerResetMs;
+
+    @AssertTrue(message = "search-url, timeout-ms, circuit-breaker-failure-threshold and "
+            + "circuit-breaker-reset-ms must be set when enabled=true")
+    boolean isConfiguredWhenEnabled() {
+        return !Boolean.TRUE.equals(enabled)
+                || (searchUrl != null && !searchUrl.isBlank()
+                && timeoutMs != null
+                && circuitBreakerFailureThreshold != null
+                && circuitBreakerResetMs != null);
+    }
 
     public Boolean isEnabled() {
         return enabled;

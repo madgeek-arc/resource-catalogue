@@ -56,8 +56,10 @@ public class FederationSimilarityClient {
     @Autowired
     public FederationSimilarityClient(CatalogueProperties catalogueProperties,
                                       FederationDuplicateCheckProperties federationProperties) {
-        this(catalogueProperties, federationProperties, new SearchAggregatorClient(
-                federationProperties.getSearchUrl(), Duration.ofMillis(federationProperties.getTimeoutMs())));
+        this(catalogueProperties, federationProperties, Boolean.TRUE.equals(federationProperties.isEnabled())
+                ? new SearchAggregatorClient(federationProperties.getSearchUrl(),
+                        Duration.ofMillis(federationProperties.getTimeoutMs()))
+                : null);
     }
 
     public FederationSimilarityClient(CatalogueProperties catalogueProperties,
@@ -66,9 +68,11 @@ public class FederationSimilarityClient {
         this.catalogueProperties = catalogueProperties;
         this.federationProperties = federationProperties;
         this.searchAggregatorClient = searchAggregatorClient;
-        this.circuitBreaker = new CircuitBreaker(
-                federationProperties.getCircuitBreakerFailureThreshold(),
-                federationProperties.getCircuitBreakerResetMs());
+        // the connection settings are only required, and so only read, when the feature is enabled
+        this.circuitBreaker = Boolean.TRUE.equals(federationProperties.isEnabled())
+                ? new CircuitBreaker(federationProperties.getCircuitBreakerFailureThreshold(),
+                        federationProperties.getCircuitBreakerResetMs())
+                : null;
     }
 
     /**
@@ -81,7 +85,7 @@ public class FederationSimilarityClient {
     public List<ScoredResult<LinkedHashMap<String, Object>>> findSimilar(String resourceType,
                                                                           Map<String, Object> resource,
                                                                           Float threshold, int quantity) {
-        if (!federationProperties.isEnabled()) {
+        if (!Boolean.TRUE.equals(federationProperties.isEnabled())) {
             return Collections.emptyList();
         }
         String federationPath = federationPathFor(resourceType);

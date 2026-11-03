@@ -73,6 +73,22 @@ class FederationDuplicateCheckPropertiesUnitTest {
     }
 
     @Test
+    void disabledWithOnlyEnabledFlagSet_startsSuccessfully() {
+        contextRunner.withPropertyValues("federation.duplicate-check.enabled=false")
+                .run(context -> assertThat(context).hasNotFailed());
+    }
+
+    @Test
+    void enabledWithMissingSearchUrl_failsStartup() {
+        contextRunner.withPropertyValues(
+                "federation.duplicate-check.enabled=true",
+                "federation.duplicate-check.timeout-ms=2000",
+                "federation.duplicate-check.circuit-breaker-failure-threshold=5",
+                "federation.duplicate-check.circuit-breaker-reset-ms=60000"
+        ).run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
     void blankPropertyValue_failsStartupInsteadOfSilentlyBindingNull() {
         contextRunner.withPropertyValues(
                 "federation.duplicate-check.enabled=", // present but blank, e.g. an empty override

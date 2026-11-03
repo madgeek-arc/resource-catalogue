@@ -59,16 +59,19 @@ public class FederationResourceClient {
 
     @Autowired
     public FederationResourceClient(FederationCrossLinkageProperties properties) {
-        this(properties, new SearchAggregatorClient(
-                properties.getSearchUrl(), Duration.ofMillis(properties.getTimeoutMs())));
+        this(properties, Boolean.TRUE.equals(properties.isEnabled())
+                ? new SearchAggregatorClient(properties.getSearchUrl(), Duration.ofMillis(properties.getTimeoutMs()))
+                : null);
     }
 
     public FederationResourceClient(FederationCrossLinkageProperties properties, SearchAggregatorClient searchAggregatorClient) {
         this.properties = properties;
         this.searchAggregatorClient = searchAggregatorClient;
-        this.circuitBreaker = new CircuitBreaker(
-                properties.getCircuitBreakerFailureThreshold(),
-                properties.getCircuitBreakerResetMs());
+        // the connection settings are only required, and so only read, when the feature is enabled
+        this.circuitBreaker = isEnabled()
+                ? new CircuitBreaker(properties.getCircuitBreakerFailureThreshold(),
+                        properties.getCircuitBreakerResetMs())
+                : null;
     }
 
     public boolean isEnabled() {

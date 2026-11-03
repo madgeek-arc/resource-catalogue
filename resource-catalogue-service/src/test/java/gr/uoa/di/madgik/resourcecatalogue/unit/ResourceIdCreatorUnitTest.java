@@ -71,9 +71,8 @@ class ResourceIdCreatorUnitTest {
     }
 
     /**
-     * All fields are mandatory in {@link FederationDuplicateCheckProperties} (no in-code
-     * defaults), so every instance built in these tests - like every instance Spring binds from
-     * configuration - must set every field explicitly.
+     * Fully configured but disabled, so tests can flip {@code enabled} without filling in the
+     * connection settings each time.
      */
     private FederationDuplicateCheckProperties disabledFederationProperties() {
         return new FederationDuplicateCheckProperties()
@@ -99,6 +98,18 @@ class ResourceIdCreatorUnitTest {
         String id = idCreator.generate("service");
 
         assertThat(id).startsWith("service/");
+    }
+
+    @Test
+    void generate_federationCheckDisabledWithOnlyEnabledFlagSet_works() {
+        Paging<Resource> emptyPaging = mock(Paging.class);
+        lenient().when(emptyPaging.getTotal()).thenReturn(0);
+        lenient().when(searchService.search(any(FacetFilter.class))).thenReturn(emptyPaging);
+
+        idCreator = new ResourceIdCreator(searchService, catalogueWithResource("service", "services"),
+                new FederationDuplicateCheckProperties().setEnabled(false));
+
+        assertThat(idCreator.generate("service")).startsWith("service/");
     }
 
     @Test

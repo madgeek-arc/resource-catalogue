@@ -69,10 +69,6 @@ class FederationSimilarityClientUnitTest {
         return catalogueProperties;
     }
 
-    /**
-     * All fields are mandatory in {@link FederationDuplicateCheckProperties} (no in-code
-     * defaults), so every instance built here must set every field explicitly.
-     */
     private FederationDuplicateCheckProperties enabledProperties() {
         return new FederationDuplicateCheckProperties()
                 .setEnabled(true)
@@ -130,5 +126,14 @@ class FederationSimilarityClientUnitTest {
                 client.findSimilar("service", Map.of(), 0.9f, 5);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findSimilar_disabledWithOnlyEnabledFlagSet_returnsEmpty() {
+        FederationSimilarityClient disabled = new FederationSimilarityClient(
+                catalogueWithResource("service", "services"),
+                new FederationDuplicateCheckProperties().setEnabled(false));
+
+        assertThat(disabled.findSimilar("service", Map.of(), 0.9f, 5)).isEmpty();
     }
 }
