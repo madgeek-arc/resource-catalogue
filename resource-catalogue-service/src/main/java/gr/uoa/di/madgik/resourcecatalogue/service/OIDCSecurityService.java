@@ -384,7 +384,6 @@ public class OIDCSecurityService implements SecurityService {
     }
 
     private boolean canAddResources(Authentication auth, OrganisationBundle provider) {
-        // provider related check
         if (!provider.isActive()) {
             return false;
         }
@@ -394,15 +393,6 @@ public class OIDCSecurityService implements SecurityService {
         }
         if (!"approved".equals(status)) {
             return false;
-        }
-
-        // resource onboarding related check
-        String templateStatus = provider.getTemplateStatus();
-        if ("no template status".equals(templateStatus)) {
-            return true;
-        }
-        if ("rejected template".equals(templateStatus)) {
-            return true;
         }
 
         return isOrganisationAdmin(auth, provider.getId());
