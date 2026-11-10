@@ -38,7 +38,7 @@
         <jackson.version>3.2.3</jackson.version>
         <registry-core.version>5.0.0-SNAPSHOT</registry-core.version>
         <elasticsearch.version>9.4.3</elasticsearch.version>
-        <springdoc.version>3.0.3</springdoc.version>
+        <springdoc.version>3.2.0</springdoc.version>
         <jakarta.mail.version>2.1.3</jakarta.mail.version>
         <jaxb2-maven-plugin.version>4.1.0</jaxb2-maven-plugin.version>
 
@@ -295,6 +295,11 @@
                 <groupId>io.opentelemetry.semconv</groupId>
                 <artifactId>opentelemetry-semconv</artifactId>
                 <version>1.41.1</version>
+            </dependency>
+            <dependency> <!-- CVE-2026-116803/116804: DOMPurify < 3.4.17 bundled in swagger-ui; 5.34.1 ships 3.4.17. springdoc 3.2.0 defaults to 5.34.0. Keep in sync with springdoc.swagger-ui.version in application.properties. -->
+                <groupId>org.webjars</groupId>
+                <artifactId>swagger-ui</artifactId>
+                <version>5.34.1</version>
             </dependency>
             <dependency> <!-- CVE-2026-84939: path traversal via locale identifier in template loading, fixed in 2.3.35. Pulled in by spring-boot-starter-freemarker. -->
                 <groupId>org.freemarker</groupId>

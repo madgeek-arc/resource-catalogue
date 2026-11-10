@@ -74,6 +74,10 @@ public class SecureResponseAdvice<T> implements ResponseBodyAdvice<T> {
                              Class<? extends HttpMessageConverter<?>> aClass,
                              ServerHttpRequest serverHttpRequest,
                              ServerHttpResponse serverHttpResponse) {
+        // raw payloads (e.g. springdoc's OpenAPI JSON) hold no bundles to mask and are noise when logged
+        if (t instanceof byte[]) {
+            return t;
+        }
         if (t != null) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             fixNodeFacets(t);
