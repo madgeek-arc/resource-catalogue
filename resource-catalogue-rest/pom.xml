@@ -51,6 +51,7 @@
                                 <exclude>**/controllers/registry/ConfigurationTemplateController.java</exclude>
                                 <exclude>**/controllers/registry/ConfigurationTemplateInstanceController.java</exclude>
                                 <exclude>**/controllers/registry/CSVController.java</exclude>
+                                <exclude>**/controllers/registry/DeduplicationController.java</exclude>
                                 <exclude>**/controllers/registry/DeployableApplicationController.java</exclude>
                                 <exclude>**/controllers/registry/OrganisationController.java</exclude>
                                 <exclude>**/controllers/registry/CatalogueController.java</exclude>

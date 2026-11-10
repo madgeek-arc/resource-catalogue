@@ -136,6 +136,8 @@
                                 <exclude>**/manager/ConfigurationTemplateManager.java</exclude>
                                 <exclude>**/manager/CSVManager.java</exclude>
                                 <exclude>**/manager/pids/PidServiceRegistrationConsistency.java</exclude>
+                                <exclude>**/manager/DeduplicationManager.java</exclude>
+                                <exclude>**/manager/pids/BundleResourceTypes.java</exclude>
                                 <exclude>**/manager/PublicAdapterService.java</exclude>
                                 <exclude>**/manager/PublicConfigurationTemplateInstanceService.java</exclude>
                                 <exclude>**/manager/PublicDatasourceService.java</exclude>
@@ -173,6 +175,16 @@
                                     <testExclude>**/unit/ServiceManagerUnitTest.java</testExclude>
                                     <testExclude>**/unit/TrainingResourceManagerUnitTest.java</testExclude>
                                     <testExclude>**/unit/DatasourceManagerUnitTest.java</testExclude>
+                                    <testExclude>**/config/security/SecurityConfigUnitTest.java</testExclude>
+                                    <testExclude>**/unit/AdapterManagerUnitTest.java</testExclude>
+                                    <testExclude>**/unit/BearerTokenUserUnitTest.java</testExclude>
+                                    <testExclude>**/unit/BundleUnitTest.java</testExclude>
+                                    <testExclude>**/unit/CatalogueManagerUnitTest.java</testExclude>
+                                    <testExclude>**/unit/InteroperabilityRecordManagerUnitTest.java</testExclude>
+                                    <testExclude>**/unit/ProviderCanAddResourcesUnitTest.java</testExclude>
+                                    <testExclude>**/unit/PublicAdapterServiceUnitTest.java</testExclude>
+                                    <testExclude>**/unit/PublicResourceInteroperabilityRecordServiceFederationUnitTest.java</testExclude>
+                                    <testExclude>**/unit/RelationshipValidatorUnitTest.java</testExclude>
                                 </testExcludes>
                         </configuration>
                     </plugin>

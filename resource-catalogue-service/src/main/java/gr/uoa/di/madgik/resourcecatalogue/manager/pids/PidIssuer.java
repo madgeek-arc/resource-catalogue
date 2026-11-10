@@ -19,6 +19,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -67,6 +69,7 @@ public class PidIssuer {
     private static final int FDO_TYPE_INDEX = 9991;
     private static final int FDO_PROFILE_INDEX = 9992;
     private static final int FDO_DATA_INDEX = 9993;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String ORGANISATION_RESOURCE_TYPE = "organisation";
 
     private static final DateTimeFormatter[] PUBLISHING_DATE_FORMATS = {
@@ -77,7 +80,7 @@ public class PidIssuer {
             DateTimeFormatter.ofPattern("dd.MM.yyyy"),
     };
 
-    private final CatalogueProperties properties;
+    protected final CatalogueProperties properties;
     private final PidRecordValidator pidRecordValidator;
 
     public PidIssuer(CatalogueProperties properties, PidRecordValidator pidRecordValidator) {
@@ -98,7 +101,10 @@ public class PidIssuer {
                 ? customResolveEndpoints
                 : resourceProperties.getResolveEndpoints();
 
-        LinkedHashMap<String, Object> payload = bundle.getPayload();
+        // lot1 bundles wrap a typed payload instead of a map; the lot1 PidIssuer never reaches this line
+        LinkedHashMap<String, Object> payload = OBJECT_MAPPER.convertValue(bundle.getPayload(),
+                new TypeReference<LinkedHashMap<String, Object>>() {
+                });
         PidFields fields = extractFields(payload);
 
         String typeApiUrl = (properties.getTypeApi() != null) ? properties.getTypeApi().getUrl() : null;
@@ -163,7 +169,7 @@ public class PidIssuer {
         exchange(null, headers, config, pid, webClient, HttpMethod.DELETE);
     }
 
-    private WebClient createWebClient(PidIssuerConfig config) {
+    protected WebClient createWebClient(PidIssuerConfig config) {
         PidIssuerConfig.IssuerCertificateAuthenticationConfig auth = config.getAuth();
         if (auth == null) {
             return WebClient.builder().build();
@@ -434,7 +440,7 @@ public class PidIssuer {
         return result;
     }
 
-    private HttpHeaders createHeaders(PidIssuerConfig config) {
+    protected HttpHeaders createHeaders(PidIssuerConfig config) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if (config.getAuth() != null &&
@@ -457,7 +463,7 @@ public class PidIssuer {
         return "Basic " + new String(encodedAuth, StandardCharsets.UTF_8);
     }
 
-    private void exchange(String payload, HttpHeaders headers, PidIssuerConfig config, String pid,
+    protected void exchange(String payload, HttpHeaders headers, PidIssuerConfig config, String pid,
                           WebClient webClient, HttpMethod method) {
         try {
             URI uri = URI.create(String.join("/", config.getUrl(), pid));
