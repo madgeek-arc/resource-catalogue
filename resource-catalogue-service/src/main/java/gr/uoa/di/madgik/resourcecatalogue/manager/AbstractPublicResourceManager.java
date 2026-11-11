@@ -115,7 +115,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
         T ret;
         logger.info("{} '{}' is being published with id '{}'", t.getClass().getSimpleName(), lowerLevelId, t.getId());
-        ret = genericResourceService.add(getResourceTypeName(), t, false); //FIXME: issue with public CTI (Found more than one models)
+        ret = genericResourceService.add(getResourceTypeName(), t, false);
         jmsService.convertAndSendTopic(getResourceTypeName() + ".create", t);
         return ret;
     }
@@ -145,7 +145,7 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
 
         logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
         T ret;
-        ret = genericResourceService.update(getResourceTypeName(), t);
+        ret = genericResourceService.update(getResourceTypeName(), t, false);
         jmsService.convertAndSendTopic(getResourceTypeName() + ".update", t);
         return ret;
     }
