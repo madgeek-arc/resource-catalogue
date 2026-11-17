@@ -1,0 +1,20 @@
+## Onboarding Properties ##
+# Onboarding policy per resource type. One of:
+#   review-all      -> every resource goes 'pending' and needs approval (templateStatus is never touched)
+#   review-first    -> the Organisation's first resource is a template (goes 'pending'); once it is approved,
+#                      the Organisation's later resources are approved immediately. The Organisation has ONE
+#                      template, shared by every type set to review-first: the first resource of any of them is
+#                      the template, none of them can be added while it is pending, and its approval opens all
+#                      of them.
+#   review-none     -> every resource is approved immediately
+# Organisation and Catalogue onboarding is not configurable: it always requires approval.
+# Every configurable type must be set. The defaults below reproduce the behaviour before the policy became configurable.
+catalogue:
+  onboarding:
+    policy:
+      service: review-first
+      datasource: review-first
+      training_resource: review-first
+      deployable_application: review-first
+      adapter: review-none
+      interoperability_record: review-all
