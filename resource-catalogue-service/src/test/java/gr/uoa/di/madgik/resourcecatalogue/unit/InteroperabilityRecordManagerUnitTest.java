@@ -25,6 +25,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Metadata;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -69,6 +70,8 @@ class InteroperabilityRecordManagerUnitTest {
     private EmailService emailService;
     @Mock
     private WorkflowService workflowService;
+    @Mock
+    private OnboardingTemplateHandler templateHandler;
 
     @InjectMocks
     private InteroperabilityRecordManager interoperabilityRecordManager;

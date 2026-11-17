@@ -4,6 +4,7 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingPolicyService;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RuntimeService;
@@ -29,15 +30,18 @@ public class FlowableWorkflowService implements WorkflowService {
     private final RuntimeService runtimeService;
     private final HistoryService historyService;
     private final WorkflowVariableMapper helper;
+    private final OnboardingPolicyService onboardingPolicyService;
     private final String nodePid;
 
     public FlowableWorkflowService(RuntimeService runtimeService,
                                    HistoryService historyService,
                                    WorkflowVariableMapper helper,
+                                   OnboardingPolicyService onboardingPolicyService,
                                    NodeProperties nodeProperties) {
         this.runtimeService = runtimeService;
         this.historyService = historyService;
         this.helper = helper;
+        this.onboardingPolicyService = onboardingPolicyService;
         this.nodePid = nodeProperties.getPid().getValue();
     }
 
@@ -57,6 +61,9 @@ public class FlowableWorkflowService implements WorkflowService {
         }
         Map<String, Object> vars = new HashMap<>();
         vars.put("resourceType", resourceType);
+        if (onboardingPolicyService.isConfigurable(resourceType)) {
+            vars.put("onboardingPolicy", onboardingPolicyService.getPolicy(resourceType).workflowValue());
+        }
         helper.putResourceBundle(vars, bundle);
         helper.putUserInfo(vars, UserInfo.of(authentication));
 

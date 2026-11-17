@@ -23,13 +23,16 @@ import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
 import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
+import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -51,16 +54,19 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
     private final OrganisationService organisationService;
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
+    private final OnboardingTemplateHandler templateHandler;
 
     public InteroperabilityRecordManager(OrganisationService organisationService, IdCreator idCreator,
                                          SecurityService securityService, VocabularyService vocabularyService,
                                          GenericResourceService genericResourceService,
                                          EmailService emailService,
-                                         WorkflowService workflowService) {
+                                         WorkflowService workflowService,
+                                         OnboardingTemplateHandler templateHandler) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
         this.genericResourceService = genericResourceService;
         this.emailService = emailService;
+        this.templateHandler = templateHandler;
     }
 
     @Override
@@ -77,6 +83,7 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
             return guideline;
         }
         guideline.markUpdate(UserInfo.of(auth), comment);
+        templateHandler.resetRejectedOnboarding(getResourceTypeName(), guideline, auth);
 
         blockNamingAsEOSCMonitoringGuideline((String) guideline.getInteroperabilityRecord().get("name"),
                 (String) existing.getInteroperabilityRecord().get("name"));
@@ -98,6 +105,8 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         }
         InteroperabilityRecordBundle existing = get(id);
         existing.markOnboard(status, active, UserInfo.of(auth), null);
+
+        templateHandler.syncTemplateStatus(getResourceTypeName(), existing, status, auth);
 
         logger.info("Verifying Interoperability Record: {}", existing);
         return genericResourceService.update(getResourceTypeName(), existing);
@@ -131,6 +140,14 @@ public class InteroperabilityRecordManager extends ResourceCatalogueGenericManag
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         return getAll(ff, auth);
+    }
+
+    @Override
+    public Bundle getTemplate(String providerId, Authentication auth) {
+        if (!templateHandler.isReviewFirst(getResourceTypeName())) {
+            return null;
+        }
+        return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {

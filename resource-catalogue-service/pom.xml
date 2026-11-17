@@ -156,6 +156,7 @@
                                 <exclude>**/manager/ResourceCatalogueManager.java</exclude>
                                 <exclude>**/manager/PublicResourceInteroperabilityRecordService.java</exclude>
                                 <exclude>**/onboarding/**</exclude>
+                                <exclude>**/config/properties/OnboardingProperties.java</exclude>
                                 <exclude>**/manager/VocabularyManager.java</exclude>
                                 <exclude>**/manager/aspects/MailManagementAspect.java</exclude>
                                 <exclude>**/manager/aspects/OnboardingManagementAspect.java</exclude>
@@ -185,6 +186,11 @@
                                     <testExclude>**/unit/PublicAdapterServiceUnitTest.java</testExclude>
                                     <testExclude>**/unit/PublicResourceInteroperabilityRecordServiceFederationUnitTest.java</testExclude>
                                     <testExclude>**/unit/RelationshipValidatorUnitTest.java</testExclude>
+                                    <testExclude>**/unit/OnboardingPolicyUnitTest.java</testExclude>
+                                    <testExclude>**/unit/OnboardingTemplateHandlerUnitTest.java</testExclude>
+                                    <testExclude>**/unit/MailManagementAspectUnitTest.java</testExclude>
+                                    <testExclude>**/unit/ResourceOnboardingMailTemplateUnitTest.java</testExclude>
+                                    <testExclude>**/integration/OnboardingPolicyIntegrationTest.java</testExclude>
                                 </testExcludes>
                         </configuration>
                     </plugin>

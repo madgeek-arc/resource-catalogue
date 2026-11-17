@@ -65,11 +65,16 @@
     <exclusiveGateway id="Gateway_1cobda0" name="Check if Catalogue is Approved">
       <incoming>Flow_0pjxq7p</incoming>
       <outgoing>Flow_0r3bpfb</outgoing>
+      <outgoing>Flow_1catall</outgoing>
       <outgoing>Flow_0p1meom</outgoing>
     </exclusiveGateway>
 
     <sequenceFlow id="Flow_0r3bpfb" name="approved" sourceRef="Gateway_1cobda0" targetRef="Activity_1lr0vvx">
-      <conditionExpression xsi:type="tFormalExpression">${catalogue != null &amp;&amp; catalogue['status'] == 'approved'}</conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression">${catalogue != null &amp;&amp; catalogue['status'] == 'approved' &amp;&amp; onboardingPolicy != 'review-all'}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_1catall" name="approved - review-all" sourceRef="Gateway_1cobda0" targetRef="Activity_0fof8ny">
+      <conditionExpression xsi:type="tFormalExpression">${catalogue != null &amp;&amp; catalogue['status'] == 'approved' &amp;&amp; onboardingPolicy == 'review-all'}</conditionExpression>
     </sequenceFlow>
 
     <sequenceFlow id="Flow_0p1meom" name="not approved" sourceRef="Gateway_1cobda0" targetRef="Activity_101mfzm">
@@ -104,18 +109,33 @@
     <sequenceFlow id="Flow_1b9ungf" sourceRef="Activity_1otm8rv" targetRef="Activity_0vagvot"/>
     <sequenceFlow id="Flow_0sojgzr" sourceRef="Activity_0vagvot" targetRef="Gateway_0a1sz4u"/>
 
-    <exclusiveGateway id="Gateway_0a1sz4u" name="Check Organisation Status">
+    <exclusiveGateway id="Gateway_0a1sz4u" name="Check Organisation Status, Onboarding Policy and Template Status">
       <incoming>Flow_0sojgzr</incoming>
       <outgoing>Flow_1ff3515</outgoing>
       <outgoing>Flow_1o7p270</outgoing>
+      <outgoing>Flow_0i7qnvc</outgoing>
+      <outgoing>Flow_00bwlo7</outgoing>
+      <outgoing>Flow_1f9jhf2</outgoing>
     </exclusiveGateway>
 
     <sequenceFlow id="Flow_1ff3515" name="not approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1a6x7qv">
       <conditionExpression xsi:type="tFormalExpression">${organisation['status'] != 'approved'}</conditionExpression>
     </sequenceFlow>
 
-    <sequenceFlow id="Flow_1o7p270" name="approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_0fof8ny">
-      <conditionExpression xsi:type="tFormalExpression">${organisation['status'] == 'approved'}</conditionExpression>
+    <sequenceFlow id="Flow_1o7p270" name="review-all" sourceRef="Gateway_0a1sz4u" targetRef="Activity_0fof8ny">
+      <conditionExpression xsi:type="tFormalExpression">${organisation['status'] == 'approved' &amp;&amp; onboardingPolicy == 'review-all'}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_0i7qnvc" name="approved" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1lr0vvx">
+      <conditionExpression xsi:type="tFormalExpression">${organisation['status'] == 'approved' &amp;&amp; (onboardingPolicy == 'review-none' || (onboardingPolicy == 'review-first' &amp;&amp; organisation['templateStatus'] == 'approved template'))}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_00bwlo7" name="review-first" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1y14exa">
+      <conditionExpression xsi:type="tFormalExpression">${organisation['status'] == 'approved' &amp;&amp; onboardingPolicy == 'review-first' &amp;&amp; (organisation['templateStatus'] == 'no template status' || organisation['templateStatus'] == 'rejected template')}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_1f9jhf2" name="Already pending template" sourceRef="Gateway_0a1sz4u" targetRef="Activity_1pndtpl">
+      <conditionExpression xsi:type="tFormalExpression">${organisation['status'] == 'approved' &amp;&amp; onboardingPolicy == 'review-first' &amp;&amp; organisation['templateStatus'] == 'pending template'}</conditionExpression>
     </sequenceFlow>
 
     <!-- Onboard - Approved (from catalogue path) -->
@@ -127,8 +147,36 @@
         <flowable:field name="active" stringValue="true"/>
       </extensionElements>
       <incoming>Flow_0r3bpfb</incoming>
+      <incoming>Flow_0i7qnvc</incoming>
       <outgoing>Flow_0skdybj</outgoing>
     </serviceTask>
+
+    <!-- Set Template Status = "pending template" on organisation (review-first policy) -->
+    <serviceTask id="Activity_1y14exa" name="Set Template Status"
+                 flowable:delegateExpression="${setKeyValueDelegate}">
+      <extensionElements>
+        <flowable:field name="variableName" stringValue="organisation"/>
+        <flowable:field name="key" stringValue="templateStatus"/>
+        <flowable:field name="value" stringValue="pending template"/>
+      </extensionElements>
+      <incoming>Flow_00bwlo7</incoming>
+      <outgoing>Flow_1yjo50z</outgoing>
+    </serviceTask>
+
+    <!-- Save Organisation -->
+    <serviceTask id="Activity_15om8qj" name="Save Organisation"
+                 flowable:delegateExpression="${updateResourceDelegate}">
+      <extensionElements>
+        <flowable:field name="resourceName" stringValue="organisation"/>
+        <flowable:field name="resourceType" stringValue="organisation"/>
+      </extensionElements>
+      <incoming>Flow_1yjo50z</incoming>
+      <outgoing>Flow_12ulh07</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_1yjo50z" sourceRef="Activity_1y14exa" targetRef="Activity_15om8qj"/>
+
+    <sequenceFlow id="Flow_12ulh07" sourceRef="Activity_15om8qj" targetRef="Activity_0fof8ny"/>
 
     <!-- Onboard - Pending with active=true (guideline specific) -->
     <serviceTask id="Activity_0fof8ny" name="Onboard - Pending"
@@ -139,6 +187,8 @@
         <flowable:field name="active" stringValue="true"/>
       </extensionElements>
       <incoming>Flow_1o7p270</incoming>
+      <incoming>Flow_12ulh07</incoming>
+      <incoming>Flow_1catall</incoming>
       <outgoing>Flow_1ut3wy5</outgoing>
     </serviceTask>
 
@@ -148,14 +198,29 @@
       <extensionElements>
         <flowable:field name="status" stringValue="FAILURE"/>
         <flowable:field name="code" stringValue="403"/>
-        <flowable:field name="message" stringValue="Organisation is not eligible to onboard a Guideline."/>
+        <flowable:field name="message" stringValue="The Organisation is not eligible to onboard a Guideline: it has not been approved yet."/>
       </extensionElements>
       <incoming>Flow_1ff3515</incoming>
       <outgoing>Flow_19dxg20</outgoing>
     </serviceTask>
 
+    <!-- Mark Failure - the Organisation's template is still under review -->
+    <serviceTask id="Activity_1pndtpl" name="Mark Failure - Pending Template"
+                 flowable:delegateExpression="${markWorkflowResultDelegate}">
+      <extensionElements>
+        <flowable:field name="status" stringValue="FAILURE"/>
+        <flowable:field name="code" stringValue="403"/>
+        <flowable:field name="message" stringValue="The Organisation already has a template under review (template status: pending template). The template is shared by all resource types with the review-first policy, so none of them can be added until it has been approved."/>
+      </extensionElements>
+      <incoming>Flow_1f9jhf2</incoming>
+      <outgoing>Flow_1pndend</outgoing>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_1pndend" sourceRef="Activity_1pndtpl" targetRef="Event_05bf4c9"/>
+
     <endEvent id="Event_05bf4c9">
       <incoming>Flow_19dxg20</incoming>
+      <incoming>Flow_1pndend</incoming>
       <incoming>Flow_0udute6</incoming>
     </endEvent>
 
@@ -326,6 +391,38 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0f5rjas_di" bpmnElement="Flow_0f5rjas">
         <di:waypoint x="620" y="620" /><di:waypoint x="620" y="702" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_1y14exa_di" bpmnElement="Activity_1y14exa">
+        <dc:Bounds x="1060" y="110" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_15om8qj_di" bpmnElement="Activity_15om8qj">
+        <dc:Bounds x="1220" y="110" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_00bwlo7_di" bpmnElement="Flow_00bwlo7">
+        <di:waypoint x="983" y="277" /><di:waypoint x="983" y="215" /><di:waypoint x="1110" y="215" /><di:waypoint x="1110" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yjo50z_di" bpmnElement="Flow_1yjo50z">
+        <di:waypoint x="1160" y="150" /><di:waypoint x="1220" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12ulh07_di" bpmnElement="Flow_12ulh07">
+        <di:waypoint x="1270" y="190" /><di:waypoint x="1270" y="225" /><di:waypoint x="1150" y="225" /><di:waypoint x="1150" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1f9jhf2_di" bpmnElement="Flow_1f9jhf2">
+        <di:waypoint x="985" y="302" /><di:waypoint x="985" y="370" /><di:waypoint x="1380" y="370" /><di:waypoint x="1380" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i7qnvc_di" bpmnElement="Flow_0i7qnvc">
+        <di:waypoint x="970" y="315" /><di:waypoint x="970" y="400" />
+        <bpmndi:BPMNLabel><dc:Bounds x="975" y="350" width="46" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1catall_di" bpmnElement="Flow_1catall">
+        <di:waypoint x="608" y="452" /><di:waypoint x="608" y="520" /><di:waypoint x="1560" y="520" /><di:waypoint x="1560" y="235" /><di:waypoint x="1160" y="235" /><di:waypoint x="1160" y="250" />
+        <bpmndi:BPMNLabel><dc:Bounds x="900" y="502" width="100" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_1pndtpl_di" bpmnElement="Activity_1pndtpl">
+        <dc:Bounds x="1340" y="260" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1pndend_di" bpmnElement="Flow_1pndend">
+        <di:waypoint x="1440" y="260" /><di:waypoint x="1484" y="260" /><di:waypoint x="1484" y="138" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -20,7 +20,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import org.springframework.security.core.Authentication;
 
 public interface AdapterService extends ResourceCatalogueGenericService<AdapterBundle>,
-        EOSCResourceService<AdapterBundle>, DraftService<AdapterBundle> {
+        EOSCResourceService<AdapterBundle>,
+        TemplateOnboardingService, DraftService<AdapterBundle> {
 
     /**
      * Moves an Adapter to a different owner Organisation. The target Organisation must exist in the

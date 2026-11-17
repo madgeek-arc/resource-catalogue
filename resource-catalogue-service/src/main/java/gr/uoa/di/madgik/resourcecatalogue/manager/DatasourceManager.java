@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
 import gr.uoa.di.madgik.resourcecatalogue.exceptions.CatalogueResourceNotFoundException;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
@@ -45,6 +46,7 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
     private static final Logger logger = LoggerFactory.getLogger(DatasourceManager.class);
 
     private final OrganisationService organisationService;
+    private final OnboardingTemplateHandler templateHandler;
     private final OpenAIREDatasourceManager openAIREDatasourceManager;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
@@ -60,9 +62,11 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
                              RelationshipValidator relationshipValidator,
                              ResourceInteroperabilityRecordService rirService,
                              EmailService emailService,
-                             WorkflowService workflowService) {
+                             WorkflowService workflowService,
+                             OnboardingTemplateHandler templateHandler) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
+        this.templateHandler = templateHandler;
         this.openAIREDatasourceManager = openAIREDatasourceManager;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
@@ -95,26 +99,13 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         }
         datasource.markUpdate(UserInfo.of(auth), comment);
         relationshipValidator.checkRelatedResourceIDsConsistency(datasource, existing);
-        checkAndResetDatasourceOnboarding(datasource, auth);
+        templateHandler.resetRejectedOnboarding(getResourceTypeName(), datasource, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
 
         return genericResourceService.update(getResourceTypeName(), datasource);
-    }
-
-    private void checkAndResetDatasourceOnboarding(DatasourceBundle datasource, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"));
-        // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
-        if (datasource.getStatus().equals(vocabularyService.get("rejected").getId())) {
-            if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                datasource.setStatus(vocabularyService.get("pending").getId());
-                datasource.setActive(false);
-                provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                organisationService.update(provider, "system update", auth);
-            }
-        }
     }
 
     @Override
@@ -135,28 +126,10 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
         DatasourceBundle existing = get(id);
         existing.markOnboard(status, active, UserInfo.of(auth), null);
 
-        updateProviderTemplateStatus(existing, status, auth);
+        templateHandler.syncTemplateStatus(getResourceTypeName(), existing, status, auth);
 
         logger.info("Verifying Datasource: {}", existing);
         return genericResourceService.update(getResourceTypeName(), existing);
-    }
-
-    private void updateProviderTemplateStatus(DatasourceBundle datasource, String status, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"));
-        switch (status) {
-            case "pending":
-                provider.setTemplateStatus("pending template");
-                break;
-            case "approved":
-                provider.setTemplateStatus("approved template");
-                break;
-            case "rejected":
-                provider.setTemplateStatus("rejected template");
-                break;
-            default:
-                break;
-        }
-        organisationService.update(provider, "system update", auth);
     }
 
     @Override
@@ -218,6 +191,9 @@ public class DatasourceManager extends ResourceCatalogueGenericManager<Datasourc
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
+        if (!templateHandler.isReviewFirst(getResourceTypeName())) {
+            return null;
+        }
         return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
 

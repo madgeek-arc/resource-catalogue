@@ -29,6 +29,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.DeployableApplicationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
@@ -52,6 +53,7 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
     private static final Logger logger = LoggerFactory.getLogger(DeployableApplicationManager.class);
 
     private final OrganisationService organisationService;
+    private final OnboardingTemplateHandler templateHandler;
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
 
@@ -61,9 +63,11 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
                                         @Lazy VocabularyService vocabularyService,
                                         GenericResourceService genericResourceService,
                                         EmailService emailService,
-                                        WorkflowService workflowService) {
+                                        WorkflowService workflowService,
+                                        OnboardingTemplateHandler templateHandler) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
+        this.templateHandler = templateHandler;
         this.genericResourceService = genericResourceService;
         this.emailService = emailService;
     }
@@ -83,26 +87,12 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
             return deployableApplication;
         }
         deployableApplication.markUpdate(UserInfo.of(auth), comment);
-        checkAndResetDeployableApplicationOnboarding(deployableApplication, auth);
+        templateHandler.resetRejectedOnboarding(getResourceTypeName(), deployableApplication, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
 
         return genericResourceService.update(getResourceTypeName(), deployableApplication);
-    }
-
-    private void checkAndResetDeployableApplicationOnboarding(DeployableApplicationBundle deployableApplication, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
-                deployableApplication.getCatalogueId());
-        // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
-        if (deployableApplication.getStatus().equals(vocabularyService.get("rejected").getId())) {
-            if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                deployableApplication.setStatus(vocabularyService.get("pending").getId());
-                deployableApplication.setActive(false);
-                provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                organisationService.update(provider, "system update", auth);
-            }
-        }
     }
 
     @Override
@@ -121,29 +111,10 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
         DeployableApplicationBundle existing = get(id);
         existing.markOnboard(status, active, UserInfo.of(auth), null);
 
-        updateProviderTemplateStatus(existing, status, auth);
+        templateHandler.syncTemplateStatus(getResourceTypeName(), existing, status, auth);
 
         logger.info("Verifying Deployable Application: {}", existing);
         return genericResourceService.update(getResourceTypeName(), existing);
-    }
-
-    private void updateProviderTemplateStatus(DeployableApplicationBundle deployableApplication, String status, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"),
-                deployableApplication.getCatalogueId());
-        switch (status) {
-            case "pending":
-                provider.setTemplateStatus("pending template");
-                break;
-            case "approved":
-                provider.setTemplateStatus("approved template");
-                break;
-            case "rejected":
-                provider.setTemplateStatus("rejected template");
-                break;
-            default:
-                break;
-        }
-        organisationService.update(provider, "system update", auth);
     }
 
     @Override
@@ -206,6 +177,9 @@ public class DeployableApplicationManager extends ResourceCatalogueGenericManage
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
+        if (!templateHandler.isReviewFirst(getResourceTypeName())) {
+            return null;
+        }
         return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
     //endregion

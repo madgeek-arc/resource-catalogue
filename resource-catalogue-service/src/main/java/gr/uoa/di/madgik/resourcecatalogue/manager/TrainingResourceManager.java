@@ -29,6 +29,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
@@ -51,6 +52,7 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
     private static final Logger logger = LoggerFactory.getLogger(TrainingResourceManager.class);
 
     private final OrganisationService organisationService;
+    private final OnboardingTemplateHandler templateHandler;
     private final RelationshipValidator relationshipValidator;
     private final GenericResourceService genericResourceService;
     private final EmailService emailService;
@@ -61,9 +63,11 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
                                    @Lazy RelationshipValidator relationshipValidator,
                                    GenericResourceService genericResourceService,
                                    EmailService emailService,
-                                   WorkflowService workflowService) {
+                                   WorkflowService workflowService,
+                                   OnboardingTemplateHandler templateHandler) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
+        this.templateHandler = templateHandler;
         this.relationshipValidator = relationshipValidator;
         this.genericResourceService = genericResourceService;
         this.emailService = emailService;
@@ -85,26 +89,12 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         }
         trainingResource.markUpdate(UserInfo.of(auth), comment);
         relationshipValidator.checkRelatedResourceIDsConsistency(trainingResource, existing);
-        checkAndResetServiceOnboarding(trainingResource, auth);
+        templateHandler.resetRejectedOnboarding(getResourceTypeName(), trainingResource, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateScientificDomains();
 
         return genericResourceService.update(getResourceTypeName(), trainingResource);
-    }
-
-    private void checkAndResetServiceOnboarding(TrainingResourceBundle trainingResource, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
-                trainingResource.getCatalogueId());
-        // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
-        if (trainingResource.getStatus().equals(vocabularyService.get("rejected").getId())) {
-            if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                trainingResource.setStatus(vocabularyService.get("pending").getId());
-                trainingResource.setActive(false);
-                provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                organisationService.update(provider, "system update", auth);
-            }
-        }
     }
 
     @Override
@@ -124,29 +114,10 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
         TrainingResourceBundle existing = get(id);
         existing.markOnboard(status, active, UserInfo.of(auth), null);
 
-        updateProviderTemplateStatus(existing, status, auth);
+        templateHandler.syncTemplateStatus(getResourceTypeName(), existing, status, auth);
 
         logger.info("Verifying Training Resource: {}", existing);
         return genericResourceService.update(getResourceTypeName(), existing);
-    }
-
-    private void updateProviderTemplateStatus(TrainingResourceBundle trainingResource, String status, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"),
-                trainingResource.getCatalogueId());
-        switch (status) {
-            case "pending":
-                provider.setTemplateStatus("pending template");
-                break;
-            case "approved":
-                provider.setTemplateStatus("approved template");
-                break;
-            case "rejected":
-                provider.setTemplateStatus("rejected template");
-                break;
-            default:
-                break;
-        }
-        organisationService.update(provider, "system update", auth);
     }
 
     @Override
@@ -209,6 +180,9 @@ public class TrainingResourceManager extends ResourceCatalogueGenericManager<Tra
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
+        if (!templateHandler.isReviewFirst(getResourceTypeName())) {
+            return null;
+        }
         return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
     //endregion

@@ -24,6 +24,7 @@ import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.*;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingPolicyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -61,6 +62,7 @@ public class EmailService {
     private final String homepage;
     private final boolean enableAdminNotifications;
     private final boolean enableProviderNotifications;
+    private final OnboardingPolicyService onboardingPolicyService;
 
     public EmailService(MailService mailService, Configuration cfg,
                         SecurityService securityService,
@@ -72,7 +74,8 @@ public class EmailService {
                         @Lazy InteroperabilityRecordManager interoperabilityRecordManager,
                         @Lazy AdapterManager adapterManager,
                         CatalogueProperties properties,
-                        NodeProperties nodeProperties) {
+                        NodeProperties nodeProperties,
+                        OnboardingPolicyService onboardingPolicyService) {
         this.mailService = mailService;
         this.cfg = cfg;
         this.securityService = securityService;
@@ -88,6 +91,7 @@ public class EmailService {
         this.enableAdminNotifications = properties.getEmails().isAdminNotifications();
         this.enableProviderNotifications = properties.getEmails().isProviderNotifications();
         this.nodeName = nodeProperties.getName();
+        this.onboardingPolicyService = onboardingPolicyService;
     }
 
     //region mail functionalities
@@ -273,6 +277,54 @@ public class EmailService {
         }
     }
 
+    /**
+     * Sends the application-received / approved / rejected mails of a resource that goes through approval on its
+     * own, i.e. of a resource type with the {@code review-all} onboarding policy. Unlike
+     * {@link #sendOnboardingEmailsToProviderAdmins(OrganisationBundle, String)}, the mails describe the resource
+     * itself and not the Organisation's template.
+     */
+    @Async
+    public void sendResourceOnboardingEmails(Bundle resource, OrganisationBundle organisation) {
+        String organisationName = organisation.getOrganisation().get("name").toString();
+        EmailService.EmailBasicInfo emailBasicInfoUser =
+                initializeEmail("resourceOnboardingForProviderAdmins.ftl", resource, organisationName);
+
+        EmailService.EmailBasicInfo emailBasicInfoAdmin =
+                initializeEmail("resourceOnboardingForPortalAdmins.ftl", resource, organisationName);
+
+        updateRootAccordingToResourceType(resource, emailBasicInfoUser);
+        emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
+        emailBasicInfoAdmin.setSubject(String.format("[%s] Provider [%s]-[%s] has created a new %s", nodeName,
+                organisationName, resource.getPayload().get("resourceOwner"),
+                emailBasicInfoUser.getRoot().get("resourceType")));
+
+        User registeredUser = extractRegisteredUser(organisation);
+        emailBasicInfoAdmin.updateRoot("user", registeredUser);
+
+        sendMailsFromTemplate(
+                "resourceOnboardingForPortalAdmins.ftl",
+                emailBasicInfoAdmin.getRoot(),
+                emailBasicInfoAdmin.getSubject(),
+                registrationEmail,
+                "onboarding-team"
+        );
+
+        List<User> users = deduplicateUsersByEmail(
+                securityService.getOrganisationUsers(organisation.getId())
+        );
+
+        for (User user : users) {
+            emailBasicInfoUser.updateRoot("user", user);
+            sendMailsFromTemplate(
+                    "resourceOnboardingForProviderAdmins.ftl",
+                    emailBasicInfoUser.getRoot(),
+                    emailBasicInfoUser.getSubject(),
+                    user.getEmail().toLowerCase(),
+                    "provider"
+            );
+        }
+    }
+
     public void sendCatalogueOnboardingEmailsToPortalAdmins(CatalogueBundle catalogue,
                                                             OrganisationBundle organisation) {
         EmailService.EmailBasicInfo emailBasicInfoUser =
@@ -391,7 +443,7 @@ public class EmailService {
                 emailBasicInfo.updateRoot("resourceBundleName", deployableApplicationBundle
                         .getDeployableApplication().get("name"));
                 emailBasicInfo.updateRoot("resourceEndpoint", "deployable-services");
-                emailBasicInfo.updateRoot("resourceType", "Training Resource");
+                emailBasicInfo.updateRoot("resourceType", "Deployable Application");
             }
             case AdapterBundle adapterBundle -> {
                 emailBasicInfo.updateRoot("resourceBundleName", adapterBundle.getAdapter().get("name"));
@@ -574,6 +626,9 @@ public class EmailService {
                 emailBasicInfo.setSubject(String.format("[%s] Provider [%s]-[%s] has created a new Interoperability " +
                         "Record", nodeName, associatedResource, bundle.getPayload().get("resourceOwner")));
                 break;
+            case "resourceOnboardingForProviderAdmins.ftl":
+                emailBasicInfo.setSubject(getSubjectForResourceOnboarding(bundle, false, false));
+                break;
             case "interoperabilityRecordOnboardingForProviderAdmins.ftl":
                 emailBasicInfo.setSubject(getProviderAdminsSubjectForInteroperabilityRecordOnboarding(
                         (InteroperabilityRecordBundle) bundle));
@@ -650,13 +705,17 @@ public class EmailService {
             return "name".equals(field) ? ((InteroperabilityRecordBundle) bundle).getInteroperabilityRecord().get("name").toString() :
                     ((InteroperabilityRecordBundle) bundle).getStatus();
         }
-        return bundle.getId();
+        return "name".equals(field) ? String.valueOf(bundle.getPayload().get("name")) : bundle.getStatus();
     }
     //endregion
 
     //region scheduled
     @Scheduled(cron = "0 0 12 ? * 2/7")
     public void sendOnboardingEmailNotificationsToProviderAdmins() {
+        // the reminder asks Organisations to submit their first resource, i.e. their template
+        if (!onboardingPolicyService.isAnyReviewFirst()) {
+            return;
+        }
         EmailService.EmailBasicInfo emailBasicInfo = initializeEmail("providerOnboarding.ftl");
 
         List<OrganisationBundle> allNonDraftProviders = fetchProviders(false);

@@ -17,27 +17,23 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.registry.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +45,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private final GenericResourceService genericResourceService;
     private final OrganisationService organisationService;
     private final EmailService emailService;
+    private final OnboardingTemplateHandler templateHandler;
 
     public AdapterManager(OIDCSecurityService securityService,
                           VocabularyService vocabularyService,
@@ -56,11 +53,13 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                           GenericResourceService genericResourceService,
                           OrganisationService organisationService,
                           EmailService emailService,
-                          WorkflowService workflowService) {
+                          WorkflowService workflowService,
+                          OnboardingTemplateHandler templateHandler) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.genericResourceService = genericResourceService;
         this.organisationService = organisationService;
         this.emailService = emailService;
+        this.templateHandler = templateHandler;
     }
 
     @Override
@@ -77,6 +76,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
             return bundle;
         }
         bundle.markUpdate(UserInfo.of(auth), comment);
+        templateHandler.resetRejectedOnboarding(getResourceTypeName(), bundle, auth);
 
         return genericResourceService.update(getResourceTypeName(), bundle);
     }
@@ -96,6 +96,8 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         }
         AdapterBundle existing = get(id);
         existing.markOnboard(status, active, UserInfo.of(auth), null);
+
+        templateHandler.syncTemplateStatus(getResourceTypeName(), existing, status, auth);
 
         logger.info("Verifying Adapter: {}", existing);
         return genericResourceService.update(getResourceTypeName(), existing);
@@ -168,6 +170,14 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         return getAll(ff, auth);
+    }
+
+    @Override
+    public Bundle getTemplate(String providerId, Authentication auth) {
+        if (!templateHandler.isReviewFirst(getResourceTypeName())) {
+            return null;
+        }
+        return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {

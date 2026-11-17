@@ -17,8 +17,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingPolicy;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingPolicyService;
 import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
@@ -35,10 +38,23 @@ public class MailManagementAspect {
 
     private final OrganisationService organisationService;
     private final EmailService emailService;
+    private final OnboardingPolicyService policyService;
 
-    public MailManagementAspect(OrganisationService organisationService, EmailService emailService) {
+    public MailManagementAspect(OrganisationService organisationService, EmailService emailService,
+                                OnboardingPolicyService policyService) {
         this.organisationService = organisationService;
         this.emailService = emailService;
+        this.policyService = policyService;
+    }
+
+    /**
+     * The onboarding mails of a {@code review-first} type are about the Organisation's template. Once the template is
+     * approved, a resource that is added (or finalized from a draft) is approved right away and gets no mail; the
+     * mail that tells the template's approval is sent after {@code verify}, so it still goes out.
+     */
+    private static boolean isLaterThanTemplate(JoinPoint joinPoint, OrganisationBundle provider) {
+        return !"verify".equals(joinPoint.getSignature().getName())
+                && "approved template".equals(provider.getTemplateStatus());
     }
 
     //region registration
@@ -57,65 +73,94 @@ public class MailManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "service")
-    public void providerRegistrationEmails(final ServiceBundle service) {
+    public void providerRegistrationEmails(final JoinPoint joinPoint, final ServiceBundle service) {
         if (service.getCatalogueId() != null) return;
         OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"), null);
-        if (!provider.getTemplateStatus().equals("approved")) {
+        OnboardingPolicy policy = policyService.getPolicy("service");
+        if (policy == OnboardingPolicy.REVIEW_NONE) return;
+        if (policy == OnboardingPolicy.REVIEW_ALL) {
+            // the resource is approved on its own, so the mails describe the resource and not the template
             logger.trace("Sending Registration emails");
-            emailService.sendOnboardingEmailsToProviderAdmins(provider, "serviceManager");
+            emailService.sendResourceOnboardingEmails(service, provider);
+            return;
         }
+        if (isLaterThanTemplate(joinPoint, provider)) return;
+        logger.trace("Sending Registration emails");
+        emailService.sendOnboardingEmailsToProviderAdmins(provider, "serviceManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "datasource")
-    public void providerRegistrationEmails(final DatasourceBundle datasource) {
+    public void providerRegistrationEmails(final JoinPoint joinPoint, final DatasourceBundle datasource) {
         if (datasource.getCatalogueId() != null) return;
         OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"), null);
-        if (!provider.getTemplateStatus().equals("approved")) {
+        OnboardingPolicy policy = policyService.getPolicy("datasource");
+        if (policy == OnboardingPolicy.REVIEW_NONE) return;
+        if (policy == OnboardingPolicy.REVIEW_ALL) {
+            // the resource is approved on its own, so the mails describe the resource and not the template
             logger.trace("Sending Registration emails");
-            emailService.sendOnboardingEmailsToProviderAdmins(provider, "datasourceManager");
+            emailService.sendResourceOnboardingEmails(datasource, provider);
+            return;
         }
+        if (isLaterThanTemplate(joinPoint, provider)) return;
+        logger.trace("Sending Registration emails");
+        emailService.sendOnboardingEmailsToProviderAdmins(provider, "datasourceManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "training")
-    public void providerRegistrationEmails(final TrainingResourceBundle training) {
+    public void providerRegistrationEmails(final JoinPoint joinPoint, final TrainingResourceBundle training) {
         if (training.getCatalogueId() != null) return;
         OrganisationBundle provider = organisationService.get((String) training.getTrainingResource().get("resourceOwner"), null);
-        if (!provider.getTemplateStatus().equals("approved")) {
+        OnboardingPolicy policy = policyService.getPolicy("training_resource");
+        if (policy == OnboardingPolicy.REVIEW_NONE) return;
+        if (policy == OnboardingPolicy.REVIEW_ALL) {
+            // the resource is approved on its own, so the mails describe the resource and not the template
             logger.trace("Sending Registration emails");
-            emailService.sendOnboardingEmailsToProviderAdmins(provider, "trainingResourceManager");
+            emailService.sendResourceOnboardingEmails(training, provider);
+            return;
         }
+        if (isLaterThanTemplate(joinPoint, provider)) return;
+        logger.trace("Sending Registration emails");
+        emailService.sendOnboardingEmailsToProviderAdmins(provider, "trainingResourceManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "deployableApplication")
-    public void providerRegistrationEmails(final DeployableApplicationBundle deployableApplication) {
+    public void providerRegistrationEmails(final JoinPoint joinPoint, final DeployableApplicationBundle deployableApplication) {
         if (deployableApplication.getCatalogueId() != null) return;
         OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"), null);
-        if (!provider.getTemplateStatus().equals("approved")) {
+        OnboardingPolicy policy = policyService.getPolicy("deployable_application");
+        if (policy == OnboardingPolicy.REVIEW_NONE) return;
+        if (policy == OnboardingPolicy.REVIEW_ALL) {
+            // the resource is approved on its own, so the mails describe the resource and not the template
             logger.trace("Sending Registration emails");
-            emailService.sendOnboardingEmailsToProviderAdmins(provider, "deployableApplicationManager");
+            emailService.sendResourceOnboardingEmails(deployableApplication, provider);
+            return;
         }
+        if (isLaterThanTemplate(joinPoint, provider)) return;
+        logger.trace("Sending Registration emails");
+        emailService.sendOnboardingEmailsToProviderAdmins(provider, "deployableApplicationManager");
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.verify(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.finalizeDraft(..))",
             returning = "guideline")
-    public void providerRegistrationEmails(final InteroperabilityRecordBundle guideline) {
+    public void providerRegistrationEmails(final JoinPoint joinPoint, final InteroperabilityRecordBundle guideline) {
         if (guideline.getCatalogueId() != null) return;
+        OnboardingPolicy policy = policyService.getPolicy("interoperability_record");
+        if (policy == OnboardingPolicy.REVIEW_NONE) return;
         OrganisationBundle provider = organisationService.get((String) guideline.getInteroperabilityRecord().get("resourceOwner"), null);
-        if (!provider.getTemplateStatus().equals("approved")) {
-            logger.trace("Sending Registration emails");
-            emailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(guideline, provider);
-        }
+        if (policy == OnboardingPolicy.REVIEW_FIRST && isLaterThanTemplate(joinPoint, provider)) return;
+        logger.trace("Sending Registration emails");
+        emailService.sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(guideline, provider);
     }
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.verify(..))" +
@@ -125,10 +170,8 @@ public class MailManagementAspect {
     public void providerRegistrationEmails(final CatalogueBundle catalogue) {
         if (catalogue.getCatalogueId() != null) return;
         OrganisationBundle provider = organisationService.get((String) catalogue.getCatalogue().get("resourceOwner"), null);
-        if (!provider.getTemplateStatus().equals("approved")) {
-            logger.trace("Sending Registration emails");
-            emailService.sendCatalogueOnboardingEmailsToPortalAdmins(catalogue, provider);
-        }
+        logger.trace("Sending Registration emails");
+        emailService.sendCatalogueOnboardingEmailsToPortalAdmins(catalogue, provider);
     }
     //endregion
 
