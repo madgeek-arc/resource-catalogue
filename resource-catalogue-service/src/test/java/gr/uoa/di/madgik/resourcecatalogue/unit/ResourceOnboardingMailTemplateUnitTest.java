@@ -51,7 +51,7 @@ class ResourceOnboardingMailTemplateUnitTest {
         root.put("bundle", service);
         root.put("user", new User("id", "jane@example.org", "Jane", "Doe"));
         root.put("resourceType", "Service");
-        root.put("resourceEndpoint", "resources");
+        root.put("resourceAdminListPath", "provider/resource/all");
     }
 
     private String render(String template, String status) throws Exception {
@@ -64,17 +64,17 @@ class ResourceOnboardingMailTemplateUnitTest {
 
     @Test
     void providerAdminsAreToldWhereTheirApplicationStands() throws Exception {
-        assertThat(render("resourceOnboardingForProviderAdmins.ftl", "pending"))
+        assertThat(render("resourceOnboardingForOrganisationAdmins.ftl", "pending"))
                 .contains("My Service").contains("Service").contains("will be reviewed");
-        assertThat(render("resourceOnboardingForProviderAdmins.ftl", "approved")).contains("has been approved");
-        assertThat(render("resourceOnboardingForProviderAdmins.ftl", "rejected"))
+        assertThat(render("resourceOnboardingForOrganisationAdmins.ftl", "approved")).contains("has been approved");
+        assertThat(render("resourceOnboardingForOrganisationAdmins.ftl", "rejected"))
                 .contains("has been rejected").contains("registration@example.org");
     }
 
     @Test
     void portalAdminsAreToldWhatToReview() throws Exception {
         assertThat(render("resourceOnboardingForPortalAdmins.ftl", "pending"))
-                .contains("Jane Doe").contains("My Service").contains("https://example.org/resources/all");
+                .contains("Jane Doe").contains("My Service").contains("https://example.org/provider/resource/all");
         assertThat(render("resourceOnboardingForPortalAdmins.ftl", "approved")).contains("has been approved");
         assertThat(render("resourceOnboardingForPortalAdmins.ftl", "rejected")).contains("has been rejected");
     }

@@ -15,6 +15,7 @@
  */
 package gr.uoa.di.madgik.resourcecatalogue.unit;
 
+import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.InteroperabilityRecordBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.ServiceBundle;
@@ -23,7 +24,9 @@ import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingPolicy;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingPolicyService;
 import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
+import gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createAdapterBundle;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createInteroperabilityRecordBundle;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createOrganisationBundle;
 import static gr.uoa.di.madgik.resourcecatalogue.utils.TestUtils.createServiceBundle;
@@ -176,5 +180,77 @@ class MailManagementAspectUnitTest {
 
         aspect.providerRegistrationEmails(joinPoint("verify"), guideline);
         verify(emailService).sendInteroperabilityRecordOnboardingEmailsToPortalAdmins(guideline, organisation);
+    }
+
+    @Test
+    void adaptersFollowTheirOwnPolicy() {
+        AdapterBundle adapter = createAdapterBundle();
+        adapter.setCatalogueId(null);
+        adapter.getAdapter().put("resourceOwner", OWNER_ID);
+
+        lenient().when(policyService.getPolicy("adapter")).thenReturn(OnboardingPolicy.REVIEW_NONE);
+        aspect.providerRegistrationEmails(joinPoint("add"), adapter);
+        verifyNoInteractions(emailService);
+
+        lenient().when(policyService.getPolicy("adapter")).thenReturn(OnboardingPolicy.REVIEW_ALL);
+        aspect.providerRegistrationEmails(joinPoint("add"), adapter);
+        verify(emailService).sendResourceOnboardingEmails(adapter, organisation);
+
+        org.mockito.Mockito.clearInvocations(emailService);
+        lenient().when(policyService.getPolicy("adapter")).thenReturn(OnboardingPolicy.REVIEW_FIRST);
+        aspect.providerRegistrationEmails(joinPoint("add"), adapter);
+        verify(emailService).sendOnboardingEmailsToProviderAdmins(organisation, "adapterManager");
+
+        org.mockito.Mockito.clearInvocations(emailService);
+        organisation.setTemplateStatus("approved template");
+        aspect.providerRegistrationEmails(joinPoint("add"), adapter);
+        verifyNoInteractions(emailService);
+
+        aspect.providerRegistrationEmails(joinPoint("verify"), adapter);
+        verify(emailService).sendOnboardingEmailsToProviderAdmins(organisation, "adapterManager");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void activatingAResourceThroughVerifySendsNoOnboardingMail() throws Throwable {
+        policy(OnboardingPolicy.REVIEW_ALL);
+        service.setStatus("approved");
+        ResourceCatalogueGenericManager<ServiceBundle> manager = mock(ResourceCatalogueGenericManager.class);
+        ServiceBundle before = createServiceBundle();
+        before.setStatus("approved");
+        lenient().when(manager.get("id")).thenReturn(before);
+        ProceedingJoinPoint pjp = mock(ProceedingJoinPoint.class);
+        lenient().when(pjp.getTarget()).thenReturn(manager);
+        lenient().when(pjp.getArgs()).thenReturn(new Object[]{"id", "approved", true, null});
+        lenient().when(pjp.proceed()).thenAnswer(invocation -> {
+            aspect.providerRegistrationEmails(joinPoint("verify"), service);
+            return service;
+        });
+
+        aspect.rememberStatusBeforeVerify(pjp);
+
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void approvingAPendingResourceThroughVerifySendsTheMail() throws Throwable {
+        policy(OnboardingPolicy.REVIEW_ALL);
+        service.setStatus("approved");
+        ResourceCatalogueGenericManager<ServiceBundle> manager = mock(ResourceCatalogueGenericManager.class);
+        ServiceBundle before = createServiceBundle();
+        before.setStatus("pending");
+        lenient().when(manager.get("id")).thenReturn(before);
+        ProceedingJoinPoint pjp = mock(ProceedingJoinPoint.class);
+        lenient().when(pjp.getTarget()).thenReturn(manager);
+        lenient().when(pjp.getArgs()).thenReturn(new Object[]{"id", "approved", true, null});
+        lenient().when(pjp.proceed()).thenAnswer(invocation -> {
+            aspect.providerRegistrationEmails(joinPoint("verify"), service);
+            return service;
+        });
+
+        aspect.rememberStatusBeforeVerify(pjp);
+
+        verify(emailService).sendResourceOnboardingEmails(service, organisation);
     }
 }

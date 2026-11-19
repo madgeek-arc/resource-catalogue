@@ -1,7 +1,7 @@
-<p>There are Providers and Templates waiting to be approved.</p>
+<p>There are Organisations and Templates waiting to be approved.</p>
 <p>
     <#if providersWaitingForInitialApproval?? && providersWaitingForInitialApproval?size &gt; 0>
-        Providers waiting for Initial Approval:
+        Organisations waiting for Initial Approval:
         <br>
         <#list providersWaitingForInitialApproval as provider>
             <br>
@@ -9,7 +9,7 @@
         </#list>
     </#if>
     <#if providersWaitingForTemplateApproval?? && providersWaitingForTemplateApproval?size &gt; 0>
-        Providers waiting for Template Approval:
+        Organisations waiting for Template Approval:
         <br>
         <#list providersWaitingForTemplateApproval as provider>
             <br>

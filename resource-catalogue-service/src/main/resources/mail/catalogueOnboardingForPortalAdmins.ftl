@@ -6,7 +6,7 @@
         in ${project}.
         <br>
         You can review the application here
-        ${endpoint}/catalogue-dashboard/${bundle.catalogue.id}/info and approve or reject it.
+        ${endpoint}/catalogue-dashboard/${cataloguePath}/info and approve or reject it.
     </#if>
     <#if bundle.status == "approved">
         <#if bundle.active == true>
@@ -14,20 +14,20 @@
             [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) has been approved.
             <br>
             You can view the application status here
-            ${endpoint}/catalogue-dashboard/${bundle.catalogue.id}/info.
+            ${endpoint}/catalogue-dashboard/${cataloguePath}/info.
         <#else>
             The Catalogue [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) has been set to
             inactive.
             <br>
             You can view the application status here
-            ${endpoint}/catalogue-dashboard/${bundle.catalogue.id}/info.
+            ${endpoint}/catalogue-dashboard/${cataloguePath}/info.
         </#if>
     </#if>
     <#if bundle.status == "rejected">
         The application by ${user.name} ${user.surname} – [${user.email}] for registering
         [${bundle.catalogue.name}] - ([${bundle.catalogue.id}]) has been rejected.
         <br>
-        You can view the application status here ${endpoint}/catalogue-dashboard/${bundle.catalogue.id}/info.
+        You can view the application status here ${endpoint}/catalogue-dashboard/${cataloguePath}/info.
     </#if>
 </p>
 <p>

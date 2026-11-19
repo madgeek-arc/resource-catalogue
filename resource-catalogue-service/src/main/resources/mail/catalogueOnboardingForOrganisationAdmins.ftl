@@ -29,10 +29,8 @@
         Your application has been rejected, as your catalogue does not comply with the Rules of Participation of
         the ${project}.
         <br>
-        [Option 1: We would like to offer an information webinar or training session to improve your application.
-        If you agree or for any other clarifications, please contact us at ${registrationEmail}].
-        <br>
-        [Option 2: For any clarifications, please contact us at ${registrationEmail}].
+        We would like to offer an information webinar or training session to improve your application.
+        If you agree, or for any other clarifications, please contact us at ${registrationEmail}.
         <br>
         Thank you for your interest in becoming a member of the ${project}.
     </#if>

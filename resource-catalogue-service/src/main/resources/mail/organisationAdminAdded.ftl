@@ -2,7 +2,7 @@
 <p>
     Your email [${user.email}] has been added as an Administrator for the Organisation [${bundle.organisation.name}].
     <br>
-    You can view the Provider here: ${endpoint}/provider/my
+    You can view the Organisation here: ${endpoint}/provider/my
 </p>
 <p>
     Best Regards,

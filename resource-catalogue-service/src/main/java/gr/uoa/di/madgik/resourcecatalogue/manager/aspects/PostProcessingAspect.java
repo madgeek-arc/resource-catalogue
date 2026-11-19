@@ -71,11 +71,11 @@ public class PostProcessingAspect {
             notifyProviderAdminsForProviderDeletionAspect(bundle);
         });
         aspectRegistry.put("AfterServiceUpdateEmails", obj -> {
-            if (!(obj instanceof ServiceBundle) && !(obj instanceof DatasourceBundle)) {
+            if (!(obj instanceof Bundle bundle)) {
                 logger.debug("Skipping AfterServiceUpdateEmails – object is {}", obj.getClass());
                 return;
             }
-            notifyPortalAdminsForInvalidResourceUpdateAspect((ServiceBundle) obj);
+            notifyPortalAdminsForInvalidResourceUpdateAspect(bundle);
         });
     }
 
@@ -220,7 +220,7 @@ public class PostProcessingAspect {
             long latestAudit = Long.parseLong(updatedProvider.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(updatedProvider.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate) {
-                emailService.notifyPortalAdminsForInvalidProviderUpdate(updatedProvider);
+                emailService.notifyPortalAdminsForInvalidUpdate(updatedProvider);
             }
         }
     }
@@ -229,12 +229,12 @@ public class PostProcessingAspect {
         emailService.notifyProviderAdminsForProviderDeletion(bundle);
     }
 
-    private void notifyPortalAdminsForInvalidResourceUpdateAspect(ServiceBundle bundle) {
+    private void notifyPortalAdminsForInvalidResourceUpdateAspect(Bundle bundle) {
         if (bundle.getLatestAuditInfo() != null && bundle.getLatestUpdateInfo() != null) {
             long latestAudit = Long.parseLong(bundle.getLatestAuditInfo().getDate());
             long latestUpdate = Long.parseLong(bundle.getLatestUpdateInfo().getDate());
             if (latestAudit < latestUpdate && bundle.getLatestAuditInfo().getActionType().equals(LoggingInfo.ActionType.INVALID.getKey())) {
-                emailService.notifyPortalAdminsForInvalidServiceUpdate(bundle);
+                emailService.notifyPortalAdminsForInvalidUpdate(bundle);
             }
         }
     }

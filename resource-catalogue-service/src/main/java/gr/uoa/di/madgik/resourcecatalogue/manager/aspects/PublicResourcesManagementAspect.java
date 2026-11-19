@@ -119,6 +119,26 @@ public class PublicResourcesManagementAspect {
         }
     }
 
+    /**
+     * Updates the public copy of a resource after a private-side change. The public copy only exists once
+     * the resource has been approved and activated, and that is created by the add handlers, so a missing
+     * public copy is expected (e.g. pending, rejected or inactive resources, or the approval that creates it)
+     * and is skipped. A failure to update an existing public copy is still logged as an error.
+     */
+    private <T extends Bundle> void syncPublicUpdate(PublicResourceService<T> service, T bundle, String label) {
+        try {
+            service.get(bundle.getIdentifiers().getPid(), bundle.getCatalogueId());
+        } catch (ResourceException | ResourceNotFoundException e) {
+            logger.debug("No Public {} '{}' to update, skipping sync", label, bundle.getId());
+            return;
+        }
+        try {
+            service.update(ObjectUtils.clone(bundle), null);
+        } catch (ResourceException | ResourceNotFoundException e) {
+            logger.error("Failed to sync Public {} '{}' after update", label, bundle.getId(), e);
+        }
+    }
+
     //region Public Provider
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.add(..))" +
@@ -170,13 +190,7 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "bundle")
     public void updatePublicProvider(final OrganisationBundle bundle) {
-        runAfterCommit(() -> {
-            try {
-                publicOrganisationService.update(ObjectUtils.clone(bundle), null);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.error("Failed to sync Public Organisation '{}' after update", bundle.getId(), e);
-            }
-        });
+        runAfterCommit(() -> syncPublicUpdate(publicOrganisationService, bundle, "Organisation"));
     }
 
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.OrganisationManager.delete(..))")
@@ -219,13 +233,7 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "service")
     public void updatePublicService(final ServiceBundle service) {
-        runAfterCommit(() -> {
-            try {
-                publicServiceService.update(ObjectUtils.clone(service), null);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.error("Failed to sync Public Service '{}' after update", service.getId(), e);
-            }
-        });
+        runAfterCommit(() -> syncPublicUpdate(publicServiceService, service, "Service"));
     }
 
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.delete(..))")
@@ -268,13 +276,7 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "catalogue")
     public void updatePublicCatalogue(final CatalogueBundle catalogue) {
-        runAfterCommit(() -> {
-            try {
-                publicCatalogueService.update(ObjectUtils.clone(catalogue), null);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.error("Failed to sync Public Catalogue '{}' after update", catalogue.getId(), e);
-            }
-        });
+        runAfterCommit(() -> syncPublicUpdate(publicCatalogueService, catalogue, "Catalogue"));
     }
 
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.CatalogueManager.delete(..))")
@@ -317,13 +319,7 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "datasource")
     public void updatePublicDatasource(final DatasourceBundle datasource) {
-        runAfterCommit(() -> {
-            try {
-                publicDatasourceService.update(ObjectUtils.clone(datasource), null);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.error("Failed to sync Public Datasource '{}' after update", datasource.getId(), e);
-            }
-        });
+        runAfterCommit(() -> syncPublicUpdate(publicDatasourceService, datasource, "Datasource"));
     }
 
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.delete(..))")
@@ -366,13 +362,7 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "training")
     public void updatePublicTrainingResource(final TrainingResourceBundle training) {
-        runAfterCommit(() -> {
-            try {
-                publicTrainingResourceService.update(ObjectUtils.clone(training), null);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.error("Failed to sync Public Training Resource '{}' after update", training.getId(), e);
-            }
-        });
+        runAfterCommit(() -> syncPublicUpdate(publicTrainingResourceService, training, "Training Resource"));
     }
 
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.delete(..))")
@@ -415,13 +405,7 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "guideline")
     public void updatePublicGuideline(final InteroperabilityRecordBundle guideline) {
-        runAfterCommit(() -> {
-            try {
-                publicGuidelineService.update(ObjectUtils.clone(guideline), null);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.error("Failed to sync Public Interoperability Record '{}' after update", guideline.getId(), e);
-            }
-        });
+        runAfterCommit(() -> syncPublicUpdate(publicGuidelineService, guideline, "Interoperability Record"));
     }
 
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.delete(..))")
@@ -464,13 +448,7 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "deployableApplication")
     public void updatePublicDeployableApplication(final DeployableApplicationBundle deployableApplication) {
-        runAfterCommit(() -> {
-            try {
-                publicDeployableApplicationService.update(ObjectUtils.clone(deployableApplication), null);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.error("Failed to sync Public Deployable Application '{}' after update", deployableApplication.getId(), e);
-            }
-        });
+        runAfterCommit(() -> syncPublicUpdate(publicDeployableApplicationService, deployableApplication, "Deployable Application"));
     }
 
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.delete(..))")
@@ -523,13 +501,7 @@ public class PublicResourcesManagementAspect {
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "adapter")
     public void updatePublicAdapter(final AdapterBundle adapter) {
-        runAfterCommit(() -> {
-            try {
-                publicAdapterService.update(ObjectUtils.clone(adapter), null);
-            } catch (ResourceException | ResourceNotFoundException e) {
-                logger.error("Failed to sync Public Adapter '{}' after update", adapter.getId(), e);
-            }
-        });
+        runAfterCommit(() -> syncPublicUpdate(publicAdapterService, adapter, "Adapter"));
     }
 
     @After("execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.delete(..))")
