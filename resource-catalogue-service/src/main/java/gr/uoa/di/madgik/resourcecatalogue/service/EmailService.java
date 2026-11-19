@@ -393,25 +393,27 @@ public class EmailService {
         return getSubjectForResourceOnboarding(interoperabilityRecordBundle, false, false);
     }
 
+    private Bundle firstResourceOfProvider(ResourceCatalogueGenericManager<? extends Bundle> manager,
+                                           String providerId) {
+        FacetFilter ff = createFacetFilter();
+        ff.addFilter("resource_owner", providerId);
+        ff.addFilter("draft", false);
+        return manager.getAll(ff).getResults().stream().findFirst().orElse(null);
+    }
+
     private void resolveTemplateAndUpdateRoot(String source,
                                               OrganisationBundle organisationBundle,
                                               EmailService.EmailBasicInfo emailBasicInfoUser) {
+        // @Async threads carry no SecurityContext, so getAll(ff, auth) would silently restrict the search to
+        // approved and active resources and miss the pending template resource. Query without auth instead.
         Bundle template = switch (source) {
-            case "serviceManager" ->
-                    serviceManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
-                            securityService.getAdminAccess()).getResults().getFirst();
-            case "datasourceManager" ->
-                    datasourceManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
-                            securityService.getAdminAccess()).getResults().getFirst();
+            case "serviceManager" -> firstResourceOfProvider(serviceManager, organisationBundle.getId());
+            case "datasourceManager" -> firstResourceOfProvider(datasourceManager, organisationBundle.getId());
             case "trainingResourceManager" ->
-                    trainingResourceManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
-                            securityService.getAdminAccess()).getResults().getFirst();
+                    firstResourceOfProvider(trainingResourceManager, organisationBundle.getId());
             case "deployableApplicationManager" ->
-                    deployableApplicationManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
-                            securityService.getAdminAccess()).getResults().getFirst();
-            case "adapterManager" ->
-                    adapterManager.getAllEOSCResourcesOfAProvider(organisationBundle.getId(), createFacetFilter(),
-                            securityService.getAdminAccess()).getResults().getFirst();
+                    firstResourceOfProvider(deployableApplicationManager, organisationBundle.getId());
+            case "adapterManager" -> firstResourceOfProvider(adapterManager, organisationBundle.getId());
             default -> null;
         };
 
