@@ -497,10 +497,14 @@ public class PublicResourcesManagementAspect {
 
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.setActive(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.updateSqa(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.setSuspend(..))" +
             "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.audit(..))",
             returning = "adapter")
     public void updatePublicAdapter(final AdapterBundle adapter) {
+        if (adapter == null) { // updateSqa discarded its result
+            return;
+        }
         runAfterCommit(() -> syncPublicUpdate(publicAdapterService, adapter, "Adapter"));
     }
 

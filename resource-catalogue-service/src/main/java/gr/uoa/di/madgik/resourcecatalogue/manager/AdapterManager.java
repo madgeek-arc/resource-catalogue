@@ -35,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -100,6 +101,27 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         }
         ((Map<String, Object>) sqaMap).remove("sqaURL");
         ((Map<String, Object>) sqaMap).remove("sqaBadge");
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public AdapterBundle updateSqa(String id, String catalogueId, String assessedRepository, String sqaUrl,
+                                   String sqaBadge) {
+        AdapterBundle stored = get(id, catalogueId);
+        if (!Objects.equals(stored.getAdapter().get("repository"), assessedRepository)) {
+            return null;
+        }
+        Object current = stored.getAdapter().get("sqa");
+        Map<String, Object> sqa = current instanceof Map<?, ?> map
+                ? new LinkedHashMap<>((Map<String, Object>) map) : new LinkedHashMap<>();
+        sqa.put("sqaURL", sqaUrl);
+        if (sqaBadge == null) {
+            sqa.remove("sqaBadge"); // the new assessment earned no badge, so an older one no longer applies
+        } else {
+            sqa.put("sqaBadge", sqaBadge);
+        }
+        stored.getAdapter().put("sqa", sqa);
+        return genericResourceService.update(getResourceTypeName(), stored);
     }
 
     @Override
