@@ -36,6 +36,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @org.springframework.stereotype.Service("adapterManager")
@@ -77,8 +78,28 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         }
         bundle.markUpdate(UserInfo.of(auth), comment);
         templateHandler.resetRejectedOnboarding(getResourceTypeName(), bundle, auth);
+        discardStaleSqaResult(existing, bundle);
 
         return genericResourceService.update(getResourceTypeName(), bundle);
+    }
+
+    /**
+     * The SQA result describes the repository that was assessed. When the repository changes, the result is
+     * dropped, so the SQA aspect (which skips adapters that already have an SQA URL) assesses the new one.
+     * A result the caller changed on purpose is left alone.
+     */
+    @SuppressWarnings("unchecked")
+    private void discardStaleSqaResult(AdapterBundle existing, AdapterBundle updated) {
+        Object oldRepository = existing.getAdapter().get("repository");
+        Object newRepository = updated.getAdapter().get("repository");
+        Object sqa = updated.getAdapter().get("sqa");
+        if (Objects.equals(oldRepository, newRepository)
+                || !Objects.equals(existing.getAdapter().get("sqa"), sqa)
+                || !(sqa instanceof Map<?, ?> sqaMap)) {
+            return;
+        }
+        ((Map<String, Object>) sqaMap).remove("sqaURL");
+        ((Map<String, Object>) sqaMap).remove("sqaBadge");
     }
 
     @Override

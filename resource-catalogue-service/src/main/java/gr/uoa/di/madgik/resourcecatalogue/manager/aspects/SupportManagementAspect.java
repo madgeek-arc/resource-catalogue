@@ -116,7 +116,8 @@ public class SupportManagementAspect {
     //region SQA
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))",
             returning = "adapter"
     )
     public void performSqaAssessment(final AdapterBundle adapter) {
