@@ -142,21 +142,25 @@ public class SupportManagementAspect {
                 .thenApply(sqaaasAssessmentService::waitForCompletion)
                 .thenAccept(result -> handleSqaResult(adapter, result))
                 .exceptionally(ex -> {
-                    logger.error("SQA assessment failed for branch 'main' on repo: {}", repo);
-                    logger.info("Retrying SQA assessment with fallback branch 'master'...");
+                    logger.error("SQA assessment for Adapter {} failed on branch 'main' ({}). "
+                            + "Retrying with branch 'master'...", adapter.getId(), rootMessage(ex));
                     sqaaasAssessmentService.startAssessment(repo, "master")
                             .thenApply(sqaaasAssessmentService::waitForCompletion)
-                            .thenAccept(result -> {
-                                logger.info("SQA assessment succeeded with branch 'master'");
-                                handleSqaResult(adapter, result);
-                            })
+                            .thenAccept(result -> handleSqaResult(adapter, result))
                             .exceptionally(ex2 -> {
-                                logger.info("SQA assessment ALSO failed for branch 'master'");
-                                ex2.printStackTrace();
+                                logger.error("SQA assessment for Adapter {} failed on branch 'master' too ({})",
+                                        adapter.getId(), rootMessage(ex2), ex2);
                                 return null;
                             });
                     return null;
                 });
+    }
+
+    private static String rootMessage(Throwable t) {
+        while (t.getCause() != null) {
+            t = t.getCause();
+        }
+        return t.getMessage();
     }
 
     private void handleSqaResult(AdapterBundle adapter, JsonNode result) {
@@ -180,6 +184,8 @@ public class SupportManagementAspect {
         }
 
         adapterService.update(adapter, "SQA Assessment", securityService.getAdminAccess());
+        logger.info("SQA assessment for Adapter {} succeeded (badge: {}, report: {})", adapter.getId(),
+                sqa.get("sqaBadge"), url);
     }
     //endregion
 }
