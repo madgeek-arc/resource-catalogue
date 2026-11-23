@@ -27,10 +27,12 @@ services:
         target: /app/config/application.properties
       - source: pid_env
         target: /app/config/pid.yaml
+      - source: onboarding_env
+        target: /app/config/onboarding.yaml
     env_file:
       - .env
     environment:
-      SPRING_CONFIG_ADDITIONAL_LOCATION: /app/config/application.properties,/app/config/pid.yaml
+      SPRING_CONFIG_ADDITIONAL_LOCATION: /app/config/application.properties,/app/config/pid.yaml,/app/config/onboarding.yaml
     networks:
       - rc-net
     healthcheck:
@@ -151,6 +153,8 @@ secrets:
     file: ./config/application.properties
   pid_env:
     file: ./config/pid.yaml
+  onboarding_env:
+    file: ./config/onboarding.yaml
 
 networks:
   rc-net:

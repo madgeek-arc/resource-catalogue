@@ -1,0 +1,20 @@
+## Onboarding Properties ##
+# Copy to onboarding.yaml. The values below are the bundled defaults.
+#
+# Onboarding policy per resource type. One of:
+#   review-all    -> every resource goes 'pending' and needs approval
+#   review-first  -> the Organisation's first resource is a template (goes 'pending'); once it is approved,
+#                    the Organisation's later resources are approved immediately. The Organisation has ONE
+#                    template, shared by every type set to review-first.
+#   review-none   -> every resource is approved immediately
+#
+# Every type below must be set. Organisation and Catalogue onboarding is not configurable.
+catalogue:
+  onboarding:
+    policy:
+      service: review-first
+      datasource: review-first
+      training_resource: review-first
+      deployable_application: review-first
+      adapter: review-none
+      interoperability_record: review-all

@@ -362,6 +362,51 @@ policy is enabled becomes their template. If a type stops being `review-first`
 while its template is pending, verifying that template still settles the
 Organisation's template status, so other `review-first` types are not blocked.
 
+Example `onboarding.yml` files for common set-ups:
+
+```yaml
+# Strict node: every resource of every type is reviewed
+catalogue:
+  onboarding:
+    policy:
+      service: review-all
+      datasource: review-all
+      training_resource: review-all
+      deployable_application: review-all
+      adapter: review-all
+      interoperability_record: review-all
+```
+
+```yaml
+# Open node: nothing is reviewed after the Organisation itself is approved
+catalogue:
+  onboarding:
+    policy:
+      service: review-none
+      datasource: review-none
+      training_resource: review-none
+      deployable_application: review-none
+      adapter: review-none
+      interoperability_record: review-none
+```
+
+```yaml
+# Mixed node: services are reviewed through a template, adapters are open
+catalogue:
+  onboarding:
+    policy:
+      service: review-first
+      datasource: review-first
+      training_resource: review-none
+      deployable_application: review-none
+      adapter: review-none
+      interoperability_record: review-all
+```
+
+The same values can be given as environment variables, e.g.
+`CATALOGUE_ONBOARDING_POLICY_TRAINING_RESOURCE=review-none`. For a Docker Compose
+deployment see [compose/config/onboarding.yaml.example](compose/config/onboarding.yaml.example).
+
 ### PID Properties Example
 
 Refer to [pid.yml](resource-catalogue-service/src/main/resources/pid.yml)

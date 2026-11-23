@@ -1,7 +1,7 @@
 REGISTRY   := docker.madgik.di.uoa.gr
 IMAGE_NAME := $(REGISTRY)/resource-catalogue
 TAG         = $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-CONFIG     ?= file:./compose/config/application.properties,file:./compose/config/pid.yaml
+CONFIG     ?= file:./compose/config/application.properties,file:./compose/config/pid.yaml,optional:file:./compose/config/onboarding.yaml
 
 .PHONY: build run docker-build docker-push compose compose-down
 

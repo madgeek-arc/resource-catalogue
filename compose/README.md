@@ -57,7 +57,15 @@ Edit `compose/config/pid.yaml` to set the PID issuer URL, credentials (`user`, `
 
 If PID support is not needed, leave `pid.yaml` as-is with empty credentials.
 
-> **Note:** The `application.properties` and `pid.yaml` files are mounted as Docker secrets and are not exposed as environment variables.
+### 4. Onboarding config
+Copy the example file to the compose/config directory.
+```bash
+cp compose/config/onboarding.yaml.example compose/config/onboarding.yaml
+```
+
+Edit `compose/config/onboarding.yaml` to choose the onboarding policy (`review-all`, `review-first` or `review-none`) of each resource type. The example contains the bundled defaults, so leaving it unchanged keeps the default behaviour. Every resource type must be set, otherwise the application refuses to start. See the [main README](../README.md#onboarding-properties-example) for what each policy does.
+
+> **Note:** The `application.properties`, `pid.yaml` and `onboarding.yaml` files are mounted as Docker secrets and are not exposed as environment variables.
 
 ## Running
 
@@ -121,7 +129,7 @@ make run
 To apply configuration files from another directory, run:
 
 ```bash
-make run CONFIG=file:/path/to/application.properties,file:/path/to/pid.yaml
+make run CONFIG=file:/path/to/application.properties,file:/path/to/pid.yaml,file:/path/to/onboarding.yaml
 ```
 
 ## Directory structure
@@ -136,6 +144,8 @@ compose/
 │   ├── application.properties.example  # template — copy to application.properties
 │   ├── pid.yaml                        # PID issuer config (gitignored)
 │   ├── pid.yaml.example                # template — copy to pid.yaml
+│   ├── onboarding.yaml                 # onboarding policy per resource type (gitignored)
+│   ├── onboarding.yaml.example         # template — copy to onboarding.yaml
 │   └── pid_certs/                      # PEM certificates for PID auth
 └── postgres/
     └── init/
