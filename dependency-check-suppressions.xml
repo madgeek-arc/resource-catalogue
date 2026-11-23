@@ -46,62 +46,10 @@
          they target. Both are REST API wrappers with no native code, no ML inference engine,
          and no server-side components, so server-only CVEs cannot apply to them.
          dependency-check requires an exact (non-wildcard) CPE match for <cpe> suppression
-         rules, so each affected version needs its own entry below as new server CVEs get
-         misattributed to these jars; add another block here (bump the version) when that
+         rules, so each affected client version needs its own <suppress> entry here when server CVEs get
+         misattributed to these jars. Add one per CVE and client version when that
          next happens rather than reaching for a blanket <cpe> wildcard, which the plugin
          silently ignores (zero matches). -->
-    <suppress>
-        <notes><![CDATA[
-            CVE-2026-72642: heap corruption (CWE-823) in the Elasticsearch server's native
-            ML model inference process when evaluating an uploaded model. Requires privileges
-            to upload/deploy trained models to the server; co.elastic.clients:elasticsearch-java
-            is a REST client with no native code or inference engine, so it cannot be affected.
-            False positive from CPE/version-number overlap between client and server releases.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-java@.*$</packageUrl>
-        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
-        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
-        <cve>CVE-2026-72642</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-            CVE-2026-72642: same false positive as above (heap corruption in the server's
-            native ML inference process), misattributed to co.elastic.clients:elasticsearch-rest5-client,
-            which is the low-level HTTP transport used by elasticsearch-java and likewise has
-            no native code or inference engine.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-rest5-client@.*$</packageUrl>
-        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
-        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
-        <cve>CVE-2026-72642</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-            CVE-2026-72649: deserialization of untrusted data (CWE-502) in the Elasticsearch
-            server's machine learning component, leading to RCE via object injection when a
-            crafted trained model artifact is deployed. Requires an authenticated user with
-            privileges to create and deploy trained models on the server (affected server
-            versions: < 8.19.20, 9.0.0-9.4.4, 9.5.0). co.elastic.clients:elasticsearch-java
-            is a REST client with no ML component or model-loading logic, so it cannot be
-            affected. False positive from CPE/version-number overlap between client and server.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-java@.*$</packageUrl>
-        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
-        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
-        <cve>CVE-2026-72649</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-            CVE-2026-72649: same false positive as above (deserialization RCE in the server's
-            ML component), misattributed to co.elastic.clients:elasticsearch-rest5-client,
-            which is the low-level HTTP transport used by elasticsearch-java and likewise has
-            no ML component or model-loading logic.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:maven/co\.elastic\.clients/elasticsearch-rest5-client@.*$</packageUrl>
-        <cpe>cpe:2.3:a:elastic:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
-        <cpe>cpe:2.3:a:elasticsearch:elasticsearch:9.4.3:*:*:*:*:*:*:*</cpe>
-        <cve>CVE-2026-72649</cve>
-    </suppress>
 
     <!-- ===== org.springframework.ai (all spring-ai-* 1.1.8 artifacts) =====
          CVE-2026-59318: prompt-injection authorization bypass in DefaultToolCallingManager
@@ -136,53 +84,6 @@
         ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework\.ai/.*@.*$</packageUrl>
         <cve>CVE-2026-59318</cve>
-    </suppress>
-
-    <!-- ===== swagger-ui (DOMPurify) =====
-         CVE-2026-41238, CVE-2026-41239, CVE-2026-41240: DOMPurify 3.3.2 bundled in
-         swagger-ui 5.32.2 (shipped with springdoc-openapi 3.0.3). The fix is DOMPurify
-         3.4.0, present in swagger-ui >= 5.32.5. As of 2026-05-23, no springdoc release
-         bundles swagger-ui 5.32.5+. Suppress until springdoc ships an update.
-         These CVEs only affect the developer-facing Swagger UI, not production endpoints. -->
-    <suppress>
-        <notes><![CDATA[
-            swagger-ui 5.32.2 bundles DOMPurify 3.3.2 which contains CVE-2026-41238
-            (prototype pollution XSS bypass via CUSTOM_ELEMENT_HANDLING). Fixed in
-            DOMPurify 3.4.0 / swagger-ui 5.32.5. No springdoc release includes the fix yet
-            (latest is 3.0.3 as of 2026-05-23). Revisit when springdoc > 3.0.3 is released.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
-        <cve>CVE-2026-41238</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-            swagger-ui 5.32.2 bundles DOMPurify 3.3.2 which contains CVE-2026-41239
-            (SAFE_FOR_TEMPLATES bypass via RETURN_DOM). Fixed in DOMPurify 3.4.0 /
-            swagger-ui 5.32.5. No springdoc release includes the fix yet. See CVE-2026-41238
-            note above.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
-        <cve>CVE-2026-41239</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-            swagger-ui 5.32.2 bundles DOMPurify 3.3.2 which contains CVE-2026-41240
-            (FORBID_TAGS bypass when using function-based ADD_TAGS / tagCheck). Fixed in
-            DOMPurify 3.4.0 / swagger-ui 5.32.5. No springdoc release includes the fix yet.
-            See CVE-2026-41238 note above.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
-        <cve>CVE-2026-41240</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-            Same FORBID_TAGS/tagCheck logic flaw as CVE-2026-41240, reported by RetireJS
-            without a CVE assigned yet. Affects DOMPurify 3.3.2 bundled in swagger-ui 5.32.2
-            (springdoc 3.0.3). Fixed in DOMPurify 3.4.0 / swagger-ui 5.32.5. No springdoc
-            release includes the fix yet. Revisit when springdoc > 3.0.3 is released.
-        ]]></notes>
-        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
-        <vulnerabilityName regex="true">.*FORBID_TAGS is not checked when a function-based ADD_TAGS.*</vulnerabilityName>
     </suppress>
 
 </suppressions>
