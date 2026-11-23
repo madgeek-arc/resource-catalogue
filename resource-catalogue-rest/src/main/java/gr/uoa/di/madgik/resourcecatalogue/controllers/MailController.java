@@ -16,7 +16,6 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
-import com.google.common.collect.Lists;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.resourcecatalogue.domain.DatasourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
@@ -79,8 +78,12 @@ public class MailController {
         if (cc != null) {
             partitionSize -= cc.size();
         }
+        if (partitionSize <= 0) {
+            throw new IllegalArgumentException("Too many cc recipients: at most 99 are allowed");
+        }
         List<String> allEmails = getAllEmails(includeContacts, includeResourceContacts);
-        for (List<String> bccChunk : Lists.partition(allEmails, partitionSize)) {
+        for (int from = 0; from < allEmails.size(); from += partitionSize) {
+            List<String> bccChunk = allEmails.subList(from, Math.min(from + partitionSize, allEmails.size()));
             logger.info("Sending emails to: {}", String.join(", ", bccChunk));
             mailService.sendMail(new ArrayList<>(), cc, bccChunk, subject, text);
         }

@@ -39,6 +39,22 @@
         <cve>CVE-2026-39883</cve>
     </suppress>
 
+    <!-- ===== opentelemetry-api (Java) =====
+         CVE-2026-54285: targets opentelemetry-js (@opentelemetry/core), fixed in JS 2.8.0.
+         NVD's CPE carries a node.js target-software qualifier, but dependency-check matches it
+         against the Java io.opentelemetry artifacts anyway. Java API versions are all 1.x, so
+         every Java release falls below the JS "fixed in 2.8.0" bound and no Java upgrade
+         clears the match. -->
+    <suppress>
+        <notes><![CDATA[
+            False positive: CVE-2026-54285 is a missing inbound size limit in
+            W3CBaggagePropagator.extract() of the OpenTelemetry JavaScript SDK. It does not
+            apply to the Java opentelemetry-api artifact.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.opentelemetry/.*@.*$</packageUrl>
+        <cve>CVE-2026-54285</cve>
+    </suppress>
+
     <!-- ===== co.elastic.clients (Java REST API clients: elasticsearch-java, elasticsearch-rest5-client) =====
          NVD matches the Elasticsearch *server* CPEs (cpe:2.3:a:elastic:elasticsearch and
          cpe:2.3:a:elasticsearch:elasticsearch) against these co.elastic.clients artifacts
