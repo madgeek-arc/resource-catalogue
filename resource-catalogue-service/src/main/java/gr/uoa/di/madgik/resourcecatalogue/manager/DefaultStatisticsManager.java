@@ -31,8 +31,9 @@ import gr.uoa.di.madgik.resourcecatalogue.service.Analytics;
 import gr.uoa.di.madgik.resourcecatalogue.service.OrganisationService;
 import gr.uoa.di.madgik.resourcecatalogue.service.StatisticsService;
 import gr.uoa.di.madgik.resourcecatalogue.service.VocabularyService;
-import org.joda.time.DateTime;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.postgresql.jdbc.PgArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,8 +112,8 @@ public class DefaultStatisticsManager implements StatisticsService {
         throw new UnsupportedOperationException("Method has been removed");
     }
 
-    public Map<DateTime, Map<String, Long>> events(Event.UserActionType type, Instant from, Instant to, Interval by) {
-        Map<DateTime, Map<String, Long>> results = new LinkedHashMap<>();
+    public Map<ZonedDateTime, Map<String, Long>> events(Event.UserActionType type, Instant from, Instant to, Interval by) {
+        Map<ZonedDateTime, Map<String, Long>> results = new LinkedHashMap<>();
         Paging<Resource> resources = searchService.cqlQuery(
                 String.format("type=\"%s\" AND creation_date > %s AND creation_date < %s",
                         type, from.toEpochMilli(), to.toEpochMilli()), "event",
@@ -124,20 +125,19 @@ public class DefaultStatisticsManager implements StatisticsService {
                 .collect(Collectors.toList());
 
 
-        DateTime start = new DateTime(from);
-        DateTime stop = new DateTime(to);
+        ZonedDateTime start = from.atZone(ZoneId.systemDefault());
+        ZonedDateTime stop = to.atZone(ZoneId.systemDefault());
 
-        Map<DateTime, List<Event>> eventsByDate = new LinkedHashMap<>();
+        Map<ZonedDateTime, List<Event>> eventsByDate = new LinkedHashMap<>();
 
-        start.plusWeeks(1);
-        while (start.getMillis() <= stop.getMillis()) {
-            DateTime endDate = addInterval(start, by);
+        while (!start.isAfter(stop)) {
+            ZonedDateTime endDate = addInterval(start, by);
             List<Event> weekEvents = new LinkedList<>();
 
             events = events
                     .stream()
                     .map(event -> {
-                        if (endDate.isAfter(event.getInstant())) {
+                        if (endDate.toInstant().toEpochMilli() > event.getInstant()) {
                             weekEvents.add(event);
                             return null;
                         } else
@@ -150,7 +150,7 @@ public class DefaultStatisticsManager implements StatisticsService {
             start = endDate;
         }
 
-        for (Map.Entry<DateTime, List<Event>> weekEntry : eventsByDate.entrySet()) {
+        for (Map.Entry<ZonedDateTime, List<Event>> weekEntry : eventsByDate.entrySet()) {
             Map<String, Long> weekResults = weekEntry.getValue()
                     .stream()
                     .collect(Collectors.groupingBy(Event::getService, Collectors.counting()));
@@ -168,25 +168,13 @@ public class DefaultStatisticsManager implements StatisticsService {
 
     }
 
-    private DateTime addInterval(DateTime date, Interval by) {
-        DateTime duration;
-        switch (by) {
-            case DAY:
-                duration = date.plusDays(1);
-                break;
-            case WEEK:
-                duration = date.plusWeeks(1);
-                break;
-            case MONTH:
-                duration = date.plusMonths(1);
-                break;
-            case YEAR:
-                duration = date.plusYears(1);
-                break;
-            default:
-                duration = date;
-        }
-        return duration;
+    private ZonedDateTime addInterval(ZonedDateTime date, Interval by) {
+        return switch (by) {
+            case DAY -> date.plusDays(1);
+            case WEEK -> date.plusWeeks(1);
+            case MONTH -> date.plusMonths(1);
+            case YEAR -> date.plusYears(1);
+        };
     }
 
     @Override
