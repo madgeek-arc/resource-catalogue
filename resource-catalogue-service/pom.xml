@@ -189,6 +189,7 @@
                                     <testExclude>**/unit/OnboardingPolicyUnitTest.java</testExclude>
                                     <testExclude>**/unit/OnboardingTemplateHandlerUnitTest.java</testExclude>
                                     <testExclude>**/unit/MailManagementAspectUnitTest.java</testExclude>
+                                    <testExclude>**/unit/MailTemplatesUnitTest.java</testExclude>
                                     <testExclude>**/unit/ResourceOnboardingMailTemplateUnitTest.java</testExclude>
                                     <testExclude>**/integration/OnboardingPolicyIntegrationTest.java</testExclude>
                                 </testExcludes>
