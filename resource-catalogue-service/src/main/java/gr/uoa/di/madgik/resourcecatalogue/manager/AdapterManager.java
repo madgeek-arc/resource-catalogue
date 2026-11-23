@@ -101,6 +101,9 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         }
         ((Map<String, Object>) sqaMap).remove("sqaURL");
         ((Map<String, Object>) sqaMap).remove("sqaBadge");
+        if (sqaMap.isEmpty()) {
+            updated.getAdapter().remove("sqa"); // don't leave an empty "sqa": {} behind
+        }
     }
 
     @Override
