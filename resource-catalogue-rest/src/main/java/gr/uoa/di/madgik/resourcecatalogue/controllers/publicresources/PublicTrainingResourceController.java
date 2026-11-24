@@ -16,22 +16,11 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.publicresources;
 
-import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
-import gr.uoa.di.madgik.registry.domain.FacetFilter;
-import gr.uoa.di.madgik.registry.domain.Paging;
-import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.TrainingResourceBundle;
 import gr.uoa.di.madgik.resourcecatalogue.service.PublicResourceService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 @Profile("beyond")
@@ -42,36 +31,5 @@ public class PublicTrainingResourceController extends BasePublicController<Train
 
     public PublicTrainingResourceController(PublicResourceService<TrainingResourceBundle> service) {
         super(service);
-    }
-
-    @Deprecated
-    @GetMapping(path = "trainingResourceBundle/{prefix}/{suffix}")
-    @PreAuthorize("@securityService.hasReadAccess() or " +
-            "@securityService.isResourceAdmin(#auth, #prefix+'/'+#suffix)")
-    public ResponseEntity<?> getBundleDeprecated(@PathVariable String prefix,
-                                                 @PathVariable String suffix,
-                                                 @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
-        return ResponseEntity
-                .ok()
-                .header("Deprecation", "true")
-                .header("Link", "</public/trainingResource/bundle/{prefix}/{suffix}>; rel=\"successor-version\"")
-                .body(service.get(prefix + "/" + suffix));
-    }
-
-    @Deprecated
-    @BrowseParameters
-    @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "adminPage/all")
-    @PreAuthorize("@securityService.hasReadAccess()")
-    public ResponseEntity<Paging<TrainingResourceBundle>> getAllBundlesDeprecated(
-            @Parameter(hidden = true) @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("active", true);
-        return ResponseEntity
-                .ok()
-                .header("Deprecation", "true")
-                .header("Link", "</public/trainingResource/bundle/all>; rel=\"successor-version\"")
-                .body(service.getAll(ff));
     }
 }

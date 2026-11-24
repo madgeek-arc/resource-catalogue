@@ -110,33 +110,19 @@ public class DatasourceController extends ResourceCatalogueGenericController<Dat
         return ResponseEntity.ok(paging.map(DatasourceBundle::getDatasource));
     }
 
-    @Deprecated
     @BrowseParameters
     @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "adminPage/all")
-    @PreAuthorize("@securityService.hasReadAccess()")
-    public ResponseEntity<Paging<DatasourceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
-                                                                            @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", false);
-        Paging<DatasourceBundle> paging = service.getAll(ff);
-        return ResponseEntity
-                .ok()
-                .header("Deprecation", "true")
-                .header("Link", "</bundle/all>; rel=\"successor-version\"")
-                .body(paging);
-    }
-
-    @BrowseParameters
-    @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
+    @Parameters({
+            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true))),
+            @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
+    })
     @GetMapping(path = "bundle/all")
     @PreAuthorize("@securityService.hasReadAccess()")
     public ResponseEntity<Paging<DatasourceBundle>> getAllBundles(@Parameter(hidden = true)
                                                                   @RequestParam MultiValueMap<String, Object> params) {
         FacetFilter ff = FacetFilter.from(params);
         ff.addFilter("published", false);
+        ff.addFilter("draft", false);
         Paging<DatasourceBundle> paging = service.getAll(ff);
         return ResponseEntity.ok(paging);
     }
