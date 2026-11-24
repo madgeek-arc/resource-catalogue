@@ -59,7 +59,6 @@ public class PublicOrganisationController {
             "public/provider/{prefix}/{suffix}",
             "public/organisation/{prefix}/{suffix}"
     })
-    @PreAuthorize("@securityService.hasReadAccess() or @securityService.isOrganisationAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<?> get(@PathVariable String prefix,
                                  @PathVariable String suffix,
                                  @SuppressWarnings("unused") @Parameter(hidden = true) Authentication auth) {
