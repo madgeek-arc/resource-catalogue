@@ -58,6 +58,10 @@ public class SimpleMailService implements MailService {
             sessionProps.setProperty("mail.smtp.ssl.enable", String.valueOf(properties.getMailer().isSsl()));
             sessionProps.setProperty("mail.smtp.user", properties.getMailer().getUsername());
             sessionProps.setProperty("mail.smtp.from", properties.getMailer().getFrom());
+            // An unresponsive SMTP server must not hold a thread indefinitely (javax.mail defaults to no timeout)
+            sessionProps.setProperty("mail.smtp.connectiontimeout", "5000");
+            sessionProps.setProperty("mail.smtp.timeout", "10000");
+            sessionProps.setProperty("mail.smtp.writetimeout", "10000");
             session = Session.getInstance(sessionProps, new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
@@ -73,6 +77,7 @@ public class SimpleMailService implements MailService {
         sendMail(to, cc, Collections.singletonList(from), subject, text);
     }
 
+    @Async
     @Override
     public void sendMail(List<String> to, List<String> cc, List<String> bcc, String subject, String text) throws MessagingException {
         if (enableEmails) {
@@ -150,11 +155,13 @@ public class SimpleMailService implements MailService {
         }
     }
 
+    @Async
     @Override
     public void sendMail(List<String> to, String subject, String text) throws MessagingException {
         sendMail(to, null, subject, text);
     }
 
+    @Async
     @Override
     public void sendMail(String to, String cc, String subject, String text) throws MessagingException {
         List<String> addrTo = new ArrayList<>();
@@ -168,6 +175,7 @@ public class SimpleMailService implements MailService {
         sendMail(addrTo, addrCc, subject, text);
     }
 
+    @Async
     @Override
     public void sendMail(String to, String subject, String text) throws MessagingException {
         sendMail(to, null, subject, text);
