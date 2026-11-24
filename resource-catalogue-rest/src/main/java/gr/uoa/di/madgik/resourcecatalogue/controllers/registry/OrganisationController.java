@@ -16,9 +16,11 @@
 
 package gr.uoa.di.madgik.resourcecatalogue.controllers.registry;
 
+import gr.uoa.di.madgik.catalogue.exception.ValidationException;
 import gr.uoa.di.madgik.registry.annotation.BrowseParameters;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.SearchService;
 import gr.uoa.di.madgik.resourcecatalogue.annotations.BrowseCatalogue;
 import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
@@ -47,6 +49,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 
 @Profile("beyond")
@@ -59,6 +62,14 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
 
     @Autowired
     private AuditingProperties auditingProperties;
+
+    // resource types an Organisation owns and that go through onboarding
+    private static final Set<String> ONBOARDED_RESOURCE_TYPES = Set.of(
+            "service", "datasource", "training_resource", "deployable_application",
+            "adapter", "interoperability_record");
+
+    @Autowired
+    private GenericResourceService genericResourceService;
 
     OrganisationController(OrganisationService organisationService) {
         super(organisationService, "organisation");
@@ -299,20 +310,26 @@ public class OrganisationController extends ResourceCatalogueGenericController<O
     @Operation(summary = "Returns all Provider's rejected resources, providing the corresponding resource type.")
     @BrowseParameters
     @GetMapping(path = "resources/rejected/{prefix}/{suffix}")
+    @PreAuthorize("@securityService.hasReadAccess() or " +
+            "@securityService.isOrganisationAdmin(#auth, #prefix+'/'+#suffix)")
     public ResponseEntity<Paging<?>> getRejectedResources(@PathVariable String prefix,
                                                           @PathVariable String suffix,
                                                           @Parameter(hidden = true)
                                                           @RequestParam MultiValueMap<String, Object> params,
                                                           @RequestParam String resourceType,
                                                           @Parameter(hidden = true) Authentication auth) {
+        if (!ONBOARDED_RESOURCE_TYPES.contains(resourceType)) {
+            throw new ValidationException("Unsupported resourceType: " + resourceType);
+        }
         String id = prefix + "/" + suffix;
         FacetFilter ff = FacetFilter.from(params);
+        // query the generic store: the Organisation manager's getAll() forces its own resource type
         ff.setResourceType(resourceType);
         ff.addFilter("resource_owner", id);
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         ff.addFilter("status", "rejected");
-        return ResponseEntity.ok(service.getAll(ff, auth));
+        return ResponseEntity.ok(genericResourceService.getResults(ff));
     }
 
 
