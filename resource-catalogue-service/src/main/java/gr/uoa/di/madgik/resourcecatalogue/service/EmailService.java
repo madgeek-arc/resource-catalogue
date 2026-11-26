@@ -106,10 +106,14 @@ public class EmailService {
         EmailService.EmailBasicInfo emailBasicInfoAdmin =
                 initializeEmail("organisationOnboardingForPortalAdmins.ftl", organisationBundle, null);
 
-        resolveTemplateAndUpdateRoot(afterReturningFrom, organisationBundle, emailBasicInfoUser);
+        Bundle template = resolveTemplateAndUpdateRoot(afterReturningFrom, organisationBundle, emailBasicInfoUser);
         emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
 
-        User registeredUser = extractRegisteredUser(organisationBundle);
+        // when the mail describes the organisation's template resource, the applicant is whoever registered
+        // that resource; otherwise (the organisation itself) it is the organisation's registrant
+        User registeredUser = template != null
+                ? extractRegisteredUser(template, organisationBundle)
+                : extractRegisteredUser(organisationBundle);
         emailBasicInfoAdmin.updateRoot("user", registeredUser);
 
         sendMailsFromTemplate(
@@ -249,7 +253,7 @@ public class EmailService {
         updateRootAccordingToResourceType(guideline, emailBasicInfoUser);
         emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
 
-        User registeredUser = extractRegisteredUser(organisation);
+        User registeredUser = extractRegisteredUser(guideline, organisation);
         emailBasicInfoAdmin.updateRoot("user", registeredUser);
 
         sendMailsFromTemplate(
@@ -295,7 +299,7 @@ public class EmailService {
         emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
         emailBasicInfoAdmin.setSubject(getSubjectForResourceOnboarding(resource, true, false));
 
-        User registeredUser = extractRegisteredUser(organisation);
+        User registeredUser = extractRegisteredUser(resource, organisation);
         emailBasicInfoAdmin.updateRoot("user", registeredUser);
 
         sendMailsFromTemplate(
@@ -335,7 +339,7 @@ public class EmailService {
         updateRootAccordingToResourceType(catalogue, emailBasicInfoUser);
         emailBasicInfoAdmin.setRoot(emailBasicInfoUser.getRoot());
 
-        User registeredUser = extractRegisteredUser(organisation);
+        User registeredUser = extractRegisteredUser(catalogue, organisation);
         emailBasicInfoAdmin.updateRoot("user", registeredUser);
 
         sendMailsFromTemplate(
@@ -401,7 +405,7 @@ public class EmailService {
         return manager.getAll(ff).getResults().stream().findFirst().orElse(null);
     }
 
-    private void resolveTemplateAndUpdateRoot(String source,
+    private Bundle resolveTemplateAndUpdateRoot(String source,
                                               OrganisationBundle organisationBundle,
                                               EmailService.EmailBasicInfo emailBasicInfoUser) {
         // @Async threads carry no SecurityContext, so getAll(ff, auth) would silently restrict the search to
@@ -420,6 +424,7 @@ public class EmailService {
         if (template != null) {
             updateRootAccordingToResourceType(template, emailBasicInfoUser);
         }
+        return template;
     }
 
     /**
@@ -507,12 +512,30 @@ public class EmailService {
     }
 
     private User extractRegisteredUser(OrganisationBundle organisationBundle) {
-        return organisationBundle.getLoggingInfo().stream()
-                .filter(loggingInfo ->
-                        LoggingInfo.ActionType.REGISTERED.getKey().equals(loggingInfo.getActionType()))
-                .findFirst()
+        return findRegistration(organisationBundle)
                 .map(this::mapToUser)
                 .orElseGet(this::createDefaultUser);
+    }
+
+    /**
+     * The applicant of a resource is whoever registered that resource. Resources without a registration entry
+     * (e.g. legacy or migrated ones) fall back to the registrant of their Organisation.
+     */
+    User extractRegisteredUser(Bundle resource, OrganisationBundle organisationBundle) {
+        return findRegistration(resource)
+                .or(() -> findRegistration(organisationBundle))
+                .map(this::mapToUser)
+                .orElseGet(this::createDefaultUser);
+    }
+
+    private Optional<LoggingInfo> findRegistration(Bundle bundle) {
+        if (bundle == null || bundle.getLoggingInfo() == null) {
+            return Optional.empty();
+        }
+        return bundle.getLoggingInfo().stream()
+                .filter(loggingInfo ->
+                        LoggingInfo.ActionType.REGISTERED.getKey().equals(loggingInfo.getActionType()))
+                .findFirst();
     }
 
     private User mapToUser(LoggingInfo loggingInfo) {
