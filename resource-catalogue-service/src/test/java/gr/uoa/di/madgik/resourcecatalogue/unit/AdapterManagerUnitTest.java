@@ -26,6 +26,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
 import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
 import gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.EmailService;
 import gr.uoa.di.madgik.resourcecatalogue.service.IdCreator;
@@ -72,6 +73,8 @@ class AdapterManagerUnitTest {
     private EmailService emailService;
     @Mock
     private WorkflowService workflowService;
+    @Mock
+    private OnboardingTemplateHandler templateHandler;
 
     @InjectMocks
     private AdapterManager adapterManager;

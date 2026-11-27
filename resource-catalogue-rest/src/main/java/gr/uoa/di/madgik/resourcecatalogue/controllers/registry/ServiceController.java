@@ -105,26 +105,6 @@ public class ServiceController extends ResourceCatalogueGenericController<Servic
         return ResponseEntity.ok(paging.map(ServiceBundle::getService));
     }
 
-    @Deprecated
-    @Tag(name = "ServiceAdmin")
-    @BrowseParameters
-    @BrowseCatalogue
-    @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true)))
-    @GetMapping(path = "adminPage/all")
-    @PreAuthorize("@securityService.hasReadAccess()")
-    public ResponseEntity<Paging<ServiceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
-                                                                         @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", false);
-        ff.addFilter("draft", false);
-        Paging<ServiceBundle> paging = service.getAll(ff);
-        return ResponseEntity
-                .ok()
-                .header("Deprecation", "true")
-                .header("Link", "</bundle/all>; rel=\"successor-version\"")
-                .body(paging);
-    }
-
     @Tag(name = "ServiceAdmin")
     @BrowseParameters
     @BrowseCatalogue

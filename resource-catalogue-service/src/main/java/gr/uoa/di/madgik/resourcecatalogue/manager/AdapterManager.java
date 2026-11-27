@@ -17,29 +17,27 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.registry.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
 import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
-import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.LoggingInfo;
-import gr.uoa.di.madgik.resourcecatalogue.domain.OrganisationBundle;
-import gr.uoa.di.madgik.resourcecatalogue.domain.Vocabulary;
+import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
+import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @org.springframework.stereotype.Service("adapterManager")
@@ -49,6 +47,7 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
     private final GenericResourceService genericResourceService;
     private final OrganisationService organisationService;
     private final EmailService emailService;
+    private final OnboardingTemplateHandler templateHandler;
 
     public AdapterManager(OIDCSecurityService securityService,
                           VocabularyService vocabularyService,
@@ -56,11 +55,13 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
                           GenericResourceService genericResourceService,
                           OrganisationService organisationService,
                           EmailService emailService,
-                          WorkflowService workflowService) {
+                          WorkflowService workflowService,
+                          OnboardingTemplateHandler templateHandler) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.genericResourceService = genericResourceService;
         this.organisationService = organisationService;
         this.emailService = emailService;
+        this.templateHandler = templateHandler;
     }
 
     @Override
@@ -77,8 +78,53 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
             return bundle;
         }
         bundle.markUpdate(UserInfo.of(auth), comment);
+        templateHandler.resetRejectedOnboarding(getResourceTypeName(), bundle, auth);
+        discardStaleSqaResult(existing, bundle);
 
         return genericResourceService.update(getResourceTypeName(), bundle);
+    }
+
+    /**
+     * The SQA result describes the repository that was assessed. When the repository changes, the result is
+     * dropped, so the SQA aspect (which skips adapters that already have an SQA URL) assesses the new one.
+     * A result the caller changed on purpose is left alone.
+     */
+    @SuppressWarnings("unchecked")
+    private void discardStaleSqaResult(AdapterBundle existing, AdapterBundle updated) {
+        Object oldRepository = existing.getAdapter().get("repository");
+        Object newRepository = updated.getAdapter().get("repository");
+        Object sqa = updated.getAdapter().get("sqa");
+        if (Objects.equals(oldRepository, newRepository)
+                || !Objects.equals(existing.getAdapter().get("sqa"), sqa)
+                || !(sqa instanceof Map<?, ?> sqaMap)) {
+            return;
+        }
+        ((Map<String, Object>) sqaMap).remove("sqaURL");
+        ((Map<String, Object>) sqaMap).remove("sqaBadge");
+        if (sqaMap.isEmpty()) {
+            updated.getAdapter().remove("sqa"); // don't leave an empty "sqa": {} behind
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public AdapterBundle updateSqa(String id, String catalogueId, String assessedRepository, String sqaUrl,
+                                   String sqaBadge) {
+        AdapterBundle stored = get(id, catalogueId);
+        if (!Objects.equals(stored.getAdapter().get("repository"), assessedRepository)) {
+            return null;
+        }
+        Object current = stored.getAdapter().get("sqa");
+        Map<String, Object> sqa = current instanceof Map<?, ?> map
+                ? new LinkedHashMap<>((Map<String, Object>) map) : new LinkedHashMap<>();
+        sqa.put("sqaURL", sqaUrl);
+        if (sqaBadge == null) {
+            sqa.remove("sqaBadge"); // the new assessment earned no badge, so an older one no longer applies
+        } else {
+            sqa.put("sqaBadge", sqaBadge);
+        }
+        stored.getAdapter().put("sqa", sqa);
+        return genericResourceService.update(getResourceTypeName(), stored);
     }
 
     @Override
@@ -96,6 +142,8 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         }
         AdapterBundle existing = get(id);
         existing.markOnboard(status, active, UserInfo.of(auth), null);
+
+        templateHandler.syncTemplateStatus(getResourceTypeName(), existing, status, auth);
 
         logger.info("Verifying Adapter: {}", existing);
         return genericResourceService.update(getResourceTypeName(), existing);
@@ -168,6 +216,14 @@ public class AdapterManager extends ResourceCatalogueGenericManager<AdapterBundl
         ff.addFilter("published", false);
         ff.addFilter("draft", false);
         return getAll(ff, auth);
+    }
+
+    @Override
+    public Bundle getTemplate(String providerId, Authentication auth) {
+        if (!templateHandler.isReviewFirst(getResourceTypeName())) {
+            return null;
+        }
+        return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
 
     public void sendEmailNotificationToProviderForOutdatedEOSCResource(String id, Authentication auth) {

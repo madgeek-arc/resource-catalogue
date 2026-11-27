@@ -18,12 +18,12 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.aspects;
 
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.manager.PublicOrganisationService;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingPolicyService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -42,6 +42,7 @@ public class OnboardingManagementAspect {
     private final DeployableApplicationService deployableApplicationService;
     private final PublicOrganisationService publicOrganisationService;
     private final SecurityService securityService;
+    private final OnboardingPolicyService policyService;
 
     public OnboardingManagementAspect(OrganisationService organisationService,
                                       ServiceService serviceService,
@@ -49,7 +50,8 @@ public class OnboardingManagementAspect {
                                       TrainingResourceService trainingResourceService,
                                       DeployableApplicationService deployableApplicationService,
                                       PublicOrganisationService publicOrganisationService,
-                                      SecurityService securityService) {
+                                      SecurityService securityService,
+                                      OnboardingPolicyService policyService) {
         this.organisationService = organisationService;
         this.serviceService = serviceService;
         this.datasourceService = datasourceService;
@@ -57,6 +59,7 @@ public class OnboardingManagementAspect {
         this.deployableApplicationService = deployableApplicationService;
         this.publicOrganisationService = publicOrganisationService;
         this.securityService = securityService;
+        this.policyService = policyService;
     }
 
     //region resource state
@@ -64,6 +67,9 @@ public class OnboardingManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ServiceManager.verify(..))",
             returning = "service")
     public void updatePublicProviderTemplateStatus(final ServiceBundle service) {
+        if (!policyService.isReviewFirst("service")) {
+            return;
+        }
         OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"), null);
         publicOrganisationService.get(provider.getIdentifiers().getPid());
         publicOrganisationService.update(provider, null);
@@ -73,6 +79,9 @@ public class OnboardingManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DatasourceManager.verify(..))",
             returning = "datasource")
     public void updatePublicProviderTemplateStatus(final DatasourceBundle datasource) {
+        if (!policyService.isReviewFirst("datasource")) {
+            return;
+        }
         OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"), null);
         publicOrganisationService.get(provider.getIdentifiers().getPid());
         publicOrganisationService.update(provider, null);
@@ -82,6 +91,9 @@ public class OnboardingManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.TrainingResourceManager.verify(..))",
             returning = "trainingResource")
     public void updatePublicProviderTemplateStatus(final TrainingResourceBundle trainingResource) {
+        if (!policyService.isReviewFirst("training_resource")) {
+            return;
+        }
         OrganisationBundle provider = organisationService.get((String) trainingResource.getTrainingResource().get("resourceOwner"), null);
         publicOrganisationService.get(provider.getIdentifiers().getPid());
         publicOrganisationService.update(provider, null);
@@ -91,7 +103,35 @@ public class OnboardingManagementAspect {
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.DeployableApplicationManager.verify(..))",
             returning = "deployableApplication")
     public void updatePublicProviderTemplateStatus(final DeployableApplicationBundle deployableApplication) {
+        if (!policyService.isReviewFirst("deployable_application")) {
+            return;
+        }
         OrganisationBundle provider = organisationService.get((String) deployableApplication.getDeployableApplication().get("resourceOwner"), null);
+        publicOrganisationService.get(provider.getIdentifiers().getPid());
+        publicOrganisationService.update(provider, null);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))",
+            returning = "adapter")
+    public void updatePublicProviderTemplateStatus(final AdapterBundle adapter) {
+        if (!policyService.isReviewFirst("adapter")) {
+            return;
+        }
+        OrganisationBundle provider = organisationService.get((String) adapter.getAdapter().get("resourceOwner"), null);
+        publicOrganisationService.get(provider.getIdentifiers().getPid());
+        publicOrganisationService.update(provider, null);
+    }
+
+    @Async
+    @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.InteroperabilityRecordManager.verify(..))",
+            returning = "guideline")
+    public void updatePublicProviderTemplateStatus(final InteroperabilityRecordBundle guideline) {
+        if (!policyService.isReviewFirst("interoperability_record")) {
+            return;
+        }
+        OrganisationBundle provider = organisationService.get(
+                (String) guideline.getInteroperabilityRecord().get("resourceOwner"), null);
         publicOrganisationService.get(provider.getIdentifiers().getPid());
         publicOrganisationService.update(provider, null);
     }
@@ -107,7 +147,7 @@ public class OnboardingManagementAspect {
 
     @Async
     public void updateServiceStatus(ServiceBundle service) {
-        if (service.getCatalogueId() == null) {
+        if (service.getCatalogueId() == null && policyService.isReviewFirst("service")) {
             try {
                 OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"), null);
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
@@ -130,7 +170,7 @@ public class OnboardingManagementAspect {
 
     @Async
     public void updateDatasourceStatus(DatasourceBundle datasource) {
-        if (datasource.getCatalogueId() == null) {
+        if (datasource.getCatalogueId() == null && policyService.isReviewFirst("datasource")) {
             try {
                 OrganisationBundle provider = organisationService.get((String) datasource.getDatasource().get("resourceOwner"), null);
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
@@ -153,7 +193,7 @@ public class OnboardingManagementAspect {
 
     @Async
     public void updateTrainingResourceStatus(TrainingResourceBundle training) {
-        if (training.getCatalogueId() == null) {
+        if (training.getCatalogueId() == null && policyService.isReviewFirst("training_resource")) {
             try {
                 OrganisationBundle provider = organisationService.get((String) training.getTrainingResource().get("resourceOwner"), null);
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {
@@ -176,7 +216,7 @@ public class OnboardingManagementAspect {
 
     @Async
     public void updateDeployableApplicationStatus(DeployableApplicationBundle bundle) {
-        if (bundle.getCatalogueId() == null) {
+        if (bundle.getCatalogueId() == null && policyService.isReviewFirst("deployable_application")) {
             try {
                 OrganisationBundle provider = organisationService.get((String) bundle.getDeployableApplication().get("resourceOwner"), null);
                 if (provider.getTemplateStatus().equals("no template status") || provider.getTemplateStatus().equals("rejected template")) {

@@ -17,21 +17,21 @@
 package gr.uoa.di.madgik.resourcecatalogue.manager;
 
 import gr.uoa.di.madgik.catalogue.exception.ValidationException;
-import gr.uoa.di.madgik.registry.service.GenericResourceService;
-import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.domain.FacetFilter;
+import gr.uoa.di.madgik.registry.domain.Paging;
 import gr.uoa.di.madgik.registry.exception.ResourceException;
 import gr.uoa.di.madgik.registry.exception.ResourceNotFoundException;
+import gr.uoa.di.madgik.registry.service.GenericResourceService;
 import gr.uoa.di.madgik.registry.service.ServiceException;
 import gr.uoa.di.madgik.resourcecatalogue.domain.*;
 import gr.uoa.di.madgik.resourcecatalogue.dto.UserInfo;
+import gr.uoa.di.madgik.resourcecatalogue.onboarding.OnboardingTemplateHandler;
 import gr.uoa.di.madgik.resourcecatalogue.onboarding.WorkflowService;
 import gr.uoa.di.madgik.resourcecatalogue.service.*;
 import gr.uoa.di.madgik.resourcecatalogue.utils.RelationshipValidator;
 import gr.uoa.di.madgik.resourcecatalogue.utils.TemplateOnboardingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -47,6 +47,7 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
     private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
     private final OrganisationService organisationService;
+    private final OnboardingTemplateHandler templateHandler;
     private final GenericResourceService genericResourceService;
     private final RelationshipValidator relationshipValidator;
     private final ResourceInteroperabilityRecordService rirService;
@@ -60,9 +61,11 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
                           @Lazy RelationshipValidator relationshipValidator,
                           EmailService emailService,
                           ResourceInteroperabilityRecordService rirService,
-                          WorkflowService workflowService) {
+                          WorkflowService workflowService,
+                          OnboardingTemplateHandler templateHandler) {
         super(genericResourceService, idCreator, securityService, vocabularyService, workflowService);
         this.organisationService = organisationService;
+        this.templateHandler = templateHandler;
         this.genericResourceService = genericResourceService;
         this.relationshipValidator = relationshipValidator;
         this.rirService = rirService;
@@ -86,26 +89,13 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         }
         service.markUpdate(UserInfo.of(auth), comment);
         relationshipValidator.checkRelatedResourceIDsConsistency(service, existing);
-        checkAndResetServiceOnboarding(service, auth);
+        templateHandler.resetRejectedOnboarding(getResourceTypeName(), service, auth);
 
         //TODO: ModelResponseValidator to validate Vocabulary parent-child relationships
 //        VocabularyValidationUtils.validateCategories();
 //        VocabularyValidationUtils.validateScientificDomains();
 
         return genericResourceService.update(getResourceTypeName(), service);
-    }
-
-    private void checkAndResetServiceOnboarding(ServiceBundle service, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"));
-        // if Resource's status = "rejected", update to "pending" & Provider templateStatus to "pending template"
-        if (service.getStatus().equals(vocabularyService.get("rejected").getId())) {
-            if (provider.getTemplateStatus().equals(vocabularyService.get("rejected template").getId())) {
-                service.setStatus(vocabularyService.get("pending").getId());
-                service.setActive(false);
-                provider.setTemplateStatus(vocabularyService.get("pending template").getId());
-                organisationService.update(provider, "system update", auth);
-            }
-        }
     }
 
     @Override
@@ -126,28 +116,10 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
         ServiceBundle existing = get(id);
         existing.markOnboard(status, active, UserInfo.of(auth), null);
 
-        updateProviderTemplateStatus(existing, status, auth);
+        templateHandler.syncTemplateStatus(getResourceTypeName(), existing, status, auth);
 
         logger.info("Verifying Service: {}", existing);
         return genericResourceService.update(getResourceTypeName(), existing);
-    }
-
-    private void updateProviderTemplateStatus(ServiceBundle service, String status, Authentication auth) {
-        OrganisationBundle provider = organisationService.get((String) service.getService().get("resourceOwner"));
-        switch (status) {
-            case "pending":
-                provider.setTemplateStatus("pending template");
-                break;
-            case "approved":
-                provider.setTemplateStatus("approved template");
-                break;
-            case "rejected":
-                provider.setTemplateStatus("rejected template");
-                break;
-            default:
-                break;
-        }
-        organisationService.update(provider, "system update", auth);
     }
 
     @Override
@@ -208,6 +180,9 @@ public class ServiceManager extends ResourceCatalogueGenericManager<ServiceBundl
 
     @Override
     public Bundle getTemplate(String providerId, Authentication auth) {
+        if (!templateHandler.isReviewFirst(getResourceTypeName())) {
+            return null;
+        }
         return TemplateOnboardingUtils.getTemplate(providerId, auth, this, vocabularyService);
     }
     //endregion

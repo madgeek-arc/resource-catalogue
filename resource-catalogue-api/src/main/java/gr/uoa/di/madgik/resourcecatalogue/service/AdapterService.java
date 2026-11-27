@@ -20,7 +20,8 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.AdapterBundle;
 import org.springframework.security.core.Authentication;
 
 public interface AdapterService extends ResourceCatalogueGenericService<AdapterBundle>,
-        EOSCResourceService<AdapterBundle>, DraftService<AdapterBundle> {
+        EOSCResourceService<AdapterBundle>,
+        TemplateOnboardingService, DraftService<AdapterBundle> {
 
     /**
      * Moves an Adapter to a different owner Organisation. The target Organisation must exist in the
@@ -34,4 +35,19 @@ public interface AdapterService extends ResourceCatalogueGenericService<AdapterB
      * @return the updated Adapter bundle
      */
     AdapterBundle changeResourceOwner(String id, String newOwnerId, String comment, Authentication auth);
+
+    /**
+     * Stores the result of an SQA assessment on the Adapter. Only the {@code sqa} field is written, onto the
+     * stored Adapter, so edits made while the assessment ran are kept. This is not a user update: it adds no
+     * logging-info entry and does not start a new assessment.
+     *
+     * @param id                 the Adapter id
+     * @param catalogueId        the Adapter's catalogue id
+     * @param assessedRepository the repository that was assessed
+     * @param sqaUrl             the URL of the assessment report
+     * @param sqaBadge           the badge vocabulary id, or {@code null} if the assessment earned no badge
+     *                           (any previous badge is then removed)
+     * @return the updated bundle, or {@code null} if the Adapter's repository is no longer the assessed one
+     */
+    AdapterBundle updateSqa(String id, String catalogueId, String assessedRepository, String sqaUrl, String sqaBadge);
 }

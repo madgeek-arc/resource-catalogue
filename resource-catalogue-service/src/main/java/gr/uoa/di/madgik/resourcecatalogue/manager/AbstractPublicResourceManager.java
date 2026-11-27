@@ -10,6 +10,7 @@ import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
 import gr.uoa.di.madgik.resourcecatalogue.manager.pids.PidIssuer;
 import gr.uoa.di.madgik.resourcecatalogue.utils.FacetLabelService;
 import gr.uoa.di.madgik.resourcecatalogue.utils.JmsService;
+import gr.uoa.di.madgik.resourcecatalogue.utils.ObjectUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +104,11 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         // sets public ids to fields
         updateIdsToPublic(t);
 
-        // Post PID
+        T ret;
+        logger.info("{} '{}' is being published with id '{}'", t.getClass().getSimpleName(), lowerLevelId, t.getId());
+        ret = genericResourceService.add(getResourceTypeName(), t, false);
+
+        // Post PID only once the public resource has actually been stored
         if (pidServiceEnabled && registerPID) {
             try {
                 logger.info("Posting {} with id {} to PID service", t.getClass().getSimpleName(), t.getId());
@@ -112,10 +117,6 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
                 logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
             }
         }
-
-        T ret;
-        logger.info("{} '{}' is being published with id '{}'", t.getClass().getSimpleName(), lowerLevelId, t.getId());
-        ret = genericResourceService.add(getResourceTypeName(), t, false); //FIXME: issue with public CTI (Found more than one models)
         jmsService.convertAndSendTopic(getResourceTypeName() + ".create", t);
         return ret;
     }
@@ -133,19 +134,21 @@ public abstract class AbstractPublicResourceManager<T extends Bundle>
         // sets public ids to fields
         updateIdsToPublic(t);
 
-        // Update PID
+        logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
+        T ret;
+        ret = genericResourceService.update(getResourceTypeName(), t, false);
+
+        // Update PID only once the public resource has actually been stored.
+        // Async: the PUT must not wait on the PID service; a clone avoids racing with later mutations
         if (pidServiceEnabled && registerPID) {
             try {
                 logger.info("Updating PID record of {} with id {} on PID service", t.getClass().getSimpleName(), t.getId());
-                pidIssuer.postPID(t, getResourceTypeName(), null);
+                pidIssuer.postPIDAsync(ObjectUtils.clone(t), getResourceTypeName(), null);
             } catch (Exception e) {
+                // e.g. the defensive clone failing; the PID step must never fail the update
                 logger.error("Error during posting {}-{} to the PID Service", t.getClass().getSimpleName(), t.getId(), e);
             }
         }
-
-        logger.info("Updating public {} with id '{}'", t.getClass().getSimpleName(), t.getId());
-        T ret;
-        ret = genericResourceService.update(getResourceTypeName(), t);
         jmsService.convertAndSendTopic(getResourceTypeName() + ".update", t);
         return ret;
     }

@@ -17,9 +17,11 @@
 package gr.uoa.di.madgik.resourcecatalogue.controllers;
 
 import gr.uoa.di.madgik.resourcecatalogue.config.NodeProperties;
+import gr.uoa.di.madgik.resourcecatalogue.service.OnboardingPolicyProvider;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +29,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @Hidden
 @RestController
@@ -38,13 +42,20 @@ public class CatalogueInfoController {
     private String catalogueSupportEmail;
 
     private final NodeProperties nodeProperties;
+    private final ObjectProvider<OnboardingPolicyProvider> onboardingPolicyProvider;
 
+    /**
+     * @param onboardingPolicy the onboarding policy ({@code review-all}, {@code review-first} or
+     *                         {@code review-none}) by resource type, empty if the node has no configurable policy
+     */
     public record CatalogueConfiguration(String catalogueSupportEmail, String nodePid,
-                                         boolean nodePidFixed) {
+                                         boolean nodePidFixed, Map<String, String> onboardingPolicy) {
     }
 
-    public CatalogueInfoController(NodeProperties nodeProperties) {
+    public CatalogueInfoController(NodeProperties nodeProperties,
+                                   ObjectProvider<OnboardingPolicyProvider> onboardingPolicyProvider) {
         this.nodeProperties = nodeProperties;
+        this.onboardingPolicyProvider = onboardingPolicyProvider;
     }
 
     @Hidden
@@ -54,7 +65,9 @@ public class CatalogueInfoController {
         CatalogueConfiguration conf = new CatalogueConfiguration(
                 catalogueSupportEmail,
                 nodeProperties.getPid().getValue(),
-                nodeProperties.getPid().isFixed()
+                nodeProperties.getPid().isFixed(),
+                onboardingPolicyProvider.stream().findFirst().map(OnboardingPolicyProvider::getPolicies)
+                        .orElse(Map.of())
         );
         return new ResponseEntity<>(conf, HttpStatus.OK);
     }

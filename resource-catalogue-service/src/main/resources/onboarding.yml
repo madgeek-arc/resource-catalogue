@@ -1,0 +1,13 @@
+## Onboarding Properties ##
+# Onboarding policy per resource type: review-all, review-first or review-none.
+# Every configurable type must be set. Organisation and Catalogue onboarding is not configurable.
+# See https://github.com/madgeek-arc/resource-catalogue-docs/blob/master/documentation/onboarding_policy.md
+catalogue:
+  onboarding:
+    policy:
+      service: review-first
+      datasource: review-first
+      training_resource: review-first
+      deployable_application: review-first
+      adapter: review-none
+      interoperability_record: review-all

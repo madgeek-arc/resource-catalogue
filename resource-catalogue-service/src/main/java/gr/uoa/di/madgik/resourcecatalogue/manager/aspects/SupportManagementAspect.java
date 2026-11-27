@@ -32,7 +32,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Profile("beyond")
 @Aspect
@@ -46,6 +48,8 @@ public class SupportManagementAspect {
     private final ResourceInteroperabilityRecordService rirService;
     private final SecurityService securityService;
     private final SqaaasAssessmentService sqaaasAssessmentService;
+    // adapters (catalogueId/id) with an assessment still running, so a repository is never assessed twice at once
+    private final Set<String> assessmentsInProgress = ConcurrentHashMap.newKeySet();
 
     public SupportManagementAspect(InteroperabilityRecordService guidelineService,
                                    AdapterService adapterService,
@@ -116,69 +120,85 @@ public class SupportManagementAspect {
     //region SQA
     @Async
     @AfterReturning(pointcut = "execution(* gr.uoa.di.madgik.resourcecatalogue.manager.ResourceCatalogueGenericManager.add(..))" +
-            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..))",
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.update(..))" +
+            "|| execution(* gr.uoa.di.madgik.resourcecatalogue.manager.AdapterManager.verify(..))",
             returning = "adapter"
     )
     public void performSqaAssessment(final AdapterBundle adapter) {
         if (!"approved".equals(adapter.getStatus())) {
             return;
         }
-
-        Object sqaObj = adapter.getAdapter().get("sqa");
-        if (sqaObj instanceof LinkedHashMap<?, ?> sqaMap) {
-            Object urlObj = sqaMap.get("sqaURL");
-            if (urlObj instanceof String url && !url.trim().isEmpty()) {
-                return;
-            }
-        }
+        // every approved add/update/verify assesses the repository again, so a repository that was improved
+        // can earn a better badge. The result is written back through AdapterService#updateSqa, which this
+        // advice does not listen to, so the write-back does not start another assessment.
         access(adapter);
     }
 
     private void access(AdapterBundle adapter) {
+        Object repository = adapter.getAdapter().get("repository");
+        if (repository == null || repository.toString().isBlank()) {
+            logger.warn("Skipping SQA assessment for Adapter {}: it has no repository", adapter.getId());
+            return;
+        }
+        String repo = repository.toString();
+        // keyed by repository too: when the repository is changed, the new one must not wait for the old one
+        String key = adapter.getCatalogueId() + "/" + adapter.getId() + "/" + repo;
+        if (!assessmentsInProgress.add(key)) {
+            logger.info("SQA assessment for Adapter {} is already in progress, skipping", adapter.getId());
+            return;
+        }
+
         logger.info("Starting SQA assessment for Adapter {}", adapter.getId());
-        String repo = adapter.getAdapter().get("repository").toString();
-        sqaaasAssessmentService.startAssessment(repo, "main")
-                .thenApply(sqaaasAssessmentService::waitForCompletion)
-                .thenAccept(result -> handleSqaResult(adapter, result))
-                .exceptionally(ex -> {
-                    logger.error("SQA assessment failed for branch 'main' on repo: {}", repo);
-                    logger.info("Retrying SQA assessment with fallback branch 'master'...");
-                    sqaaasAssessmentService.startAssessment(repo, "master")
-                            .thenApply(sqaaasAssessmentService::waitForCompletion)
-                            .thenAccept(result -> {
-                                logger.info("SQA assessment succeeded with branch 'master'");
-                                handleSqaResult(adapter, result);
-                            })
-                            .exceptionally(ex2 -> {
-                                logger.info("SQA assessment ALSO failed for branch 'master'");
-                                ex2.printStackTrace();
-                                return null;
-                            });
-                    return null;
+        assess(repo, "main")
+                .exceptionallyCompose(ex -> {
+                    logger.error("SQA assessment for Adapter {} failed on branch 'main' ({}). "
+                            + "Retrying with branch 'master'...", adapter.getId(), rootMessage(ex));
+                    return assess(repo, "master");
+                })
+                .thenAccept(result -> handleSqaResult(adapter, repo, result))
+                .whenComplete((ignored, ex) -> {
+                    assessmentsInProgress.remove(key);
+                    if (ex != null) {
+                        logger.error("SQA assessment for Adapter {} failed ({})", adapter.getId(),
+                                rootMessage(ex), ex);
+                    }
                 });
     }
 
-    private void handleSqaResult(AdapterBundle adapter, JsonNode result) {
+    private CompletableFuture<JsonNode> assess(String repo, String branch) {
+        return sqaaasAssessmentService.startAssessment(repo, branch)
+                .thenApply(sqaaasAssessmentService::waitForCompletion);
+    }
+
+    private static String rootMessage(Throwable t) {
+        while (t.getCause() != null) {
+            t = t.getCause();
+        }
+        return t.getMessage();
+    }
+
+    private void handleSqaResult(AdapterBundle adapter, String repo, JsonNode result) {
         String url = result.path("meta").path("report_permalink").asText();
-        String badge = result.path("repository").get(0).path("badge_status").asText();
-
-        LinkedHashMap<String, Object> sqa = (LinkedHashMap<String, Object>) adapter.getAdapter().get("sqa");
-
-        if (sqa == null) {
-            sqa = new LinkedHashMap<>();
-            adapter.getAdapter().put("sqa", sqa);
+        String badgeStatus = result.path("repository").path(0).path("badge_status").asText("");
+        String badge = switch (badgeStatus.toLowerCase()) {
+            case "bronze" -> "sqa_badge-bronze";
+            case "silver" -> "sqa_badge-silver";
+            case "gold" -> "sqa_badge-gold";
+            default -> null;
+        };
+        if (badge == null) {
+            logger.warn("SQA assessment for Adapter {} returned no recognised badge (badge_status: '{}'), "
+                    + "storing the report only", adapter.getId(), badgeStatus);
         }
 
-        sqa.put("sqaURL", url);
-        if (badge.equalsIgnoreCase("bronze")) {
-            sqa.put("sqaBadge", "sqa_badge-bronze");
-        } else if (badge.equalsIgnoreCase("silver")) {
-            sqa.put("sqaBadge", "sqa_badge-silver");
-        } else {
-            sqa.put("sqaBadge", "sqa_badge-gold");
+        AdapterBundle updated = adapterService.updateSqa(adapter.getId(), adapter.getCatalogueId(), repo, url, badge);
+        if (updated == null) {
+            logger.warn("Discarded SQA result for Adapter {}: its repository changed during the assessment",
+                    adapter.getId());
+            return;
         }
-
-        adapterService.update(adapter, "SQA Assessment", securityService.getAdminAccess());
+        logger.info("SQA assessment for Adapter {} succeeded (badge: {}, report: {})", adapter.getId(),
+                badge == null ? "none" : badge, url);
     }
     //endregion
 }

@@ -64,6 +64,10 @@ Follow these steps to set up a development environment for Resource Catalogue:
        for reference.
     2. `pid.yml` – Create this file only if you plan to use the PID Service.
        See the [PID Properties Example](#pid-properties-example) for details.
+    3. `onboarding.yml` – Create this file only if you want to change the
+       default onboarding policy of a resource type.
+       See the [Onboarding Properties Example](#onboarding-properties-example)
+       for details.
 4. Build and Package
 
    To build the project and package the code into an executable .jar file with
@@ -92,7 +96,7 @@ Follow these steps to set up a development environment for Resource Catalogue:
    ```bash
    java -jar \
    resource-catalogue-service/target/resource-catalogue-service-6.4.1-SNAPSHOT \
-   --spring.config.additional-location=file:/path/to/application.properties,file:/path/to/pid.yml
+   --spring.config.additional-location=file:/path/to/application.properties,file:/path/to/pid.yml,file:/path/to/onboarding.yml
    ```
    <!-- x-release-please-end -->
 
@@ -119,7 +123,7 @@ spring.freemarker.template-loader-path=classpath:/mail/
 ## Profiles && Configuration ##
 spring.profiles.active=beyond
 spring.autoconfigure.exclude=org.flowable.spring.boot.FlowableJpaAutoConfiguration,org.flowable.spring.boot.eventregistry.EventRegistryAutoConfiguration
-spring.config.import=optional:classpath:pid.yml
+spring.config.import=optional:classpath:pid.yml,optional:classpath:onboarding.yml
 ## Servlet ##
 spring.servlet.multipart.max-file-size=50MB
 spring.servlet.multipart.max-request-size=50MB
@@ -304,6 +308,37 @@ accounting.token-endpoint=
 ## SQAaaS ##
 sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
 ```
+
+### Onboarding Properties Example
+
+Refer to [onboarding.yml](resource-catalogue-service/src/main/resources/onboarding.yml) for the bundled defaults, which are used when 
+you provide no file. To override them, pass your own file with
+`--spring.config.additional-location=file:/path/to/onboarding.yml`.
+A single value can also be overridden by an environment variable or a
+command-line argument, e.g. `CATALOGUE_ONBOARDING_POLICY_SERVICE=review-none`
+or `--catalogue.onboarding.policy.service=review-none`.
+
+The policy is set per resource type to one of `review-all`, `review-first` or
+`review-none`. Every configurable type must be set (`service`, `datasource`,
+`training_resource`, `deployable_application`, `adapter`,
+`interoperability_record`), otherwise the application refuses to start.
+
+```yaml
+catalogue:
+  onboarding:
+    policy:
+      service: review-first
+      datasource: review-first
+      training_resource: review-first
+      deployable_application: review-first
+      adapter: review-none
+      interoperability_record: review-all
+```
+
+For what each policy does, the shared template, emails and UI behaviour, see the
+[Onboarding Policy documentation](https://github.com/madgeek-arc/resource-catalogue-docs/blob/master/documentation/onboarding_policy.md).
+For a Docker Compose deployment see
+[compose/config/onboarding.yaml.example](compose/config/onboarding.yaml.example).
 
 ### PID Properties Example
 

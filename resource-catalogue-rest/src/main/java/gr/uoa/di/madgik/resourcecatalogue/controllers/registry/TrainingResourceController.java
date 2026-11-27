@@ -101,28 +101,6 @@ public class TrainingResourceController extends ResourceCatalogueGenericControll
         return ResponseEntity.ok(paging.map(TrainingResourceBundle::getTrainingResource));
     }
 
-    @Deprecated
-    @BrowseParameters
-    @BrowseCatalogue
-    @Parameters({
-            @Parameter(name = "suspended", content = @Content(schema = @Schema(type = "boolean", defaultValue = "false", nullable = true))),
-            @Parameter(name = "active", content = @Content(schema = @Schema(type = "boolean", defaultValue = "true")))
-    })
-    @GetMapping(path = "adminPage/all")
-    @PreAuthorize("@securityService.hasReadAccess()")
-    public ResponseEntity<Paging<TrainingResourceBundle>> getAllBundlesDeprecated(@Parameter(hidden = true)
-                                                                                  @RequestParam MultiValueMap<String, Object> params) {
-        FacetFilter ff = FacetFilter.from(params);
-        ff.addFilter("published", false);
-        ff.addFilter("draft", false);
-        Paging<TrainingResourceBundle> paging = service.getAll(ff);
-        return ResponseEntity
-                .ok()
-                .header("Deprecation", "true")
-                .header("Link", "</bundle/all>; rel=\"successor-version\"")
-                .body(paging);
-    }
-
     @BrowseParameters
     @BrowseCatalogue
     @Parameters({

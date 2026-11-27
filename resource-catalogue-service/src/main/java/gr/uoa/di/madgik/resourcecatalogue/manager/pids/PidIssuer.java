@@ -19,6 +19,8 @@ package gr.uoa.di.madgik.resourcecatalogue.manager.pids;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.CatalogueProperties;
 import gr.uoa.di.madgik.resourcecatalogue.config.properties.ResourceProperties;
 import gr.uoa.di.madgik.resourcecatalogue.domain.Bundle;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -48,10 +50,13 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,7 +72,21 @@ public class PidIssuer {
     private static final int FDO_TYPE_INDEX = 9991;
     private static final int FDO_PROFILE_INDEX = 9992;
     private static final int FDO_DATA_INDEX = 9993;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String ORGANISATION_RESOURCE_TYPE = "organisation";
+
+    // Single thread on purpose: PID posts are processed in submission order, so a slow older update
+    // can never overwrite a newer one for the same resource.
+    private static final ExecutorService PID_EXECUTOR = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "pid-service-poster");
+        t.setDaemon(true);
+        return t;
+    });
+
+    // A slow or unresponsive PID service must never stall resource onboarding for long.
+    private static final int CONNECT_TIMEOUT_MILLIS = 2_000;
+    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(3);
+    private static final Duration BLOCK_TIMEOUT = Duration.ofSeconds(5);
 
     private static final DateTimeFormatter[] PUBLISHING_DATE_FORMATS = {
             DateTimeFormatter.ofPattern("yyyy-MM-dd"),
@@ -77,12 +96,31 @@ public class PidIssuer {
             DateTimeFormatter.ofPattern("dd.MM.yyyy"),
     };
 
-    private final CatalogueProperties properties;
+    protected final CatalogueProperties properties;
     private final PidRecordValidator pidRecordValidator;
 
     public PidIssuer(CatalogueProperties properties, PidRecordValidator pidRecordValidator) {
         this.properties = properties;
         this.pidRecordValidator = pidRecordValidator;
+    }
+
+    /**
+     * Fire-and-forget variant of {@link #postPID}: runs on a small dedicated pool so callers (e.g. a PUT
+     * request) never wait on the PID service. Failures are logged and swallowed.
+     */
+    public void postPIDAsync(Bundle bundle, String resourceType, List<String> customResolveEndpoints) {
+        try {
+            PID_EXECUTOR.execute(() -> {
+                try {
+                    postPID(bundle, resourceType, customResolveEndpoints);
+                } catch (Exception e) {
+                    logger.error("Error during posting {}-{} to the PID Service",
+                            bundle.getClass().getSimpleName(), bundle.getId(), e);
+                }
+            });
+        } catch (RuntimeException e) {
+            logger.error("Failed to schedule PID post for {}", bundle.getId(), e);
+        }
     }
 
     public void postPID(Bundle bundle, String resourceType, List<String> customResolveEndpoints) {
@@ -98,7 +136,10 @@ public class PidIssuer {
                 ? customResolveEndpoints
                 : resourceProperties.getResolveEndpoints();
 
-        LinkedHashMap<String, Object> payload = bundle.getPayload();
+        // lot1 bundles wrap a typed payload instead of a map; the lot1 PidIssuer never reaches this line
+        LinkedHashMap<String, Object> payload = OBJECT_MAPPER.convertValue(bundle.getPayload(),
+                new TypeReference<LinkedHashMap<String, Object>>() {
+                });
         PidFields fields = extractFields(payload);
 
         String typeApiUrl = (properties.getTypeApi() != null) ? properties.getTypeApi().getUrl() : null;
@@ -163,10 +204,16 @@ public class PidIssuer {
         exchange(null, headers, config, pid, webClient, HttpMethod.DELETE);
     }
 
-    private WebClient createWebClient(PidIssuerConfig config) {
+    private static HttpClient newHttpClient() {
+        return HttpClient.create()
+                .option(io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT_MILLIS)
+                .responseTimeout(RESPONSE_TIMEOUT);
+    }
+
+    protected WebClient createWebClient(PidIssuerConfig config) {
         PidIssuerConfig.IssuerCertificateAuthenticationConfig auth = config.getAuth();
         if (auth == null) {
-            return WebClient.builder().build();
+            return WebClient.builder().clientConnector(new ReactorClientHttpConnector(newHttpClient())).build();
         }
         if (Boolean.TRUE.equals(auth.getSelfSignedCert())) {
             return createSelfSignedWebClient(auth);
@@ -174,7 +221,7 @@ public class PidIssuer {
         if (StringUtils.hasText(auth.getClientKey()) && StringUtils.hasText(auth.getClientCert())) {
             return createCertBasedWebClient(auth.getClientCert(), auth.getClientKey());
         }
-        return WebClient.builder().build();
+        return WebClient.builder().clientConnector(new ReactorClientHttpConnector(newHttpClient())).build();
     }
 
     /**
@@ -214,7 +261,7 @@ public class PidIssuer {
             }
 
             SslContext sslContext = builder.build();
-            HttpClient httpClient = HttpClient.create()
+            HttpClient httpClient = newHttpClient()
                     .secure(spec -> spec
                             .sslContext(sslContext)
                             .handlerConfigurator(handler -> disableHostnameVerification(handler.engine())));
@@ -239,7 +286,7 @@ public class PidIssuer {
             SslContext sslContext = SslContextBuilder.forClient()
                     .keyManager(privateKey, certificate)
                     .build();
-            HttpClient httpClient = HttpClient.create()
+            HttpClient httpClient = newHttpClient()
                     .secure(spec -> spec.sslContext(sslContext));
             return WebClient.builder()
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
@@ -434,7 +481,7 @@ public class PidIssuer {
         return result;
     }
 
-    private HttpHeaders createHeaders(PidIssuerConfig config) {
+    protected HttpHeaders createHeaders(PidIssuerConfig config) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         if (config.getAuth() != null &&
@@ -457,7 +504,7 @@ public class PidIssuer {
         return "Basic " + new String(encodedAuth, StandardCharsets.UTF_8);
     }
 
-    private void exchange(String payload, HttpHeaders headers, PidIssuerConfig config, String pid,
+    protected void exchange(String payload, HttpHeaders headers, PidIssuerConfig config, String pid,
                           WebClient webClient, HttpMethod method) {
         try {
             URI uri = URI.create(String.join("/", config.getUrl(), pid));
@@ -472,7 +519,7 @@ public class PidIssuer {
 
             ResponseEntity<String> response = headersSpec
                     .exchangeToMono(clientResponse -> clientResponse.toEntity(String.class))
-                    .block();
+                    .block(BLOCK_TIMEOUT);
 
             logInfo(response, pid, config.getUrl(), method);
         } catch (Exception e) {
@@ -520,6 +567,6 @@ public class PidIssuer {
                                 })
                                 .map(body -> new PidServiceResponse(response.statusCode(), body))
                 )
-                .block();
+                .block(BLOCK_TIMEOUT);
     }
 }
