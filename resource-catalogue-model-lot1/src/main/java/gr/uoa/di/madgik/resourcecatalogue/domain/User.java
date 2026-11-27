@@ -58,7 +58,7 @@ public class User implements Identifiable {
     }
 
     public static User of(Authentication auth) {
-        logger.trace("Creating User from Authentication\n{}", auth);
+        logger.trace("Creating User from Authentication of type {}", auth == null ? null : auth.getClass().getSimpleName());
         User user = new User();
         if (auth == null) {
             throw new InsufficientAuthenticationException("You are not authenticated, please log in.");
@@ -99,18 +99,13 @@ public class User implements Identifiable {
         } else {
             throw new InsufficientAuthenticationException("Could not create user. Insufficient user authentication");
         }
-        logger.debug("User from Authentication: {}", user);
+        logger.debug("User from Authentication: id={}", user.id);
         return user;
     }
 
     @Override
     public String toString() {
-        return "User{" +
-                "id='" + id + '\'' +
-                ", email='" + email + '\'' +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                '}';
+        return "User{id='" + id + "'}";
     }
 
     @Override
