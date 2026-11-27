@@ -1,14 +1,7 @@
 ## Onboarding Properties ##
-# Onboarding policy per resource type. One of:
-#   review-all      -> every resource goes 'pending' and needs approval (templateStatus is never touched)
-#   review-first    -> the Organisation's first resource is a template (goes 'pending'); once it is approved,
-#                      the Organisation's later resources are approved immediately. The Organisation has ONE
-#                      template, shared by every type set to review-first: the first resource of any of them is
-#                      the template, none of them can be added while it is pending, and its approval opens all
-#                      of them.
-#   review-none     -> every resource is approved immediately
-# Organisation and Catalogue onboarding is not configurable: it always requires approval.
-# Every configurable type must be set. The defaults below reproduce the behaviour before the policy became configurable.
+# Onboarding policy per resource type: review-all, review-first or review-none.
+# Every configurable type must be set. Organisation and Catalogue onboarding is not configurable.
+# See https://github.com/madgeek-arc/resource-catalogue-docs/blob/master/documentation/onboarding_policy.md
 catalogue:
   onboarding:
     policy:

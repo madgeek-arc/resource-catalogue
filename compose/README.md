@@ -63,7 +63,7 @@ Copy the example file to the compose/config directory.
 cp compose/config/onboarding.yaml.example compose/config/onboarding.yaml
 ```
 
-Edit `compose/config/onboarding.yaml` to choose the onboarding policy (`review-all`, `review-first` or `review-none`) of each resource type. The example contains the bundled defaults, so leaving it unchanged keeps the default behaviour. Every resource type must be set, otherwise the application refuses to start. See the [main README](../README.md#onboarding-properties-example) for what each policy does.
+Edit `compose/config/onboarding.yaml` to choose the onboarding policy (`review-all`, `review-first` or `review-none`) of each resource type. The example contains the bundled defaults, so leaving it unchanged keeps the default behaviour. Every resource type must be set, otherwise the application refuses to start. See the [Onboarding Policy documentation](https://github.com/madgeek-arc/resource-catalogue-docs/blob/master/documentation/onboarding_policy.md) for what each policy does.
 
 > **Note:** The `application.properties`, `pid.yaml` and `onboarding.yaml` files are mounted as Docker secrets and are not exposed as environment variables.
 

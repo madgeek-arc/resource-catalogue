@@ -311,20 +311,17 @@ sqaaas.base-url=https://api-staging.sqaaas.eosc-synergy.eu/v1
 
 ### Onboarding Properties Example
 
-Refer to [onboarding.yml](resource-catalogue-service/src/main/resources/onboarding.yml)
-for the bundled defaults, which reproduce the behaviour of a node without this
-file. To override them, pass your own file with
+Refer to [onboarding.yml](resource-catalogue-service/src/main/resources/onboarding.yml) for the bundled defaults, which are used when 
+you provide no file. To override them, pass your own file with
 `--spring.config.additional-location=file:/path/to/onboarding.yml`.
 A single value can also be overridden by an environment variable or a
-command-line argument, e.g. `--catalogue.onboarding.policy.service=review-none`.
+command-line argument, e.g. `CATALOGUE_ONBOARDING_POLICY_SERVICE=review-none`
+or `--catalogue.onboarding.policy.service=review-none`.
 
-The onboarding policy is set per resource type, using one of:
-
-| Policy         | Behaviour                                                                                                                                              |
-|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `review-all`   | Every resource goes `pending` and is reviewed before it is approved.                                                                                   |
-| `review-first` | The Organisation's first resource is a template and goes `pending`. Once it is approved, the Organisation's later resources are approved immediately (see the note below). |
-| `review-none`  | Every resource is approved immediately, without a review.                                                                                              |
+The policy is set per resource type to one of `review-all`, `review-first` or
+`review-none`. Every configurable type must be set (`service`, `datasource`,
+`training_resource`, `deployable_application`, `adapter`,
+`interoperability_record`), otherwise the application refuses to start.
 
 ```yaml
 catalogue:
@@ -338,74 +335,10 @@ catalogue:
       interoperability_record: review-all
 ```
 
-Configurable types: `service`, `datasource`, `training_resource`,
-`deployable_application`, `adapter`, `interoperability_record`. Each of them
-must be set. Organisation and Catalogue onboarding always requires
-approval and cannot be configured; the application refuses to start if they,
-or any unknown type, are present. A resource's Organisation (and Catalogue, if
-any) must be `approved` under every policy. Changing a policy affects only
-resources onboarded afterwards.
-
-The template is shared. An Organisation has a single template status, so all
-types set to `review-first` share one template: the first resource of any of
-them becomes the template, none of them can be added while it is pending, and
-approving it approves the Organisation for all of them. For example, with
-`service` and `adapter` both `review-first`, a pending first service also blocks
-adding an adapter. Types with `review-all` or `review-none` are not affected by
-the template.
-
-An Organisation's template status (`no template status`, `pending template`,
-`approved template`, `rejected template`) is only ever started by a
-`review-first` type. If no type is `review-first`, Organisations simply keep
-`no template status`, and the first `review-first` resource added after such a
-policy is enabled becomes their template. If a type stops being `review-first`
-while its template is pending, verifying that template still settles the
-Organisation's template status, so other `review-first` types are not blocked.
-
-Example `onboarding.yml` files for common set-ups:
-
-```yaml
-# Strict node: every resource of every type is reviewed
-catalogue:
-  onboarding:
-    policy:
-      service: review-all
-      datasource: review-all
-      training_resource: review-all
-      deployable_application: review-all
-      adapter: review-all
-      interoperability_record: review-all
-```
-
-```yaml
-# Open node: nothing is reviewed after the Organisation itself is approved
-catalogue:
-  onboarding:
-    policy:
-      service: review-none
-      datasource: review-none
-      training_resource: review-none
-      deployable_application: review-none
-      adapter: review-none
-      interoperability_record: review-none
-```
-
-```yaml
-# Mixed node: services are reviewed through a template, adapters are open
-catalogue:
-  onboarding:
-    policy:
-      service: review-first
-      datasource: review-first
-      training_resource: review-none
-      deployable_application: review-none
-      adapter: review-none
-      interoperability_record: review-all
-```
-
-The same values can be given as environment variables, e.g.
-`CATALOGUE_ONBOARDING_POLICY_TRAINING_RESOURCE=review-none`. For a Docker Compose
-deployment see [compose/config/onboarding.yaml.example](compose/config/onboarding.yaml.example).
+For what each policy does, the shared template, emails and UI behaviour, see the
+[Onboarding Policy documentation](https://github.com/madgeek-arc/resource-catalogue-docs/blob/master/documentation/onboarding_policy.md).
+For a Docker Compose deployment see
+[compose/config/onboarding.yaml.example](compose/config/onboarding.yaml.example).
 
 ### PID Properties Example
 
